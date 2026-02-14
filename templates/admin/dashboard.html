@@ -1,0 +1,517 @@
+{% extends "base.html" %}
+
+{% block title %}داشبورد مدیریت - سِراج{% endblock %}
+
+{% block content %}
+<!-- Welcome Section -->
+<div class="mb-8">
+    <div class="flex justify-between items-center">
+        <div>
+            <h1 class="text-3xl font-bold mb-2">داشبورد مدیریت</h1>
+            <p class="text-gray-600">خوش آمدید {{ current_user.full_name }}، به پنل مدیریت سِراج</p>
+        </div>
+        <div class="text-left">
+            <span class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
+                <i class="fas fa-crown ml-2"></i>
+                مدیر سیستم
+            </span>
+        </div>
+    </div>
+</div>
+
+<!-- Stats Cards -->
+<div class="grid grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+    <div class="card">
+        <div class="card-body">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h3 class="text-2xl font-bold">{{ total_users }}</h3>
+                    <p class="text-gray-600">کاربران</p>
+                </div>
+                <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-users text-blue-600 text-xl"></i>
+                </div>
+            </div>
+            <div class="mt-4 pt-4 border-t border-gray-200">
+                <a href="{{ url_for('admin_users') }}" class="text-sm text-blue-600 hover:text-blue-800">
+                    مدیریت کاربران
+                    <i class="fas fa-arrow-left ml-1"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="card-body">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h3 class="text-2xl font-bold">{{ total_events }}</h3>
+                    <p class="text-gray-600">کل رویدادها</p>
+                </div>
+                <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-calendar-alt text-green-600 text-xl"></i>
+                </div>
+            </div>
+            <div class="mt-4 pt-4 border-t border-gray-200">
+                <a href="{{ url_for('admin_events') }}" class="text-sm text-blue-600 hover:text-blue-800">
+                    مدیریت رویدادها
+                    <i class="fas fa-arrow-left ml-1"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="card-body">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h3 class="text-2xl font-bold">{{ active_events }}</h3>
+                    <p class="text-gray-600">رویدادهای فعال</p>
+                </div>
+                <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-calendar-check text-purple-600 text-xl"></i>
+                </div>
+            </div>
+            <div class="mt-4 pt-4 border-t border-gray-200">
+                <a href="{{ url_for('admin_events') }}" class="text-sm text-blue-600 hover:text-blue-800">
+                    مشاهده رویدادها
+                    <i class="fas fa-arrow-left ml-1"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="card-body">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h3 class="text-2xl font-bold">{{ total_registrations }}</h3>
+                    <p class="text-gray-600">ثبت‌نام‌ها</p>
+                </div>
+                <div class="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-clipboard-list text-yellow-600 text-xl"></i>
+                </div>
+            </div>
+            <div class="mt-4 pt-4 border-t border-gray-200">
+                <a href="{{ url_for('admin_reports') }}" class="text-sm text-blue-600 hover:text-blue-800">
+                    مشاهده گزارش‌ها
+                    <i class="fas fa-arrow-left ml-1"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+    <!-- Recent Events -->
+    <div>
+        <div class="flex justify-between items-center mb-4">
+            <h2 class="text-xl font-bold">رویدادهای اخیر</h2>
+            <div class="space-x-3 space-x-reverse">
+                <a href="{{ url_for('admin_events') }}" class="text-sm text-blue-600 hover:text-blue-800">
+                    همه رویدادها
+                    <i class="fas fa-arrow-left ml-1"></i>
+                </a>
+                <a href="{{ url_for('create_event') }}" class="text-sm bg-blue-600 text-white px-3 py-1 rounded-lg hover:bg-blue-700">
+                    <i class="fas fa-plus ml-2"></i>
+                    رویداد جدید
+                </a>
+            </div>
+        </div>
+        
+        {% if recent_events %}
+            <div class="card">
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">عنوان رویداد</th>
+                                <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">نوع</th>
+                                <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">تاریخ</th>
+                                <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">عملیات</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            {% for event in recent_events %}
+                                <tr>
+                                    <td class="px-4 py-3 whitespace-nowrap">
+                                        <div class="font-medium text-gray-900">{{ event.title }}</div>
+                                    </td>
+                                    <td class="px-4 py-3 whitespace-nowrap">
+                                        <span class="badge badge-{{ event.event_type.value }}">
+                                            {% if event.event_type.value == 'workshop' %}
+                                                کارگاه
+                                            {% elif event.event_type.value == 'competition' %}
+                                                مسابقه
+                                            {% elif event.event_type.value == 'halaqah' %}
+                                                حلقه تلاوت
+                                            {% elif event.event_type.value == 'lecture' %}
+                                                سخنرانی
+                                            {% else %}
+                                                دیگر
+                                            {% endif %}
+                                        </span>
+                                    </td>
+                                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
+                                        {{ event.start_date|persian_date }}
+                                    </td>
+                                    <td class="px-4 py-3 whitespace-nowrap text-sm font-medium">
+                                        <a href="{{ url_for('edit_event', event_id=event.id) }}" class="text-blue-600 hover:text-blue-900 ml-3">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <button
+                                            data-event-id="{{ event.id }}"
+                                            onclick="deleteEvent(this)"
+                                            class="text-red-600 hover:text-red-900">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        {% else %}
+            <div class="card text-center py-8">
+                <i class="fas fa-calendar-plus text-4xl text-gray-300 mb-3"></i>
+                <p class="text-gray-600">هنوز رویدادی ایجاد نکرده‌اید</p>
+                <a href="{{ url_for('create_event') }}" class="btn btn-primary mt-4">
+                    <i class="fas fa-plus ml-2"></i>
+                    ایجاد اولین رویداد
+                </a>
+            </div>
+        {% endif %}
+    </div>
+    
+    <!-- New Users -->
+    <div>
+        <div class="flex justify-between items-center mb-4">
+            <h2 class="text-xl font-bold">کاربران جدید</h2>
+            <a href="{{ url_for('admin_users') }}" class="text-sm text-blue-600 hover:text-blue-800">
+                همه کاربران
+                <i class="fas fa-arrow-left ml-1"></i>
+            </a>
+        </div>
+        
+        {% if new_users %}
+            <div class="card">
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">نام کاربر</th>
+                                <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">دانشگاه</th>
+                                <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">تاریخ عضویت</th>
+                                <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">وضعیت</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            {% for user in new_users %}
+                                <tr>
+                                    <td class="px-4 py-3 whitespace-nowrap">
+                                        <div class="flex items-center">
+                                            <div class="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center ml-3">
+                                                <i class="fas fa-user text-gray-600 text-sm"></i>
+                                            </div>
+                                            <div>
+                                                <div class="font-medium text-gray-900">{{ user.full_name }}</div>
+                                                <div class="text-sm text-gray-500">{{ user.username }}</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
+                                        {{ user.university }}
+                                    </td>
+                                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
+                                        {{ user.created_at|time_ago }}
+                                    </td>
+                                    <td class="px-4 py-3 whitespace-nowrap">
+                                        {% if user.is_active %}
+                                            <span class="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800">
+                                                فعال
+                                            </span>
+                                        {% else %}
+                                            <span class="px-2 py-1 text-xs rounded-full bg-red-100 text-red-800">
+                                                غیرفعال
+                                            </span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        {% else %}
+            <div class="card text-center py-8">
+                <i class="fas fa-user-slash text-4xl text-gray-300 mb-3"></i>
+                <p class="text-gray-600">هیچ کاربری ثبت‌نام نکرده است</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Recent Registrations -->
+<div class="mb-8">
+    <div class="flex justify-between items-center mb-4">
+        <h2 class="text-xl font-bold">ثبت‌نام‌های اخیر</h2>
+        <a href="{{ url_for('admin_reports') }}" class="text-sm text-blue-600 hover:text-blue-800">
+            همه گزارش‌ها
+            <i class="fas fa-arrow-left ml-1"></i>
+        </a>
+    </div>
+    
+    {% if recent_registrations %}
+        <div class="card">
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">کاربر</th>
+                            <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">رویداد</th>
+                            <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">تاریخ ثبت‌نام</th>
+                            <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">وضعیت</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        {% for reg in recent_registrations %}
+                            <tr>
+                                <td class="px-4 py-3 whitespace-nowrap">
+                                    <div class="font-medium text-gray-900">{{ reg.user.full_name }}</div>
+                                    <div class="text-xs text-gray-500">{{ reg.user.email }}</div>
+                                </td>
+                                <td class="px-4 py-3 whitespace-nowrap">
+                                    <div class="text-sm text-gray-900">{{ reg.event.title }}</div>
+                                </td>
+                                <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
+                                    {{ reg.registration_date|persian_datetime }}
+                                </td>
+                                <td class="px-4 py-3 whitespace-nowrap">
+                                    {% if reg.attended %}
+                                        <span class="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800">
+                                            شرکت کرده
+                                        </span>
+                                    {% else %}
+                                        <span class="px-2 py-1 text-xs rounded-full bg-yellow-100 text-yellow-800">
+                                            ثبت‌نام شده
+                                        </span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    {% else %}
+        <div class="card text-center py-8">
+            <i class="fas fa-clipboard-list text-4xl text-gray-300 mb-3"></i>
+            <p class="text-gray-600">هیچ ثبت‌نامی انجام نشده است</p>
+        </div>
+    {% endif %}
+</div>
+
+<!-- Quick Actions -->
+<div class="mb-8">
+    <h2 class="text-xl font-bold mb-4">دسترسی سریع مدیریت</h2>
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <!-- ایجاد رویداد -->
+        <a href="{{ url_for('create_event') }}" class="card text-center hover:shadow-md transition-shadow">
+            <div class="card-body">
+                <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <i class="fas fa-plus text-blue-600 text-xl"></i>
+                </div>
+                <h3 class="font-bold">ایجاد رویداد</h3>
+            </div>
+        </a>
+        
+        <!-- مدیریت کاربران -->
+        <a href="{{ url_for('admin_users') }}" class="card text-center hover:shadow-md transition-shadow">
+            <div class="card-body">
+                <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <i class="fas fa-users-cog text-green-600 text-xl"></i>
+                </div>
+                <h3 class="font-bold">مدیریت کاربران</h3>
+            </div>
+        </a>
+        
+        <!-- گزارش‌گیری -->
+        <a href="{{ url_for('admin_reports') }}" class="card text-center hover:shadow-md transition-shadow">
+            <div class="card-body">
+                <div class="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <i class="fas fa-chart-bar text-purple-600 text-xl"></i>
+                </div>
+                <h3 class="font-bold">گزارش‌گیری</h3>
+            </div>
+        </a>
+        
+        <!-- مشاهده سایت -->
+        <a href="{{ url_for('events_list') }}" class="card text-center hover:shadow-md transition-shadow">
+            <div class="card-body">
+                <div class="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <i class="fas fa-eye text-yellow-600 text-xl"></i>
+                </div>
+                <h3 class="font-bold">مشاهده سایت</h3>
+            </div>
+        </a>
+        
+        <!-- ارسال اعلامیه -->
+        <a href="{{ url_for('admin_announcement') }}" class="card text-center hover:shadow-md transition-shadow">
+            <div class="card-body">
+                <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <i class="fas fa-bullhorn text-red-600 text-xl"></i>
+                </div>
+                <h3 class="font-bold">ارسال اعلامیه</h3>
+            </div>
+        </a>
+        
+        <!-- تاریخچه اعلامیه‌ها -->
+        <a href="{{ url_for('admin_announcements_list') }}" class="card text-center hover:shadow-md transition-shadow">
+            <div class="card-body">
+                <div class="w-12 h-12 bg-indigo-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <i class="fas fa-history text-indigo-600 text-xl"></i>
+                </div>
+                <h3 class="font-bold">تاریخچه اعلامیه‌ها</h3>
+            </div>
+        </a>
+        
+        <!-- مدیریت رویدادها -->
+        <a href="{{ url_for('admin_events') }}" class="card text-center hover:shadow-md transition-shadow">
+            <div class="card-body">
+                <div class="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <i class="fas fa-calendar-alt text-orange-600 text-xl"></i>
+                </div>
+                <h3 class="font-bold">مدیریت رویدادها</h3>
+            </div>
+        </a>
+        
+        <!-- هوش مصنوعی -->
+        <a href="{{ url_for('admin_ai_dashboard') }}" class="card text-center hover:shadow-md transition-shadow">
+            <div class="card-body">
+                <div class="w-12 h-12 bg-teal-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <i class="fas fa-robot text-teal-600 text-xl"></i>
+                </div>
+                <h3 class="font-bold">هوش مصنوعی</h3>
+            </div>
+        </a>
+    </div>
+</div>
+
+<!-- System Status -->
+<div class="mb-8">
+    <div class="card">
+        <div class="card-header">
+            <h2 class="text-xl font-bold flex items-center">
+                <i class="fas fa-server ml-2 text-blue-600"></i>
+                وضعیت سیستم
+            </h2>
+        </div>
+        <div class="card-body">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div class="flex items-center space-x-2 space-x-reverse">
+                    <div class="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+                    <span class="text-sm text-gray-700">پایگاه داده: فعال</span>
+                </div>
+                <div class="flex items-center space-x-2 space-x-reverse">
+                    <div class="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+                    <span class="text-sm text-gray-700">سرور: فعال</span>
+                </div>
+                <div class="flex items-center space-x-2 space-x-reverse">
+                    <div class="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+                    <span class="text-sm text-gray-700">هوش مصنوعی: فعال</span>
+                </div>
+                <div class="flex items-center space-x-2 space-x-reverse">
+                    <div class="w-3 h-3 bg-blue-500 rounded-full"></div>
+                    <span class="text-sm text-gray-700">کاربران آنلاین: {{ total_users }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- JavaScript for Delete Confirmation -->
+<script>
+function deleteEvent(btn) {
+    const eventId = btn.dataset.eventId;
+
+    if (!confirm('آیا از حذف این رویداد مطمئن هستید؟')) return;
+
+    fetch('/admin/event/delete/' + eventId, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            alert('رویداد با موفقیت حذف شد');
+            location.reload();
+        } else {
+            alert(data.message || 'خطا در حذف رویداد');
+        }
+    })
+    .catch(() => alert('خطا در ارتباط با سرور'));
+}
+</script>
+
+<style>
+/* انیمیشن برای کارت‌ها */
+.card {
+    transition: all 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+}
+
+/* بج‌های وضعیت */
+.badge {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    border-radius: 9999px;
+}
+
+.badge-workshop { background-color: #dbeafe; color: #1e40af; }
+.badge-competition { background-color: #dcfce7; color: #166534; }
+.badge-halaqah { background-color: #f3e8ff; color: #6b21a8; }
+.badge-lecture { background-color: #fef9c3; color: #854d0e; }
+.badge-other { background-color: #f1f5f9; color: #334155; }
+
+/* دکمه‌ها */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    border-radius: 0.5rem;
+    transition: all 0.2s;
+}
+
+.btn-primary {
+    background-color: #2563eb;
+    color: white;
+}
+
+.btn-primary:hover {
+    background-color: #1d4ed8;
+}
+
+/* ریسپانسیو */
+@media (max-width: 768px) {
+    .grid-cols-2 {
+        gap: 0.75rem;
+    }
+    
+    .card-body {
+        padding: 1rem;
+    }
+}
+</style>
+{% endblock %}

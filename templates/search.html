@@ -1,0 +1,156 @@
+{% extends "base.html" %}
+
+{% block title %}نتایج جستجو - سِراج{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto">
+    <!-- Header -->
+    <div class="mb-8">
+        <h1 class="text-3xl font-bold mb-2">نتایج جستجو</h1>
+        <p class="text-gray-600">
+            {% if query %}
+                نتایج جستجو برای: "{{ query }}"
+            {% else %}
+                صفحه جستجوی پیشرفته
+            {% endif %}
+        </p>
+    </div>
+    
+    <!-- Search Form -->
+    <div class="card mb-8">
+        <div class="card-body">
+            <form method="GET" action="{{ url_for('search') }}" class="flex flex-col md:flex-row gap-4">
+                <div class="flex-grow">
+                    <div class="relative">
+                        <input type="text" name="q" value="{{ query }}" 
+                               placeholder="عبارت مورد نظر خود را جستجو کنید..."
+                               class="w-full px-5 py-3 pr-12 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        <i class="fas fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary px-8 py-3">
+                    <i class="fas fa-search ml-2"></i>
+                    جستجو
+                </button>
+            </form>
+        </div>
+    </div>
+    
+    {% if query %}
+        <!-- Results -->
+        <div class="space-y-6">
+            {% if results.events and results.events.items %}
+                <div>
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-xl font-bold">رویدادها</h2>
+                        <span class="text-sm text-gray-500">{{ results.total }} نتیجه</span>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {% for event in results.events.items %}
+                            <div class="card hover:shadow-lg transition-shadow">
+                                <div class="card-header">
+                                    <div class="flex justify-between items-center">
+                                        <span class="badge badge-{{ event.event_type.value }}">
+                                            {% if event.event_type.value == 'workshop' %}
+                                                کارگاه
+                                            {% elif event.event_type.value == 'competition' %}
+                                                مسابقه
+                                            {% elif event.event_type.value == 'halaqah' %}
+                                                حلقه تلاوت
+                                            {% elif event.event_type.value == 'lecture' %}
+                                                سخنرانی
+                                            {% else %}
+                                                دیگر
+                                            {% endif %}
+                                        </span>
+                                        {% if event.is_full() %}
+                                            <span class="text-xs bg-red-100 text-red-800 px-2 py-1 rounded-full">تکمیل ظرفیت</span>
+                                        {% endif %}
+                                    </div>
+                                    <h3 class="text-lg font-bold mt-2">{{ event.title }}</h3>
+                                </div>
+                                
+                                <div class="card-body">
+                                    <p class="text-gray-600 mb-4 line-clamp-2">{{ event.description[:100] }}...</p>
+                                    
+                                    <div class="space-y-2 mb-4">
+                                        <div class="flex items-center text-sm">
+                                            <i class="fas fa-calendar ml-2 text-gray-400"></i>
+                                            <span class="text-gray-700">{{ event.start_date.strftime('%Y/%m/%d') }}</span>
+                                        </div>
+                                        {% if event.location %}
+                                            <div class="flex items-center text-sm">
+                                                <i class="fas fa-map-marker-alt ml-2 text-gray-400"></i>
+                                                <span class="text-gray-700">{{ event.location }}</span>
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                    
+                                    <a href="{{ url_for('event_detail', event_id=event.id) }}" class="btn btn-primary w-full text-center">
+                                        مشاهده جزئیات
+                                    </a>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                    
+                    <!-- Pagination -->
+                    {% if results.events.pages > 1 %}
+                        <div class="flex justify-center mt-6">
+                            <div class="flex space-x-2 space-x-reverse">
+                                {% if results.events.has_prev %}
+                                    <a href="{{ url_for('search', q=query, page=results.events.prev_num) }}" 
+                                       class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">
+                                        قبلی
+                                    </a>
+                                {% endif %}
+                                
+                                <span class="px-4 py-2 bg-blue-600 text-white rounded-lg">
+                                    {{ results.events.page }}
+                                </span>
+                                
+                                {% if results.events.has_next %}
+                                    <a href="{{ url_for('search', q=query, page=results.events.next_num) }}" 
+                                       class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">
+                                        بعدی
+                                    </a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+            {% else %}
+                <div class="card text-center py-12">
+                    <div class="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-search text-gray-400 text-3xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-700 mb-2">نتیجه‌ای یافت نشد</h3>
+                    <p class="text-gray-600 mb-6">
+                        هیچ رویدادی با عبارت "{{ query }}" یافت نشد.
+                    </p>
+                    <div class="space-y-2">
+                        <p class="text-sm text-gray-500">پیشنهادات:</p>
+                        <ul class="text-sm text-blue-600 space-y-1">
+                            <li>• از کلمات کلیدی عمومی‌تر استفاده کنید</li>
+                            <li>• املای کلمات را بررسی کنید</li>
+                            <li>• فیلترهای جستجو را کاهش دهید</li>
+                        </ul>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    {% else %}
+        <!-- No Query -->
+        <div class="card text-center py-12">
+            <div class="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i class="fas fa-search text-blue-600 text-3xl"></i>
+            </div>
+            <h3 class="text-xl font-bold text-gray-700 mb-2">جستجو در رویدادها</h3>
+            <p class="text-gray-600">
+                عبارت مورد نظر خود را وارد کنید تا رویدادهای مرتبط را پیدا کنید.
+            </p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

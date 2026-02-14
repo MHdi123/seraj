@@ -1,0 +1,245 @@
+{% extends "base.html" %}
+
+{% block title %}داشبورد - سِراج{% endblock %}
+
+{% block content %}
+<!-- Welcome Section -->
+<div class="mb-8">
+    <h1 class="text-3xl font-bold mb-2">خوش آمدید {{ current_user.full_name }}!</h1>
+    <p class="text-gray-600">به پنل کاربری سِراج خوش آمدید. از آخرین رویدادها و فعالیت‌های خود مطلع شوید.</p>
+</div>
+
+<!-- Stats Cards -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+    <div class="card">
+        <div class="card-body">
+            <div class="flex items-center">
+                <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center ml-4">
+                    <i class="fas fa-calendar-check text-blue-600 text-xl"></i>
+                </div>
+                <div>
+                    <h3 class="text-2xl font-bold">{% if registrations %}{{ registrations|length }}{% else %}0{% endif %}</h3>
+                    <p class="text-gray-600">رویداد ثبت‌نام شده</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="card-body">
+            <div class="flex items-center">
+                <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center ml-4">
+                    <i class="fas fa-trophy text-green-600 text-xl"></i>
+                </div>
+                <div>
+                    <h3 class="text-2xl font-bold">۲</h3>
+                    <p class="text-gray-600">گواهی کسب شده</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="card-body">
+            <div class="flex items-center">
+                <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center ml-4">
+                    <i class="fas fa-bell text-purple-600 text-xl"></i>
+                </div>
+                <div>
+                    <h3 class="text-2xl font-bold">{% if notifications %}{{ notifications|length }}{% else %}0{% endif %}</h3>
+                    <p class="text-gray-600">اعلان خوانده نشده</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+    <!-- Upcoming Events -->
+    <div>
+        <div class="flex justify-between items-center mb-4">
+            <h2 class="text-xl font-bold">رویدادهای پیش‌رو</h2>
+            <a href="{{ url_for('events_list') }}" class="text-sm text-blue-600 hover:text-blue-800">
+                مشاهده همه
+                <i class="fas fa-arrow-left ml-1"></i>
+            </a>
+        </div>
+        
+        {% if upcoming_events %}
+            <div class="space-y-4">
+                {% for event in upcoming_events %}
+                    <div class="card hover:shadow-md transition-shadow">
+                        <div class="card-body">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <h3 class="font-bold text-lg mb-1">{{ event.title }}</h3>
+                                    <div class="flex items-center text-sm text-gray-600 mb-2">
+                                        <i class="fas fa-calendar ml-2"></i>
+                                        <span>{{ event.start_date|persian_date }}</span>
+                                        <i class="fas fa-clock mr-4 ml-2"></i>
+                                        <span>{{ event.start_date.strftime('%H:%M') }}</span>
+                                    </div>
+                                    <span class="badge badge-{{ event.event_type.value }}">
+                                        {% if event.event_type.value == 'workshop' %}
+                                            کارگاه
+                                        {% elif event.event_type.value == 'competition' %}
+                                            مسابقه
+                                        {% elif event.event_type.value == 'halaqah' %}
+                                            حلقه تلاوت
+                                        {% elif event.event_type.value == 'lecture' %}
+                                            سخنرانی
+                                        {% else %}
+                                            دیگر
+                                        {% endif %}
+                                    </span>
+                                </div>
+                                <a href="{{ url_for('event_detail', event_id=event.id) }}" class="btn btn-primary text-sm">
+                                    مشاهده
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="card text-center py-8">
+                <i class="fas fa-calendar-plus text-4xl text-gray-300 mb-3"></i>
+                <p class="text-gray-600">هیچ رویداد پیش‌رویی وجود ندارد</p>
+            </div>
+        {% endif %}
+    </div>
+    
+    <!-- Recent Registrations -->
+    <div>
+        <div class="flex justify-between items-center mb-4">
+            <h2 class="text-xl font-bold">آخرین ثبت‌نام‌ها</h2>
+            <a href="{{ url_for('profile') }}" class="text-sm text-blue-600 hover:text-blue-800">
+                مشاهده همه
+                <i class="fas fa-arrow-left ml-1"></i>
+            </a>
+        </div>
+        
+        {% if registrations %}
+            <div class="space-y-4">
+                {% for reg in registrations %}
+                    <div class="card hover:shadow-md transition-shadow">
+                        <div class="card-body">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <h3 class="font-bold text-lg mb-1">{{ reg.event.title }}</h3>
+                                    <div class="flex items-center text-sm text-gray-600 mb-2">
+                                        <i class="fas fa-clock ml-2"></i>
+                                        <span>{{ reg.registered_at|time_ago }}</span>
+                                        {% if reg.attended %}
+                                            <span class="mr-4 px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">شرکت کرده</span>
+                                        {% else %}
+                                            <span class="mr-4 px-2 py-1 bg-yellow-100 text-yellow-800 text-xs rounded-full">در انتظار</span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="text-left">
+                                    <a href="{{ url_for('event_detail', event_id=reg.event.id) }}" class="text-sm text-blue-600 hover:text-blue-800">
+                                        جزئیات
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="card text-center py-8">
+                <i class="fas fa-clipboard-list text-4xl text-gray-300 mb-3"></i>
+                <p class="text-gray-600">هنوز در رویدادی ثبت‌نام نکرده‌اید</p>
+                <a href="{{ url_for('events_list') }}" class="btn btn-primary mt-4">
+                    <i class="fas fa-calendar-alt ml-2"></i>
+                    مشاهده رویدادها
+                </a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Notifications Section -->
+<div class="mt-8">
+    <div class="flex justify-between items-center mb-4">
+        <h2 class="text-xl font-bold">آخرین اعلان‌ها</h2>
+        <a href="{{ url_for('notifications') }}" class="text-sm text-blue-600 hover:text-blue-800">
+            مشاهده همه اعلان‌ها
+            <i class="fas fa-arrow-left ml-1"></i>
+        </a>
+    </div>
+    
+    {% if notifications %}
+        <div class="space-y-3">
+            {% for notification in notifications %}
+                <div class="card {% if not notification.is_read %}border-r-4 border-r-blue-500{% endif %}">
+                    <div class="card-body">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <h3 class="font-bold mb-1">{{ notification.title }}</h3>
+                                <p class="text-gray-600 text-sm mb-2">{{ notification.message }}</p>
+                                <span class="text-xs text-gray-500">{{ notification.created_at|time_ago }}</span>
+                            </div>
+                            <div>
+                                {% if not notification.is_read %}
+                                    <a href="{{ url_for('mark_notification_read', notification_id=notification.id) }}" class="text-xs text-blue-600 hover:text-blue-800">
+                                        علامت خوانده شده
+                                    </a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="card text-center py-6">
+            <i class="fas fa-bell-slash text-3xl text-gray-300 mb-2"></i>
+            <p class="text-gray-600">هیچ اعلان جدیدی ندارید</p>
+        </div>
+    {% endif %}
+</div>
+
+<!-- Quick Actions -->
+<div class="mt-8">
+    <h2 class="text-xl font-bold mb-4">دسترسی سریع</h2>
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <a href="{{ url_for('events_list') }}" class="card text-center hover:shadow-md transition-shadow">
+            <div class="card-body">
+                <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <i class="fas fa-calendar-alt text-blue-600 text-xl"></i>
+                </div>
+                <h3 class="font-bold">رویدادها</h3>
+            </div>
+        </a>
+        
+        <a href="{{ url_for('profile') }}" class="card text-center hover:shadow-md transition-shadow">
+            <div class="card-body">
+                <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <i class="fas fa-user-circle text-green-600 text-xl"></i>
+                </div>
+                <h3 class="font-bold">پروفایل</h3>
+            </div>
+        </a>
+        
+        <a href="{{ url_for('notifications') }}" class="card text-center hover:shadow-md transition-shadow">
+            <div class="card-body">
+                <div class="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <i class="fas fa-bell text-yellow-600 text-xl"></i>
+                </div>
+                <h3 class="font-bold">اعلان‌ها</h3>
+            </div>
+        </a>
+        
+        <a href="{{ url_for('ai_quran') }}" class="card text-center hover:shadow-md transition-shadow">
+            <div class="card-body">
+                <div class="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <i class="fas fa-robot text-purple-600 text-xl"></i>
+                </div>
+                <h3 class="font-bold">پرسش قرآنی</h3>
+            </div>
+        </a>
+    </div>
+</div>
+{% endblock %}

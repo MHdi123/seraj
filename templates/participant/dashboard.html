@@ -1,0 +1,434 @@
+{% extends "base.html" %}
+
+{% block title %}داشبورد - سِراج{% endblock %}
+
+{% block content %}
+<!-- Welcome Section -->
+<div class="mb-8">
+    <div class="flex justify-between items-center">
+        <div>
+            <h1 class="text-3xl font-bold mb-2">خوش آمدید {{ current_user.full_name }}!</h1>
+            <p class="text-gray-600">به پنل کاربری سِراج خوش آمدید. از آخرین رویدادها و فعالیت‌های خود مطلع شوید.</p>
+        </div>
+        <div class="text-left">
+            <span class="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-medium">
+                <i class="fas fa-user-graduate ml-2"></i>
+                دانشجو
+            </span>
+        </div>
+    </div>
+</div>
+
+<!-- Stats Cards -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+    <div class="card">
+        <div class="card-body">
+            <div class="flex items-center">
+                <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center ml-4">
+                    <i class="fas fa-calendar-check text-blue-600 text-xl"></i>
+                </div>
+                <div>
+                    <h3 class="text-2xl font-bold">{{ total_registrations|default(0) }}</h3>
+                    <p class="text-gray-600">رویداد ثبت‌نام شده</p>
+                </div>
+            </div>
+            <div class="mt-4 pt-4 border-t border-gray-200">
+                <a href="{{ url_for('my_events') }}" class="text-sm text-blue-600 hover:text-blue-800">
+                    مشاهده همه
+                    <i class="fas fa-arrow-left ml-1"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="card-body">
+            <div class="flex items-center">
+                <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center ml-4">
+                    <i class="fas fa-trophy text-green-600 text-xl"></i>
+                </div>
+                <div>
+                    <h3 class="text-2xl font-bold">{{ attended_events|default(0) }}</h3>
+                    <p class="text-gray-600">رویداد شرکت کرده</p>
+                </div>
+            </div>
+            <div class="mt-4 pt-4 border-t border-gray-200">
+                <span class="text-sm text-gray-500">
+                    <i class="fas fa-star ml-1 text-yellow-400"></i>
+                    امتیاز: {{ current_user.points|default(0) }}
+                </span>
+            </div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="card-body">
+            <div class="flex items-center">
+                <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center ml-4">
+                    <i class="fas fa-bell text-purple-600 text-xl"></i>
+                </div>
+                <div>
+                    <h3 class="text-2xl font-bold">{{ unread_notifications|default(0) }}</h3>
+                    <p class="text-gray-600">اعلان خوانده نشده</p>
+                </div>
+            </div>
+            <div class="mt-4 pt-4 border-t border-gray-200">
+                <a href="{{ url_for('notifications') }}" class="text-sm text-blue-600 hover:text-blue-800">
+                    مشاهده اعلان‌ها
+                    <i class="fas fa-arrow-left ml-1"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+    <!-- Upcoming Events -->
+    <div>
+        <div class="flex justify-between items-center mb-4">
+            <h2 class="text-xl font-bold">رویدادهای پیش‌رو</h2>
+            <a href="{{ url_for('events_list') }}" class="text-sm text-blue-600 hover:text-blue-800">
+                مشاهده همه
+                <i class="fas fa-arrow-left ml-1"></i>
+            </a>
+        </div>
+        
+        {% if upcoming_events %}
+            <div class="space-y-4">
+                {% for event in upcoming_events %}
+                    <div class="card hover:shadow-md transition-shadow">
+                        <div class="card-body">
+                            <div class="flex justify-between items-start">
+                                <div class="flex-grow">
+                                    <div class="flex items-center gap-2 mb-2">
+                                        <span class="badge badge-{{ event.event_type.value }}">
+                                            {% if event.event_type.value == 'workshop' %}
+                                                کارگاه
+                                            {% elif event.event_type.value == 'competition' %}
+                                                مسابقه
+                                            {% elif event.event_type.value == 'halaqah' %}
+                                                حلقه تلاوت
+                                            {% elif event.event_type.value == 'lecture' %}
+                                                سخنرانی
+                                            {% else %}
+                                                دیگر
+                                            {% endif %}
+                                        </span>
+                                        {% if event.is_full() %}
+                                            <span class="text-xs bg-red-100 text-red-800 px-2 py-1 rounded-full">تکمیل ظرفیت</span>
+                                        {% endif %}
+                                    </div>
+                                    
+                                    <h3 class="font-bold text-lg mb-1">{{ event.title }}</h3>
+                                    
+                                    <div class="flex items-center text-sm text-gray-600 mb-2">
+                                        <i class="fas fa-calendar ml-2"></i>
+                                        <span>{{ event.start_date|persian_date }}</span>
+                                        <i class="fas fa-clock mr-4 ml-2"></i>
+                                        <span>{{ event.start_date.strftime('%H:%M') }}</span>
+                                    </div>
+                                    
+                                    {% if event.location %}
+                                        <div class="flex items-center text-sm text-gray-600">
+                                            <i class="fas fa-map-marker-alt ml-2"></i>
+                                            <span>{{ event.location }}</span>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                
+                                <a href="{{ url_for('event_detail', event_id=event.id) }}" class="btn btn-primary text-sm px-4 py-2">
+                                    جزئیات
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="card text-center py-8">
+                <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-calendar-plus text-gray-400 text-2xl"></i>
+                </div>
+                <p class="text-gray-600 mb-2">هیچ رویداد پیش‌رویی وجود ندارد</p>
+                <a href="{{ url_for('events_list') }}" class="text-sm text-blue-600 hover:text-blue-800">
+                    مشاهده همه رویدادها
+                    <i class="fas fa-arrow-left ml-1"></i>
+                </a>
+            </div>
+        {% endif %}
+    </div>
+    
+    <!-- Recent Registrations -->
+    <div>
+        <div class="flex justify-between items-center mb-4">
+            <h2 class="text-xl font-bold">آخرین ثبت‌نام‌ها</h2>
+            <a href="{{ url_for('my_events') }}" class="text-sm text-blue-600 hover:text-blue-800">
+                مشاهده همه
+                <i class="fas fa-arrow-left ml-1"></i>
+            </a>
+        </div>
+        
+        {% if registrations %}
+            <div class="space-y-4">
+                {% for reg in registrations %}
+                    <div class="card hover:shadow-md transition-shadow">
+                        <div class="card-body">
+                            <div class="flex justify-between items-start">
+                                <div class="flex-grow">
+                                    <div class="flex items-center gap-2 mb-1">
+                                        <h3 class="font-bold text-lg">{{ reg.event.title }}</h3>
+                                        {% if reg.attended %}
+                                            <span class="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">شرکت کرده</span>
+                                        {% else %}
+                                            <span class="px-2 py-1 bg-yellow-100 text-yellow-800 text-xs rounded-full">در انتظار</span>
+                                        {% endif %}
+                                    </div>
+                                    
+                                    <div class="flex items-center text-sm text-gray-600">
+                                        <i class="fas fa-clock ml-2"></i>
+                                        <span>تاریخ ثبت‌نام: {{ reg.registration_date|persian_date }}</span>
+                                    </div>
+                                    
+                                    <div class="flex items-center text-sm text-gray-600 mt-1">
+                                        <i class="fas fa-calendar ml-2"></i>
+                                        <span>برگزاری: {{ reg.event.start_date|persian_date }}</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="flex flex-col gap-2">
+                                    <a href="{{ url_for('event_detail', event_id=reg.event.id) }}" class="text-sm text-blue-600 hover:text-blue-800">
+                                        جزئیات
+                                    </a>
+                                    <!-- ✅ مشکل اینجا بود - now() به now تغییر کرد -->
+                                    {% if reg.event.start_date > now and not reg.attended %}
+                                        <form method="POST" action="{{ url_for('cancel_registration', event_id=reg.event.id) }}" 
+                                              onsubmit="return confirm('آیا از لغو ثبت‌نام خود مطمئن هستید؟');">
+                                            <button type="submit" class="text-sm text-red-600 hover:text-red-800">
+                                                لغو ثبت‌نام
+                                            </button>
+                                        </form>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="card text-center py-8">
+                <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-clipboard-list text-gray-400 text-2xl"></i>
+                </div>
+                <p class="text-gray-600 mb-2">هنوز در رویدادی ثبت‌نام نکرده‌اید</p>
+                <a href="{{ url_for('events_list') }}" class="btn btn-primary mt-2 text-sm">
+                    <i class="fas fa-calendar-alt ml-2"></i>
+                    مشاهده رویدادها
+                </a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Notifications Section -->
+<div class="mt-8">
+    <div class="flex justify-between items-center mb-4">
+        <h2 class="text-xl font-bold">آخرین اعلان‌ها</h2>
+        <a href="{{ url_for('notifications') }}" class="text-sm text-blue-600 hover:text-blue-800">
+            مشاهده همه اعلان‌ها
+            <i class="fas fa-arrow-left ml-1"></i>
+        </a>
+    </div>
+    
+    {% if notifications %}
+        <div class="space-y-3">
+            {% for notification in notifications %}
+                <div class="card {% if not notification.is_read %}border-r-4 border-r-blue-500 bg-blue-50{% endif %}">
+                    <div class="card-body">
+                        <div class="flex justify-between items-start">
+                            <div class="flex-grow">
+                                <div class="flex items-center gap-2 mb-1">
+                                    {% if not notification.is_read %}
+                                        <span class="w-2 h-2 bg-blue-600 rounded-full"></span>
+                                    {% endif %}
+                                    <h3 class="font-bold {% if not notification.is_read %}text-blue-900{% endif %}">
+                                        {{ notification.title }}
+                                    </h3>
+                                </div>
+                                <p class="text-gray-700 text-sm mb-2">{{ notification.message }}</p>
+                                <span class="text-xs text-gray-500">{{ notification.created_at|time_ago }}</span>
+                            </div>
+                            {% if not notification.is_read %}
+                                <a href="{{ url_for('mark_notification_read', notification_id=notification.id) }}" 
+                                   class="text-xs text-blue-600 hover:text-blue-800 px-2 py-1 rounded hover:bg-blue-100">
+                                    علامت خوانده شده
+                                </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="card text-center py-6">
+            <div class="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                <i class="fas fa-bell-slash text-gray-400"></i>
+            </div>
+            <p class="text-gray-600">هیچ اعلان جدیدی ندارید</p>
+        </div>
+    {% endif %}
+</div>
+
+<!-- Quick Actions -->
+<div class="mt-8">
+    <h2 class="text-xl font-bold mb-4">دسترسی سریع</h2>
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <a href="{{ url_for('events_list') }}" class="card text-center hover:shadow-md transition-shadow">
+            <div class="card-body">
+                <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <i class="fas fa-calendar-alt text-blue-600 text-xl"></i>
+                </div>
+                <h3 class="font-bold text-sm">رویدادها</h3>
+            </div>
+        </a>
+        
+        <a href="{{ url_for('my_events') }}" class="card text-center hover:shadow-md transition-shadow">
+            <div class="card-body">
+                <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <i class="fas fa-user-check text-green-600 text-xl"></i>
+                </div>
+                <h3 class="font-bold text-sm">رویدادهای من</h3>
+            </div>
+        </a>
+        
+        <a href="{{ url_for('profile') }}" class="card text-center hover:shadow-md transition-shadow">
+            <div class="card-body">
+                <div class="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <i class="fas fa-user-circle text-purple-600 text-xl"></i>
+                </div>
+                <h3 class="font-bold text-sm">پروفایل</h3>
+            </div>
+        </a>
+        
+        <a href="{{ url_for('notifications') }}" class="card text-center hover:shadow-md transition-shadow">
+            <div class="card-body">
+                <div class="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <i class="fas fa-bell text-yellow-600 text-xl"></i>
+                </div>
+                <h3 class="font-bold text-sm">اعلان‌ها</h3>
+            </div>
+        </a>
+        
+        <a href="{{ url_for('ai_quran') }}" class="card text-center hover:shadow-md transition-shadow">
+            <div class="card-body">
+                <div class="w-12 h-12 bg-indigo-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <i class="fas fa-robot text-indigo-600 text-xl"></i>
+                </div>
+                <h3 class="font-bold text-sm">پرسش قرآنی</h3>
+            </div>
+        </a>
+        
+        <a href="{{ url_for('edit_profile') }}" class="card text-center hover:shadow-md transition-shadow">
+            <div class="card-body">
+                <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <i class="fas fa-cog text-red-600 text-xl"></i>
+                </div>
+                <h3 class="font-bold text-sm">تنظیمات</h3>
+            </div>
+        </a>
+    </div>
+</div>
+
+<!-- Quran Verse of the Day -->
+<div class="mt-8">
+    <div class="card bg-gradient-to-l from-blue-50 to-indigo-50 border border-blue-100">
+        <div class="card-body">
+            <div class="flex items-start gap-4">
+                <div class="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center flex-shrink-0">
+                    <i class="fas fa-quran text-white text-xl"></i>
+                </div>
+                <div class="flex-grow">
+                    <h3 class="font-bold text-lg mb-2">آیه روز</h3>
+                    <p class="text-gray-800 text-lg mb-2 font-arabic">«{{ daily_verse.verse }}»</p>
+                    <p class="text-gray-700 mb-1">{{ daily_verse.translation }}</p>
+                    <p class="text-sm text-gray-500">— {{ daily_verse.surah }}</p>
+                    <p class="text-xs text-gray-400 mt-2">{{ now|persian_date }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// به‌روزرسانی خودکار صفحه هر 60 ثانیه برای نمایش اعلان‌های جدید
+setTimeout(function() {
+    location.reload();
+}, 60000);
+</script>
+
+<style>
+/* استایل کارت‌ها */
+.card {
+    transition: all 0.3s ease;
+    background: white;
+    border-radius: 1rem;
+    overflow: hidden;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+}
+
+/* بج‌های رویداد */
+.badge {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    border-radius: 9999px;
+}
+
+.badge-workshop { background-color: #dbeafe; color: #1e40af; }
+.badge-competition { background-color: #dcfce7; color: #166534; }
+.badge-halaqah { background-color: #f3e8ff; color: #6b21a8; }
+.badge-lecture { background-color: #fef9c3; color: #854d0e; }
+.badge-other { background-color: #f1f5f9; color: #334155; }
+
+/* فونت عربی برای آیات */
+.font-arabic {
+    font-family: 'Amiri', 'Traditional Arabic', 'Scheherazade', serif;
+    line-height: 2;
+}
+
+/* انیمیشن برای اعلان‌های جدید */
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.card.border-r-4 {
+    animation: slideIn 0.3s ease-out;
+}
+
+/* ریسپانسیو */
+@media (max-width: 768px) {
+    .grid-cols-2 {
+        gap: 0.75rem;
+    }
+    
+    .card-body {
+        padding: 1rem;
+    }
+    
+    h1 {
+        font-size: 1.5rem;
+    }
+}
+</style>
+{% endblock %}

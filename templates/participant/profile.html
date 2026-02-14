@@ -1,0 +1,178 @@
+{% extends "base.html" %}
+
+{% block title %}پروفایل {{ current_user.full_name }} - سِراج{% endblock %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto">
+    <!-- Profile Header -->
+    <div class="card mb-8">
+        <div class="card-body">
+            <div class="flex flex-col md:flex-row items-start md:items-center gap-6">
+                <div class="relative">
+                    <div class="w-28 h-28 bg-gradient-to-br from-blue-600 to-blue-800 rounded-full flex items-center justify-center shadow-lg">
+                        <span class="text-white font-bold text-4xl">{{ current_user.full_name[0] if current_user.full_name else 'U' }}</span>
+                    </div>
+                    <div class="absolute -bottom-2 -right-2 w-8 h-8 bg-green-500 rounded-full border-4 border-white"></div>
+                </div>
+                
+                <div class="flex-grow">
+                    <div class="flex flex-col md:flex-row justify-between items-start md:items-center">
+                        <div>
+                            <h1 class="text-3xl font-bold mb-1">{{ current_user.full_name }}</h1>
+                            <p class="text-gray-600">@{{ current_user.username }}</p>
+                        </div>
+                        <a href="{{ url_for('edit_profile') }}" class="btn btn-primary mt-3 md:mt-0">
+                            <i class="fas fa-edit ml-2"></i>
+                            ویرایش پروفایل
+                        </a>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
+                        <div class="text-center p-3 bg-gray-50 rounded-lg">
+                            <div class="text-2xl font-bold text-blue-600">{{ total_registrations }}</div>
+                            <div class="text-xs text-gray-600">کل ثبت‌نام‌ها</div>
+                        </div>
+                        <div class="text-center p-3 bg-gray-50 rounded-lg">
+                            <div class="text-2xl font-bold text-green-600">{{ attended_events }}</div>
+                            <div class="text-xs text-gray-600">رویدادهای شرکت کرده</div>
+                        </div>
+                        <div class="text-center p-3 bg-gray-50 rounded-lg">
+                            <div class="text-2xl font-bold text-purple-600">{{ upcoming_registrations }}</div>
+                            <div class="text-xs text-gray-600">رویدادهای پیش‌رو</div>
+                        </div>
+                        <div class="text-center p-3 bg-gray-50 rounded-lg">
+                            <div class="text-2xl font-bold text-yellow-600">{{ current_user.points|default(0) }}</div>
+                            <div class="text-xs text-gray-600">امتیازات</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Profile Information -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div class="card">
+            <div class="card-header">
+                <h2 class="text-xl font-bold flex items-center">
+                    <i class="fas fa-user-circle ml-2 text-blue-600"></i>
+                    اطلاعات شخصی
+                </h2>
+            </div>
+            <div class="card-body">
+                <div class="space-y-4">
+                    <div class="flex border-b border-gray-100 pb-3">
+                        <span class="text-gray-600 w-32">نام کامل:</span>
+                        <span class="font-medium">{{ current_user.full_name or 'نامشخص' }}</span>
+                    </div>
+                    <div class="flex border-b border-gray-100 pb-3">
+                        <span class="text-gray-600 w-32">ایمیل:</span>
+                        <span class="font-medium">{{ current_user.email }}</span>
+                    </div>
+                    <div class="flex border-b border-gray-100 pb-3">
+                        <span class="text-gray-600 w-32">شماره تماس:</span>
+                        <span class="font-medium">{{ current_user.phone or 'نامشخص' }}</span>
+                    </div>
+                    <div class="flex border-b border-gray-100 pb-3">
+                        <span class="text-gray-600 w-32">نقش کاربری:</span>
+                        <span class="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm">
+                            {% if current_user.role.value == 'admin' %}
+                                مدیر سیستم
+                            {% elif current_user.role.value == 'manager' %}
+                                مسئول
+                            {% else %}
+                                دانشجو
+                            {% endif %}
+                        </span>
+                    </div>
+                    <div class="flex">
+                        <span class="text-gray-600 w-32">عضو از:</span>
+                        <span class="font-medium">{{ current_user.created_at|persian_date }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-header">
+                <h2 class="text-xl font-bold flex items-center">
+                    <i class="fas fa-university ml-2 text-green-600"></i>
+                    اطلاعات دانشگاهی
+                </h2>
+            </div>
+            <div class="card-body">
+                <div class="space-y-4">
+                    <div class="flex border-b border-gray-100 pb-3">
+                        <span class="text-gray-600 w-32">دانشگاه:</span>
+                        <span class="font-medium">{{ current_user.university or 'نامشخص' }}</span>
+                    </div>
+                    <div class="flex border-b border-gray-100 pb-3">
+                        <span class="text-gray-600 w-32">دانشکده:</span>
+                        <span class="font-medium">{{ current_user.faculty or 'نامشخص' }}</span>
+                    </div>
+                    <div class="flex">
+                        <span class="text-gray-600 w-32">شماره دانشجویی:</span>
+                        <span class="font-medium">{{ current_user.student_id or 'نامشخص' }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card md:col-span-2">
+            <div class="card-header">
+                <h2 class="text-xl font-bold flex items-center">
+                    <i class="fas fa-history ml-2 text-purple-600"></i>
+                    آخرین فعالیت‌ها
+                </h2>
+            </div>
+            <div class="card-body">
+                <p class="text-gray-600 text-center py-8">
+                    به زودی...
+                </p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Quick Actions -->
+    <div class="mt-8">
+        <h2 class="text-xl font-bold mb-4">دسترسی سریع</h2>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <a href="{{ url_for('my_events') }}" class="card text-center hover:shadow-lg transition-shadow">
+                <div class="card-body">
+                    <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                        <i class="fas fa-calendar-alt text-blue-600 text-xl"></i>
+                    </div>
+                    <h3 class="font-bold">رویدادهای من</h3>
+                </div>
+            </a>
+            
+            <a href="{{ url_for('notifications') }}" class="card text-center hover:shadow-lg transition-shadow">
+                <div class="card-body">
+                    <div class="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                        <i class="fas fa-bell text-yellow-600 text-xl"></i>
+                    </div>
+                    <h3 class="font-bold">اعلان‌ها</h3>
+                </div>
+            </a>
+            
+            <a href="{{ url_for('ai_quran') }}" class="card text-center hover:shadow-lg transition-shadow">
+                <div class="card-body">
+                    <div class="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                        <i class="fas fa-robot text-purple-600 text-xl"></i>
+                    </div>
+                    <h3 class="font-bold">پرسش قرآنی</h3>
+                </div>
+            </a>
+            
+            <a href="{{ url_for('edit_profile') }}" class="card text-center hover:shadow-lg transition-shadow">
+                <div class="card-body">
+                    <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                        <i class="fas fa-cog text-green-600 text-xl"></i>
+                    </div>
+                    <h3 class="font-bold">تنظیمات</h3>
+                </div>
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

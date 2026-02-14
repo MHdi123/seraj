@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+
+{% block title %}رویدادهای من - سِراج{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto">
+    <!-- Header -->
+    <div class="mb-8">
+        <h1 class="text-3xl font-bold mb-2">رویدادهای من</h1>
+        <p class="text-gray-600">لیست رویدادهایی که در آنها ثبت‌نام کرده‌اید</p>
+    </div>
+    
+    <!-- Events List -->
+    <div class="space-y-6">
+        {% if registrations.items %}
+            {% for registration in registrations.items %}
+                <div class="card hover:shadow-lg transition-shadow">
+                    <div class="card-body">
+                        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                            <div class="flex-grow">
+                                <div class="flex items-center gap-3 mb-2">
+                                    <span class="badge badge-{{ registration.event.event_type.value }}">
+                                        {% if registration.event.event_type.value == 'workshop' %}
+                                            کارگاه
+                                        {% elif registration.event.event_type.value == 'competition' %}
+                                            مسابقه
+                                        {% elif registration.event.event_type.value == 'halaqah' %}
+                                            حلقه تلاوت
+                                        {% elif registration.event.event_type.value == 'lecture' %}
+                                            سخنرانی
+                                        {% else %}
+                                            دیگر
+                                        {% endif %}
+                                    </span>
+                                    
+                                    {% if registration.attended %}
+                                        <span class="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs">
+                                            <i class="fas fa-check-circle ml-1"></i>
+                                            شرکت کرده
+                                        </span>
+                                    {% else %}
+                                        <span class="bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full text-xs">
+                                            <i class="fas fa-clock ml-1"></i>
+                                            در انتظار
+                                        </span>
+                                    {% endif %}
+                                </div>
+                                
+                                <h3 class="text-xl font-bold mb-2">{{ registration.event.title }}</h3>
+                                
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
+                                    <div class="flex items-center text-sm text-gray-600">
+                                        <i class="fas fa-calendar ml-2 text-blue-500"></i>
+                                        <span>{{ registration.event.start_date|persian_date }}</span>
+                                    </div>
+                                    <div class="flex items-center text-sm text-gray-600">
+                                        <i class="fas fa-clock ml-2 text-green-500"></i>
+                                        <span>{{ registration.event.start_date.strftime('%H:%M') }}</span>
+                                    </div>
+                                    <div class="flex items-center text-sm text-gray-600">
+                                        <i class="fas fa-map-marker-alt ml-2 text-red-500"></i>
+                                        <span>{{ registration.event.location or 'نامشخص' }}</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="text-sm text-gray-500">
+                                    <i class="fas fa-calendar-check ml-2"></i>
+                                    تاریخ ثبت‌نام: {{ registration.registration_date|persian_datetime }}
+                                </div>
+                            </div>
+                            
+                            <div class="flex flex-col gap-2 w-full md:w-auto">
+                                <a href="{{ url_for('event_detail', event_id=registration.event.id) }}" 
+                                   class="btn btn-primary text-sm px-6">
+                                    <i class="fas fa-eye ml-2"></i>
+                                    مشاهده جزئیات
+                                </a>
+                                
+                                {% if registration.event.start_date > now and not registration.attended %}
+                                    <form method="POST" action="{{ url_for('cancel_registration', event_id=registration.event.id) }}" 
+                                          onsubmit="return confirm('آیا از لغو ثبت‌نام خود مطمئن هستید؟');">
+                                        <button type="submit" class="btn btn-secondary text-sm px-6 w-full">
+                                            <i class="fas fa-times ml-2"></i>
+                                            لغو ثبت‌نام
+                                        </button>
+                                    </form>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+            
+            <!-- Pagination -->
+            {% if registrations.pages > 1 %}
+                <div class="mt-8 flex justify-center">
+                    <div class="flex space-x-2 space-x-reverse">
+                        {% if registrations.has_prev %}
+                            <a href="{{ url_for('my_events', page=registrations.prev_num) }}" 
+                               class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">
+                                قبلی
+                            </a>
+                        {% endif %}
+                        
+                        <span class="px-4 py-2 bg-blue-600 text-white rounded-lg">
+                            صفحه {{ registrations.page }} از {{ registrations.pages }}
+                        </span>
+                        
+                        {% if registrations.has_next %}
+                            <a href="{{ url_for('my_events', page=registrations.next_num) }}" 
+                               class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">
+                                بعدی
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endif %}
+            
+        {% else %}
+            <!-- Empty State -->
+            <div class="card text-center py-16">
+                <div class="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <i class="fas fa-calendar-times text-gray-400 text-4xl"></i>
+                </div>
+                <h3 class="text-2xl font-bold text-gray-700 mb-3">هنوز در رویدادی ثبت‌نام نکرده‌اید</h3>
+                <p class="text-gray-600 mb-8 max-w-md mx-auto">
+                    برای شرکت در رویدادهای قرآنی، به صفحه رویدادها بروید و در رویداد مورد نظر ثبت‌نام کنید.
+                </p>
+                <a href="{{ url_for('events_list') }}" class="btn btn-primary px-8 py-3">
+                    <i class="fas fa-calendar-alt ml-2"></i>
+                    مشاهده رویدادها
+                </a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

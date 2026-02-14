@@ -1,0 +1,226 @@
+{% extends "base.html" %}
+
+{% block title %}ارسال اعلامیه - سِراج{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto">
+    <!-- Header -->
+    <div class="mb-8">
+        <h1 class="text-3xl font-bold mb-2">📢 ارسال اعلامیه عمومی</h1>
+        <p class="text-gray-600">این پیام برای همه کاربران فعال سیستم ارسال خواهد شد.</p>
+    </div>
+    
+    <!-- Announcement Form -->
+    <div class="card">
+        <div class="card-header bg-gradient-to-l from-blue-50 to-indigo-50">
+            <div class="flex items-center">
+                <div class="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center ml-3">
+                    <i class="fas fa-bullhorn text-white"></i>
+                </div>
+                <div>
+                    <h2 class="text-xl font-bold">فرم ارسال اعلامیه</h2>
+                    <p class="text-sm text-gray-600">تمامی فیلدها الزامی هستند</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card-body">
+            <form method="POST" action="{{ url_for('admin_announcement') }}" id="announcementForm">
+                <!-- عنوان -->
+                <div class="mb-6">
+                    <label for="title" class="block text-sm font-medium text-gray-700 mb-2">
+                        <i class="fas fa-heading ml-1 text-gray-500"></i>
+                        عنوان اعلامیه
+                    </label>
+                    <input type="text" 
+                           id="title" 
+                           name="title" 
+                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                           placeholder="مثال: برگزاری مسابقه قرآن"
+                           required
+                           maxlength="200">
+                    <p class="text-xs text-gray-500 mt-1">حداکثر ۲۰۰ کاراکتر</p>
+                </div>
+                
+                <!-- اولویت -->
+                <div class="mb-6">
+                    <label for="priority" class="block text-sm font-medium text-gray-700 mb-2">
+                        <i class="fas fa-flag ml-1 text-gray-500"></i>
+                        سطح اولویت
+                    </label>
+                    <select id="priority" 
+                            name="priority" 
+                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        <option value="normal" selected>🟢 عادی</option>
+                        <option value="important">🟡 مهم</option>
+                        <option value="urgent">🔴 فوری</option>
+                    </select>
+                </div>
+                
+                <!-- متن پیام -->
+                <div class="mb-6">
+                    <label for="message" class="block text-sm font-medium text-gray-700 mb-2">
+                        <i class="fas fa-file-alt ml-1 text-gray-500"></i>
+                        متن اعلامیه
+                    </label>
+                    <textarea id="message" 
+                              name="message" 
+                              rows="6" 
+                              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                              placeholder="متن پیام خود را وارد کنید..."
+                              required
+                              minlength="10"></textarea>
+                    <div class="flex justify-between mt-1">
+                        <p class="text-xs text-gray-500">حداقل ۱۰ کاراکتر</p>
+                        <p class="text-xs text-gray-500" id="charCount">۰ کاراکتر</p>
+                    </div>
+                </div>
+                
+                <!-- پیش‌نمایش -->
+                <div class="mb-6 bg-gray-50 rounded-lg p-4 border border-gray-200">
+                    <h3 class="text-sm font-medium text-gray-700 mb-3 flex items-center">
+                        <i class="fas fa-eye ml-2 text-blue-600"></i>
+                        پیش‌نمایش اعلامیه
+                    </h3>
+                    <div id="preview" class="bg-white rounded-lg p-4 shadow-sm">
+                        <div class="flex items-start">
+                            <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center ml-3 flex-shrink-0">
+                                <i class="fas fa-bullhorn text-blue-600 text-sm"></i>
+                            </div>
+                            <div class="flex-grow">
+                                <div class="flex justify-between items-center">
+                                    <h4 id="previewTitle" class="font-bold text-gray-900">عنوان اعلامیه</h4>
+                                    <span id="previewPriority" class="text-xs px-2 py-1 bg-gray-100 rounded-full">عادی</span>
+                                </div>
+                                <p id="previewMessage" class="text-gray-700 text-sm mt-2">متن پیام در اینجا نمایش داده می‌شود...</p>
+                                <p class="text-xs text-gray-500 mt-2">📅 امروز - {{ now.strftime('%H:%M') }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- هشدار و تأیید -->
+                <div class="mb-6 bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                    <div class="flex items-start">
+                        <i class="fas fa-exclamation-triangle text-yellow-600 ml-3 mt-1"></i>
+                        <div>
+                            <h4 class="font-bold text-yellow-800 mb-1">⚠️ نکته مهم</h4>
+                            <p class="text-sm text-yellow-700">
+                                این اعلامیه برای <span class="font-bold">همه کاربران فعال</span> سیستم ارسال خواهد شد.
+                                قبل از ارسال، محتوای پیام را به دقت بررسی کنید.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- دکمه‌ها -->
+                <div class="flex justify-between items-center pt-4 border-t border-gray-200">
+                    <a href="{{ url_for('admin_dashboard') }}" class="px-6 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors">
+                        <i class="fas fa-arrow-right ml-2"></i>
+                        انصراف
+                    </a>
+                    <button type="submit" 
+                            id="submitBtn"
+                            class="px-8 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center"
+                            onclick="return confirm('آیا از ارسال این اعلامیه برای همه کاربران مطمئن هستید؟');">
+                        <i class="fas fa-paper-plane ml-2"></i>
+                        ارسال اعلامیه
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- اطلاعات آماری -->
+    <div class="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="bg-blue-50 rounded-lg p-4 text-center">
+            <div class="text-2xl font-bold text-blue-800">{{ users_count|default(0) }}</div>
+            <div class="text-sm text-blue-600">کاربر فعال</div>
+        </div>
+        <div class="bg-green-50 rounded-lg p-4 text-center">
+            <div class="text-2xl font-bold text-green-800">۲۰</div>
+            <div class="text-sm text-green-600">ثانیه تا ارسال</div>
+        </div>
+        <div class="bg-purple-50 rounded-lg p-4 text-center">
+            <div class="text-2xl font-bold text-purple-800">۲۴/۷</div>
+            <div class="text-sm text-purple-600">پشتیبانی</div>
+        </div>
+    </div>
+</div>
+
+<script>
+// شمارنده کاراکتر
+const messageInput = document.getElementById('message');
+const charCount = document.getElementById('charCount');
+
+messageInput.addEventListener('input', function() {
+    const count = this.value.length;
+    charCount.textContent = count + ' کاراکتر';
+    
+    if (count < 10) {
+        charCount.classList.add('text-red-500');
+        charCount.classList.remove('text-gray-500');
+    } else {
+        charCount.classList.remove('text-red-500');
+        charCount.classList.add('text-gray-500');
+    }
+});
+
+// پیش‌نمایش زنده
+const titleInput = document.getElementById('title');
+const previewTitle = document.getElementById('previewTitle');
+const previewMessage = document.getElementById('previewMessage');
+const prioritySelect = document.getElementById('priority');
+const previewPriority = document.getElementById('previewPriority');
+
+titleInput.addEventListener('input', function() {
+    previewTitle.textContent = this.value || 'عنوان اعلامیه';
+});
+
+messageInput.addEventListener('input', function() {
+    previewMessage.textContent = this.value || 'متن پیام در اینجا نمایش داده می‌شود...';
+});
+
+prioritySelect.addEventListener('change', function() {
+    const priority = this.value;
+    const priorityMap = {
+        'normal': { text: '🟢 عادی', class: 'bg-gray-100' },
+        'important': { text: '🟡 مهم', class: 'bg-yellow-100 text-yellow-800' },
+        'urgent': { text: '🔴 فوری', class: 'bg-red-100 text-red-800' }
+    };
+    
+    previewPriority.textContent = priorityMap[priority].text;
+    previewPriority.className = 'text-xs px-2 py-1 rounded-full ' + priorityMap[priority].class;
+});
+
+// جلوگیری از ارسال مجدد فرم
+const form = document.getElementById('announcementForm');
+form.addEventListener('submit', function() {
+    const btn = document.getElementById('submitBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin ml-2"></i> در حال ارسال...';
+});
+</script>
+
+<style>
+/* انیمیشن برای دکمه */
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+
+#submitBtn:hover {
+    animation: pulse 1s infinite;
+}
+
+/* استایل پیش‌نمایش */
+#preview {
+    transition: all 0.3s ease;
+}
+
+#preview:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1);
+}
+</style>
+{% endblock %}

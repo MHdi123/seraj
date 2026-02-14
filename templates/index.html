@@ -1,0 +1,226 @@
+{% extends "base.html" %}
+
+{% block title %}خانه - سِراج{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="mb-16 px-4 sm:px-6 lg:px-12">
+    <div class="bg-gradient-to-r from-blue-700 to-blue-900 rounded-2xl p-8 lg:p-12 text-white">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+            <!-- متن اصلی -->
+            <div class="space-y-6">
+<h1 class="text-2xl sm:text-4xl font-bold mb-4" style="color: #FFD700;">
+  پلتفرم مدیریت فعالیت‌های قرآنی دانشگاهی
+</h1>
+
+                <p class="text-lg sm:text-xl text-gray-300 opacity-90">
+                    سِراج بستری یکپارچه برای سازماندهی، مدیریت و توسعه برنامه‌های قرآنی در محیط دانشگاه است. 
+                    با ما در راه نورانی قرآن همراه شوید.
+                </p>
+                <!-- دکمه‌ها -->
+                <div class="flex flex-wrap gap-4">
+                    {% if not current_user.is_authenticated %}
+                        <a href="{{ url_for('register') }}" class="btn bg-white text-blue-700 hover:bg-gray-100 px-6 py-3 rounded-lg transition">
+                            <i class="fas fa-user-plus ml-2"></i>
+                            ثبت‌نام رایگان
+                        </a>
+                    {% endif %}
+                    <a href="{{ url_for('events_list') }}" class="btn border-2 border-white text-white hover:bg-white hover:text-blue-700 px-6 py-3 rounded-lg transition">
+                        <i class="fas fa-calendar-alt ml-2"></i>
+                        مشاهده رویدادها
+                    </a>
+                </div>
+            </div>
+            <!-- کادر آیه روز -->
+<!-- Daily Verse Card -->
+{% if daily_verse %}
+<div class="w-full max-w-md mx-auto lg:mx-0">
+    <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20 text-center hover:scale-105 transition-transform duration-300">
+
+
+        <!-- متن آیه -->
+        <p class="opacity-80 text-base sm:text-lg mb-2">
+            {{ daily_verse.verse }}
+        </p>
+
+        <!-- نام سوره -->
+        <p class="text-sm opacity-60 mt-2">— {{ daily_verse.surah }}</p>
+
+        <!-- تاریخ آیه -->
+        <p class="text-xs opacity-40 mt-4">
+            آیه روز {{ current_date|persian_date }}
+        </p>
+    </div>
+</div>
+{% else %}
+<div class="w-full max-w-md mx-auto text-center text-gray-500 py-6">
+    آیه‌ای برای نمایش موجود نیست.
+</div>
+{% endif %}
+
+
+        </div>
+    </div>
+</section>
+<!-- Stats Section -->
+<section class="mt-10 mb-10 px-4 sm:px-6 lg:px-12">
+    <div class="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+        
+        <!-- دانشجوی فعال -->
+        <div class="card text-center p-6 bg-white rounded-2xl shadow-md hover:shadow-lg transition-shadow">
+            <div class="text-blue-600 text-4xl mb-3">
+                <i class="fas fa-users"></i>
+            </div>
+            <h3 class="text-2xl md:text-3xl font-bold mb-1">
+                {{ active_students if active_students else '۰' }}
+            </h3>
+            <p class="text-gray-600 text-sm md:text-base">دانشجوی فعال</p>
+        </div>
+        
+        <!-- رویداد برگزار شده -->
+        <div class="card text-center p-6 bg-white rounded-2xl shadow-md hover:shadow-lg transition-shadow">
+            <div class="text-green-600 text-4xl mb-3">
+                <i class="fas fa-calendar-check"></i>
+            </div>
+            <h3 class="text-2xl md:text-3xl font-bold mb-1">
+                {{ events_count if events_count else '۰' }}
+            </h3>
+            <p class="text-gray-600 text-sm md:text-base">رویداد برگزار شده</p>
+        </div> 
+        <!-- مسابقه قرآنی -->
+        <div class="card text-center p-6 bg-white rounded-2xl shadow-md hover:shadow-lg transition-shadow">
+            <div class="text-purple-600 text-4xl mb-3">
+                <i class="fas fa-trophy"></i>
+            </div>
+            <h3 class="text-2xl md:text-3xl font-bold mb-1">
+                {{ competitions_count if competitions_count else '۰' }}
+            </h3>
+            <p class="text-gray-600 text-sm md:text-base">مسابقه قرآنی</p>
+        </div>
+        <!-- کارگاه آموزشی -->
+        <div class="card text-center p-6 bg-white rounded-2xl shadow-md hover:shadow-lg transition-shadow">
+            <div class="text-yellow-600 text-4xl mb-3">
+                <i class="fas fa-graduation-cap"></i>
+            </div>
+            <h3 class="text-2xl md:text-3xl font-bold mb-1">
+                {{ workshops_count if workshops_count else '۰' }}
+            </h3>
+            <p class="text-gray-600 text-sm md:text-base">کارگاه آموزشی</p>
+        </div>
+    </div>
+</section>
+<!-- Upcoming Events -->
+<section class="mb-12">
+    <div class="flex justify-between items-center mb-6">
+        <h2 class="text-2xl font-bold">رویدادهای پیش‌رو</h2>
+        <a href="{{ url_for('events_list') }}" class="text-blue-600 hover:text-blue-800">
+            مشاهده همه رویدادها
+            <i class="fas fa-arrow-left ml-1"></i>
+        </a>
+    </div>
+    
+    {% if events %}
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {% for event in events %}
+                <div class="card hover:shadow-lg transition-shadow duration-300">
+                    <div class="card-header">
+                        <div class="flex justify-between items-center">
+                            <span class="badge badge-{{ event.event_type.value }}">
+                                {% if event.event_type.value == 'workshop' %}
+                                    کارگاه
+                                {% elif event.event_type.value == 'competition' %}
+                                    مسابقه
+                                {% elif event.event_type.value == 'halaqah' %}
+                                    حلقه تلاوت
+                                {% elif event.event_type.value == 'lecture' %}
+                                    سخنرانی
+                                {% else %}
+                                    دیگر
+                                {% endif %}
+                            </span>
+                            {% if event.is_full() %}
+                                <span class="text-xs bg-red-100 text-red-800 px-2 py-1 rounded-full">تکمیل ظرفیت</span>
+                            {% endif %}
+                        </div>
+                        <h3 class="text-lg font-bold mt-2">{{ event.title }}</h3>
+                    </div>
+                    
+                    <div class="card-body">
+                        <p class="text-gray-600 mb-4 line-clamp-2">{{ event.description[:120] }}...</p>
+                        
+                        <div class="space-y-2 mb-4">
+                            <div class="flex items-center text-sm">
+                                <i class="fas fa-calendar ml-2 text-gray-400"></i>
+                                <span class="text-gray-700">{{ event.start_date|persian_date }}</span>
+                            </div>
+                            <div class="flex items-center text-sm">
+                                <i class="fas fa-clock ml-2 text-gray-400"></i>
+                                <span class="text-gray-700">{{ event.start_date.strftime('%H:%M') }}</span>
+                            </div>
+                            {% if event.location %}
+                                <div class="flex items-center text-sm">
+                                    <i class="fas fa-map-marker-alt ml-2 text-gray-400"></i>
+                                    <span class="text-gray-700">{{ event.location }}</span>
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="flex justify-between items-center">
+                            <div class="text-sm text-gray-500">
+                                <i class="fas fa-users ml-1"></i>
+                                {{ event.current_participants }} / {{ event.capacity if event.capacity else 'نامحدود' }}
+                            </div>
+                            <a href="{{ url_for('event_detail', event_id=event.id) }}" class="btn btn-primary text-sm">
+                                جزئیات بیشتر
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="card text-center py-12">
+            <i class="fas fa-calendar-times text-5xl text-gray-300 mb-4"></i>
+            <h3 class="text-xl font-bold mb-2">رویدادی برنامه‌ریزی نشده است</h3>
+            <p class="text-gray-600">به زودی رویدادهای جدیدی اضافه خواهند شد.</p>
+        </div>
+    {% endif %}
+</section>
+
+<!-- Features Section -->
+<section class="mb-12">
+    <h2 class="text-2xl font-bold mb-8 text-center">چرا سِراج؟</h2>
+    
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div class="text-center">
+            <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i class="fas fa-bullhorn text-blue-600 text-2xl"></i>
+            </div>
+            <h3 class="text-xl font-bold mb-2">اطلاع‌رسانی متمرکز</h3>
+            <p class="text-gray-600">
+                تمام رویدادها و اخبار قرآنی دانشگاه در یک پلتفرم واحد اطلاع‌رسانی می‌شوند.
+            </p>
+        </div>
+        
+        <div class="text-center">
+            <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i class="fas fa-user-check text-green-600 text-2xl"></i>
+            </div>
+            <h3 class="text-xl font-bold mb-2">ثبت‌نام آسان</h3>
+            <p class="text-gray-600">
+                با چند کلیک در رویدادها ثبت‌نام کنید و از نوبت‌های حضوری بی‌نیاز شوید.
+            </p>
+        </div>
+        
+        <div class="text-center">
+            <div class="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i class="fas fa-chart-line text-purple-600 text-2xl"></i>
+            </div>
+            <h3 class="text-xl font-bold mb-2">گزارش‌گیری هوشمند</h3>
+            <p class="text-gray-600">
+                آمار دقیق شرکت‌کنندگان و گزارش‌های تحلیلی برای برنامه‌ریزی بهتر.
+            </p>
+        </div>
+    </div>
+</section>
+{% endblock %}

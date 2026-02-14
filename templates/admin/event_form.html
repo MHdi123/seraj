@@ -1,0 +1,270 @@
+{% extends "base.html" %}
+
+{% block title %}
+    {% if event %}ویرایش رویداد{% else %}ایجاد رویداد جدید{% endif %} - سِراج
+{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    <div class="card">
+        <div class="card-header">
+            <h2 class="text-2xl font-bold">
+                {% if event %}
+                    ویرایش رویداد: {{ event.title }}
+                {% else %}
+                    ایجاد رویداد جدید
+                {% endif %}
+            </h2>
+        </div>
+        
+        <div class="card-body">
+            <form method="POST" enctype="multipart/form-data">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                    <div>
+                        <label for="title" class="block text-sm font-medium text-gray-700 mb-1">عنوان رویداد *</label>
+                        <input type="text" id="title" name="title" 
+                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
+                               value="{{ event.title if event else '' }}" required>
+                    </div>
+                    
+                    <div>
+                        <label for="event_type" class="block text-sm font-medium text-gray-700 mb-1">نوع رویداد *</label>
+                        <select id="event_type" name="event_type" 
+                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" required>
+                            <option value="" disabled {% if not event %}selected{% endif %}>انتخاب کنید</option>
+                            <option value="workshop" {% if event and event.event_type.value == 'workshop' %}selected{% endif %}>کارگاه آموزشی</option>
+                            <option value="competition" {% if event and event.event_type.value == 'competition' %}selected{% endif %}>مسابقه قرآنی</option>
+                            <option value="halaqah" {% if event and event.event_type.value == 'halaqah' %}selected{% endif %}>حلقه تلاوت و تدبر</option>
+                            <option value="lecture" {% if event and event.event_type.value == 'lecture' %}selected{% endif %}>سخنرانی</option>
+                            <option value="other" {% if event and event.event_type.value == 'other' %}selected{% endif %}>سایر</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="mb-6">
+                    <label for="description" class="block text-sm font-medium text-gray-700 mb-1">توضیحات رویداد *</label>
+                    <textarea id="description" name="description" rows="6" 
+                              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" required>{{ event.description if event else '' }}</textarea>
+                    <p class="text-xs text-gray-500 mt-1">توضیحات کامل رویداد را اینجا وارد کنید</p>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                    <div>
+                        <label for="start_date" class="block text-sm font-medium text-gray-700 mb-1">تاریخ و زمان شروع *</label>
+                        <input type="datetime-local" id="start_date" name="start_date" 
+                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
+                               value="{{ event.start_date.strftime('%Y-%m-%dT%H:%M') if event else '' }}" required>
+                    </div>
+                    
+                    <div>
+                        <label for="end_date" class="block text-sm font-medium text-gray-700 mb-1">تاریخ و زمان پایان *</label>
+                        <input type="datetime-local" id="end_date" name="end_date" 
+                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
+                               value="{{ event.end_date.strftime('%Y-%m-%dT%H:%M') if event else '' }}" required>
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                    <div>
+                        <label for="location" class="block text-sm font-medium text-gray-700 mb-1">مکان برگزاری</label>
+                        <input type="text" id="location" name="location" 
+                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
+                               value="{{ event.location if event else '' }}" 
+                               placeholder="مثال: دانشکده الهیات، سالن شهید مطهری">
+                        <p class="text-xs text-gray-500 mt-1">در صورت آنلاین بودن، لینک جلسه را وارد کنید</p>
+                    </div>
+                    
+                    <div>
+                        <label for="capacity" class="block text-sm font-medium text-gray-700 mb-1">ظرفیت</label>
+                        <input type="number" id="capacity" name="capacity" 
+                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
+                               value="{{ event.capacity if event else '' }}" min="1" 
+                               placeholder="مثال: 50">
+                        <p class="text-xs text-gray-500 mt-1">برای ظرفیت نامحدود، خالی بگذارید</p>
+                    </div>
+                </div>
+                
+                <div class="mb-6">
+                    <label for="image" class="block text-sm font-medium text-gray-700 mb-1">تصویر رویداد</label>
+                    <div class="flex items-center space-x-4 space-x-reverse">
+                        <div class="flex-grow">
+                            <input type="file" id="image" name="image" accept="image/*"
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        </div>
+                        {% if event and event.image %}
+                            <div class="flex-shrink-0">
+                                <img src="{{ url_for('static', filename='uploads/' + event.image) }}" 
+                                     alt="{{ event.title }}" 
+                                     class="w-20 h-20 object-cover rounded-lg border border-gray-200">
+                            </div>
+                        {% endif %}
+                    </div>
+                    <p class="text-xs text-gray-500 mt-1">فرمت‌های مجاز: JPG، PNG، GIF (حداکثر ۲ مگابایت)</p>
+                </div>
+                
+                {% if event %}
+                    <div class="mb-6">
+                        <div class="flex items-center">
+                            <input type="checkbox" id="is_active" name="is_active" 
+                                   class="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
+                                   {% if event.is_active %}checked{% endif %}>
+                            <label for="is_active" class="mr-2 text-sm text-gray-700">رویداد فعال است</label>
+                        </div>
+                        <p class="text-xs text-gray-500 mr-6">در صورت غیرفعال بودن، رویداد در سایت نمایش داده نمی‌شود</p>
+                    </div>
+                {% endif %}
+                
+                <div class="flex justify-between pt-6 border-t border-gray-200">
+                    <a href="{{ url_for('admin_events') }}" class="px-6 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors">
+                        <i class="fas fa-arrow-right ml-2"></i>
+                        بازگشت
+                    </a>
+                    <button type="submit" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                        <i class="fas fa-save ml-2"></i>
+                        {% if event %}
+                            ذخیره تغییرات
+                        {% else %}
+                            ایجاد رویداد
+                        {% endif %}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    {% if event %}
+        <div class="card mt-6">
+            <div class="card-header">
+                <h3 class="text-lg font-bold">آمار رویداد</h3>
+            </div>
+            <div class="card-body">
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div class="text-center p-4 bg-gray-50 rounded-lg">
+                        <div class="text-2xl font-bold text-blue-600">{{ event.current_participants }}</div>
+                        <p class="text-sm text-gray-600">ثبت‌نام‌کنندگان</p>
+                    </div>
+                    
+                    <div class="text-center p-4 bg-gray-50 rounded-lg">
+                        <div class="text-2xl font-bold text-green-600">
+                            {% if event.capacity %}
+                                {{ "%.1f"|format((event.current_participants / event.capacity) * 100) }}%
+                            {% else %}
+                                ∞
+                            {% endif %}
+                        </div>
+                        <p class="text-sm text-gray-600">پرشدگی ظرفیت</p>
+                    </div>
+                    
+                    <div class="text-center p-4 bg-gray-50 rounded-lg">
+                        <div class="text-2xl font-bold text-purple-600">
+                            {% set attended_count = event.registrations|selectattr('attended', 'equalto', true)|list|length %}
+                            {{ attended_count }}
+                        </div>
+                        <p class="text-sm text-gray-600">شرکت‌کنندگان قطعی</p>
+                    </div>
+                    
+                    <div class="text-center p-4 bg-gray-50 rounded-lg">
+                        <div class="text-2xl font-bold text-yellow-600">
+                            {{ event.registrations|length - attended_count }}
+                        </div>
+                        <p class="text-sm text-gray-600">ثبت‌نام اولیه</p>
+                    </div>
+                </div>
+                
+                <div class="mt-4 pt-4 border-t border-gray-200">
+                    <h4 class="font-medium mb-2">لیست ثبت‌نام‌کنندگان</h4>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-4 py-2 text-right text-xs font-medium text-gray-500">نام کاربر</th>
+                                    <th class="px-4 py-2 text-right text-xs font-medium text-gray-500">تاریخ ثبت‌نام</th>
+                                    <th class="px-4 py-2 text-right text-xs font-medium text-gray-500">وضعیت</th>
+                                    <th class="px-4 py-2 text-right text-xs font-medium text-gray-500">عملیات</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                {% for registration in event.registrations %}
+                                    <tr>
+                                        <td class="px-4 py-2">
+                                            <div class="font-medium">{{ registration.user.full_name }}</div>
+                                            <div class="text-xs text-gray-500">{{ registration.user.email }}</div>
+                                        </td>
+                                        <td class="px-4 py-2 text-sm text-gray-500">
+                                            {{ registration.registration_date.strftime('%Y/%m/%d') }}
+                                        </td>
+                                        <td class="px-4 py-2">
+                                            {% if registration.attended %}
+                                                <span class="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs">شرکت کرده</span>
+                                            {% else %}
+                                                <span class="px-2 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs">ثبت‌نام شده</span>
+                                            {% endif %}
+                                        </td>
+                                        <td class="px-4 py-2">
+                                            <button class="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded hover:bg-blue-200">
+                                                تأیید حضور
+                                            </button>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const today = new Date().toISOString().slice(0, 16);
+    const startDateInput = document.getElementById('start_date');
+    const endDateInput = document.getElementById('end_date');
+    
+    if (!startDateInput.value) {
+        startDateInput.min = today;
+    }
+    
+    if (!endDateInput.value) {
+        endDateInput.min = today;
+    }
+    
+    startDateInput.addEventListener('change', function() {
+        endDateInput.min = this.value;
+        if (endDateInput.value < this.value) {
+            endDateInput.value = this.value;
+        }
+    });
+    
+    // Preview image
+    const imageInput = document.getElementById('image');
+    if (imageInput) {
+        imageInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                if (file.size > 2 * 1024 * 1024) {
+                    alert('حجم فایل نباید بیشتر از ۲ مگابایت باشد.');
+                    this.value = '';
+                }
+            }
+        });
+    }
+});
+</script>
+
+<style>
+input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+    background: transparent;
+    bottom: 0;
+    color: transparent;
+    cursor: pointer;
+    height: auto;
+    left: 0;
+    position: absolute;
+    right: 0;
+    top: 0;
+    width: auto;
+}
+</style>
+{% endblock %}

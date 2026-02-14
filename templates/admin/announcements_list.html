@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+
+{% block title %}تاریخچه اعلامیه‌ها - سِراج{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto">
+    <!-- Header -->
+    <div class="mb-8 flex justify-between items-center">
+        <div>
+            <h1 class="text-3xl font-bold mb-2">📋 تاریخچه اعلامیه‌ها</h1>
+            <p class="text-gray-600">لیست اعلامیه‌های ارسال شده برای کاربران</p>
+        </div>
+        <a href="{{ url_for('admin_announcement') }}" class="btn btn-primary">
+            <i class="fas fa-plus ml-2"></i>
+            ارسال اعلامیه جدید
+        </a>
+    </div>
+    
+    <!-- Announcements List -->
+    <div class="card">
+        <div class="card-body">
+            {% if announcements %}
+                <div class="space-y-4">
+                    {% for announcement in announcements %}
+                        <div class="border border-gray-200 rounded-lg p-5 hover:shadow-md transition-shadow">
+                            <div class="flex justify-between items-start">
+                                <div class="flex-grow">
+                                    <div class="flex items-center mb-2">
+                                        <i class="fas fa-bullhorn text-blue-600 ml-2"></i>
+                                        <h3 class="font-bold text-lg">{{ announcement.title }}</h3>
+                                        <span class="mr-3 px-2 py-1 text-xs rounded-full bg-gray-100">
+                                            <i class="fas fa-users ml-1"></i>
+                                            {{ announcement.recipients }} دریافت‌کننده
+                                        </span>
+                                    </div>
+                                    
+                                    <p class="text-gray-700 mb-3 bg-gray-50 p-3 rounded-lg">
+                                        {{ announcement.message }}
+                                    </p>
+                                    
+                                    <div class="flex items-center text-sm text-gray-500">
+                                        <i class="fas fa-clock ml-2"></i>
+                                        <span>{{ announcement.created_at|persian_datetime }}</span>
+                                        <span class="mx-2">•</span>
+                                        <i class="fas fa-check-circle ml-2 text-green-600"></i>
+                                        <span>ارسال شده</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="text-center py-16">
+                    <div class="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <i class="fas fa-bullhorn text-gray-400 text-4xl"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-700 mb-3">هیچ اعلامیه‌ای ارسال نشده</h3>
+                    <p class="text-gray-600 mb-8">
+                        اولین اعلامیه خود را برای کاربران ارسال کنید.
+                    </p>
+                    <a href="{{ url_for('admin_announcement') }}" class="btn btn-primary px-8 py-3">
+                        <i class="fas fa-plus ml-2"></i>
+                        ارسال اعلامیه
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

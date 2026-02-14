@@ -1,0 +1,521 @@
+{% extends "base.html" %}
+
+{% block title %}ثبت‌نام - سِراج{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto">
+    <div class="card">
+        <div class="card-header text-center bg-gradient-to-l from-blue-50 to-indigo-50">
+            <div class="w-20 h-20 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
+                <i class="fas fa-user-plus text-white text-3xl"></i>
+            </div>
+            <h2 class="text-2xl font-bold">عضویت در سِراج</h2>
+            <p class="text-gray-600 mt-1">فرم زیر را برای ایجاد حساب کاربری جدید تکمیل کنید</p>
+            <p class="text-xs text-red-500 mt-2">* فیلدهای الزامی</p>
+        </div>
+        
+        <div class="card-body">
+            <form method="POST" action="{{ url_for('register') }}" id="registerForm">
+                <!-- ================ اطلاعات هویتی ================ -->
+                <div class="bg-gray-50 p-4 rounded-lg mb-6">
+                    <h3 class="text-lg font-bold mb-4 flex items-center">
+                        اطلاعات هویتی
+                    </h3>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- نام و نام خانوادگی -->
+                        <div>
+                            <label for="full_name" class="form-label">
+                                نام و نام خانوادگی <span class="text-red-500">*</span>
+                            </label>
+                            <div class="relative">
+                                <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                    <i class="fas fa-user text-gray-400"></i>
+                                </div>
+                                <input type="text" id="full_name" name="full_name" class="form-input pr-10" 
+                                       placeholder="مثال: محمد رضایی" required>
+                            </div>
+                        </div>
+                        
+                        <!-- نام کاربری -->
+                        <div>
+                            <label for="username" class="form-label">
+                                نام کاربری <span class="text-red-500">*</span>
+                            </label>
+                            <div class="relative">
+                                <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                    <i class="fas fa-at text-gray-400"></i>
+                                </div>
+                                <input type="text" id="username" name="username" class="form-input pr-10" 
+                                       placeholder="مثال: mohammad123" required>
+                            </div>
+                            <p class="text-xs text-gray-500 mt-1">حداقل ۳ کاراکتر، برای ورود به سیستم</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- ================ اطلاعات تماس ================ -->
+                <div class="bg-gray-50 p-4 rounded-lg mb-6">
+                    <h3 class="text-lg font-bold mb-4 flex items-center">
+                        اطلاعات تماس
+                    </h3>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- ایمیل -->
+                        <div>
+                            <label for="email" class="form-label">
+                                ایمیل <span class="text-red-500">*</span>
+                            </label>
+                            <div class="relative">
+                                <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                    <i class="fas fa-envelope text-gray-400"></i>
+                                </div>
+                                <input type="email" id="email" name="email" class="form-input pr-10" 
+                                       placeholder="example@university.ac.ir" required>
+                            </div>
+                            <p class="text-xs text-gray-500 mt-1">ایمیل دانشگاهی یا شخصی معتبر</p>
+                        </div>
+                        
+                        <!-- تلفن همراه -->
+                        <div>
+                            <label for="phone" class="form-label">
+                                تلفن همراه <span class="text-red-500">*</span>
+                            </label>
+                            <div class="relative">
+                                <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                    <i class="fas fa-mobile-alt text-gray-400"></i>
+                                </div>
+                                <input type="tel" id="phone" name="phone" class="form-input pr-10" 
+                                       placeholder="مثال: ۰۹۱۲۳۴۵۶۷۸۹" required>
+                            </div>
+                            <p class="text-xs text-gray-500 mt-1">برای اطلاع‌رسانی رویدادها</p>
+                        </div>
+                        
+                        <!-- تلفن ثابت (اختیاری) -->
+                        <div>
+                            <label for="landline" class="form-label">تلفن ثابت</label>
+                            <div class="relative">
+                                <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                    <i class="fas fa-phone text-gray-400"></i>
+                                </div>
+                                <input type="tel" id="landline" name="landline" class="form-input pr-10" 
+                                       placeholder="مثال: ۰۲۱۱۲۳۴۵۶۷۸">
+                            </div>
+                            <p class="text-xs text-gray-500 mt-1">اختیاری</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- ================ اطلاعات تحصیلی ================ -->
+                <div class="bg-gray-50 p-4 rounded-lg mb-6">
+                    <h3 class="text-lg font-bold mb-4 flex items-center">
+                        اطلاعات تحصیلی
+                    </h3>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- شماره دانشجویی -->
+                        <div>
+                            <label for="student_id" class="form-label">
+                                شماره دانشجویی <span class="text-red-500">*</span>
+                            </label>
+                            <div class="relative">
+                                <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                    <i class="fas fa-id-card text-gray-400"></i>
+                                </div>
+                                <input type="text" id="student_id" name="student_id" class="form-input pr-10" 
+                                       placeholder="شماره دانشجویی" required>
+                            </div>
+                        </div>
+                        
+                        <!-- سال ورود -->
+                        <div>
+                            <label for="entrance_year" class="form-label">
+                                سال ورود <span class="text-red-500">*</span>
+                            </label>
+                            <div class="relative">
+                                <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                    <i class="fas fa-calendar text-gray-400"></i>
+                                </div>
+                                <select id="entrance_year" name="entrance_year" class="form-input pr-10" required>
+                                    <option value="" selected disabled>لطفا یکی از گزینه‌ها را انتخاب نمایید</option>
+                                    <option value="1404">۱۴۰۴</option>
+                                    <option value="1403">۱۴۰۳</option>
+                                    <option value="1402">۱۴۰۲</option>
+                                    <option value="1401">۱۴۰۱</option>
+                                    <option value="1400">۱۴۰۰</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <!-- مقطع تحصیلی -->
+                        <div>
+                            <label for="degree" class="form-label">
+                                مقطع تحصیلی <span class="text-red-500">*</span>
+                            </label>
+                            <div class="relative">
+                                <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                    <i class="fas fa-layer-group text-gray-400"></i>
+                                </div>
+                                <select id="degree" name="degree" class="form-input pr-10" required>
+                                    <option value="" selected disabled>لطفا یکی از گزینه‌ها را انتخاب نمایید</option>
+                                    <option value="کارشناسی">کارشناسی</option>
+                                    <option value="کارشناسی ارشد">کارشناسی ارشد</option>
+                                    <option value="دکتری">دکتری</option>
+                                    <option value="پسا دکتری">پسا دکتری</option>
+                                    <option value="کاردانی">کاردانی</option>
+                                    <option value="پزشکی عمومی">پزشکی عمومی</option>
+                                    <option value="دستیاری">دستیاری</option>
+                                    <option value="کارشناسی پیوسته">کارشناسی پیوسته</option>
+                                    <option value="کارشناسی ناپیوسته">کارشناسی ناپیوسته</option>
+                                    <option value="کارشناسی ارشد پیوسته">کارشناسی ارشد پیوسته</option>
+                                    <option value="کارشناسی ارشد ناپیوسته">کارشناسی ارشد ناپیوسته</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <!-- رشته تحصیلی -->
+                        <div>
+                            <label for="field_of_study" class="form-label">
+                                رشته تحصیلی <span class="text-red-500">*</span>
+                            </label>
+                            <div class="relative">
+                                <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                    <i class="fas fa-book text-gray-400"></i>
+                                </div>
+                                <input type="text" id="field_of_study" name="field_of_study" class="form-input pr-10" 
+                                       placeholder="مثال: مهندسی کامپیوتر" required>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- ================ اطلاعات مکانی ================ -->
+                <div class="bg-gray-50 p-4 rounded-lg mb-6">
+                    <h3 class="text-lg font-bold mb-4 flex items-center">
+                        اطلاعات مکانی
+                    </h3>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- دانشگاه -->
+                        <div>
+                            <label for="university" class="form-label">
+                                دانشگاه <span class="text-red-500">*</span>
+                            </label>
+                            <div class="relative">
+                                <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                    <i class="fas fa-university text-gray-400"></i>
+                                </div>
+                                <select id="university" name="university" class="form-input pr-10" required>
+                                    <option value="" selected disabled>لطفا یکی از گزینه‌ها را انتخاب نمایید</option>
+                                    <option value="تهران">دانشگاه تهران</option>
+                                    <option value="شریف">دانشگاه صنعتی شریف</option>
+                                    <option value="علم و صنعت">دانشگاه علم و صنعت ایران</option>
+                                    <option value="بهشتی">دانشگاه شهید بهشتی</option>
+                                    <option value="امیرکبیر">دانشگاه صنعتی امیرکبیر</option>
+                                    <option value="خواجه نصیر">دانشگاه خواجه نصیرالدین طوسی</option>
+                                    <option value="صنعت نفت">دانشگاه صنعت نفت</option>
+                                    <option value="صنعتی اصفهان">دانشگاه صنعتی اصفهان</option>
+                                    <option value="صنعتی شیراز">دانشگاه صنعتی شیراز</option>
+                                    <option value="فنی و حرفه‌ای">دانشگاه فنی و حرفه‌ای (مهارت)</option>
+                                    <option value="آزاد">دانشگاه آزاد اسلامی</option>
+                                    <option value="پیام نور">دانشگاه پیام نور</option>
+                                    <option value="علمی کاربردی">دانشگاه علمی کاربردی</option>
+                                    <option value="فردوسی مشهد">دانشگاه فردوسی مشهد</option>
+                                    <option value="تبریز">دانشگاه تبریز</option>
+                                    <option value="شیراز">دانشگاه شیراز</option>
+                                    <option value="اصفهان">دانشگاه اصفهان</option>
+                                    <option value="الزهرا">دانشگاه الزهرا</option>
+                                    <option value="علامه طباطبایی">دانشگاه علامه طباطبایی</option>
+                                    <option value="تربیت مدرس">دانشگاه تربیت مدرس</option>
+                                    <option value="سایر">سایر دانشگاه‌ها</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <!-- مرکز / دانشکده -->
+                        <div>
+                            <label for="faculty" class="form-label">
+                                مرکز / دانشکده <span class="text-red-500">*</span>
+                            </label>
+                            <div class="relative">
+                                <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                    <i class="fas fa-building text-gray-400"></i>
+                        </div>
+                        
+                        <!-- استان -->
+                        <div>
+                            <label for="province" class="form-label">
+                                استان <span class="text-red-500">*</span>
+                            </label>
+                            <div class="relative">
+                                <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                    <i class="fas fa-map text-gray-400"></i>
+                                </div>
+                                <select id="province" name="province" class="form-input pr-10" required>
+                                    <option value="" selected disabled>لطفا یکی از گزینه‌ها را انتخاب نمایید</option>
+                                    <option value="آذربایجان شرقی">آذربایجان شرقی</option>
+                                    <option value="آذربایجان غربی">آذربایجان غربی</option>
+                                    <option value="اردبیل">اردبیل</option>
+                                    <option value="اصفهان">اصفهان</option>
+                                    <option value="البرز">البرز</option>
+                                    <option value="ایلام">ایلام</option>
+                                    <option value="بوشهر">بوشهر</option>
+                                    <option value="تهران">تهران</option>
+                                    <option value="چهارمحال و بختیاری">چهارمحال و بختیاری</option>
+                                    <option value="خراسان جنوبی">خراسان جنوبی</option>
+                                    <option value="خراسان رضوی">خراسان رضوی</option>
+                                    <option value="خراسان شمالی">خراسان شمالی</option>
+                                    <option value="خوزستان">خوزستان</option>
+                                    <option value="زنجان">زنجان</option>
+                                    <option value="سمنان">سمنان</option>
+                                    <option value="سیستان و بلوچستان">سیستان و بلوچستان</option>
+                                    <option value="فارس">فارس</option>
+                                    <option value="قزوین">قزوین</option>
+                                    <option value="قم">قم</option>
+                                    <option value="کردستان">کردستان</option>
+                                    <option value="کرمان">کرمان</option>
+                                    <option value="کرمانشاه">کرمانشاه</option>
+                                    <option value="کهگیلویه و بویراحمد">کهگیلویه و بویراحمد</option>
+                                    <option value="گلستان">گلستان</option>
+                                    <option value="گیلان">گیلان</option>
+                                    <option value="لرستان">لرستان</option>
+                                    <option value="مازندران">مازندران</option>
+                                    <option value="مرکزی">مرکزی</option>
+                                    <option value="هرمزگان">هرمزگان</option>
+                                    <option value="همدان">همدان</option>
+                                    <option value="یزد">یزد</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <!-- شهر -->
+                        <div>
+                            <label for="city" class="form-label">
+                                شهر <span class="text-red-500">*</span>
+                            </label>
+                            <div class="relative">
+                                <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                    <i class="fas fa-city text-gray-400"></i>
+                                </div>
+                                <input type="text" id="city" name="city" class="form-input pr-10" 
+                                       placeholder="نام شهر خود را وارد کنید" required>
+                            </div>
+                            <p class="text-xs text-gray-500 mt-1">شهر محل سکونت یا تحصیل</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- ================ جنسیت ================ -->
+                <div class="bg-gray-50 p-4 rounded-lg mb-6">
+                    <h3 class="text-lg font-bold mb-4 flex items-center">
+                        اطلاعات فردی
+                    </h3>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- جنسیت -->
+                        <div>
+                            <label class="form-label">
+                                جنسیت <span class="text-red-500">*</span>
+                            </label>
+                            <div class="flex space-x-6 space-x-reverse mt-2">
+                                <div class="flex items-center">
+                                    <input type="radio" id="male" name="gender" value="male" class="w-4 h-4 text-blue-600 focus:ring-blue-500" required>
+                                    <label for="male" class="mr-2 text-sm text-gray-700">مرد</label>
+                                </div>
+                                <div class="flex items-center">
+                                    <input type="radio" id="female" name="gender" value="female" class="w-4 h-4 text-pink-600 focus:ring-pink-500" required>
+                                    <label for="female" class="mr-2 text-sm text-gray-700">زن</label>
+                                </div>
+                            </div>
+                            <p class="text-xs text-gray-500 mt-1">لطفا یکی از گزینه‌ها را انتخاب نمایید</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- ================ رمز عبور ================ -->
+                <div class="bg-gray-50 p-4 rounded-lg mb-6">
+                    <h3 class="text-lg font-bold mb-4 flex items-center">
+                        امنیت حساب
+                    </h3>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- رمز عبور -->
+                        <div>
+                            <label for="password" class="form-label">
+                                رمز عبور <span class="text-red-500">*</span>
+                            </label>
+                            <div class="relative">
+                                <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                    <i class="fas fa-lock text-gray-400"></i>
+                                </div>
+                                <input type="password" id="password" name="password" class="form-input pr-10" 
+                                       placeholder="حداقل ۶ کاراکتر" minlength="6" required>
+                            </div>
+                            <p class="text-xs text-gray-500 mt-1">حداقل ۶ کاراکتر، شامل حروف و اعداد</p>
+                        </div>
+                        
+                        <!-- تأیید رمز عبور -->
+                        <div>
+                            <label for="confirm_password" class="form-label">
+                                تأیید رمز عبور <span class="text-red-500">*</span>
+                            </label>
+                            <div class="relative">
+                                <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                    <i class="fas fa-lock text-gray-400"></i>
+                                </div>
+                                <input type="password" id="confirm_password" name="confirm_password" class="form-input pr-10" 
+                                       placeholder="تکرار رمز عبور" minlength="6" required>
+                            </div>
+                            <p id="password-error" class="text-xs text-red-500 mt-1 hidden">رمز عبور و تکرار آن مطابقت ندارند</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- ================ قوانین ================ -->
+                <div class="mb-6">
+                    <div class="flex items-start bg-blue-50 p-4 rounded-lg">
+                        <input type="checkbox" id="terms" name="terms" class="w-4 h-4 mt-1 text-blue-600 rounded focus:ring-blue-500" required>
+                        <label for="terms" class="mr-2 text-sm text-gray-700">
+                            با 
+                            <a href="#" class="text-blue-600 hover:text-blue-800 font-medium">شرایط استفاده</a> و 
+                            <a href="#" class="text-blue-600 hover:text-blue-800 font-medium">حریم خصوصی</a> 
+                            سِراج موافقت می‌کنم <span class="text-red-500">*</span>
+                        </label>
+                    </div>
+                </div>
+                
+                <!-- دکمه ثبت‌نام -->
+                <button type="submit" id="submitBtn" class="w-full btn btn-primary py-3 text-lg">
+                    <i class="fas fa-user-plus ml-2"></i>
+                    ایجاد حساب کاربری
+                </button>
+                
+                <div class="mt-4 text-center">
+                    <p class="text-xs text-gray-500">
+                        <i class="fas fa-info-circle ml-1"></i>
+                        اطلاعات شما نزد ما محفوظ خواهد ماند
+                    </p>
+                </div>
+            </form>
+            
+            <div class="mt-6 pt-6 border-t border-gray-200 text-center">
+                <p class="text-gray-600">قبلاً حساب کاربری دارید؟</p>
+                <a href="{{ url_for('login') }}" class="inline-block mt-2 text-blue-600 hover:text-blue-800 font-medium">
+                    <i class="fas fa-sign-in-alt ml-2"></i>
+                    ورود به سیستم
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // ================ اعتبارسنجی رمز عبور ================
+    const password = document.getElementById('password');
+    const confirmPassword = document.getElementById('confirm_password');
+    const passwordError = document.getElementById('password-error');
+    
+    function validatePassword() {
+        if (password.value !== confirmPassword.value) {
+            confirmPassword.classList.add('border-red-500');
+            passwordError.classList.remove('hidden');
+            return false;
+        } else {
+            confirmPassword.classList.remove('border-red-500');
+            passwordError.classList.add('hidden');
+            return true;
+        }
+    }
+    
+    if (password && confirmPassword) {
+        password.addEventListener('input', validatePassword);
+        confirmPassword.addEventListener('input', validatePassword);
+    }
+    
+    // ================ اعتبارسنجی فرم ================
+    const form = document.getElementById('registerForm');
+    const submitBtn = document.getElementById('submitBtn');
+    
+    form.addEventListener('submit', function(e) {
+        if (!validatePassword()) {
+            e.preventDefault();
+            alert('رمز عبور و تکرار آن مطابقت ندارند!');
+        }
+    });
+    
+    // ================ شمارنده کاراکتر برای شماره دانشجویی ================
+    const studentId = document.getElementById('student_id');
+    if (studentId) {
+        studentId.addEventListener('input', function() {
+            this.value = this.value.replace(/[^0-9]/g, '');
+        });
+    }
+    
+    // ================ فرمت شماره تلفن ================
+    const phoneInput = document.getElementById('phone');
+    if (phoneInput) {
+        phoneInput.addEventListener('input', function() {
+            this.value = this.value.replace(/[^0-9]/g, '');
+        });
+    }
+    
+    const landlineInput = document.getElementById('landline');
+    if (landlineInput) {
+        landlineInput.addEventListener('input', function() {
+            this.value = this.value.replace(/[^0-9]/g, '');
+        });
+    }
+});
+</script>
+
+<style>
+.form-label {
+    display: block;
+    margin-bottom: 0.375rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #374151;
+}
+
+.form-input {
+    display: block;
+    width: 100%;
+    padding: 0.625rem 1rem;
+    padding-right: 2.5rem;
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    color: #111827;
+    background-color: #fff;
+    border: 1px solid #d1d5db;
+    border-radius: 0.5rem;
+    transition: all 0.2s;
+}
+
+.form-input:focus {
+    outline: none;
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.form-input.error {
+    border-color: #dc2626;
+}
+
+.form-input.error:focus {
+    border-color: #dc2626;
+    box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+}
+
+/* ریسپانسیو */
+@media (max-width: 768px) {
+    .card-body {
+        padding: 1rem;
+    }
+    
+    .grid {
+        gap: 1rem;
+    }
+}
+</style>
+{% endblock %}

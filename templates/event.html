@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block content %}
+<h2 class="text-2xl font-bold mb-2">اضافه کردن رویداد</h2>
+<form method="POST" class="space-y-2">
+    <input type="text" name="title" placeholder="عنوان" class="p-2 border rounded w-full">
+    <textarea name="description" placeholder="توضیحات" class="p-2 border rounded w-full"></textarea>
+    <button type="submit" class="bg-blue-600 text-white p-2 rounded">اضافه کردن</button>
+</form>
+{% endblock %}

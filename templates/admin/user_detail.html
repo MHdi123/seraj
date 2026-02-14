@@ -1,0 +1,373 @@
+{% extends "base.html" %}
+
+{% block title %}جزئیات کاربر - سِراج{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    <div class="mb-6">
+        <a href="{{ url_for('admin_pending_users') }}" class="text-blue-600 hover:text-blue-800">
+            <i class="fas fa-arrow-right ml-2"></i>
+            بازگشت به لیست
+        </a>
+    </div>
+    
+    <div class="bg-white rounded-lg shadow overflow-hidden">
+        <!-- هدر -->
+        <div class="bg-gradient-to-l from-blue-50 to-indigo-50 px-6 py-4 border-b">
+            <h1 class="text-2xl font-bold">جزئیات کاربر</h1>
+        </div>
+        
+        <!-- اطلاعات کاربر -->
+        <div class="p-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <h3 class="text-lg font-bold mb-4">اطلاعات هویتی</h3>
+                    <dl class="space-y-2">
+                        <div class="flex">
+                            <dt class="w-32 text-gray-600">نام و نام خانوادگی:</dt>
+                            <dd class="font-medium">{{ user.full_name }}</dd>
+                        </div>
+                        <div class="flex">
+                            <dt class="w-32 text-gray-600">نام کاربری:</dt>
+                            <dd>{{ user.username }}</dd>
+                        </div>
+                        <div class="flex">
+                            <dt class="w-32 text-gray-600">ایمیل:</dt>
+                            <dd>{{ user.email }}</dd>
+                        </div>
+                        <div class="flex">
+                            <dt class="w-32 text-gray-600">نوع کاربر:</dt>
+                            <dd>
+                                {% if user.user_type == 'professor' %}
+                                    <span class="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs">استاد</span>
+                                {% elif user.user_type == 'staff' %}
+                                    <span class="px-2 py-1 bg-purple-100 text-purple-800 rounded-full text-xs">کارمند</span>
+                                {% else %}
+                                    <span class="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs">دانشجو</span>
+                                {% endif %}
+                            </dd>
+                        </div>
+                        <div class="flex">
+                            <dt class="w-32 text-gray-600">وضعیت:</dt>
+                            <dd>
+                                {% if user.is_verified %}
+                                    <span class="text-green-600">تأیید شده</span>
+                                {% else %}
+                                    <span class="text-yellow-600">در انتظار تأیید</span>
+                                {% endif %}
+                            </dd>
+                        </div>
+                    </dl>
+                </div>
+                
+                <div>
+                    <h3 class="text-lg font-bold mb-4">اطلاعات تماس</h3>
+                    <dl class="space-y-2">
+                        <div class="flex">
+                            <dt class="w-32 text-gray-600">تلفن همراه:</dt>
+                            <dd>{{ user.phone }}</dd>
+                        </div>
+                        {% if user.landline %}
+                        <div class="flex">
+                            <dt class="w-32 text-gray-600">تلفن ثابت:</dt>
+                            <dd>{{ user.landline }}</dd>
+                        </div>
+                        {% endif %}
+                        {% if user.office_phone %}
+                        <div class="flex">
+                            <dt class="w-32 text-gray-600">تلفن دفتر:</dt>
+                            <dd>{{ user.office_phone }}</dd>
+                        </div>
+                        {% endif %}
+                        <div class="flex">
+                            <dt class="w-32 text-gray-600">جنسیت:</dt>
+                            <dd>{{ user.get_gender_display() }}</dd>
+                        </div>
+                    </dl>
+                </div>
+            </div>
+            
+            {% if user.user_type == 'professor' %}
+            <!-- اطلاعات استاد -->
+            <div class="mt-8">
+                <h3 class="text-lg font-bold mb-4">اطلاعات استاد</h3>
+                <dl class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="flex">
+                        <dt class="w-32 text-gray-600">مرتبه علمی:</dt>
+                        <dd>{{ user.academic_rank }}</dd>
+                    </div>
+                    <div class="flex">
+                        <dt class="w-32 text-gray-600">تخصص:</dt>
+                        <dd>{{ user.specialization }}</dd>
+                    </div>
+                    {% if user.teaching_experience %}
+                    <div class="flex">
+                        <dt class="w-32 text-gray-600">سابقه تدریس:</dt>
+                        <dd>{{ user.teaching_experience }} سال</dd>
+                    </div>
+                    {% endif %}
+                    {% if user.professor_code %}
+                    <div class="flex">
+                        <dt class="w-32 text-gray-600">کد استادی:</dt>
+                        <dd>{{ user.professor_code }}</dd>
+                    </div>
+                    {% endif %}
+                    {% if user.office_hours %}
+                    <div class="flex">
+                        <dt class="w-32 text-gray-600">ساعات حضور:</dt>
+                        <dd>{{ user.office_hours }}</dd>
+                    </div>
+                    {% endif %}
+                    {% if user.website %}
+                    <div class="flex">
+                        <dt class="w-32 text-gray-600">وبسایت:</dt>
+                        <dd><a href="{{ user.website }}" target="_blank" class="text-blue-600 hover:underline">{{ user.website }}</a></dd>
+                    </div>
+                    {% endif %}
+                    {% if user.resume_file %}
+                    <div class="flex">
+                        <dt class="w-32 text-gray-600">رزومه:</dt>
+                        <dd><a href="{{ url_for('static', filename='uploads/' + user.resume_file) }}" target="_blank" class="text-blue-600 hover:underline">دانلود رزومه</a></dd>
+                    </div>
+                    {% endif %}
+                </dl>
+            </div>
+            {% elif user.user_type == 'staff' %}
+            <!-- اطلاعات کارمند -->
+            <div class="mt-8">
+                <h3 class="text-lg font-bold mb-4">اطلاعات کارمند</h3>
+                <dl class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="flex">
+                        <dt class="w-32 text-gray-600">کد پرسنلی:</dt>
+                        <dd>{{ user.employee_id }}</dd>
+                    </div>
+                    <div class="flex">
+                        <dt class="w-32 text-gray-600">واحد سازمانی:</dt>
+                        <dd>{{ user.department }}</dd>
+                    </div>
+                    <div class="flex">
+                        <dt class="w-32 text-gray-600">سمت:</dt>
+                        <dd>{{ user.position }}</dd>
+                    </div>
+                    {% if user.responsibility %}
+                    <div class="flex">
+                        <dt class="w-32 text-gray-600">حوزه مسئولیت:</dt>
+                        <dd>{{ user.responsibility }}</dd>
+                    </div>
+                    {% endif %}
+                </dl>
+            </div>
+            {% endif %}
+            
+            <!-- اطلاعات مکانی -->
+            <div class="mt-8">
+                <h3 class="text-lg font-bold mb-4">اطلاعات مکانی</h3>
+                <dl class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="flex">
+                        <dt class="w-32 text-gray-600">دانشگاه:</dt>
+                        <dd>{{ user.university }}</dd>
+                    </div>
+                    <div class="flex">
+                        <dt class="w-32 text-gray-600">دانشکده:</dt>
+                        <dd>{{ user.faculty }}</dd>
+                    </div>
+                    <div class="flex">
+                        <dt class="w-32 text-gray-600">استان:</dt>
+                        <dd>{{ user.province }}</dd>
+                    </div>
+                    <div class="flex">
+                        <dt class="w-32 text-gray-600">شهر:</dt>
+                        <dd>{{ user.city }}</dd>
+                    </div>
+                    {% if user.address %}
+                    <div class="flex">
+                        <dt class="w-32 text-gray-600">آدرس:</dt>
+                        <dd>{{ user.address }}</dd>
+                    </div>
+                    {% endif %}
+                </dl>
+            </div>
+            
+            <!-- تاریخ‌ها -->
+            <div class="mt-8 pt-4 border-t">
+                <dl class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="flex">
+                        <dt class="w-32 text-gray-600">تاریخ ثبت‌نام:</dt>
+                        <dd>{{ user.created_at|persian_datetime }}</dd>
+                    </div>
+                    {% if user.verified_at %}
+                    <div class="flex">
+                        <dt class="w-32 text-gray-600">تاریخ تأیید:</dt>
+                        <dd>{{ user.verified_at|persian_datetime }}</dd>
+                    </div>
+                    {% endif %}
+                    {% if user.last_login %}
+                    <div class="flex">
+                        <dt class="w-32 text-gray-600">آخرین ورود:</dt>
+                        <dd>{{ user.last_login|persian_datetime }}</dd>
+                    </div>
+                    {% endif %}
+                </dl>
+            </div>
+            
+            <!-- دکمه‌های عملیات -->
+            {% if not user.is_verified %}
+            <div class="mt-8 flex justify-end space-x-2 space-x-reverse">
+                <button class="verify-btn px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+                        data-user-id="{{ user.id }}">
+                    <i class="fas fa-check ml-2"></i>
+                    تأیید کاربر
+                </button>
+                <button class="reject-btn px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
+                        data-user-id="{{ user.id }}"
+                        data-user-name="{{ user.full_name }}">
+                    <i class="fas fa-times ml-2"></i>
+                    رد درخواست
+                </button>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Modal برای رد درخواست -->
+<div id="rejectModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden items-center justify-center z-50">
+    <div class="bg-white rounded-lg p-6 max-w-md w-full">
+        <h3 class="text-lg font-bold mb-4">رد درخواست کاربر</h3>
+        <p class="mb-4">آیا از رد درخواست <span id="rejectUserName" class="font-bold"></span> اطمینان دارید؟</p>
+        
+        <form id="rejectForm" method="POST">
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-2">دلیل رد (اختیاری)</label>
+                <textarea name="reason" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-lg"></textarea>
+            </div>
+            
+            <div class="flex justify-end space-x-2 space-x-reverse">
+                <button type="button" class="cancel-btn px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400">
+                    انصراف
+                </button>
+                <button type="submit" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">
+                    تأیید و رد
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+// متغیرهای سراسری
+let currentUserId = null;
+
+function verifyUser(userId) {
+    if (confirm('آیا از تأیید این کاربر اطمینان دارید؟')) {
+        fetch(`/admin/user/verify/${userId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                window.location.reload();
+            } else {
+                alert(data.message || 'خطا در تأیید کاربر');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('خطا در ارتباط با سرور');
+        });
+    }
+}
+
+function showRejectModal(userId, userName) {
+    currentUserId = userId;
+    document.getElementById('rejectUserName').textContent = userName;
+    document.getElementById('rejectForm').action = `/admin/user/reject/${userId}`;
+    document.getElementById('rejectModal').classList.remove('hidden');
+    document.getElementById('rejectModal').classList.add('flex');
+}
+
+function closeRejectModal() {
+    document.getElementById('rejectModal').classList.add('hidden');
+    document.getElementById('rejectModal').classList.remove('flex');
+    document.getElementById('rejectForm').reset();
+}
+
+// راه‌اندازی event listeners بعد از لود صفحه
+document.addEventListener('DOMContentLoaded', function() {
+    // دکمه تأیید
+    const verifyBtn = document.querySelector('.verify-btn');
+    if (verifyBtn) {
+        verifyBtn.addEventListener('click', function() {
+            const userId = this.dataset.userId;
+            verifyUser(userId);
+        });
+    }
+    
+    // دکمه رد
+    const rejectBtn = document.querySelector('.reject-btn');
+    if (rejectBtn) {
+        rejectBtn.addEventListener('click', function() {
+            const userId = this.dataset.userId;
+            const userName = this.dataset.userName;
+            showRejectModal(userId, userName);
+        });
+    }
+    
+    // دکمه انصراف در مودال
+    const cancelBtn = document.querySelector('.cancel-btn');
+    if (cancelBtn) {
+        cancelBtn.addEventListener('click', function() {
+            closeRejectModal();
+        });
+    }
+    
+    // بستن مودال با کلیک روی پس‌زمینه
+    const modal = document.getElementById('rejectModal');
+    if (modal) {
+        modal.addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeRejectModal();
+            }
+        });
+    }
+    
+    // بستن مودال با کلید ESC
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            closeRejectModal();
+        }
+    });
+});
+</script>
+
+<style>
+.hidden {
+    display: none !important;
+}
+
+#rejectModal {
+    transition: opacity 0.3s ease;
+}
+
+#rejectModal.flex {
+    opacity: 1;
+}
+
+#rejectModal.hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.verify-btn, .reject-btn, .cancel-btn {
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.verify-btn:hover, .reject-btn:hover, .cancel-btn:hover {
+    transform: scale(1.02);
+}
+</style>
+{% endblock %}

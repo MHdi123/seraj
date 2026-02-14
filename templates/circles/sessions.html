@@ -1,0 +1,141 @@
+{% extends "base.html" %}
+
+{% block title %}جلسات {{ circle.name }} - سِراج{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto">
+    <!-- Header -->
+    <div class="mb-8">
+        <div class="flex items-center mb-4">
+            <a href="{{ url_for('circle_detail', circle_id=circle.id) }}" class="text-gray-600 hover:text-gray-900 ml-4">
+                <i class="fas fa-arrow-right"></i>
+            </a>
+            <h1 class="text-3xl font-bold">برنامه جلسات حلقه {{ circle.name }}</h1>
+        </div>
+        <p class="text-gray-600">مشاهده و پیگیری جلسات برگزار شده و پیش‌رو</p>
+    </div>
+    
+    <!-- Filters -->
+    <div class="card mb-6">
+        <div class="card-body">
+            <form method="GET" action="{{ url_for('circle_sessions', circle_id=circle.id) }}" class="flex gap-4">
+                <select name="status" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                    <option value="all" {% if request.args.get('status') == 'all' %}selected{% endif %}>همه جلسات</option>
+                    <option value="upcoming" {% if request.args.get('status') == 'upcoming' %}selected{% endif %}>جلسات پیش‌رو</option>
+                    <option value="past" {% if request.args.get('status') == 'past' %}selected{% endif %}>جلسات گذشته</option>
+                </select>
+                
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-filter ml-2"></i>
+                    اعمال فیلتر
+                </button>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Sessions List -->
+    {% if sessions and sessions.items %}
+        <div class="space-y-4">
+            {% for session in sessions.items %}
+                <div class="card hover:shadow-md transition-shadow">
+                    <div class="card-body">
+                        <div class="flex justify-between items-start">
+                            <div class="flex-grow">
+                                <div class="flex items-center mb-2">
+                                    <h3 class="text-xl font-bold ml-4">{{ session.title or 'جلسه حلقه' }}</h3>
+                                    {% if session.session_date < now.date() %}
+                                        <span class="px-3 py-1 bg-gray-100 text-gray-800 rounded-full text-xs">برگزار شده</span>
+                                    {% else %}
+                                        <span class="px-3 py-1 bg-green-100 text-green-800 rounded-full text-xs">پیش‌رو</span>
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                                    <div class="flex items-center text-sm text-gray-600">
+                                        <i class="fas fa-calendar ml-2 text-blue-600 w-5"></i>
+                                        <span>{{ session.session_date|persian_date }}</span>
+                                    </div>
+                                    
+                                    <div class="flex items-center text-sm text-gray-600">
+                                        <i class="fas fa-clock ml-2 text-green-600 w-5"></i>
+                                        <span>{{ session.start_time }} تا {{ session.end_time }}</span>
+                                    </div>
+                                    
+                                    <div class="flex items-center text-sm text-gray-600">
+                                        <i class="fas fa-tag ml-2 text-purple-600 w-5"></i>
+                                        <span>{{ session.topic or 'موضوع: عمومی' }}</span>
+                                    </div>
+                                </div>
+                                
+                                {% if session.description %}
+                                    <p class="text-gray-700 mb-4 line-clamp-2">{{ session.description }}</p>
+                                {% endif %}
+                                
+                                <div class="flex items-center text-sm text-gray-500">
+                                    <i class="fas fa-users ml-2"></i>
+                                    <span>حاضرین: {{ session.attendance_count }} نفر</span>
+                                    <span class="mx-3">•</span>
+                                    <i class="fas fa-file ml-2"></i>
+                                    <span>فایل‌ها: {{ session.files.count() }}</span>
+                                </div>
+                            </div>
+                            
+                            <div class="flex-shrink-0 mr-6">
+                                <a href="{{ url_for('session_detail', session_id=session.id) }}" 
+                                   class="btn btn-primary">
+                                    جزئیات جلسه
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+        
+        <!-- Pagination -->
+        {% if sessions.pages > 1 %}
+            <div class="flex justify-center mt-8">
+                <div class="flex space-x-2 space-x-reverse">
+                    {% if sessions.has_prev %}
+                        <a href="{{ url_for('circle_sessions', circle_id=circle.id, page=sessions.prev_num, status=request.args.get('status', 'all')) }}" 
+                           class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">
+                            قبلی
+                        </a>
+                    {% endif %}
+                    
+                    {% for page_num in sessions.iter_pages() %}
+                        {% if page_num %}
+                            {% if page_num == sessions.page %}
+                                <span class="px-4 py-2 bg-blue-600 text-white rounded-lg">{{ page_num }}</span>
+                            {% else %}
+                                <a href="{{ url_for('circle_sessions', circle_id=circle.id, page=page_num, status=request.args.get('status', 'all')) }}" 
+                                   class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">
+                                    {{ page_num }}
+                                </a>
+                            {% endif %}
+                        {% else %}
+                            <span class="px-4 py-2">...</span>
+                        {% endif %}
+                    {% endfor %}
+                    
+                    {% if sessions.has_next %}
+                        <a href="{{ url_for('circle_sessions', circle_id=circle.id, page=sessions.next_num, status=request.args.get('status', 'all')) }}" 
+                           class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">
+                            بعدی
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        {% endif %}
+        
+    {% else %}
+        <div class="card text-center py-12">
+            <div class="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i class="fas fa-calendar-times text-gray-400 text-3xl"></i>
+            </div>
+            <h3 class="text-xl font-bold text-gray-700 mb-2">جلسه‌ای یافت نشد</h3>
+            <p class="text-gray-600">هیچ جلسه‌ای برای نمایش وجود ندارد.</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
