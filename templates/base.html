@@ -6,7 +6,29 @@
         <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
         <meta name="theme-color" content="#0d6efd">
     <title>{% block title %}سِراج - پلتفرم مدیریت فعالیت‌های قرآنی{% endblock %}</title>
-    
+    <!-- PWA Meta Tags -->
+<link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
+<meta name="theme-color" content="#1e3a8a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="سِراج">
+<meta name="format-detection" content="telephone=no">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="msapplication-TileColor" content="#1e3a8a">
+<meta name="msapplication-tap-highlight" content="no">
+
+<!-- iOS Icons -->
+<link rel="apple-touch-icon" href="{{ url_for('static', filename='logo/icon-192x192.png') }}">
+<link rel="apple-touch-icon" sizes="152x152" href="{{ url_for('static', filename='logo/icon-152x152.png') }}">
+<link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='logo/icon-192x192.png') }}">
+<link rel="apple-touch-icon" sizes="167x167" href="{{ url_for('static', filename='logo/icon-152x152.png') }}">
+
+<!-- Startup Image (Splash Screen) -->
+<link rel="apple-touch-startup-image" href="{{ url_for('static', filename='logo/splash.png') }}">
+
+<!-- Windows -->
+<meta name="msapplication-navbutton-color" content="#1e3a8a">
+<meta name="msapplication-TileImage" content="{{ url_for('static', filename='logo/icon-144x144.png') }}">
     <!-- Tailwind CSS -->
     <link href="{{ url_for('static', filename='css/tailwind.css') }}" rel="stylesheet">
     
@@ -227,34 +249,102 @@
             </div>
         </div>
     </footer>
-    
-    <!-- JavaScript -->
-    <script>
-        // Mobile menu toggle
-        document.getElementById('mobile-menu-button').addEventListener('click', function() {
-            const menu = document.getElementById('mobile-menu');
-            menu.classList.toggle('hidden');
+
+<script>
+// ثبت Service Worker با مدیریت خطا
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function() {
+        // ثبت با استراتژی پیشرفته
+        navigator.serviceWorker.register('/static/service-worker.js', {
+            scope: '/'
+        }).then(function(registration) {
+            console.log('✅ Service Worker ثبت شد با scope:', registration.scope);
+            
+            // بررسی به‌روزرسانی
+            registration.addEventListener('updatefound', function() {
+                const newWorker = registration.installing;
+                console.log('🔄 نسخه جدید Service Worker در حال نصب...');
+                
+                newWorker.addEventListener('statechange', function() {
+                    if (newWorker.state === 'installed') {
+                        if (navigator.serviceWorker.controller) {
+                            console.log('🔄 نسخه جدید آماده است. صفحه را رفرش کنید.');
+                            
+                            // نمایش پیام به کاربر
+                            showUpdateNotification();
+                        }
+                    }
+                });
+            });
+        }).catch(function(error) {
+            console.log('❌ خطا در ثبت Service Worker:', error);
         });
         
-        // Auto-dismiss alerts after 5 seconds
-        setTimeout(() => {
-            const alerts = document.querySelectorAll('.alert');
-            alerts.forEach(alert => {
-                alert.style.transition = 'opacity 0.5s';
-                alert.style.opacity = '0';
-                setTimeout(() => alert.remove(), 500);
-            });
-        }, 5000);
-
-      if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('/static/service-worker.js')
-      .then(reg => console.log('Service Worker ثبت شد:', reg))
-      .catch(err => console.log('خطا در ثبت Service Worker:', err));
+        // بررسی اتصال اینترنت
+        function updateOnlineStatus() {
+            if (navigator.onLine) {
+                document.body.classList.remove('offline');
+                console.log('✅ آنلاین');
+            } else {
+                document.body.classList.add('offline');
+                console.log('⚠️ آفلاین');
+                
+                // نمایش نوتیفیکیشن آفلاین
+                showOfflineNotification();
+            }
+        }
+        
+        window.addEventListener('online', updateOnlineStatus);
+        window.addEventListener('offline', updateOnlineStatus);
+        updateOnlineStatus();
     });
-  }
+}
 
-    </script>
+// نمایش نوتیفیکیشن آفلاین
+function showOfflineNotification() {
+    const notification = document.createElement('div');
+    notification.className = 'fixed bottom-4 right-4 bg-yellow-500 text-white px-4 py-2 rounded-lg shadow-lg z-50 flex items-center';
+    notification.innerHTML = `
+        <i class="fas fa-exclamation-triangle ml-2"></i>
+        <span>شما آفلاین هستید. برخی امکانات محدود شده‌اند.</span>
+        <button onclick="this.parentElement.remove()" class="mr-3 text-white hover:text-yellow-100">
+            <i class="fas fa-times"></i>
+        </button>
+    `;
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        notification.remove();
+    }, 5000);
+}
+
+// نمایش نوتیفیکیشن به‌روزرسانی
+function showUpdateNotification() {
+    const notification = document.createElement('div');
+    notification.className = 'fixed bottom-4 left-4 bg-blue-600 text-white px-4 py-3 rounded-lg shadow-lg z-50 flex items-center';
+    notification.innerHTML = `
+        <i class="fas fa-sync-alt ml-3 animate-spin"></i>
+        <span class="flex-grow">نسخه جدیدی از برنامه منتشر شده است.</span>
+        <button onclick="updateApp()" class="mr-3 bg-white text-blue-600 px-3 py-1 rounded-lg hover:bg-blue-50 transition">
+            بروزرسانی
+        </button>
+        <button onclick="this.parentElement.remove()" class="mr-2 text-white hover:text-blue-200">
+            <i class="fas fa-times"></i>
+        </button>
+    `;
+    document.body.appendChild(notification);
+}
+
+// تابع بروزرسانی برنامه
+window.updateApp = function() {
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.ready.then(registration => {
+            registration.waiting.postMessage('skipWaiting');
+            window.location.reload();
+        });
+    }
+};
+</script>
     
     {% block scripts %}{% endblock %}
 </body>

@@ -4,8 +4,8 @@ const filesToCache = [
   '/index.html',
   '/static/css/tailwind.css',
   '/static/js/main.js',
-  '/static/logo/icon-192.png',
-  '/static/logo/icon-512.png'
+  '/static/logo/192.png',
+  '/static/logo/512.png'
 ];
 
 // نصب Service Worker و کش فایل‌ها
@@ -32,3 +32,9 @@ self.addEventListener('fetch', (event) => {
     caches.match(event.request).then((response) => response || fetch(event.request))
   );
 });
+
+event.respondWith(
+  caches.match(event.request)
+    .then((response) => response || fetch(event.request))
+    .catch(() => caches.match('/offline.html'))
+);
