@@ -246,13 +246,13 @@
             });
         }, 5000);
 
-        if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-            navigator.serviceWorker.register('/static/service-worker.js')
-            .then(reg => console.log('Service Worker ثبت شد:', reg))
-            .catch(err => console.log('خطا در ثبت Service Worker:', err));
-        });
-        }
+      if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/static/service-worker.js')
+      .then(reg => console.log('Service Worker ثبت شد:', reg))
+      .catch(err => console.log('خطا در ثبت Service Worker:', err));
+    });
+  }
 
     </script>
     
