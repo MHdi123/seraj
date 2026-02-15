@@ -2,32 +2,29 @@
 from flask import Flask, render_template
 from extensions import db, login_manager
 from config import Config
-from models import User  # فقط User رو اینجا ایمپورت کنید
+from models import User
 from routes import init_routes
 from datetime import datetime
 import os
-import jdatetime  # برای تاریخ شمسی
-from flask_migrate import Migrate  # برای مهاجرت دیتابیس
-
-# ❌ این خط را کامل حذف کنید:
-# from app import ( ... )
+import jdatetime
+from flask_migrate import Migrate
 
 def create_app():
     app = Flask(__name__)
     app.config.from_object(Config)
 
-    # ========== ایجاد پوشه‌های مورد نیاز ==========
+    # ========== پوشه‌های مورد نیاز ==========
     os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
     os.makedirs('static/fonts', exist_ok=True)
     os.makedirs('templates/auth', exist_ok=True)
     os.makedirs('templates/participant', exist_ok=True)
     os.makedirs('templates/admin', exist_ok=True)
 
-    # ========== راه‌اندازی پایگاه داده ==========
+    # ========== دیتابیس ==========
     db.init_app(app)
-    migrate = Migrate(app, db)
+    Migrate(app, db)
 
-    # ========== راه‌اندازی Flask-Login ==========
+    # ========== Flask-Login ==========
     login_manager.init_app(app)
     login_manager.login_view = 'auth.login'
     login_manager.login_message = 'لطفاً برای دسترسی به این صفحه وارد شوید.'
@@ -49,8 +46,7 @@ def create_app():
                 return dt
         if isinstance(dt, datetime):
             try:
-                gregorian_date = dt.date()
-                jalali_date = jdatetime.date.fromgregorian(date=gregorian_date)
+                jalali_date = jdatetime.date.fromgregorian(date=dt.date())
                 return jalali_date.strftime('%Y/%m/%d')
             except:
                 return dt.strftime('%Y/%m/%d')
@@ -62,8 +58,7 @@ def create_app():
             return ''
         if isinstance(dt, datetime):
             try:
-                gregorian_date = dt.date()
-                jalali_date = jdatetime.date.fromgregorian(date=gregorian_date)
+                jalali_date = jdatetime.date.fromgregorian(date=dt.date())
                 return f"{jalali_date.strftime('%Y/%m/%d')} - {dt.strftime('%H:%M')}"
             except:
                 return dt.strftime('%Y/%m/%d %H:%M')
@@ -106,14 +101,13 @@ def create_app():
             pass
         return date_str
 
-    # ========== context processors ==========
+    # ========== Context Processors ==========
     @app.context_processor
     def inject_now():
         return {'now': datetime.utcnow(), 'today': datetime.now().date()}
 
     @app.context_processor
     def inject_quran_verse():
-        # اگر get_daily_verse هنوز آماده نیست، None بذار
         return {
             'daily_verse': None,
             'current_date': datetime.now(),
@@ -133,19 +127,10 @@ def create_app():
     def internal_server_error(e):
         return render_template('500.html'), 500
 
-    # ========== روت‌های اصلی ==========
+    # ========== روت‌ها ==========
     init_routes(app)
 
     return app
 
-# ================== اجرا ==================
+# فقط اپلیکیشن را بسازیم
 app = create_app()
-
-if __name__ == '__main__':
-    with app.app_context():
-        db.create_all()  # فقط لوکال، روی Render معمولاً از migrate استفاده می‌کنیم
-    
-    # فقط وقتی با python app.py اجرا می‌کنیم
-    if os.environ.get("FLASK_ENV") == "development":
-        port = int(os.environ.get("PORT", 5000))
-        app.run(host="0.0.0.0", port=port, debug=True)
