@@ -143,8 +143,8 @@ app = create_app()
 
 if __name__ == '__main__':
     with app.app_context():
-        db.create_all()  # فقط اگر جدول موجود نباشد ساخته می‌شود
+        db.create_all()
     
-    # استفاده از پورت اختصاصی Render یا 5000 لوکال
+    # اگر Render پورت داد، استفاده کن، در غیر این صورت 5000 لوکال
     port = int(os.environ.get("PORT", 5000))
-    app.run(debug=True, host='0.0.0.0', port=port)
+    app.run(host='0.0.0.0', port=port, debug=True)
