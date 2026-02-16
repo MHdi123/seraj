@@ -2215,6 +2215,44 @@ def init_routes(app):
         return render_template('auth/register_staff.html')
     
     # ============================================
+    # مسیرهای FCM (Firebase Cloud Messaging)
+    # ============================================
+    
+    @app.route('/check-auth-status', methods=['GET'])
+    def check_auth_status():
+        """
+        بررسی می‌کند که کاربر لاگین است یا نه
+        """
+        return jsonify({
+            'is_authenticated': current_user.is_authenticated
+        })
+
+    @app.route('/save-fcm-token', methods=['POST'])
+    @login_required
+    def save_fcm_token():
+        """
+        ذخیره توکن FCM برای کاربر جاری
+        """
+        try:
+            data = request.get_json()
+            token = data.get('token')
+            
+            if not token:
+                return jsonify({'error': 'توکن ارسال نشده'}), 400
+            
+            # ذخیره توکن برای کاربر جاری
+            current_user.fcm_token = token
+            db.session.commit()
+            
+            return jsonify({
+                'success': True, 
+                'message': 'توکن با موفقیت ذخیره شد'
+            })
+            
+        except Exception as e:
+            return jsonify({'error': str(e)}), 500
+    
+    # ============================================
     # مسیرهای خطا
     # ============================================
     

@@ -3,32 +3,32 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
-        <meta name="theme-color" content="#0d6efd">
+    <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
+    <meta name="theme-color" content="#0d6efd">
     <title>{% block title %}سِراج - پلتفرم مدیریت فعالیت‌های قرآنی{% endblock %}</title>
     <!-- PWA Meta Tags -->
-<link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
-<meta name="theme-color" content="#1e3a8a">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="سِراج">
-<meta name="format-detection" content="telephone=no">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="msapplication-TileColor" content="#1e3a8a">
-<meta name="msapplication-tap-highlight" content="no">
+    <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
+    <meta name="theme-color" content="#1e3a8a">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="سِراج">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="msapplication-TileColor" content="#1e3a8a">
+    <meta name="msapplication-tap-highlight" content="no">
 
-<!-- iOS Icons -->
-<link rel="apple-touch-icon" href="{{ url_for('static', filename='logo/icon-192x192.png') }}">
-<link rel="apple-touch-icon" sizes="152x152" href="{{ url_for('static', filename='logo/icon-152x152.png') }}">
-<link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='logo/icon-192x192.png') }}">
-<link rel="apple-touch-icon" sizes="167x167" href="{{ url_for('static', filename='logo/icon-152x152.png') }}">
+    <!-- iOS Icons -->
+    <link rel="apple-touch-icon" href="{{ url_for('static', filename='logo/icon-192x192.png') }}">
+    <link rel="apple-touch-icon" sizes="152x152" href="{{ url_for('static', filename='logo/icon-152x152.png') }}">
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='logo/icon-192x192.png') }}">
+    <link rel="apple-touch-icon" sizes="167x167" href="{{ url_for('static', filename='logo/icon-152x152.png') }}">
 
-<!-- Startup Image (Splash Screen) -->
-<link rel="apple-touch-startup-image" href="{{ url_for('static', filename='logo/splash.png') }}">
+    <!-- Startup Image (Splash Screen) -->
+    <link rel="apple-touch-startup-image" href="{{ url_for('static', filename='logo/splash.png') }}">
 
-<!-- Windows -->
-<meta name="msapplication-navbutton-color" content="#1e3a8a">
-<meta name="msapplication-TileImage" content="{{ url_for('static', filename='logo/icon-144x144.png') }}">
+    <!-- Windows -->
+    <meta name="msapplication-navbutton-color" content="#1e3a8a">
+    <meta name="msapplication-TileImage" content="{{ url_for('static', filename='logo/icon-144x144.png') }}">
     <!-- Tailwind CSS -->
     <link href="{{ url_for('static', filename='css/tailwind.css') }}" rel="stylesheet">
     
@@ -65,7 +65,15 @@
                         <h1 class="text-xl font-bold text-gray-900">سِراج</h1>
                         <p class="text-xs text-gray-600">پلتفرم فعالیت‌های قرآنی دانشگاهی</p>
                     </div>
-                </div>   
+                </div>
+                
+                <!-- دکمه فعال‌سازی نوتیفیکیشن (فقط برای کاربران لاگین شده) -->
+                {% if current_user.is_authenticated %}
+                <button id="enable-notifications-btn" class="hidden md:inline-block mr-4 p-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 text-sm transition">
+                    <i class="fas fa-bell ml-1"></i>
+                    فعال‌سازی اعلان‌ها
+                </button>
+                {% endif %}
                 
                 <!-- Navigation - Desktop -->
                 <div class="hidden md:flex items-center space-x-4 space-x-reverse">
@@ -76,7 +84,7 @@
                         رویدادها
                     </a>
                     
-                    <!-- لینک حلقه‌های تلاوت - اضافه شده -->
+                    <!-- لینک حلقه‌های تلاوت -->
                     <a href="{{ url_for('circles_list') }}" class="nav-link {% if request.endpoint == 'circles_list' %}nav-link-active{% else %}nav-link-inactive{% endif %}">
                         حلقه‌های تلاوت
                     </a>
@@ -153,7 +161,7 @@
                         رویدادها
                     </a>
                     
-                    <!-- لینک حلقه‌های تلاوت در منوی موبایل - اضافه شده -->
+                    <!-- لینک حلقه‌های تلاوت در منوی موبایل -->
                     <a href="{{ url_for('circles_list') }}" class="nav-link {% if request.endpoint == 'circles_list' %}nav-link-active{% else %}nav-link-inactive{% endif %}">
                         حلقه‌های تلاوت
                     </a>
@@ -245,106 +253,324 @@
             </div>
             
             <div class="border-t border-gray-700 mt-8 pt-6 text-center text-gray-400 text-sm">
-                <p>تمام حقوق برای سامانه سِراج محفوظ است </p>
+                <p>تمام حقوق برای سامانه سِراج محفوظ است</p>
             </div>
         </div>
     </footer>
 
-<script>
-// ثبت Service Worker با مدیریت خطا
-if ('serviceWorker' in navigator) {
-    window.addEventListener('load', function() {
-        // ثبت با استراتژی پیشرفته
-        navigator.serviceWorker.register('/static/service-worker.js', {
-            scope: '/'
-        }).then(function(registration) {
-            console.log('✅ Service Worker ثبت شد با scope:', registration.scope);
-            
-            // بررسی به‌روزرسانی
-            registration.addEventListener('updatefound', function() {
-                const newWorker = registration.installing;
-                console.log('🔄 نسخه جدید Service Worker در حال نصب...');
-                
-                newWorker.addEventListener('statechange', function() {
-                    if (newWorker.state === 'installed') {
-                        if (navigator.serviceWorker.controller) {
-                            console.log('🔄 نسخه جدید آماده است. صفحه را رفرش کنید.');
-                            
-                            // نمایش پیام به کاربر
-                            showUpdateNotification();
-                        }
+    <script type="module">
+        // وارد کردن ماژول‌های Firebase
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+        import { getMessaging, getToken, onMessage } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging.js";
+
+        // تنظیمات Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyCu9ruK0nzFXl7cj2U81pu2Ku-SiCk9iOw",
+            authDomain: "seraj-app.firebaseapp.com",
+            projectId: "seraj-app",
+            storageBucket: "seraj-app.firebasestorage.app",
+            messagingSenderId: "651768016947",
+            appId: "1:651768016947:web:68632e505ad4c1c7bd3346",
+            measurementId: "G-KN3B5SW162"
+        };
+
+        // کلید VAPID - باید از Firebase Console گرفته شود
+        const vapidKey = "YOUR_VAPID_KEY_HERE"; // اینو عوض کن با کلید واقعی از Firebase
+
+        // مقداردهی اولیه Firebase
+        const app = initializeApp(firebaseConfig);
+        const messaging = getMessaging(app);
+
+        // ================================================
+        // درخواست اجازه و دریافت توکن
+        // ================================================
+        async function requestPermissionAndToken() {
+            try {
+                // بررسی پشتیبانی مرورگر از نوتیفیکیشن
+                if (!('Notification' in window)) {
+                    console.log('❌ این مرورگر از نوتیفیکیشن پشتیبانی نمی‌کند');
+                    alert('مرورگر شما از نوتیفیکیشن پشتیبانی نمی‌کند');
+                    return;
+                }
+
+                // بررسی پشتیبانی از Service Worker
+                if (!('serviceWorker' in navigator)) {
+                    console.log('❌ این مرورگر از Service Worker پشتیبانی نمی‌کند');
+                    alert('مرورگر شما از نوتیفیکیشن پشتیبانی نمی‌کند');
+                    return;
+                }
+
+                // اگر قبلاً اجازه داده شده، نیازی به درخواست مجدد نیست
+                if (Notification.permission === 'denied') {
+                    alert('شما قبلاً اجازه نوتیفیکیشن را رد کرده‌اید. برای فعال‌سازی، به تنظیمات مرورگر مراجعه کنید.');
+                    return;
+                }
+
+                if (Notification.permission === 'granted') {
+                    console.log('✅ اجازه نوتیفیکیشن قبلاً داده شده است');
+                } else {
+                    const permission = await Notification.requestPermission();
+                    if (permission !== "granted") {
+                        console.log("❌ کاربر اجازه نوتیفیکیشن را نداد");
+                        return;
                     }
+                    console.log("✅ اجازه نوتیفیکیشن داده شد");
+                }
+
+                // منتظر می‌مانیم تا Service Worker آماده شود
+                const registration = await navigator.serviceWorker.ready;
+
+                // دریافت توکن FCM
+                const currentToken = await getToken(messaging, {
+                    vapidKey: vapidKey,
+                    serviceWorkerRegistration: registration
                 });
-            });
-        }).catch(function(error) {
-            console.log('❌ خطا در ثبت Service Worker:', error);
-        });
-        
-        // بررسی اتصال اینترنت
-        function updateOnlineStatus() {
-            if (navigator.onLine) {
-                document.body.classList.remove('offline');
-                console.log('✅ آنلاین');
-            } else {
-                document.body.classList.add('offline');
-                console.log('⚠️ آفلاین');
-                
-                // نمایش نوتیفیکیشن آفلاین
-                showOfflineNotification();
+
+                if (currentToken) {
+                    console.log("🔥 توکن FCM دریافت شد:", currentToken);
+                    
+                    // ذخیره توکن در localStorage
+                    localStorage.setItem('fcm_token', currentToken);
+                    
+                    // ارسال توکن به سرور Flask
+                    await sendTokenToServer(currentToken);
+                    
+                    // نمایش پیام موفقیت
+                    showSuccessMessage('✅ اعلان‌ها با موفقیت فعال شدند');
+                } else {
+                    console.log("❌ توکن دریافت نشد");
+                }
+
+            } catch (error) {
+                console.log("❌ خطا در دریافت توکن:", error);
             }
         }
-        
-        window.addEventListener('online', updateOnlineStatus);
-        window.addEventListener('offline', updateOnlineStatus);
-        updateOnlineStatus();
-    });
-}
 
-// نمایش نوتیفیکیشن آفلاین
-function showOfflineNotification() {
-    const notification = document.createElement('div');
-    notification.className = 'fixed bottom-4 right-4 bg-yellow-500 text-white px-4 py-2 rounded-lg shadow-lg z-50 flex items-center';
-    notification.innerHTML = `
-        <i class="fas fa-exclamation-triangle ml-2"></i>
-        <span>شما آفلاین هستید. برخی امکانات محدود شده‌اند.</span>
-        <button onclick="this.parentElement.remove()" class="mr-3 text-white hover:text-yellow-100">
-            <i class="fas fa-times"></i>
-        </button>
-    `;
-    document.body.appendChild(notification);
-    
-    setTimeout(() => {
-        notification.remove();
-    }, 5000);
-}
+        // ================================================
+        // ارسال توکن به سرور
+        // ================================================
+        async function sendTokenToServer(token) {
+            try {
+                const response = await fetch('/save-fcm-token', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ token: token })
+                });
 
-// نمایش نوتیفیکیشن به‌روزرسانی
-function showUpdateNotification() {
-    const notification = document.createElement('div');
-    notification.className = 'fixed bottom-4 left-4 bg-blue-600 text-white px-4 py-3 rounded-lg shadow-lg z-50 flex items-center';
-    notification.innerHTML = `
-        <i class="fas fa-sync-alt ml-3 animate-spin"></i>
-        <span class="flex-grow">نسخه جدیدی از برنامه منتشر شده است.</span>
-        <button onclick="updateApp()" class="mr-3 bg-white text-blue-600 px-3 py-1 rounded-lg hover:bg-blue-50 transition">
-            بروزرسانی
-        </button>
-        <button onclick="this.parentElement.remove()" class="mr-2 text-white hover:text-blue-200">
-            <i class="fas fa-times"></i>
-        </button>
-    `;
-    document.body.appendChild(notification);
-}
+                const data = await response.json();
+                
+                if (response.ok) {
+                    console.log('✅ توکن با موفقیت به سرور ارسال شد:', data);
+                } else {
+                    console.error('❌ خطا در ارسال توکن به سرور:', data.error);
+                }
+            } catch (error) {
+                console.error('❌ خطا در ارتباط با سرور:', error);
+            }
+        }
 
-// تابع بروزرسانی برنامه
-window.updateApp = function() {
-    if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.ready.then(registration => {
-            registration.waiting.postMessage('skipWaiting');
-            window.location.reload();
+        // ================================================
+        // نمایش پیام موفقیت
+        // ================================================
+        function showSuccessMessage(message) {
+            const notification = document.createElement('div');
+            notification.className = 'fixed bottom-4 right-4 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg z-50 flex items-center';
+            notification.innerHTML = `
+                <i class="fas fa-check-circle ml-2"></i>
+                <span>${message}</span>
+                <button onclick="this.parentElement.remove()" class="mr-3 text-white hover:text-green-100">
+                    <i class="fas fa-times"></i>
+                </button>
+            `;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                if (notification.parentElement) {
+                    notification.remove();
+                }
+            }, 5000);
+        }
+
+        // ================================================
+        // دریافت نوتیفیکیشن در حالت foreground
+        // ================================================
+        onMessage(messaging, (payload) => {
+            console.log("📩 پیام جدید دریافت شد:", payload);
+
+            if (Notification.permission === "granted") {
+                const title = payload.notification?.title || 'پیام جدید از سراج';
+                const body = payload.notification?.body || 'یک پیام جدید دریافت کردید';
+                
+                new Notification(title, {
+                    body: body,
+                    icon: "/static/logo/192.png",
+                    badge: "/static/logo/96.png"
+                });
+            }
         });
-    }
-};
-</script>
+
+        // ================================================
+        // بررسی وضعیت کاربر
+        // ================================================
+        async function checkUserAndRequestToken() {
+            try {
+                const response = await fetch('/check-auth-status');
+                const data = await response.json();
+                
+                if (data.is_authenticated) {
+                    console.log('✅ کاربر لاگین است');
+                    // می‌تونیم توکن رو بگیریم، اما صبر می‌کنیم کاربر روی دکمه کلیک کنه
+                    // یا اگه خواستیم خودکار، این خط رو فعال کنیم:
+                    // setTimeout(() => { requestPermissionAndToken(); }, 3000);
+                } else {
+                    console.log('ℹ️ کاربر لاگین نیست');
+                }
+            } catch (error) {
+                console.log('❌ خطا در بررسی وضعیت کاربر:', error);
+            }
+        }
+
+        // ================================================
+        // ثبت Service Worker
+        // ================================================
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function() {
+                navigator.serviceWorker.register('/static/service-worker.js', { 
+                    scope: '/' 
+                })
+                .then(function(registration) {
+                    console.log('✅ Service Worker ثبت شد. Scope:', registration.scope);
+
+                    // بررسی آپدیت‌ها
+                    registration.addEventListener('updatefound', function() {
+                        const newWorker = registration.installing;
+                        console.log('🔄 نسخه جدید Service Worker در حال نصب...');
+                        
+                        newWorker.addEventListener('statechange', function() {
+                            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                console.log('🔄 نسخه جدید آماده است');
+                                showUpdateNotification();
+                            }
+                        });
+                    });
+
+                    // بررسی وضعیت کاربر
+                    checkUserAndRequestToken();
+
+                }).catch(function(error) {
+                    console.log('❌ خطا در ثبت Service Worker:', error);
+                });
+
+                // بررسی وضعیت آنلاین/آفلاین
+                function updateOnlineStatus() {
+                    if (navigator.onLine) {
+                        document.body.classList.remove('offline');
+                        console.log('✅ آنلاین');
+                        
+                        // اگر آنلاین شدیم و توکن قبلی وجود دارد، دوباره ارسالش کن
+                        const savedToken = localStorage.getItem('fcm_token');
+                        if (savedToken) {
+                            sendTokenToServer(savedToken);
+                        }
+                    } else {
+                        document.body.classList.add('offline');
+                        console.log('⚠️ آفلاین');
+                        showOfflineNotification();
+                    }
+                }
+                
+                window.addEventListener('online', updateOnlineStatus);
+                window.addEventListener('offline', updateOnlineStatus);
+                updateOnlineStatus();
+            });
+        }
+
+        // ================================================
+        // دکمه فعال‌سازی دستی نوتیفیکیشن
+        // ================================================
+        const enableBtn = document.getElementById('enable-notifications-btn');
+        if (enableBtn) {
+            enableBtn.addEventListener('click', function() {
+                requestPermissionAndToken();
+            });
+        }
+
+        // ================================================
+        // نمایش نوتیفیکیشن آفلاین
+        // ================================================
+        function showOfflineNotification() {
+            // اگر نوتیفیکیشن قبلی وجود دارد، حذفش کن
+            const existingNotification = document.getElementById('offline-notification');
+            if (existingNotification) {
+                existingNotification.remove();
+            }
+
+            const notification = document.createElement('div');
+            notification.id = 'offline-notification';
+            notification.className = 'fixed bottom-4 right-4 bg-yellow-500 text-white px-4 py-2 rounded-lg shadow-lg z-50 flex items-center';
+            notification.innerHTML = `
+                <i class="fas fa-exclamation-triangle ml-2"></i>
+                <span>شما آفلاین هستید. برخی امکانات محدود شده‌اند.</span>
+                <button onclick="this.parentElement.remove()" class="mr-3 text-white hover:text-yellow-100">
+                    <i class="fas fa-times"></i>
+                </button>
+            `;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                const notif = document.getElementById('offline-notification');
+                if (notif) notif.remove();
+            }, 5000);
+        }
+
+        // ================================================
+        // نمایش نوتیفیکیشن آپدیت
+        // ================================================
+        function showUpdateNotification() {
+            const notification = document.createElement('div');
+            notification.className = 'fixed bottom-4 left-4 bg-blue-600 text-white px-4 py-3 rounded-lg shadow-lg z-50 flex items-center';
+            notification.innerHTML = `
+                <i class="fas fa-sync-alt ml-3 animate-spin"></i>
+                <span class="flex-grow">نسخه جدیدی از برنامه منتشر شده است.</span>
+                <button onclick="updateApp()" class="mr-3 bg-white text-blue-600 px-3 py-1 rounded-lg hover:bg-blue-50 transition">
+                    بروزرسانی
+                </button>
+                <button onclick="this.parentElement.remove()" class="mr-2 text-white hover:text-blue-200">
+                    <i class="fas fa-times"></i>
+                </button>
+            `;
+            document.body.appendChild(notification);
+        }
+
+        // ================================================
+        // بروزرسانی برنامه
+        // ================================================
+        window.updateApp = function() {
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.ready.then(registration => {
+                    if (registration.waiting) {
+                        registration.waiting.postMessage('skipWaiting');
+                        window.location.reload();
+                    }
+                });
+            }
+        };
+
+        // ================================================
+        // منوی موبایل
+        // ================================================
+        const mobileMenuBtn = document.getElementById('mobile-menu-button');
+        if (mobileMenuBtn) {
+            mobileMenuBtn.addEventListener('click', function() {
+                const menu = document.getElementById('mobile-menu');
+                if (menu) {
+                    menu.classList.toggle('hidden');
+                }
+            });
+        }
+    </script>
     
     {% block scripts %}{% endblock %}
 </body>

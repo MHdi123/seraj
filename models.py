@@ -485,3 +485,15 @@ class CircleSchedule(db.Model):
     is_active = db.Column(db.Boolean, default=True)
     
     circle = db.relationship("QuranCircle", backref="schedules")
+
+
+class UserFCMToken(db.Model):
+    __tablename__ = "user_fcm_tokens"
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
+    fcm_token = db.Column(db.String(255), unique=True, nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    fcm_token = db.Column(db.String(255), nullable=True)
+    user = db.relationship("User", backref="fcm_tokens")
+
