@@ -1,8 +1,10 @@
 {
   "name": "سِراج - پلتفرم مدیریت فعالیت‌های قرآنی",
+  "id": "/",
   "short_name": "سِراج",
   "description": "پلتفرم جامع مدیریت فعالیت‌های قرآنی دانشگاهی با امکان ثبت‌نام در رویدادها، حلقه‌های تلاوت و پرسش و پاسخ قرآنی",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#1e3a8a",
@@ -19,7 +21,8 @@
     {
       "src": "/static/icons/192.png",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     },
     {
       "src": "/static/icons/512.png",
