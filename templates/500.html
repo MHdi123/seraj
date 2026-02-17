@@ -16,6 +16,11 @@
         75% { transform: scale(1.1); }
     }
     
+    @keyframes slideInRight {
+        from { transform: translateX(20px); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
+    }
+    
     .animate-rotate {
         animation: rotate 20s linear infinite;
     }
@@ -24,163 +29,164 @@
         animation: heartbeat 2s ease-in-out infinite;
     }
     
-    .status-card {
-        backdrop-filter: blur(10px);
-        transition: all 0.3s ease;
+    .animate-slideRight {
+        animation: slideInRight 0.5s ease-out;
     }
     
-    .status-card:hover {
-        transform: translateY(-2px);
+    @media (max-width: 640px) {
+        .error-icon {
+            font-size: 5rem;
+        }
     }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="max-w-2xl mx-auto text-center py-12">
-    <!-- وضعیت سیستم -->
-    <div class="relative mb-8">
-        <div class="animate-rotate text-gray-100">
-            <i class="fas fa-circle-notch text-9xl"></i>
-        </div>
-        <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-            <div class="animate-heartbeat">
-                <i class="fas fa-server text-red-600 text-6xl"></i>
-            </div>
-        </div>
-    </div>
-    
-    <h1 class="text-3xl font-bold mb-2 text-gray-900">خطای داخلی سرور!</h1>
-    <p class="text-gray-600 mb-6">
-        متأسفانه مشکلی در سرور رخ داده است. تیم فنی ما در حال رفع مشکل است.
-    </p>
-    
-    <!-- وضعیت سرویس‌ها -->
-    <div class="bg-white rounded-2xl shadow-lg p-6 mb-8 text-right">
-        <h3 class="font-bold text-gray-900 mb-4 flex items-center">
-            <i class="fas fa-heartbeat text-red-500 ml-2 animate-pulse"></i>
-            وضعیت سرویس‌ها:
-        </h3>
+<div class="min-h-[70vh] flex items-center justify-center py-8">
+    <div class="max-w-3xl mx-auto text-center px-4">
         
-        <div class="grid grid-cols-2 gap-4">
-            <div class="status-card bg-gray-50 p-3 rounded-lg">
-                <div class="flex items-center justify-between">
-                    <span class="text-sm">پایگاه داده</span>
-                    <span class="flex items-center text-yellow-600">
-                        <i class="fas fa-sync-alt fa-spin ml-1"></i>
-                        در حال بررسی
-                    </span>
-                </div>
+        <!-- وضعیت سیستم با انیمیشن -->
+        <div class="relative mb-6 sm:mb-8">
+            <div class="animate-rotate text-gray-100">
+                <i class="fas fa-circle-notch error-icon text-7xl sm:text-8xl lg:text-9xl"></i>
             </div>
-            
-            <div class="status-card bg-gray-50 p-3 rounded-lg">
-                <div class="flex items-center justify-between">
-                    <span class="text-sm">سرور برنامه</span>
-                    <span class="flex items-center text-red-600">
-                        <i class="fas fa-exclamation-circle ml-1"></i>
-                        خطا
-                    </span>
-                </div>
-            </div>
-            
-            <div class="status-card bg-gray-50 p-3 rounded-lg">
-                <div class="flex items-center justify-between">
-                    <span class="text-sm">هوش مصنوعی</span>
-                    <span class="flex items-center text-green-600">
-                        <i class="fas fa-check-circle ml-1"></i>
-                        فعال
-                    </span>
-                </div>
-            </div>
-            
-            <div class="status-card bg-gray-50 p-3 rounded-lg">
-                <div class="flex items-center justify-between">
-                    <span class="text-sm">سرویس پیامک</span>
-                    <span class="flex items-center text-green-600">
-                        <i class="fas fa-check-circle ml-1"></i>
-                        فعال
-                    </span>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <!-- راهنما و پشتیبانی -->
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-        <div class="bg-blue-50 rounded-xl p-5 text-right">
-            <div class="flex items-start">
-                <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center ml-3 flex-shrink-0">
-                    <i class="fas fa-tools text-blue-600"></i>
-                </div>
-                <div>
-                    <h4 class="font-bold text-gray-900 mb-1">اقدامات پیشنهادی</h4>
-                    <ul class="text-sm text-gray-700 space-y-1 pr-4">
-                        <li class="flex items-center">
-                            <i class="fas fa-circle text-2xs ml-2 text-blue-600"></i>
-                            صفحه را مجدداً بارگذاری کنید
-                        </li>
-                        <li class="flex items-center">
-                            <i class="fas fa-circle text-2xs ml-2 text-blue-600"></i>
-                            کش مرورگر را پاک کنید
-                        </li>
-                        <li class="flex items-center">
-                            <i class="fas fa-circle text-2xs ml-2 text-blue-600"></i>
-                            ۵ دقیقه دیگر تلاش کنید
-                        </li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-        
-        <div class="bg-purple-50 rounded-xl p-5 text-right">
-            <div class="flex items-start">
-                <div class="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center ml-3 flex-shrink-0">
-                    <i class="fas fa-headset text-purple-600"></i>
-                </div>
-                <div>
-                    <h4 class="font-bold text-gray-900 mb-1">پشتیبانی فوری</h4>
-                    <p class="text-sm text-gray-700 mb-2">در صورت تداوم مشکل:</p>
-                    <div class="flex flex-col space-y-1 text-sm">
-                        <span class="flex items-center">
-                            <i class="fas fa-envelope ml-2 text-gray-500"></i>
-                            support@siraj.ir
-                        </span>
-                        <span class="flex items-center">
-                            <i class="fas fa-phone ml-2 text-gray-500"></i>
-                            ۰۲۱-۱۲۳۴۵۶۷۸
-                        </span>
+            <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+                <div class="animate-heartbeat">
+                    <div class="w-16 h-16 sm:w-20 sm:h-20 lg:w-24 lg:h-24 bg-gradient-to-br from-red-500 to-red-600 rounded-3xl flex items-center justify-center shadow-2xl">
+                        <i class="fas fa-server text-white text-2xl sm:text-3xl lg:text-4xl"></i>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
-    
-    <!-- دکمه‌های اقدام -->
-    <div class="flex flex-col sm:flex-row justify-center gap-4">
-        <button onclick="location.reload()" class="btn btn-primary px-8 py-3">
-            <i class="fas fa-redo-alt ml-2 fa-spin"></i>
-            تلاش مجدد
-        </button>
         
-        <a href="{{ url_for('index') }}" class="btn btn-secondary px-8 py-3">
-            <i class="fas fa-home ml-2"></i>
-            صفحه اصلی
-        </a>
-    </div>
-    
-    <!-- کد خطا -->
-    <div class="mt-8 p-4 bg-gray-50 rounded-lg">
-        <div class="flex items-center justify-center">
-            <span class="text-xs text-gray-500 ml-2">کد خطا:</span>
-            <code class="text-xs bg-gray-800 text-white px-3 py-1 rounded">
-                ERR_INTERNAL_SERVER_500
-            </code>
-            <button onclick="copyErrorCode()" class="mr-2 text-gray-400 hover:text-gray-600">
-                <i class="fas fa-copy"></i>
-            </button>
-        </div>
-        <p class="text-xs text-gray-400 mt-2">
-            زمان خطا: {{ now.strftime('%Y/%m/%d %H:%M:%S') }}
+        <h1 class="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 mb-2">
+            خطای داخلی سرور!
+        </h1>
+        
+        <p class="text-sm sm:text-base text-gray-600 mb-6 max-w-xl mx-auto">
+            متأسفانه مشکلی در سرور رخ داده است. تیم فنی ما در حال رفع مشکل است.
         </p>
+        
+        <!-- وضعیت سرویس‌ها (گرید ریسپانسیو) -->
+        <div class="bg-white rounded-xl sm:rounded-2xl shadow-lg p-4 sm:p-6 mb-6 text-right">
+            <h3 class="font-bold text-gray-900 mb-3 flex items-center">
+                <i class="fas fa-heartbeat text-red-500 ml-2 animate-pulse"></i>
+                وضعیت سرویس‌ها:
+            </h3>
+            
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
+                <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition">
+                    <span class="text-xs sm:text-sm">پایگاه داده</span>
+                    <span class="flex items-center text-yellow-600 text-xs sm:text-sm">
+                        <i class="fas fa-sync-alt fa-spin ml-1"></i>
+                        در حال بررسی
+                    </span>
+                </div>
+                
+                <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition">
+                    <span class="text-xs sm:text-sm">سرور برنامه</span>
+                    <span class="flex items-center text-red-600 text-xs sm:text-sm">
+                        <i class="fas fa-exclamation-circle ml-1"></i>
+                        خطا
+                    </span>
+                </div>
+                
+                <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition">
+                    <span class="text-xs sm:text-sm">هوش مصنوعی</span>
+                    <span class="flex items-center text-green-600 text-xs sm:text-sm">
+                        <i class="fas fa-check-circle ml-1"></i>
+                        فعال
+                    </span>
+                </div>
+                
+                <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition">
+                    <span class="text-xs sm:text-sm">سرویس پیامک</span>
+                    <span class="flex items-center text-green-600 text-xs sm:text-sm">
+                        <i class="fas fa-check-circle ml-1"></i>
+                        فعال
+                    </span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- راهنما و پشتیبانی (کارت‌های ریسپانسیو) -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 mb-6">
+            <div class="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-4 text-right animate-slideRight">
+                <div class="flex gap-3">
+                    <div class="w-10 h-10 sm:w-12 sm:h-12 bg-blue-200 rounded-full flex items-center justify-center flex-shrink-0">
+                        <i class="fas fa-tools text-blue-700 text-sm sm:text-base"></i>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-gray-900 mb-1 text-sm sm:text-base">اقدامات پیشنهادی</h4>
+                        <ul class="text-xs sm:text-sm text-gray-700 space-y-1 pr-4">
+                            <li class="flex items-center">
+                                <i class="fas fa-circle text-2xs ml-2 text-blue-600"></i>
+                                صفحه را مجدداً بارگذاری کنید
+                            </li>
+                            <li class="flex items-center">
+                                <i class="fas fa-circle text-2xs ml-2 text-blue-600"></i>
+                                کش مرورگر را پاک کنید
+                            </li>
+                            <li class="flex items-center">
+                                <i class="fas fa-circle text-2xs ml-2 text-blue-600"></i>
+                                ۵ دقیقه دیگر تلاش کنید
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl p-4 text-right animate-slideRight" style="animation-delay: 0.2s;">
+                <div class="flex gap-3">
+                    <div class="w-10 h-10 sm:w-12 sm:h-12 bg-purple-200 rounded-full flex items-center justify-center flex-shrink-0">
+                        <i class="fas fa-headset text-purple-700 text-sm sm:text-base"></i>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-gray-900 mb-1 text-sm sm:text-base">پشتیبانی فوری</h4>
+                        <p class="text-xs sm:text-sm text-gray-700 mb-2">در صورت تداوم مشکل:</p>
+                        <div class="space-y-1">
+                            <div class="flex items-center text-xs sm:text-sm bg-white/50 rounded-lg p-2">
+                                <i class="fas fa-envelope ml-2 text-gray-600"></i>
+                                <span class="font-mono text-xs">support@siraj.ir</span>
+                            </div>
+                            <div class="flex items-center text-xs sm:text-sm bg-white/50 rounded-lg p-2">
+                                <i class="fas fa-phone ml-2 text-gray-600"></i>
+                                <span dir="ltr">۰۲۱-۱۲۳۴۵۶۷۸</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- دکمه‌های اقدام -->
+        <div class="flex flex-col sm:flex-row justify-center gap-3">
+            <button onclick="location.reload()" class="btn btn-primary px-6 sm:px-8 py-3 sm:py-4 text-sm sm:text-base">
+                <i class="fas fa-redo-alt ml-2 fa-spin"></i>
+                تلاش مجدد
+            </button>
+            
+            <a href="{{ url_for('index') }}" class="btn btn-secondary px-6 sm:px-8 py-3 sm:py-4 text-sm sm:text-base">
+                <i class="fas fa-home ml-2"></i>
+                صفحه اصلی
+            </a>
+        </div>
+        
+        <!-- کد خطا -->
+        <div class="mt-6 p-3 sm:p-4 bg-gray-50 rounded-lg">
+            <div class="flex flex-wrap items-center justify-center gap-2">
+                <span class="text-xs text-gray-500">کد خطا:</span>
+                <code class="text-xs bg-gray-800 text-white px-3 py-1.5 rounded-lg font-mono">
+                    ERR_INTERNAL_SERVER_500
+                </code>
+                <button onclick="copyErrorCode()" class="text-gray-400 hover:text-gray-600">
+                    <i class="fas fa-copy"></i>
+                </button>
+            </div>
+            <p class="text-xs text-gray-400 mt-2">
+                زمان خطا: {{ now.strftime('%Y/%m/%d %H:%M:%S') }}
+            </p>
+        </div>
     </div>
 </div>
 
@@ -191,13 +197,14 @@ function copyErrorCode() {
     
     // نمایش نوتیفیکیشن
     const notification = document.createElement('div');
-    notification.className = 'fixed bottom-4 left-4 bg-green-600 text-white px-4 py-2 rounded-lg shadow-lg text-sm';
-    notification.innerHTML = '<i class="fas fa-check-circle ml-2"></i>کد خطا کپی شد';
+    notification.className = 'fixed bottom-4 left-4 bg-green-600 text-white px-4 py-2 rounded-lg shadow-lg text-sm z-50 flex items-center gap-2 animate-slideDown';
+    notification.innerHTML = `
+        <i class="fas fa-check-circle"></i>
+        <span>کد خطا کپی شد</span>
+    `;
     document.body.appendChild(notification);
     
-    setTimeout(() => {
-        notification.remove();
-    }, 3000);
+    setTimeout(() => notification.remove(), 3000);
 }
 
 // تلاش خودکار مجدد
@@ -207,11 +214,10 @@ const maxRetries = 3;
 function autoRetry() {
     if (retryCount < maxRetries) {
         retryCount++;
-        console.log(`تلاش مجدد ${retryCount} از ${maxRetries}...`);
+        console.log(`تلاش مجدد ${retryCount}...`);
     }
 }
 
-// شروع تلاش خودکار
 setTimeout(autoRetry, 5000);
 </script>
 {% endblock %}

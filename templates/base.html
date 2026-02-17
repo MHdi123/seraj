@@ -2,12 +2,7 @@
 <html lang="fa" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
-    <meta name="theme-color" content="#0d6efd">
-    <title>{% block title %}سِراج - پلتفرم مدیریت فعالیت‌های قرآنی{% endblock %}</title>
-    <!-- PWA Meta Tags -->
-    <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
     <meta name="theme-color" content="#1e3a8a">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -15,187 +10,348 @@
     <meta name="format-detection" content="telephone=no">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="msapplication-TileColor" content="#1e3a8a">
-    <meta name="msapplication-tap-highlight" content="no">
-
-    <!-- iOS Icons -->
+    
+    <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='logo/12.png') }}">
     <link rel="apple-touch-icon" href="{{ url_for('static', filename='logo/icon-192x192.png') }}">
-    <link rel="apple-touch-icon" sizes="152x152" href="{{ url_for('static', filename='logo/icon-152x152.png') }}">
-    <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='logo/icon-192x192.png') }}">
-    <link rel="apple-touch-icon" sizes="167x167" href="{{ url_for('static', filename='logo/icon-152x152.png') }}">
-
-    <!-- Startup Image (Splash Screen) -->
-    <link rel="apple-touch-startup-image" href="{{ url_for('static', filename='logo/splash.png') }}">
-
-    <!-- Windows -->
-    <meta name="msapplication-navbutton-color" content="#1e3a8a">
-    <meta name="msapplication-TileImage" content="{{ url_for('static', filename='logo/icon-144x144.png') }}">
+    
+    <title>{% block title %}سِراج - پلتفرم مدیریت فعالیت‌های قرآنی{% endblock %}</title>
+    
     <!-- Tailwind CSS -->
     <link href="{{ url_for('static', filename='css/tailwind.css') }}" rel="stylesheet">
     
-    <!-- Font Awesome -->
+    <!-- Font Awesome 6 -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <!-- Favicon -->
-    <link rel="icon" type="image/png" href="{{ url_for('static', filename='logo/12.png') }}">
+    <!-- Vazir Font -->
+    <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazir-font@v30.1.0/dist/font-face.css" rel="stylesheet">
+    
+    <style>
+        * {
+            font-family: 'Vazir', 'Tahoma', sans-serif;
+        }
+        
+        /* بهینه‌سازی برای موبایل */
+        @media (max-width: 640px) {
+            .container {
+                padding-left: 1rem;
+                padding-right: 1rem;
+            }
+            h1 { font-size: 1.5rem; }
+            h2 { font-size: 1.25rem; }
+        }
+        
+        /* انیمیشن‌ها */
+        @keyframes slideDown {
+            from { transform: translateY(-10px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .animate-slideDown {
+            animation: slideDown 0.3s ease-out;
+        }
+        
+        .animate-fadeIn {
+            animation: fadeIn 0.5s ease-out;
+        }
+        
+        /* استایل‌های کامپوننت‌ها */
+        .nav-link {
+            @apply px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200;
+        }
+        
+        .nav-link-active {
+            @apply bg-blue-600 text-white shadow-md;
+        }
+        
+        .nav-link-inactive {
+            @apply text-gray-700 hover:bg-blue-50 hover:text-blue-700;
+        }
+        
+        .btn {
+            @apply inline-flex items-center justify-center px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 shadow-sm hover:shadow-md;
+        }
+        
+        .btn-primary {
+            @apply bg-blue-600 text-white hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2;
+        }
+        
+        .btn-secondary {
+            @apply bg-gray-100 text-gray-800 hover:bg-gray-200 focus:ring-2 focus:ring-gray-400 focus:ring-offset-2;
+        }
+        
+        .btn-danger {
+            @apply bg-red-600 text-white hover:bg-red-700 focus:ring-2 focus:ring-red-500 focus:ring-offset-2;
+        }
+        
+        .card {
+            @apply bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow duration-300 overflow-hidden;
+        }
+        
+        .card-header {
+            @apply px-4 py-3 border-b border-gray-100;
+        }
+        
+        .card-body {
+            @apply p-4;
+        }
+        
+        .badge {
+            @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+        }
+        
+        .badge-workshop { @apply bg-blue-100 text-blue-800; }
+        .badge-competition { @apply bg-green-100 text-green-800; }
+        .badge-halaqah { @apply bg-purple-100 text-purple-800; }
+        .badge-lecture { @apply bg-yellow-100 text-yellow-800; }
+        
+        .alert {
+            @apply p-4 rounded-lg mb-4 animate-slideDown;
+        }
+        
+        .alert-success { @apply bg-green-50 text-green-800 border-r-4 border-green-500; }
+        .alert-error { @apply bg-red-50 text-red-800 border-r-4 border-red-500; }
+        .alert-warning { @apply bg-yellow-50 text-yellow-800 border-r-4 border-yellow-500; }
+        .alert-info { @apply bg-blue-50 text-blue-800 border-r-4 border-blue-500; }
+        
+        /* بهینه‌سازی برای تاچ موبایل */
+        @media (max-width: 768px) {
+            .btn {
+                @apply py-3 text-base;
+            }
+            
+            .nav-link {
+                @apply py-3;
+            }
+            
+            input, select, textarea {
+                @apply text-base;
+            }
+        }
+        
+        /* حالت آفلاین */
+        body.offline {
+            @apply grayscale;
+        }
+        
+        .offline-indicator {
+            @apply fixed bottom-4 left-4 bg-yellow-500 text-white px-4 py-2 rounded-lg shadow-lg z-50 text-sm;
+        }
+        
+        /* اسکرول‌بار سفارشی */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            @apply bg-gray-100;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            @apply bg-gray-400 rounded-full hover:bg-gray-500;
+        }
+    </style>
+    
     {% block head %}{% endblock %}
 </head>
 <body class="bg-gray-50 min-h-screen flex flex-col">
     
-    <!-- Header -->
-    <header id="mainHeader"
-        class="bg-white/30 backdrop-blur-md 
-               border-b border-white/20
-               sticky top-0 z-50 transition-all duration-300">
-        <nav class="container mx-auto px-4 py-3">
-            <div class="flex justify-between items-center">
-                <!-- Mobile Back Button + Logo -->
-                <div class="flex items-center space-x-3 space-x-reverse">
-                    <!-- Back Button (Only Mobile) -->
-                    <button onclick="history.back()" 
-                            class="md:hidden p-2 rounded-lg bg-gray-100 hover:bg-gray-200 transition">
+    <!-- Header با طراحی ریسپانسیو -->
+    <header id="mainHeader" class="bg-white/30 backdrop-blur-md border-b border-white/20 sticky top-0 z-50 transition-all duration-300">
+        <nav class="container mx-auto px-4 py-2 lg:py-3">
+            <div class="flex items-center justify-between">
+                <!-- بخش راست: دکمه بازگشت + لوگو -->
+                <div class="flex items-center gap-2 sm:gap-3">
+                    <!-- دکمه بازگشت موبایل -->
+                    <button onclick="window.history.back()" 
+                            class="md:hidden w-10 h-10 flex items-center justify-center rounded-lg bg-gray-100 hover:bg-gray-200 transition">
                         <i class="fas fa-arrow-right text-gray-700"></i>
                     </button>
-                    <!-- Logo -->
-                    <div class="w-10 h-10 rounded-full overflow-hidden flex-shrink-0 shadow-md border border-gray-200">
-                        <img src="{{ url_for('static', filename='logo/12.png') }}" 
-                             alt="سِراج" 
-                             class="w-full h-full object-cover">
-                    </div>
-                    <div>
-                        <h1 class="text-xl font-bold text-gray-900">سِراج</h1>
-                        <p class="text-xs text-gray-600">پلتفرم فعالیت‌های قرآنی دانشگاهی</p>
-                    </div>
+                    
+                    <!-- لوگو -->
+                    <a href="{{ url_for('index') }}" class="flex items-center gap-2 sm:gap-3">
+                        <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-full overflow-hidden flex-shrink-0 shadow-md border-2 border-blue-200">
+                            <img src="{{ url_for('static', filename='logo/12.png') }}" 
+                                 alt="سِراج" 
+                                 class="w-full h-full object-cover">
+                        </div>
+                        <div class="hidden xs:block">
+                            <h1 class="text-lg sm:text-xl font-bold text-gray-900">سِراج</h1>
+                            <p class="text-xs text-gray-600 hidden sm:block">پلتفرم فعالیت‌های قرآنی</p>
+                        </div>
+                    </a>
                 </div>
                 
-                <!-- دکمه فعال‌سازی نوتیفیکیشن (فقط برای کاربران لاگین شده) -->
-                {% if current_user.is_authenticated %}
-                <button id="enable-notifications-btn" class="hidden md:inline-block mr-4 p-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 text-sm transition">
-                    <i class="fas fa-bell ml-1"></i>
-                    فعال‌سازی اعلان‌ها
-                </button>
-                {% endif %}
-                
-                <!-- Navigation - Desktop -->
-                <div class="hidden md:flex items-center space-x-4 space-x-reverse">
-                    <a href="{{ url_for('index') }}" class="nav-link {% if request.endpoint == 'index' %}nav-link-active{% else %}nav-link-inactive{% endif %}">
-                        خانه
-                    </a>
-                    <a href="{{ url_for('events_list') }}" class="nav-link {% if request.endpoint == 'events_list' %}nav-link-active{% else %}nav-link-inactive{% endif %}">
-                        رویدادها
-                    </a>
-                    
-                    <!-- لینک حلقه‌های تلاوت -->
-                    <a href="{{ url_for('circles_list') }}" class="nav-link {% if request.endpoint == 'circles_list' %}nav-link-active{% else %}nav-link-inactive{% endif %}">
-                        حلقه‌های تلاوت
-                    </a>
-                    
+                <!-- بخش وسط: دکمه نوتیفیکیشن -->
+                <div class="hidden md:block">
                     {% if current_user.is_authenticated %}
-                        <a href="{{ url_for('ai_quran') }}" class="nav-link {% if request.endpoint == 'ai_quran' %}nav-link-active{% else %}nav-link-inactive{% endif %}">
-                           سراج‌یار
-                        </a>
-                        
-                        {% if current_user.role.value == 'admin' %}
-                            <a href="{{ url_for('admin_dashboard') }}" class="nav-link {% if request.endpoint == 'admin_dashboard' %}nav-link-active{% else %}nav-link-inactive{% endif %}">
-                                مدیریت
-                            </a>
-                        {% else %}
-                            <a href="{{ url_for('dashboard') }}" class="nav-link {% if request.endpoint == 'dashboard' %}nav-link-active{% else %}nav-link-inactive{% endif %}">
-                                داشبورد
-                            </a>
-                        {% endif %}
-                        
-                        <div class="relative group">
-                            <button class="flex items-center space-x-2 space-x-reverse focus:outline-none">
-                                <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                                    <i class="fas fa-user text-blue-600"></i>
-                                </div>
-                                <span class="text-sm font-medium">{{ current_user.full_name }}</span>
-                                <i class="fas fa-chevron-down text-gray-400"></i>
-                            </button>
-                            
-                            <div class="absolute left-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-2 z-10 hidden group-hover:block hover:block">
-                                <a href="{{ url_for('profile') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                                    <i class="fas fa-user-circle ml-2"></i>
-                                    پروفایل
-                                </a>
-                                <a href="{{ url_for('notifications') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                                    <i class="fas fa-bell ml-2"></i>
-                                    اعلان‌ها
-                                    {% set unread_count = current_user.notifications|selectattr('is_read', 'equalto', False)|list|length %}
-                                    {% if unread_count > 0 %}
-                                        <span class="bg-red-500 text-white text-xs rounded-full px-2 py-1 mr-2">{{ unread_count }}</span>
-                                    {% endif %}
-                                </a>
-                                <div class="border-t border-gray-100 my-1"></div>
-                                <a href="{{ url_for('logout') }}" class="block px-4 py-2 text-sm text-red-600 hover:bg-gray-100">
-                                    <i class="fas fa-sign-out-alt ml-2"></i>
-                                    خروج
-                                </a>
-                            </div>
-                        </div>
-                    {% else %}
-                        <a href="{{ url_for('login') }}" class="btn btn-secondary">
-                            <i class="fas fa-sign-in-alt ml-2"></i>
-                            ورود
-                        </a>
-                        <a href="{{ url_for('register') }}" class="btn btn-primary">
-                            <i class="fas fa-user-plus ml-2"></i>
-                            ثبت‌نام
-                        </a>
+                    <button id="enable-notifications-btn" 
+                            class="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 transition shadow-md">
+                        <i class="fas fa-bell"></i>
+                        <span class="text-sm">فعال‌سازی اعلان‌ها</span>
+                    </button>
                     {% endif %}
                 </div>
                 
-                <!-- Mobile menu button -->
-                <button id="mobile-menu-button" class="md:hidden p-2 rounded-lg text-gray-600 hover:bg-gray-100">
-                    <i class="fas fa-bars text-xl"></i>
-                </button>
+                <!-- بخش چپ: منوی دسکتاپ + دکمه موبایل -->
+                <div class="flex items-center gap-2">
+                    <!-- منوی دسکتاپ -->
+                    <div class="hidden lg:flex items-center gap-1">
+                        <a href="{{ url_for('index') }}" class="nav-link {% if request.endpoint == 'index' %}nav-link-active{% else %}nav-link-inactive{% endif %}">
+                            خانه
+                        </a>
+                        <a href="{{ url_for('events_list') }}" class="nav-link {% if request.endpoint == 'events_list' %}nav-link-active{% else %}nav-link-inactive{% endif %}">
+                            رویدادها
+                        </a>
+                        <a href="{{ url_for('circles_list') }}" class="nav-link {% if request.endpoint == 'circles_list' %}nav-link-active{% else %}nav-link-inactive{% endif %}">
+                            حلقه‌ها
+                        </a>
+                        
+                        {% if current_user.is_authenticated %}
+                            <a href="{{ url_for('ai_quran') }}" class="nav-link {% if request.endpoint == 'ai_quran' %}nav-link-active{% else %}nav-link-inactive{% endif %}">
+                                سراج‌یار
+                            </a>
+                            
+                            {% if current_user.role.value == 'admin' %}
+                                <a href="{{ url_for('admin_dashboard') }}" class="nav-link {% if request.endpoint == 'admin_dashboard' %}nav-link-active{% else %}nav-link-inactive{% endif %}">
+                                    مدیریت
+                                </a>
+                            {% else %}
+                                <a href="{{ url_for('dashboard') }}" class="nav-link {% if request.endpoint == 'dashboard' %}nav-link-active{% else %}nav-link-inactive{% endif %}">
+                                    داشبورد
+                                </a>
+                            {% endif %}
+                            
+                            <!-- منوی کاربری -->
+                            <div class="relative group mr-2">
+                                <button class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-100 transition">
+                                    <div class="w-8 h-8 bg-gradient-to-br from-blue-600 to-blue-700 rounded-full flex items-center justify-center text-white shadow-md">
+                                        <i class="fas fa-user text-sm"></i>
+                                    </div>
+                                    <span class="text-sm font-medium hidden xl:block">{{ current_user.full_name|truncate(12) }}</span>
+                                    <i class="fas fa-chevron-down text-xs text-gray-500"></i>
+                                </button>
+                                
+                                <div class="absolute left-0 mt-2 w-64 bg-white rounded-xl shadow-xl py-2 z-50 hidden group-hover:block hover:block border border-gray-100 animate-slideDown">
+                                    <div class="px-4 py-3 border-b border-gray-100">
+                                        <p class="text-sm font-bold">{{ current_user.full_name }}</p>
+                                        <p class="text-xs text-gray-500">{{ current_user.email|truncate(25) }}</p>
+                                    </div>
+                                    
+                                    <a href="{{ url_for('profile') }}" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-700">
+                                        <i class="fas fa-user-circle ml-3 w-5"></i>
+                                        پروفایل
+                                    </a>
+                                    <a href="{{ url_for('notifications') }}" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-700">
+                                        <i class="fas fa-bell ml-3 w-5"></i>
+                                        اعلان‌ها
+                                        {% set unread_count = current_user.notifications|selectattr('is_read', 'equalto', False)|list|length %}
+                                        {% if unread_count > 0 %}
+                                            <span class="bg-red-500 text-white text-xs rounded-full px-2 py-0.5 mr-auto">{{ unread_count }}</span>
+                                        {% endif %}
+                                    </a>
+                                    <a href="{{ url_for('settings') }}" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-700">
+                                        <i class="fas fa-cog ml-3 w-5"></i>
+                                        تنظیمات
+                                    </a>
+                                    
+                                    <div class="border-t border-gray-100 my-1"></div>
+                                    
+                                    <a href="{{ url_for('logout') }}" class="flex items-center px-4 py-2 text-sm text-red-600 hover:bg-red-50">
+                                        <i class="fas fa-sign-out-alt ml-3 w-5"></i>
+                                        خروج
+                                    </a>
+                                </div>
+                            </div>
+                        {% else %}
+                            <a href="{{ url_for('login') }}" class="btn btn-secondary">
+                                <i class="fas fa-sign-in-alt ml-2"></i>
+                                ورود
+                            </a>
+                            <a href="{{ url_for('register') }}" class="btn btn-primary">
+                                <i class="fas fa-user-plus ml-2"></i>
+                                ثبت‌نام
+                            </a>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- دکمه منوی موبایل -->
+                    <button id="mobileMenuToggle" class="lg:hidden w-10 h-10 flex items-center justify-center rounded-lg bg-gray-100 hover:bg-gray-200 transition">
+                        <i class="fas fa-bars text-gray-700"></i>
+                    </button>
+                </div>
             </div>
             
-            <!-- Mobile menu -->
-            <div id="mobile-menu" class="md:hidden mt-4 hidden">
-                <div class="flex flex-col space-y-2">
-                    <a href="{{ url_for('index') }}" class="nav-link {% if request.endpoint == 'index' %}nav-link-active{% else %}nav-link-inactive{% endif %}">
+            <!-- منوی موبایل (اسلاید پایین) -->
+            <div id="mobileMenu" class="lg:hidden mt-4 hidden animate-slideDown">
+                <div class="bg-white rounded-xl shadow-lg p-3 space-y-1">
+                    <a href="{{ url_for('index') }}" class="flex items-center px-4 py-3 rounded-lg {% if request.endpoint == 'index' %}bg-blue-600 text-white{% else %}text-gray-700 hover:bg-blue-50{% endif %}">
+                        <i class="fas fa-home ml-3 w-6"></i>
                         خانه
                     </a>
-                    <a href="{{ url_for('events_list') }}" class="nav-link {% if request.endpoint == 'events_list' %}nav-link-active{% else %}nav-link-inactive{% endif %}">
+                    <a href="{{ url_for('events_list') }}" class="flex items-center px-4 py-3 rounded-lg {% if request.endpoint == 'events_list' %}bg-blue-600 text-white{% else %}text-gray-700 hover:bg-blue-50{% endif %}">
+                        <i class="fas fa-calendar-alt ml-3 w-6"></i>
                         رویدادها
                     </a>
-                    
-                    <!-- لینک حلقه‌های تلاوت در منوی موبایل -->
-                    <a href="{{ url_for('circles_list') }}" class="nav-link {% if request.endpoint == 'circles_list' %}nav-link-active{% else %}nav-link-inactive{% endif %}">
+                    <a href="{{ url_for('circles_list') }}" class="flex items-center px-4 py-3 rounded-lg {% if request.endpoint == 'circles_list' %}bg-blue-600 text-white{% else %}text-gray-700 hover:bg-blue-50{% endif %}">
+                        <i class="fas fa-users ml-3 w-6"></i>
                         حلقه‌های تلاوت
                     </a>
                     
                     {% if current_user.is_authenticated %}
-                        <a href="{{ url_for('ai_quran') }}" class="nav-link {% if request.endpoint == 'ai_quran' %}nav-link-active{% else %}nav-link-inactive{% endif %}">
+                        <a href="{{ url_for('ai_quran') }}" class="flex items-center px-4 py-3 rounded-lg {% if request.endpoint == 'ai_quran' %}bg-blue-600 text-white{% else %}text-gray-700 hover:bg-blue-50{% endif %}">
+                            <i class="fas fa-robot ml-3 w-6"></i>
                             سراج‌یار
                         </a>
                         
                         {% if current_user.role.value == 'admin' %}
-                            <a href="{{ url_for('admin_dashboard') }}" class="nav-link {% if request.endpoint == 'admin_dashboard' %}nav-link-active{% else %}nav-link-inactive{% endif %}">
+                            <a href="{{ url_for('admin_dashboard') }}" class="flex items-center px-4 py-3 rounded-lg {% if request.endpoint == 'admin_dashboard' %}bg-blue-600 text-white{% else %}text-gray-700 hover:bg-blue-50{% endif %}">
+                                <i class="fas fa-cog ml-3 w-6"></i>
                                 مدیریت
                             </a>
                         {% else %}
-                            <a href="{{ url_for('dashboard') }}" class="nav-link {% if request.endpoint == 'dashboard' %}nav-link-active{% else %}nav-link-inactive{% endif %}">
+                            <a href="{{ url_for('dashboard') }}" class="flex items-center px-4 py-3 rounded-lg {% if request.endpoint == 'dashboard' %}bg-blue-600 text-white{% else %}text-gray-700 hover:bg-blue-50{% endif %}">
+                                <i class="fas fa-tachometer-alt ml-3 w-6"></i>
                                 داشبورد
                             </a>
                         {% endif %}
                         
-                        <a href="{{ url_for('profile') }}" class="nav-link">
+                        <hr class="my-2 border-gray-100">
+                        
+                        <a href="{{ url_for('profile') }}" class="flex items-center px-4 py-3 rounded-lg text-gray-700 hover:bg-blue-50">
+                            <i class="fas fa-user-circle ml-3 w-6"></i>
                             پروفایل
                         </a>
-                        <a href="{{ url_for('notifications') }}" class="nav-link">
+                        <a href="{{ url_for('notifications') }}" class="flex items-center px-4 py-3 rounded-lg text-gray-700 hover:bg-blue-50">
+                            <i class="fas fa-bell ml-3 w-6"></i>
                             اعلان‌ها
+                            {% if unread_count %}
+                                <span class="bg-red-500 text-white text-xs rounded-full px-2 py-0.5 mr-auto">{{ unread_count }}</span>
+                            {% endif %}
                         </a>
-                        <a href="{{ url_for('logout') }}" class="nav-link text-red-600">
+                        <a href="{{ url_for('settings') }}" class="flex items-center px-4 py-3 rounded-lg text-gray-700 hover:bg-blue-50">
+                            <i class="fas fa-cog ml-3 w-6"></i>
+                            تنظیمات
+                        </a>
+                        
+                        <a href="{{ url_for('logout') }}" class="flex items-center px-4 py-3 rounded-lg text-red-600 hover:bg-red-50">
+                            <i class="fas fa-sign-out-alt ml-3 w-6"></i>
                             خروج
                         </a>
                     {% else %}
-                        <div class="flex space-x-3 space-x-reverse pt-2">
-                            <a href="{{ url_for('login') }}" class="btn btn-secondary flex-1 text-center">
+                        <div class="grid grid-cols-2 gap-2 pt-2">
+                            <a href="{{ url_for('login') }}" class="btn btn-secondary w-full">
+                                <i class="fas fa-sign-in-alt ml-2"></i>
                                 ورود
                             </a>
-                            <a href="{{ url_for('register') }}" class="btn btn-primary flex-1 text-center">
+                            <a href="{{ url_for('register') }}" class="btn btn-primary w-full">
+                                <i class="fas fa-user-plus ml-2"></i>
                                 ثبت‌نام
                             </a>
                         </div>
@@ -210,18 +366,21 @@
         {% if messages %}
             <div class="container mx-auto px-4 mt-4">
                 {% for category, message in messages %}
-                    <div class="alert alert-{{ category if category in ['success', 'error', 'warning', 'info'] else 'info' }} mb-3">
+                    <div class="alert alert-{{ category if category in ['success', 'error', 'warning', 'info'] else 'info' }} animate-slideDown">
                         <div class="flex items-center">
                             {% if category == 'success' %}
-                                <i class="fas fa-check-circle ml-3"></i>
+                                <i class="fas fa-check-circle ml-3 text-xl"></i>
                             {% elif category == 'error' %}
-                                <i class="fas fa-exclamation-circle ml-3"></i>
+                                <i class="fas fa-exclamation-circle ml-3 text-xl"></i>
                             {% elif category == 'warning' %}
-                                <i class="fas fa-exclamation-triangle ml-3"></i>
+                                <i class="fas fa-exclamation-triangle ml-3 text-xl"></i>
                             {% else %}
-                                <i class="fas fa-info-circle ml-3"></i>
+                                <i class="fas fa-info-circle ml-3 text-xl"></i>
                             {% endif %}
-                            <span>{{ message }}</span>
+                            <div class="flex-1">{{ message }}</div>
+                            <button onclick="this.parentElement.parentElement.remove()" class="mr-3 text-gray-400 hover:text-gray-600">
+                                <i class="fas fa-times"></i>
+                            </button>
                         </div>
                     </div>
                 {% endfor %}
@@ -230,30 +389,100 @@
     {% endwith %}
     
     <!-- Main Content -->
-    <main class="flex-grow container mx-auto px-4 py-6">
+    <main class="flex-grow container mx-auto px-4 py-4 sm:py-6 lg:py-8">
         {% block content %}{% endblock %}
     </main>
     
-    <!-- Footer -->
-    <footer class="bg-gray-800 text-white py-8 mt-12">
-        <div class="container mx-auto px-4">
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                <div>
-                    <div class="flex items-center space-x-3 space-x-reverse">
-                        <!-- Circular Image Logo with shadow -->
-                        <div class="w-10 h-10 rounded-full overflow-hidden flex-shrink-0 shadow-md border border-gray-200">
+    <!-- Footer ریسپانسیو -->
+    <footer class="bg-gradient-to-b from-gray-900 to-gray-950 text-white mt-12">
+        <div class="container mx-auto px-4 py-8 lg:py-12">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+                <!-- درباره ما -->
+                <div class="space-y-4">
+                    <div class="flex items-center gap-3">
+                        <div class="w-12 h-12 rounded-full overflow-hidden border-2 border-blue-400 shadow-lg">
                             <img src="{{ url_for('static', filename='logo/12.png') }}" alt="سِراج" class="w-full h-full object-cover">
                         </div>
                         <div>
-                            <h1 class="text-xl font-bold text-white">سِراج</h1>
-                            <p class="text-xs text-gray-400">پلتفرم فعالیت‌های قرآنی دانشگاهی</p>
+                            <h3 class="text-xl font-bold">سِراج</h3>
+                            <p class="text-xs text-gray-400">پلتفرم فعالیت‌های قرآنی</p>
                         </div>
                     </div>
+                    <p class="text-sm text-gray-300 leading-relaxed">
+                        بستری یکپارچه برای سازماندهی، مدیریت و توسعه برنامه‌های قرآنی در محیط دانشگاه با بهره‌گیری از فناوری‌های روز.
+                    </p>
+                    <div class="flex gap-3">
+                        <a href="#" class="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-blue-600 transition">
+                            <i class="fab fa-telegram-plane"></i>
+                        </a>
+                        <a href="#" class="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-blue-600 transition">
+                            <i class="fab fa-instagram"></i>
+                        </a>
+                        <a href="#" class="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-blue-600 transition">
+                            <i class="fab fa-twitter"></i>
+                        </a>
+                        <a href="#" class="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-blue-600 transition">
+                            <i class="fab fa-whatsapp"></i>
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- لینک‌های سریع -->
+                <div>
+                    <h4 class="text-lg font-bold mb-4 pb-2 border-b-2 border-blue-500 inline-block">دسترسی سریع</h4>
+                    <ul class="space-y-2">
+                        <li><a href="{{ url_for('index') }}" class="text-gray-300 hover:text-white hover:pr-2 transition-all"><i class="fas fa-chevron-left ml-2 text-xs"></i>خانه</a></li>
+                        <li><a href="{{ url_for('events_list') }}" class="text-gray-300 hover:text-white hover:pr-2 transition-all"><i class="fas fa-chevron-left ml-2 text-xs"></i>رویدادها</a></li>
+                        <li><a href="{{ url_for('circles_list') }}" class="text-gray-300 hover:text-white hover:pr-2 transition-all"><i class="fas fa-chevron-left ml-2 text-xs"></i>حلقه‌های تلاوت</a></li>
+                        <li><a href="{{ url_for('ai_quran') }}" class="text-gray-300 hover:text-white hover:pr-2 transition-all"><i class="fas fa-chevron-left ml-2 text-xs"></i>پرسش قرآنی</a></li>
+                    </ul>
+                </div>
+                
+                <!-- پشتیبانی -->
+                <div>
+                    <h4 class="text-lg font-bold mb-4 pb-2 border-b-2 border-blue-500 inline-block">پشتیبانی</h4>
+                    <ul class="space-y-3">
+                        <li class="flex items-center gap-2 text-gray-300">
+                            <i class="fas fa-phone-alt text-blue-400 w-5"></i>
+                            <span>۰۲۱-۱۲۳۴۵۶۷۸</span>
+                        </li>
+                        <li class="flex items-center gap-2 text-gray-300">
+                            <i class="fas fa-envelope text-blue-400 w-5"></i>
+                            <span>support@siraj.ir</span>
+                        </li>
+                        <li class="flex items-center gap-2 text-gray-300">
+                            <i class="fas fa-map-marker-alt text-blue-400 w-5"></i>
+                            <span>تهران، دانشگاه صنعتی شریف</span>
+                        </li>
+                        <li class="flex items-center gap-2 text-gray-300">
+                            <i class="fas fa-clock text-blue-400 w-5"></i>
+                            <span>شنبه تا پنجشنبه ۸ الی ۲۰</span>
+                        </li>
+                    </ul>
+                </div>
+                
+                <!-- خبرنامه -->
+                <div>
+                    <h4 class="text-lg font-bold mb-4 pb-2 border-b-2 border-blue-500 inline-block">خبرنامه</h4>
+                    <p class="text-sm text-gray-300 mb-4">با عضویت در خبرنامه، از آخرین رویدادها مطلع شوید.</p>
+                    <form class="flex flex-col gap-2">
+                        <input type="email" placeholder="ایمیل خود را وارد کنید" 
+                               class="px-4 py-3 bg-gray-800 text-white rounded-lg border border-gray-700 focus:border-blue-500 focus:outline-none">
+                        <button type="submit" class="btn btn-primary w-full">
+                            <i class="fas fa-paper-plane ml-2"></i>
+                            عضویت
+                        </button>
+                    </form>
                 </div>
             </div>
             
-            <div class="border-t border-gray-700 mt-8 pt-6 text-center text-gray-400 text-sm">
-                <p>تمام حقوق برای سامانه سِراج محفوظ است</p>
+            <div class="border-t border-gray-800 mt-8 pt-6 text-center">
+                <p class="text-sm text-gray-400">
+                    تمامی حقوق مادی و معنوی این سامانه برای <span class="text-blue-400 font-bold">سِراج</span> محفوظ است.
+                </p>
+                <p class="text-xs text-gray-500 mt-2">
+                    {{ now.strftime('%Y') }} ©
+                </p>
             </div>
         </div>
     </footer>
@@ -274,301 +503,168 @@
             measurementId: "G-KN3B5SW162"
         };
 
-        // کلید VAPID - باید از Firebase Console گرفته شود
-        const vapidKey = "YOUR_VAPID_KEY_HERE"; // اینو عوض کن با کلید واقعی از Firebase
+        const vapidKey = "YOUR_VAPID_KEY_HERE"; // کلید واقعی از Firebase
 
         // مقداردهی اولیه Firebase
         const app = initializeApp(firebaseConfig);
         const messaging = getMessaging(app);
 
         // ================================================
-        // درخواست اجازه و دریافت توکن
+        // توابع کاربردی
         // ================================================
+        
+        // مدیریت منوی موبایل
+        const mobileMenuToggle = document.getElementById('mobileMenuToggle');
+        const mobileMenu = document.getElementById('mobileMenu');
+        
+        if (mobileMenuToggle && mobileMenu) {
+            mobileMenuToggle.addEventListener('click', () => {
+                mobileMenu.classList.toggle('hidden');
+            });
+            
+            // بستن منو با کلیک روی لینک‌ها
+            mobileMenu.querySelectorAll('a').forEach(link => {
+                link.addEventListener('click', () => {
+                    mobileMenu.classList.add('hidden');
+                });
+            });
+        }
+        
+        // تشخیص وضعیت آنلاین/آفلاین
+        function updateOnlineStatus() {
+            if (navigator.onLine) {
+                document.body.classList.remove('offline');
+                hideOfflineNotification();
+            } else {
+                document.body.classList.add('offline');
+                showOfflineNotification();
+            }
+        }
+        
+        function showOfflineNotification() {
+            if (!document.getElementById('offline-notification')) {
+                const notification = document.createElement('div');
+                notification.id = 'offline-notification';
+                notification.className = 'offline-indicator animate-slideDown';
+                notification.innerHTML = `
+                    <div class="flex items-center gap-2">
+                        <i class="fas fa-wifi-slash"></i>
+                        <span>شما آفلاین هستید</span>
+                        <button onclick="this.parentElement.parentElement.remove()" class="mr-3 text-white hover:text-yellow-100">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                `;
+                document.body.appendChild(notification);
+            }
+        }
+        
+        function hideOfflineNotification() {
+            const notification = document.getElementById('offline-notification');
+            if (notification) notification.remove();
+        }
+        
+        window.addEventListener('online', updateOnlineStatus);
+        window.addEventListener('offline', updateOnlineStatus);
+        updateOnlineStatus();
+        
+        // درخواست اجازه نوتیفیکیشن
         async function requestPermissionAndToken() {
             try {
-                // بررسی پشتیبانی مرورگر از نوتیفیکیشن
                 if (!('Notification' in window)) {
-                    console.log('❌ این مرورگر از نوتیفیکیشن پشتیبانی نمی‌کند');
                     alert('مرورگر شما از نوتیفیکیشن پشتیبانی نمی‌کند');
                     return;
                 }
 
-                // بررسی پشتیبانی از Service Worker
                 if (!('serviceWorker' in navigator)) {
-                    console.log('❌ این مرورگر از Service Worker پشتیبانی نمی‌کند');
-                    alert('مرورگر شما از نوتیفیکیشن پشتیبانی نمی‌کند');
+                    alert('مرورگر شما از Service Worker پشتیبانی نمی‌کند');
                     return;
                 }
 
-                // اگر قبلاً اجازه داده شده، نیازی به درخواست مجدد نیست
                 if (Notification.permission === 'denied') {
-                    alert('شما قبلاً اجازه نوتیفیکیشن را رد کرده‌اید. برای فعال‌سازی، به تنظیمات مرورگر مراجعه کنید.');
+                    alert('شما قبلاً اجازه نوتیفیکیشن را رد کرده‌اید');
                     return;
                 }
 
-                if (Notification.permission === 'granted') {
-                    console.log('✅ اجازه نوتیفیکیشن قبلاً داده شده است');
-                } else {
+                if (Notification.permission !== 'granted') {
                     const permission = await Notification.requestPermission();
-                    if (permission !== "granted") {
-                        console.log("❌ کاربر اجازه نوتیفیکیشن را نداد");
-                        return;
-                    }
-                    console.log("✅ اجازه نوتیفیکیشن داده شد");
+                    if (permission !== "granted") return;
                 }
 
-                // منتظر می‌مانیم تا Service Worker آماده شود
                 const registration = await navigator.serviceWorker.ready;
-
-                // دریافت توکن FCM
                 const currentToken = await getToken(messaging, {
                     vapidKey: vapidKey,
                     serviceWorkerRegistration: registration
                 });
 
                 if (currentToken) {
-                    console.log("🔥 توکن FCM دریافت شد:", currentToken);
-                    
-                    // ذخیره توکن در localStorage
                     localStorage.setItem('fcm_token', currentToken);
-                    
-                    // ارسال توکن به سرور Flask
                     await sendTokenToServer(currentToken);
-                    
-                    // نمایش پیام موفقیت
-                    showSuccessMessage('✅ اعلان‌ها با موفقیت فعال شدند');
-                } else {
-                    console.log("❌ توکن دریافت نشد");
+                    showSuccessMessage('✅ اعلان‌ها فعال شدند');
                 }
-
             } catch (error) {
-                console.log("❌ خطا در دریافت توکن:", error);
+                console.error('خطا:', error);
             }
         }
-
-        // ================================================
+        
         // ارسال توکن به سرور
-        // ================================================
         async function sendTokenToServer(token) {
             try {
                 const response = await fetch('/save-fcm-token', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ token: token })
                 });
-
-                const data = await response.json();
                 
-                if (response.ok) {
-                    console.log('✅ توکن با موفقیت به سرور ارسال شد:', data);
-                } else {
-                    console.error('❌ خطا در ارسال توکن به سرور:', data.error);
+                if (!response.ok) {
+                    throw new Error('خطا در ارسال توکن');
                 }
             } catch (error) {
-                console.error('❌ خطا در ارتباط با سرور:', error);
+                console.error('خطا:', error);
             }
         }
-
-        // ================================================
+        
         // نمایش پیام موفقیت
-        // ================================================
         function showSuccessMessage(message) {
             const notification = document.createElement('div');
-            notification.className = 'fixed bottom-4 right-4 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg z-50 flex items-center';
+            notification.className = 'fixed bottom-4 right-4 bg-green-600 text-white px-4 py-3 rounded-lg shadow-lg z-50 flex items-center gap-2 animate-slideDown';
             notification.innerHTML = `
-                <i class="fas fa-check-circle ml-2"></i>
+                <i class="fas fa-check-circle"></i>
                 <span>${message}</span>
-                <button onclick="this.parentElement.remove()" class="mr-3 text-white hover:text-green-100">
+                <button onclick="this.parentElement.remove()" class="mr-3 text-white hover:text-green-200">
                     <i class="fas fa-times"></i>
                 </button>
             `;
             document.body.appendChild(notification);
             
-            setTimeout(() => {
-                if (notification.parentElement) {
-                    notification.remove();
-                }
-            }, 5000);
+            setTimeout(() => notification.remove(), 5000);
         }
-
-        // ================================================
+        
         // دریافت نوتیفیکیشن در حالت foreground
-        // ================================================
         onMessage(messaging, (payload) => {
-            console.log("📩 پیام جدید دریافت شد:", payload);
-
             if (Notification.permission === "granted") {
-                const title = payload.notification?.title || 'پیام جدید از سراج';
-                const body = payload.notification?.body || 'یک پیام جدید دریافت کردید';
-                
-                new Notification(title, {
-                    body: body,
-                    icon: "/static/logo/192.png",
-                    badge: "/static/logo/96.png"
+                new Notification(payload.notification?.title || 'پیام جدید', {
+                    body: payload.notification?.body || 'یک پیام جدید دریافت کردید',
+                    icon: "/static/logo/192.png"
                 });
             }
         });
-
-        // ================================================
-        // بررسی وضعیت کاربر
-        // ================================================
-        async function checkUserAndRequestToken() {
-            try {
-                const response = await fetch('/check-auth-status');
-                const data = await response.json();
-                
-                if (data.is_authenticated) {
-                    console.log('✅ کاربر لاگین است');
-                    // می‌تونیم توکن رو بگیریم، اما صبر می‌کنیم کاربر روی دکمه کلیک کنه
-                    // یا اگه خواستیم خودکار، این خط رو فعال کنیم:
-                    // setTimeout(() => { requestPermissionAndToken(); }, 3000);
-                } else {
-                    console.log('ℹ️ کاربر لاگین نیست');
-                }
-            } catch (error) {
-                console.log('❌ خطا در بررسی وضعیت کاربر:', error);
-            }
-        }
-
-        // ================================================
+        
         // ثبت Service Worker
-        // ================================================
         if ('serviceWorker' in navigator) {
-            window.addEventListener('load', function() {
-                navigator.serviceWorker.register('/static/service-worker.js', { 
-                    scope: '/' 
+            navigator.serviceWorker.register('/static/service-worker.js', { scope: '/' })
+                .then(registration => {
+                    console.log('✅ Service Worker ثبت شد');
                 })
-                .then(function(registration) {
-                    console.log('✅ Service Worker ثبت شد. Scope:', registration.scope);
-
-                    // بررسی آپدیت‌ها
-                    registration.addEventListener('updatefound', function() {
-                        const newWorker = registration.installing;
-                        console.log('🔄 نسخه جدید Service Worker در حال نصب...');
-                        
-                        newWorker.addEventListener('statechange', function() {
-                            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                                console.log('🔄 نسخه جدید آماده است');
-                                showUpdateNotification();
-                            }
-                        });
-                    });
-
-                    // بررسی وضعیت کاربر
-                    checkUserAndRequestToken();
-
-                }).catch(function(error) {
-                    console.log('❌ خطا در ثبت Service Worker:', error);
+                .catch(error => {
+                    console.error('❌ خطا:', error);
                 });
-
-                // بررسی وضعیت آنلاین/آفلاین
-                function updateOnlineStatus() {
-                    if (navigator.onLine) {
-                        document.body.classList.remove('offline');
-                        console.log('✅ آنلاین');
-                        
-                        // اگر آنلاین شدیم و توکن قبلی وجود دارد، دوباره ارسالش کن
-                        const savedToken = localStorage.getItem('fcm_token');
-                        if (savedToken) {
-                            sendTokenToServer(savedToken);
-                        }
-                    } else {
-                        document.body.classList.add('offline');
-                        console.log('⚠️ آفلاین');
-                        showOfflineNotification();
-                    }
-                }
-                
-                window.addEventListener('online', updateOnlineStatus);
-                window.addEventListener('offline', updateOnlineStatus);
-                updateOnlineStatus();
-            });
         }
-
-        // ================================================
-        // دکمه فعال‌سازی دستی نوتیفیکیشن
-        // ================================================
+        
+        // دکمه فعال‌سازی نوتیفیکیشن
         const enableBtn = document.getElementById('enable-notifications-btn');
         if (enableBtn) {
-            enableBtn.addEventListener('click', function() {
-                requestPermissionAndToken();
-            });
-        }
-
-        // ================================================
-        // نمایش نوتیفیکیشن آفلاین
-        // ================================================
-        function showOfflineNotification() {
-            // اگر نوتیفیکیشن قبلی وجود دارد، حذفش کن
-            const existingNotification = document.getElementById('offline-notification');
-            if (existingNotification) {
-                existingNotification.remove();
-            }
-
-            const notification = document.createElement('div');
-            notification.id = 'offline-notification';
-            notification.className = 'fixed bottom-4 right-4 bg-yellow-500 text-white px-4 py-2 rounded-lg shadow-lg z-50 flex items-center';
-            notification.innerHTML = `
-                <i class="fas fa-exclamation-triangle ml-2"></i>
-                <span>شما آفلاین هستید. برخی امکانات محدود شده‌اند.</span>
-                <button onclick="this.parentElement.remove()" class="mr-3 text-white hover:text-yellow-100">
-                    <i class="fas fa-times"></i>
-                </button>
-            `;
-            document.body.appendChild(notification);
-            
-            setTimeout(() => {
-                const notif = document.getElementById('offline-notification');
-                if (notif) notif.remove();
-            }, 5000);
-        }
-
-        // ================================================
-        // نمایش نوتیفیکیشن آپدیت
-        // ================================================
-        function showUpdateNotification() {
-            const notification = document.createElement('div');
-            notification.className = 'fixed bottom-4 left-4 bg-blue-600 text-white px-4 py-3 rounded-lg shadow-lg z-50 flex items-center';
-            notification.innerHTML = `
-                <i class="fas fa-sync-alt ml-3 animate-spin"></i>
-                <span class="flex-grow">نسخه جدیدی از برنامه منتشر شده است.</span>
-                <button onclick="updateApp()" class="mr-3 bg-white text-blue-600 px-3 py-1 rounded-lg hover:bg-blue-50 transition">
-                    بروزرسانی
-                </button>
-                <button onclick="this.parentElement.remove()" class="mr-2 text-white hover:text-blue-200">
-                    <i class="fas fa-times"></i>
-                </button>
-            `;
-            document.body.appendChild(notification);
-        }
-
-        // ================================================
-        // بروزرسانی برنامه
-        // ================================================
-        window.updateApp = function() {
-            if ('serviceWorker' in navigator) {
-                navigator.serviceWorker.ready.then(registration => {
-                    if (registration.waiting) {
-                        registration.waiting.postMessage('skipWaiting');
-                        window.location.reload();
-                    }
-                });
-            }
-        };
-
-        // ================================================
-        // منوی موبایل
-        // ================================================
-        const mobileMenuBtn = document.getElementById('mobile-menu-button');
-        if (mobileMenuBtn) {
-            mobileMenuBtn.addEventListener('click', function() {
-                const menu = document.getElementById('mobile-menu');
-                if (menu) {
-                    menu.classList.toggle('hidden');
-                }
-            });
+            enableBtn.addEventListener('click', requestPermissionAndToken);
         }
     </script>
     

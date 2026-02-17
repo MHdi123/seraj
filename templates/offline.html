@@ -1,55 +1,103 @@
-<!-- templates/offline.html -->
 {% extends "base.html" %}
 
 {% block title %}آفلاین - سِراج{% endblock %}
 
+{% block head %}
+<style>
+    @keyframes pulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+    }
+    
+    .offline-icon {
+        animation: pulse 2s ease-in-out infinite;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="min-h-[60vh] flex items-center justify-center">
-    <div class="text-center max-w-md mx-auto p-8">
-        <div class="w-24 h-24 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-6">
-            <i class="fas fa-wifi-slash text-yellow-600 text-4xl"></i>
+<div class="min-h-[70vh] flex items-center justify-center py-8">
+    <div class="max-w-md w-full mx-auto text-center px-4">
+        
+        <!-- آیکون آفلاین -->
+        <div class="offline-icon mb-6">
+            <div class="w-20 h-20 sm:w-24 sm:h-24 bg-gradient-to-br from-yellow-500 to-yellow-600 rounded-full flex items-center justify-center mx-auto shadow-2xl">
+                <i class="fas fa-wifi-slash text-white text-3xl sm:text-4xl"></i>
+            </div>
         </div>
         
-        <h1 class="text-3xl font-bold mb-4">شما آفلاین هستید!</h1>
+        <h1 class="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 mb-3">
+            شما آفلاین هستید!
+        </h1>
         
-        <p class="text-gray-600 mb-8">
+        <p class="text-sm sm:text-base text-gray-600 mb-6">
             ارتباط اینترنت شما قطع شده است. 
             نگران نباشید، می‌توانید همچنان از بخش‌های قبلی بازدید کنید.
         </p>
         
-        <div class="space-y-4">
-            <h2 class="font-bold text-lg">بخش‌های قابل دسترسی در حالت آفلاین:</h2>
+        <!-- بخش‌های قابل دسترسی آفلاین -->
+        <div class="bg-white rounded-xl shadow-lg p-4 sm:p-5 mb-6">
+            <h2 class="font-bold text-sm sm:text-base mb-3 flex items-center">
+                <i class="fas fa-check-circle text-green-600 ml-2"></i>
+                بخش‌های قابل دسترسی در حالت آفلاین:
+            </h2>
             
-            <div class="grid grid-cols-2 gap-4">
-                <a href="/" class="p-4 bg-blue-50 rounded-lg hover:bg-blue-100 transition">
-                    <i class="fas fa-home text-blue-600 text-2xl mb-2"></i>
-                    <p class="text-sm">خانه</p>
+            <div class="grid grid-cols-2 gap-2">
+                <a href="/" class="p-3 bg-gray-50 rounded-lg hover:bg-blue-50 transition group">
+                    <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-2 group-hover:scale-110 transition">
+                        <i class="fas fa-home text-blue-600 text-xs"></i>
+                    </div>
+                    <span class="text-xs font-medium">خانه</span>
                 </a>
                 
-                <a href="/events" class="p-4 bg-green-50 rounded-lg hover:bg-green-100 transition">
-                    <i class="fas fa-calendar text-green-600 text-2xl mb-2"></i>
-                    <p class="text-sm">رویدادها</p>
+                <a href="{{ url_for('events_list') }}" class="p-3 bg-gray-50 rounded-lg hover:bg-green-50 transition group">
+                    <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-2 group-hover:scale-110 transition">
+                        <i class="fas fa-calendar text-green-600 text-xs"></i>
+                    </div>
+                    <span class="text-xs font-medium">رویدادها</span>
                 </a>
                 
-                <a href="/circles" class="p-4 bg-purple-50 rounded-lg hover:bg-purple-100 transition">
-                    <i class="fas fa-users text-purple-600 text-2xl mb-2"></i>
-                    <p class="text-sm">حلقه‌ها</p>
+                <a href="{{ url_for('circles_list') }}" class="p-3 bg-gray-50 rounded-lg hover:bg-purple-50 transition group">
+                    <div class="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-2 group-hover:scale-110 transition">
+                        <i class="fas fa-users text-purple-600 text-xs"></i>
+                    </div>
+                    <span class="text-xs font-medium">حلقه‌ها</span>
                 </a>
                 
-                <a href="/about" class="p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition">
-                    <i class="fas fa-info-circle text-gray-600 text-2xl mb-2"></i>
-                    <p class="text-sm">درباره ما</p>
+                <a href="{{ url_for('about') }}" class="p-3 bg-gray-50 rounded-lg hover:bg-yellow-50 transition group">
+                    <div class="w-8 h-8 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-2 group-hover:scale-110 transition">
+                        <i class="fas fa-info-circle text-yellow-600 text-xs"></i>
+                    </div>
+                    <span class="text-xs font-medium">درباره ما</span>
                 </a>
             </div>
         </div>
         
-        <div class="mt-8">
-            <button onclick="window.location.reload()" 
-                    class="btn btn-primary">
-                <i class="fas fa-sync-alt ml-2"></i>
-                تلاش مجدد
-            </button>
+        <!-- نکته -->
+        <div class="bg-blue-50 border-r-4 border-blue-500 rounded-lg p-3 text-right mb-6">
+            <div class="flex items-start gap-2">
+                <i class="fas fa-lightbulb text-blue-600 text-sm mt-0.5"></i>
+                <div class="text-xs sm:text-sm text-gray-700">
+                    <span class="font-bold">نکته:</span> پس از اتصال به اینترنت، اطلاعات به‌طور خودکار بروزرسانی می‌شوند.
+                </div>
+            </div>
         </div>
+        
+        <!-- دکمه تلاش مجدد -->
+        <button onclick="window.location.reload()" 
+                class="btn btn-primary px-6 py-3 sm:px-8 sm:py-4 text-sm sm:text-base w-full sm:w-auto">
+            <i class="fas fa-sync-alt ml-2 fa-spin"></i>
+            تلاش مجدد برای اتصال
+        </button>
     </div>
 </div>
+
+<script>
+// بررسی خودکار اتصال اینترنت
+setInterval(() => {
+    if (navigator.onLine) {
+        window.location.reload();
+    }
+}, 5000);
+</script>
 {% endblock %}

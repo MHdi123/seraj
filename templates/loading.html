@@ -2,7 +2,7 @@
 <html lang="fa" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
     <title>در حال بارگذاری - سِراج</title>
     
     <!-- Tailwind CSS -->
@@ -15,31 +15,23 @@
     <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazir-font@v30.1.0/dist/font-face.css" rel="stylesheet">
     
     <style>
-        :root {
-            --primary: #225bbe;
-            --primary-dark: #1a478e;
-            --secondary: #6b46c1;
-            --accent: #0ea5e9;
-        }
-        
-        body {
+        * {
             font-family: 'Vazir', 'Tahoma', sans-serif;
         }
         
         @keyframes float {
             0%, 100% { transform: translateY(0px) rotate(0deg); }
-            50% { transform: translateY(-20px) rotate(2deg); }
+            50% { transform: translateY(-15px) rotate(2deg); }
         }
         
-        @keyframes pulse-slow {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.7; }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.7; transform: scale(1.05); }
         }
         
-        @keyframes shine {
-            0% { left: -100%; }
-            20% { left: 120%; }
-            100% { left: 120%; }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
         
         @keyframes shimmer {
@@ -47,63 +39,25 @@
             100% { background-position: 1000px 0; }
         }
         
-        @keyframes scale {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-        }
-        
-        @keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-        
         .animate-float {
             animation: float 3s ease-in-out infinite;
         }
         
         .animate-pulse-slow {
-            animation: pulse-slow 2s ease-in-out infinite;
-        }
-        
-        .animate-scale {
-            animation: scale 2s ease-in-out infinite;
+            animation: pulse 2s ease-in-out infinite;
         }
         
         .animate-slideIn {
             animation: slideIn 0.5s ease-out;
         }
         
-        .progress-shine::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 50%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent);
-            animation: shine 2s infinite;
-        }
-        
-        .shimmer-effect {
-            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
-            background-size: 1000px 100%;
-            animation: shimmer 2s infinite;
-        }
-        
         .dot-floating {
             display: inline-block;
-            width: 14px;
-            height: 14px;
+            width: 12px;
+            height: 12px;
             border-radius: 50%;
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            background: linear-gradient(135deg, #2563eb, #7c3aed);
             animation: float 1.5s ease-in-out infinite;
-            box-shadow: 0 4px 6px rgba(37, 99, 235, 0.2);
         }
         
         .dot-floating:nth-child(2) { animation-delay: 0.2s; }
@@ -111,145 +65,93 @@
         .dot-floating:nth-child(4) { animation-delay: 0.6s; }
         .dot-floating:nth-child(5) { animation-delay: 0.8s; }
         
-        .quran-verse {
-            background: linear-gradient(145deg, #ffffff, #f8fafc);
-            box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.1);
-            transition: all 0.3s ease;
-        }
-        
-        .quran-verse:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 20px 40px -15px rgba(34, 91, 190, 0.2);
-        }
-        
         .progress-bar {
-            background: linear-gradient(90deg, 
-                var(--primary) 0%, 
-                #3b82f6 50%, 
-                var(--secondary) 100%);
+            background: linear-gradient(90deg, #2563eb, #7c3aed, #2563eb);
             background-size: 200% 100%;
             animation: shimmer 3s infinite;
         }
         
-        .loading-tip {
-            border-right: 4px solid var(--primary);
-            transition: all 0.3s ease;
+        @media (max-width: 640px) {
+            .loading-logo {
+                width: 80px;
+                height: 80px;
+            }
+            .loading-title {
+                font-size: 2rem;
+            }
         }
-        
-        .loading-tip:hover {
-            background: linear-gradient(90deg, #f8fafc, #ffffff);
-            transform: translateX(-2px);
-        }
-        
-        .moon-star {
-            position: relative;
-            display: inline-block;
-        }
-        
-        .star {
-            position: absolute;
-            color: gold;
-            font-size: 12px;
-            animation: pulse-slow 2s infinite;
-        }
-        
-        .star-1 { top: -10px; right: -5px; animation-delay: 0s; }
-        .star-2 { top: -5px; left: -10px; animation-delay: 0.4s; }
-        .star-3 { bottom: -5px; right: 0px; animation-delay: 0.8s; }
     </style>
 </head>
 <body class="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 min-h-screen flex items-center justify-center p-4">
     
     <div class="max-w-3xl w-full animate-slideIn">
         <!-- کارت اصلی -->
-        <div class="bg-white rounded-4xl shadow-2xl p-8 md:p-12 relative overflow-hidden">
-            <!-- عناصر تزئینی پیشرفته -->
-            <div class="absolute top-0 left-0 w-80 h-80 bg-gradient-to-br from-blue-400 to-indigo-600 rounded-full opacity-5 -translate-x-1/2 -translate-y-1/2"></div>
-            <div class="absolute bottom-0 right-0 w-80 h-80 bg-gradient-to-br from-purple-400 to-pink-600 rounded-full opacity-5 translate-x-1/2 translate-y-1/2"></div>
-            <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full opacity-5 blur-3xl"></div>
+        <div class="bg-white rounded-3xl sm:rounded-4xl shadow-2xl p-6 sm:p-8 lg:p-12 relative overflow-hidden">
             
-            <!-- الگوهای تزئینی -->
-            <div class="absolute top-10 right-10 text-gray-100">
-                <i class="fas fa-star text-2xl"></i>
-                <i class="fas fa-star text-xl mr-2"></i>
-                <i class="fas fa-star text-lg mr-2"></i>
-            </div>
-            
-            <div class="absolute bottom-10 left-10 text-gray-100">
-                <i class="fas fa-moon text-3xl"></i>
-                <i class="fas fa-star text-sm absolute top-0 right-0"></i>
-            </div>
+            <!-- عناصر تزئینی -->
+            <div class="absolute top-0 left-0 w-64 h-64 bg-gradient-to-br from-blue-400 to-indigo-600 rounded-full opacity-5 -translate-x-1/2 -translate-y-1/2"></div>
+            <div class="absolute bottom-0 right-0 w-64 h-64 bg-gradient-to-br from-purple-400 to-pink-600 rounded-full opacity-5 translate-x-1/2 translate-y-1/2"></div>
             
             <!-- محتوای اصلی -->
             <div class="relative z-10 text-center">
                 
-                <!-- لوگو با انیمیشن سه‌بعدی -->
-                <div class="animate-float mb-6">
+                <!-- لوگو با انیمیشن -->
+                <div class="animate-float mb-4 sm:mb-6">
                     <div class="relative inline-block">
-                        <div class="w-32 h-32 bg-gradient-to-br from-blue-700 via-blue-800 to-indigo-900 rounded-3xl flex items-center justify-center mx-auto shadow-2xl transform rotate-6 hover:rotate-0 transition-all duration-700">
-                            <span class="text-white font-bold text-7xl drop-shadow-2xl">س</span>
+                        <div class="loading-logo w-20 h-20 sm:w-24 sm:h-24 lg:w-32 lg:h-32 bg-gradient-to-br from-blue-700 via-blue-800 to-indigo-900 rounded-2xl sm:rounded-3xl flex items-center justify-center mx-auto shadow-2xl transform rotate-6 hover:rotate-0 transition-all duration-700">
+                            <span class="text-white font-bold text-4xl sm:text-5xl lg:text-6xl drop-shadow-2xl">س</span>
                         </div>
-                        <div class="absolute -bottom-2 -left-2 w-10 h-10 bg-gradient-to-br from-yellow-400 to-yellow-600 rounded-full flex items-center justify-center shadow-lg animate-pulse">
-                            <i class="fas fa-robot text-white text-sm"></i>
+                        <div class="absolute -bottom-2 -left-2 w-6 h-6 sm:w-8 sm:h-8 bg-gradient-to-br from-yellow-400 to-yellow-600 rounded-full flex items-center justify-center shadow-lg animate-pulse">
+                            <i class="fas fa-robot text-white text-2xs sm:text-xs"></i>
                         </div>
-                        <div class="absolute -top-2 -right-2 w-10 h-10 bg-gradient-to-br from-green-400 to-teal-600 rounded-full flex items-center justify-center shadow-lg animate-bounce">
-                            <i class="fas fa-quran text-white text-sm"></i>
+                        <div class="absolute -top-2 -right-2 w-6 h-6 sm:w-8 sm:h-8 bg-gradient-to-br from-green-400 to-teal-600 rounded-full flex items-center justify-center shadow-lg animate-bounce">
+                            <i class="fas fa-quran text-white text-2xs sm:text-xs"></i>
                         </div>
                     </div>
                 </div>
-                <!-- عنوان با زیرنویس -->
-                <h1 class="text-5xl md:text-6xl font-bold text-gray-800 mb-2 tracking-tight">
+                
+                <!-- عنوان -->
+                <h1 class="loading-title text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-800 mb-2">
                     سِراج
                 </h1>
-                <p class="text-gray-600 text-lg mb-6 border-b-2 border-dashed border-gray-200 pb-4 inline-block px-10">
+                <p class="text-sm sm:text-base text-gray-600 mb-4 sm:mb-6 border-b-2 border-dashed border-gray-200 pb-3 inline-block px-4 sm:px-8">
                     <i class="fas fa-lightbulb text-yellow-500 ml-2"></i>
                     چراغ هدایت دانشگاهیان
                 </p>
                 
-                <!-- آیه قرآن با طراحی خاص -->
-                <div class="quran-verse bg-white rounded-3xl p-8 mb-8 border border-blue-100/50 relative overflow-hidden">
-                    <div class="absolute top-0 right-0 w-20 h-20 bg-blue-50 rounded-full -mr-6 -mt-6"></div>
-                    <div class="absolute bottom-0 left-0 w-16 h-16 bg-green-50 rounded-full -ml-4 -mb-4"></div>
-                    
-                    <div class="relative">
-                        <i class="fas fa-quote-right absolute -top-3 -right-3 text-blue-200 text-4xl"></i>
-                        <i class="fas fa-quote-left absolute -bottom-3 -left-3 text-blue-200 text-4xl"></i>
-                        
-                        <p class="text-2xl md:text-3xl text-gray-800 mb-4 font-arabic leading-loose px-4">
-                            «إِنَّ هَٰذَا الْقُرْآنَ يَهْدِي لِلَّتِي هِيَ أَقْوَمُ»
-                        </p>
-                        <p class="text-gray-700 text-base bg-gradient-to-l from-blue-50 to-indigo-50 rounded-lg p-4 backdrop-blur-sm border border-blue-100">
-                            همانا این قرآن به استوارترین راه هدایت می‌کند
-                        </p>
-                        <p class="text-xs text-gray-500 mt-4">
-                            <span class="bg-blue-100 px-4 py-1.5 rounded-full text-blue-700">
-                                سوره اسراء، آیه ۹
-                            </span>
-                        </p>
-                    </div>
+                <!-- آیه قرآن (ریسپانسیو) -->
+                <div class="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl p-4 sm:p-6 mb-6">
+                    <p class="text-base sm:text-lg lg:text-xl text-gray-800 mb-3 font-arabic leading-loose">
+                        «إِنَّ هَٰذَا الْقُرْآنَ يَهْدِي لِلَّتِي هِيَ أَقْوَمُ»
+                    </p>
+                    <p class="text-xs sm:text-sm text-gray-600 bg-white/80 rounded-lg p-2 sm:p-3">
+                        همانا این قرآن به استوارترین راه هدایت می‌کند
+                    </p>
+                    <p class="text-2xs sm:text-xs text-gray-500 mt-2">
+                        سوره اسراء، آیه ۹
+                    </p>
                 </div>
                 
-                <!-- انیمیشن لودینگ پیشرفته -->
-                <div class="flex flex-col items-center justify-center mb-8">
-                    <div class="flex justify-center items-center space-x-3 space-x-reverse mb-4">
+                <!-- انیمیشن لودینگ -->
+                <div class="flex flex-col items-center mb-4 sm:mb-6">
+                    <div class="flex justify-center items-center gap-2 sm:gap-3 mb-3">
                         <div class="dot-floating"></div>
                         <div class="dot-floating"></div>
                         <div class="dot-floating"></div>
                         <div class="dot-floating"></div>
                         <div class="dot-floating"></div>
-                        <span class="text-gray-700 mr-4 text-lg font-medium animate-pulse-slow">
+                        <span class="text-sm sm:text-base text-gray-700 mr-2 font-medium animate-pulse">
                             در حال بارگذاری
                         </span>
                     </div>
                     
-                    <!-- نوار پیشرفت با درصد -->
-                    <div class="w-full max-w-md relative">
-                        <div class="relative progress-shine w-full h-4 bg-gray-100 rounded-full mb-2 overflow-hidden">
-                            <div id="progress-bar" class="progress-bar h-full rounded-full transition-all duration-500 ease-out shadow-lg" 
-                                 style="width: 0%;">
-                            </div>
+                    <!-- نوار پیشرفت -->
+                    <div class="w-full max-w-md">
+                        <div class="relative w-full h-3 sm:h-4 bg-gray-100 rounded-full mb-2 overflow-hidden">
+                            <div id="progress-bar" class="progress-bar h-full rounded-full transition-all duration-500 ease-out" 
+                                 style="width: 0%;"></div>
                         </div>
-                        <div class="flex justify-between text-xs text-gray-500">
+                        <div class="flex justify-between text-2xs sm:text-xs text-gray-500">
                             <span>شروع</span>
                             <span id="progress-percent" class="font-bold text-blue-700">۰٪</span>
                             <span>کامل</span>
@@ -257,201 +159,119 @@
                     </div>
                 </div>
                 
-                <!-- پیام‌های متغیر با کارت -->
-                <div id="loading-message" class="text-gray-600 min-h-[80px] bg-gradient-to-l from-blue-50 to-indigo-50 rounded-xl p-4 mb-6 border border-blue-200/50 loading-tip">
-                    <div class="flex items-center">
-                        <div class="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center ml-3 flex-shrink-0">
-                            <i class="fas fa-info text-white text-sm"></i>
+                <!-- پیام‌های متغیر -->
+                <div id="loading-message" class="min-h-[60px] sm:min-h-[80px] bg-gradient-to-l from-blue-50 to-indigo-50 rounded-xl p-3 sm:p-4 mb-4 border border-blue-200">
+                    <div class="flex items-center gap-2 sm:gap-3">
+                        <div class="w-6 h-6 sm:w-8 sm:h-8 bg-blue-600 rounded-full flex items-center justify-center flex-shrink-0 animate-pulse">
+                            <i class="fas fa-info text-white text-2xs sm:text-xs"></i>
                         </div>
                         <div class="text-right">
-                            <p class="font-medium text-gray-800">در حال آماده‌سازی سامانه سِراج...</p>
-                            <p class="text-xs text-gray-500 mt-1">لطفاً چند لحظه صبر کنید</p>
+                            <p class="font-medium text-xs sm:text-sm text-gray-800">در حال آماده‌سازی سامانه...</p>
+                            <p class="text-2xs sm:text-xs text-gray-500 mt-0.5">لطفاً چند لحظه صبر کنید</p>
                         </div>
                     </div>
                 </div>
                 
-                <!-- نکات قرآنی متغیر -->
-                <div id="quran-tip" class="bg-white rounded-xl p-3 mb-6 border border-gray-100">
-                    <p class="text-sm text-gray-600">
-                        <i class="fas fa-lightbulb text-yellow-500 ml-2"></i>
-                        <span id="tip-text">نکته قرآنی امروز: سوره یس قلب قرآن است</span>
-                    </p>
+                <!-- نکات قرآنی -->
+                <div id="quran-tip" class="text-xs sm:text-sm text-gray-600 bg-white rounded-lg p-2 border border-gray-100 mb-4">
+                    <i class="fas fa-lightbulb text-yellow-500 ml-2"></i>
+                    <span id="tip-text">نکته قرآنی: سوره یس قلب قرآن است</span>
                 </div>
                 
-                <!-- وضعیت و نسخه -->
-                <div class="mt-6 pt-4 border-t border-gray-100">
-                    <div class="flex flex-wrap justify-center items-center gap-4 text-xs text-gray-500">
-                        <span class="flex items-center bg-gray-50 px-3 py-1.5 rounded-full">
-                            <i class="fas fa-shield-alt text-green-600 ml-1"></i>
-                            اتصال امن
-                        </span>
-                        <span class="flex items-center bg-gray-50 px-3 py-1.5 rounded-full">
-                            <i class="fas fa-database text-blue-600 ml-1"></i>
-                            نسخه ۲.۰.۱
-                        </span>
-                        <span class="flex items-center bg-gray-50 px-3 py-1.5 rounded-full">
-                            <i class="fas fa-users text-purple-600 ml-1"></i>
-                            ۱,۲۵۶ کاربر فعال
-                        </span>
-                        <span class="flex items-center bg-gray-50 px-3 py-1.5 rounded-full">
-                            <i class="fas fa-calendar text-orange-600 ml-1"></i>
-                            {{ now.strftime('%d %B %Y') }}
-                        </span>
-                    </div>
-                </div>
-                
-                <!-- دکمه لودینگ -->
-                <div class="mt-6">
-                    <div class="inline-flex items-center bg-blue-50 rounded-full px-5 py-2">
-                        <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse ml-2"></div>
-                        <span class="text-xs text-blue-700">سامانه در حال راه‌اندازی است...</span>
-                    </div>
+                <!-- وضعیت (ریسپانسیو) -->
+                <div class="flex flex-wrap justify-center gap-2 text-2xs sm:text-xs text-gray-500">
+                    <span class="bg-gray-50 px-2 sm:px-3 py-1.5 rounded-full flex items-center">
+                        <i class="fas fa-shield-alt text-green-600 ml-1"></i>
+                        اتصال امن
+                    </span>
+                    <span class="bg-gray-50 px-2 sm:px-3 py-1.5 rounded-full flex items-center">
+                        <i class="fas fa-database text-blue-600 ml-1"></i>
+                        نسخه ۲.۰.۱
+                    </span>
+                    <span class="bg-gray-50 px-2 sm:px-3 py-1.5 rounded-full flex items-center">
+                        <i class="fas fa-users text-purple-600 ml-1"></i>
+                        ۱,۲۵۶ کاربر
+                    </span>
                 </div>
             </div>
         </div>
         
-        <!-- فوتر با بسم الله -->
-        <div class="text-center mt-8 text-gray-500 text-sm">
-            <div class="flex items-center justify-center space-x-2 space-x-reverse">
-                <i class="fas fa-quran text-blue-600"></i>
-                <span class="font-arabic">بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</span>
-                <i class="fas fa-quran text-blue-600"></i>
-            </div>
-            <p class="text-xs mt-2 text-gray-400">
-                پلتفرم مدیریت فعالیت‌های قرآنی دانشگاهی
-            </p>
+        <!-- بسم الله -->
+        <div class="text-center mt-4 sm:mt-6 text-gray-500 text-xs sm:text-sm">
+            <i class="fas fa-quran text-blue-600 ml-2"></i>
+            <span>بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</span>
         </div>
     </div>
     
     <script>
-        // پیام‌های لودینگ پیشرفته
+        // پیام‌های لودینگ
         const loadingMessages = [
-            { title: "در حال آماده‌سازی سامانه سِراج...", desc: "لطفاً چند لحظه صبر کنید", icon: "fa-cog", color: "blue" },
-            { title: "بارگذاری رویدادهای قرآنی...", desc: "آخرین رویدادها در حال آماده‌سازی هستند", icon: "fa-calendar", color: "green" },
-            { title: "آماده‌سازی هوش مصنوعی قرآنی...", desc: "ربات پاسخگو در حال راه‌اندازی است", icon: "fa-robot", color: "purple" },
-            { title: "اتصال به پایگاه داده...", desc: "در حال برقراری ارتباط با سرور", icon: "fa-database", color: "orange" },
-            { title: "بررسی اطلاعات کاربران...", desc: "امنیت حساب‌های کاربری در حال بررسی است", icon: "fa-shield-alt", color: "red" },
-            { title: "آماده‌سازی داشبورد مدیریت...", desc: "پنل کاربری در حال بارگذاری است", icon: "fa-tachometer-alt", color: "indigo" },
-            { title: "بارگذاری آیات قرآن کریم...", desc: "کلام وحی در حال آماده‌سازی است", icon: "fa-quran", color: "emerald" },
-            { title: "تنظیمات نهایی... ✨", desc: "در حال اعمال آخرین تغییرات", icon: "fa-magic", color: "pink" },
-            { title: "قرآن، نور راه زندگی است...", desc: "با قرآن در مسیر هدایت گام بردارید", icon: "fa-lightbulb", color: "yellow" },
-            { title: "سِراج؛ چراغ هدایت دانشگاهی", desc: "پلتفرم تخصصی فعالیت‌های قرآنی", icon: "fa-university", color: "blue" }
+            { title: "در حال آماده‌سازی سامانه سِراج...", desc: "لطفاً چند لحظه صبر کنید", icon: "fa-cog" },
+            { title: "بارگذاری رویدادهای قرآنی...", desc: "آخرین رویدادها در حال آماده‌سازی هستند", icon: "fa-calendar" },
+            { title: "آماده‌سازی هوش مصنوعی قرآنی...", desc: "ربات پاسخگو در حال راه‌اندازی است", icon: "fa-robot" },
+            { title: "اتصال به پایگاه داده...", desc: "در حال برقراری ارتباط با سرور", icon: "fa-database" }
         ];
         
-        // نکات قرآنی
         const quranTips = [
             "سوره فاتحه به عنوان «ام الکتاب» شناخته می‌شود",
             "هر حرف قرآن ۱۰ حسنه دارد",
             "قرآن در ۲۳ سال نازل شده است",
-            "سوره بقره طولانی‌ترین سوره قرآن است",
-            "سوره کوثر کوتاه‌ترین سوره قرآن است",
-            "قرآن ۳۰ جزء و ۱۱۴ سوره دارد",
-            "شب قدر از هزار ماه بهتر است",
-            "ماه رمضان ماه نزول قرآن است",
-            "حافظان قرآن را «حاملان قرآن» می‌نامند",
-            "هر سوره با بسم الله الرحمن الرحیم آغاز می‌شود بجز سوره توبه"
+            "سوره بقره طولانی‌ترین سوره قرآن است"
         ];
         
-        let currentMessageIndex = 0;
-        let currentTipIndex = 0;
-        let progress = 0;
+        let msgIndex = 0, tipIndex = 0, progress = 0;
         
         // تغییر پیام هر ۲ ثانیه
         setInterval(() => {
-            currentMessageIndex = (currentMessageIndex + 1) % loadingMessages.length;
-            const msg = loadingMessages[currentMessageIndex];
+            msgIndex = (msgIndex + 1) % loadingMessages.length;
+            const msg = loadingMessages[msgIndex];
             
-            const messageEl = document.getElementById('loading-message');
-            messageEl.innerHTML = `
-                <div class="flex items-center">
-                    <div class="w-8 h-8 bg-${msg.color}-600 rounded-full flex items-center justify-center ml-3 flex-shrink-0">
-                        <i class="fas ${msg.icon} text-white text-sm"></i>
+            document.getElementById('loading-message').innerHTML = `
+                <div class="flex items-center gap-2 sm:gap-3">
+                    <div class="w-6 h-6 sm:w-8 sm:h-8 bg-blue-600 rounded-full flex items-center justify-center flex-shrink-0 animate-pulse">
+                        <i class="fas ${msg.icon} text-white text-2xs sm:text-xs"></i>
                     </div>
                     <div class="text-right">
-                        <p class="font-medium text-gray-800">${msg.title}</p>
-                        <p class="text-xs text-gray-500 mt-1">${msg.desc}</p>
+                        <p class="font-medium text-xs sm:text-sm text-gray-800">${msg.title}</p>
+                        <p class="text-2xs sm:text-xs text-gray-500 mt-0.5">${msg.desc}</p>
                     </div>
                 </div>
             `;
-            
-            messageEl.classList.add(`bg-${msg.color}-50`, 'border', `border-${msg.color}-200`);
-            
-            setTimeout(() => {
-                messageEl.classList.remove(`bg-${msg.color}-50`, `border-${msg.color}-200`);
-            }, 1800);
         }, 2200);
         
-        // تغییر نکات قرآنی
+        // تغییر نکات قرآنی هر ۳ ثانیه
         setInterval(() => {
-            currentTipIndex = (currentTipIndex + 1) % quranTips.length;
-            document.getElementById('tip-text').textContent = `نکته قرآنی: ${quranTips[currentTipIndex]}`;
-        }, 4000);
+            tipIndex = (tipIndex + 1) % quranTips.length;
+            document.getElementById('tip-text').textContent = `نکته قرآنی: ${quranTips[tipIndex]}`;
+        }, 3000);
         
-        // افزایش نوار پیشرفت با سرعت متغیر
+        // افزایش نوار پیشرفت
         const progressInterval = setInterval(() => {
-            const increment = Math.random() * 1.5 + 0.5; // افزایش تصادفی
-            progress = Math.min(progress + increment, 100);
+            progress = Math.min(progress + Math.random() * 1.2 + 0.5, 100);
             
             document.getElementById('progress-bar').style.width = progress + '%';
             document.getElementById('progress-percent').textContent = Math.floor(progress) + '٪';
             
-            // تغییر رنگ نوار پیشرفت بر اساس درصد
-            const progressBar = document.getElementById('progress-bar');
-            if (progress > 80) {
-                progressBar.classList.add('from-green-600', 'to-teal-600');
-            } else if (progress > 50) {
-                progressBar.classList.add('from-blue-600', 'to-purple-600');
-            }
-            
             if (progress >= 100) {
                 clearInterval(progressInterval);
                 
-                // انیمیشن اتمام
                 document.getElementById('loading-message').innerHTML = `
-                    <div class="flex items-center">
-                        <div class="w-8 h-8 bg-green-600 rounded-full flex items-center justify-center ml-3 flex-shrink-0 animate-bounce">
-                            <i class="fas fa-check text-white"></i>
+                    <div class="flex items-center gap-2 sm:gap-3">
+                        <div class="w-6 h-6 sm:w-8 sm:h-8 bg-green-600 rounded-full flex items-center justify-center flex-shrink-0 animate-bounce">
+                            <i class="fas fa-check text-white text-2xs sm:text-xs"></i>
                         </div>
                         <div class="text-right">
-                            <p class="font-medium text-green-800">✅ آماده شد!</p>
-                            <p class="text-xs text-gray-500 mt-1">در حال انتقال به صفحه اصلی...</p>
+                            <p class="font-medium text-xs sm:text-sm text-green-800">✅ آماده شد!</p>
+                            <p class="text-2xs sm:text-xs text-gray-500 mt-0.5">در حال انتقال...</p>
                         </div>
                     </div>
                 `;
                 
-                document.getElementById('loading-message').classList.add('bg-green-50', 'border-green-200');
-                
-                // رفتن به صفحه اصلی
                 setTimeout(() => {
                     window.location.href = '/';
                 }, 1000);
             }
-        }, 40);
-        
-        // نمایش زمان سپری شده
-        let startTime = Date.now();
-        setInterval(() => {
-            const elapsed = Math.floor((Date.now() - startTime) / 1000);
-            document.getElementById('elapsed-time')?.textContent = elapsed + ' ثانیه';
-        }, 1000);
-        
-        // اگر خطایی رخ داد
-        window.addEventListener('error', function(e) {
-            console.error('خطا:', e);
-            document.getElementById('loading-message').innerHTML = `
-                <div class="flex items-center">
-                    <div class="w-8 h-8 bg-red-600 rounded-full flex items-center justify-center ml-3 flex-shrink-0">
-                        <i class="fas fa-exclamation-triangle text-white"></i>
-                    </div>
-                    <div class="text-right">
-                        <p class="font-medium text-red-800">⚠️ خطا در بارگذاری</p>
-                        <p class="text-xs text-gray-500 mt-1">در حال تلاش مجدد...</p>
-                    </div>
-                </div>
-            `;
-            document.getElementById('loading-message').classList.add('bg-red-50', 'border-red-200');
-        });
+        }, 50);
     </script>
 </body>
 </html>
-[file content end]
