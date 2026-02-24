@@ -1,0 +1,82 @@
+# fix_db_columns.py
+import sqlite3
+import os
+
+print("=" * 60)
+print("🔄 رفع مشکل ستون‌های جا افتاده در دیتابیس")
+print("=" * 60)
+
+# مسیر دیتابیس شما
+db_path = r"F:\seraj\instance\seraj.db"
+
+if not os.path.exists(db_path):
+    # مسیرهای جایگزین
+    alt_paths = [
+        r"F:\seraj\seraj.db",
+        r"F:\seraj\app.db",
+        r"F:\seraj\instance\app.db"
+    ]
+    for path in alt_paths:
+        if os.path.exists(path):
+            db_path = path
+            break
+    else:
+        print("❌ فایل دیتابیس پیدا نشد!")
+        exit(1)
+
+print(f"✅ دیتابیس پیدا شد: {db_path}")
+
+conn = sqlite3.connect(db_path)
+cursor = conn.cursor()
+
+# بررسی ستون‌های موجود
+cursor.execute("PRAGMA table_info(users)")
+columns = [col[1] for col in cursor.fetchall()]
+
+print("\n📊 ستون‌های موجود:", columns)
+
+# لیست تمام ستون‌های مورد نیاز
+required_columns = [
+    ('fcm_token', 'VARCHAR(500)'),
+    ('is_verified', 'BOOLEAN DEFAULT 0'),
+    ('verified_at', 'DATETIME'),
+    ('verified_by', 'INTEGER'),
+    ('verification_notes', 'TEXT'),
+    ('landline', 'VARCHAR(20)'),
+    ('office_phone', 'VARCHAR(20)'),
+    ('teaching_experience', 'INTEGER'),
+    ('professor_code', 'VARCHAR(50)'),
+    ('office_hours', 'VARCHAR(200)'),
+    ('website', 'VARCHAR(200)'),
+    ('employee_id', 'VARCHAR(50)'),
+    ('department', 'VARCHAR(100)'),
+    ('position', 'VARCHAR(100)'),
+    ('responsibility', 'TEXT'),
+    ('resume_file', 'VARCHAR(500)')
+]
+
+added_count = 0
+for col_name, col_type in required_columns:
+    if col_name not in columns:
+        try:
+            cursor.execute(f"ALTER TABLE users ADD COLUMN {col_name} {col_type}")
+            print(f"   ✅ ستون {col_name} اضافه شد.")
+            added_count += 1
+        except Exception as e:
+            print(f"   ❌ خطا در اضافه کردن {col_name}: {e}")
+    else:
+        print(f"   ⏺ ستون {col_name} از قبل وجود دارد.")
+
+if added_count > 0:
+    conn.commit()
+    print(f"\n✅ {added_count} ستون جدید با موفقیت اضافه شدند.")
+else:
+    print("\n✅ همه ستون‌ها از قبل وجود دارند.")
+
+conn.close()
+
+print("\n" + "=" * 60)
+print("✅ عملیات با موفقیت انجام شد!")
+print("=" * 60)
+print("\n📝 حالا برنامه را دوباره اجرا کنید:")
+print("   python app.py")

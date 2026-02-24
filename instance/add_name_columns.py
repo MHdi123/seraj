@@ -1,0 +1,18 @@
+import sqlite3
+db_path = r"F:\seraj\instance\seraj.db"
+conn = sqlite3.connect(db_path)
+cursor = conn.cursor()
+cursor.execute("PRAGMA table_info(users)")
+columns = [col[1] for col in cursor.fetchall()]
+if "first_name" not in columns:
+    cursor.execute("ALTER TABLE users ADD COLUMN first_name TEXT")
+    print("???? first_name ????? ?? ?")
+else:
+    print("???? first_name ????? ???? ???? ??")
+if "last_name" not in columns:
+    cursor.execute("ALTER TABLE users ADD COLUMN last_name TEXT")
+    print("???? last_name ????? ?? ?")
+else:
+    print("???? last_name ????? ???? ???? ??")
+conn.commit()
+conn.close()
