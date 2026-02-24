@@ -1,0 +1,129 @@
+{% extends "base.html" %}
+
+{% block title %}اعلان‌ها - سِراج{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    <!-- Header -->
+    <div class="mb-8 flex justify-between items-center">
+        <div>
+            <h1 class="text-3xl font-bold mb-2">اعلان‌ها</h1>
+            <p class="text-gray-600">پیام‌ها و اطلاعیه‌های شما</p>
+        </div>
+        
+        {% if notifications.items %}
+        <form method="POST" action="{{ url_for('mark_all_notifications_read') }}" class="inline">
+            <button type="submit" class="btn btn-secondary text-sm">
+                <i class="fas fa-check-double ml-2"></i>
+                علامت‌گذاری همه به عنوان خوانده شده
+            </button>
+        </form>
+        {% endif %}
+    </div>
+    
+    <!-- Notifications List -->
+    <div class="space-y-4">
+        {% if notifications.items %}
+            {% for notification in notifications.items %}
+                <div class="card hover:shadow-md transition-shadow {% if not notification.is_read %}border-r-4 border-r-blue-500 bg-blue-50/50{% endif %}">
+                    <div class="card-body">
+                        <div class="flex justify-between items-start">
+                            <div class="flex-grow">
+                                <div class="flex items-center mb-2">
+                                    {% if not notification.is_read %}
+                                        <span class="w-2 h-2 bg-blue-600 rounded-full ml-2"></span>
+                                    {% endif %}
+                                    <h3 class="font-bold text-lg {% if not notification.is_read %}text-blue-900{% endif %}">
+                                        {{ notification.title }}
+                                    </h3>
+                                </div>
+                                
+                                <p class="text-gray-700 mb-3">{{ notification.message }}</p>
+                                
+                                <div class="flex items-center text-sm text-gray-500">
+                                    <i class="fas fa-clock ml-2"></i>
+                                    <span>{{ notification.created_at|time_ago }}</span>
+                                    <span class="mx-2">•</span>
+                                    <i class="fas fa-calendar ml-2"></i>
+                                    <span>{{ notification.created_at|persian_datetime }}</span>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-start mr-4">
+                                {% if not notification.is_read %}
+                                    <a href="{{ url_for('mark_notification_read', notification_id=notification.id) }}" 
+                                       class="text-blue-600 hover:text-blue-800 text-sm px-3 py-1 rounded-lg hover:bg-blue-50 transition-colors">
+                                        <i class="fas fa-check ml-1"></i>
+                                        علامت خوانده شده
+                                    </a>
+                                {% else %}
+                                    <span class="text-gray-400 text-sm px-3 py-1">
+                                        <i class="fas fa-check-circle ml-1"></i>
+                                        خوانده شده
+                                    </span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+            
+            <!-- Pagination -->
+            {% if notifications.pages > 1 %}
+                <div class="mt-8 flex justify-center">
+                    <div class="flex space-x-2 space-x-reverse">
+                        {% if notifications.has_prev %}
+                            <a href="{{ url_for('notifications', page=notifications.prev_num) }}" 
+                               class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">
+                                <i class="fas fa-chevron-right ml-2"></i>
+                                قبلی
+                            </a>
+                        {% endif %}
+                        
+                        <span class="px-4 py-2 bg-blue-600 text-white rounded-lg">
+                            صفحه {{ notifications.page }} از {{ notifications.pages }}
+                        </span>
+                        
+                        {% if notifications.has_next %}
+                            <a href="{{ url_for('notifications', page=notifications.next_num) }}" 
+                               class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">
+                                بعدی
+                                <i class="fas fa-chevron-left mr-2"></i>
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endif %}
+            
+        {% else %}
+            <!-- Empty State -->
+            <div class="card text-center py-16">
+                <div class="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <i class="fas fa-bell-slash text-gray-400 text-4xl"></i>
+                </div>
+                <h3 class="text-2xl font-bold text-gray-700 mb-3">هیچ اعلانی ندارید</h3>
+                <p class="text-gray-600 mb-8 max-w-md mx-auto">
+                    وقتی اعلان جدیدی دریافت کنید، در اینجا نمایش داده خواهد شد.
+                </p>
+                <div class="flex justify-center gap-4">
+                    <a href="{{ url_for('dashboard') }}" class="btn btn-primary">
+                        <i class="fas fa-tachometer-alt ml-2"></i>
+                        بازگشت به داشبورد
+                    </a>
+                    <a href="{{ url_for('events_list') }}" class="btn btn-secondary">
+                        <i class="fas fa-calendar-alt ml-2"></i>
+                        مشاهده رویدادها
+                    </a>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+// Auto-refresh notifications every 30 seconds
+setTimeout(function() {
+    location.reload();
+}, 30000);
+</script>
+{% endblock %}

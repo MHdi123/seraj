@@ -1,0 +1,165 @@
+{% extends "base.html" %}
+
+{% block title %}{{ circle.name }} - سِراج{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto">
+
+    <!-- Header -->
+    <div class="bg-gradient-to-r from-green-700 to-teal-700 rounded-2xl p-8 text-white mb-8">
+        <div class="flex flex-col md:flex-row items-start md:items-center gap-6">
+
+            <div class="w-24 h-24 bg-white/20 rounded-full flex items-center justify-center border-4 border-white/30 overflow-hidden">
+                {% if circle.teacher_image %}
+                    <img src="{{ url_for('static', filename='uploads/' + circle.teacher_image) }}"
+                         alt="{{ circle.teacher_name }}"
+                         class="w-full h-full object-cover">
+                {% else %}
+                    <i class="fas fa-user-graduate text-4xl"></i>
+                {% endif %}
+            </div>
+
+            <div class="flex-grow">
+                <h1 class="text-3xl font-bold mb-2">{{ circle.name }}</h1>
+                <p class="text-lg opacity-90 mb-3">
+                    با مدیریت استاد {{ circle.teacher_name }}
+                </p>
+
+                <div class="flex flex-wrap gap-4 text-sm">
+                    <span class="bg-white/20 px-3 py-1 rounded-full">
+                        <i class="fas fa-users ml-2"></i>
+                        {{ circle.current_members }} عضو
+                    </span>
+                </div>
+            </div>
+
+            <div>
+                {% if current_user.is_authenticated %}
+                    {% if is_member %}
+                        <form method="POST" action="{{ url_for('leave_circle', circle_id=circle.id) }}">
+                            <button type="submit"
+                                class="bg-red-500 px-6 py-3 rounded-lg hover:bg-red-600 transition">
+                                خروج از حلقه
+                            </button>
+                        </form>
+                    {% else %}
+                        <form method="POST" action="{{ url_for('join_circle', circle_id=circle.id) }}">
+                            <button type="submit"
+                                class="bg-white text-green-700 px-6 py-3 rounded-lg hover:bg-gray-100 transition"
+                                {% if circle.is_full() %}disabled{% endif %}>
+                                عضویت در حلقه
+                            </button>
+                        </form>
+                    {% endif %}
+                {% else %}
+                    <a href="{{ url_for('login') }}"
+                       class="bg-white text-green-700 px-6 py-3 rounded-lg hover:bg-gray-100 transition">
+                        ورود برای عضویت
+                    </a>
+                {% endif %}
+            </div>
+
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+        <!-- Main Content -->
+        <div class="lg:col-span-2 space-y-6">
+
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="text-xl font-bold">درباره حلقه</h2>
+                </div>
+                <div class="card-body">
+                    <p class="text-gray-700">
+                        {{ circle.description or 'توضیحی ثبت نشده است.' }}
+                    </p>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Sidebar -->
+        <div class="space-y-6">
+
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="text-xl font-bold">اطلاعات حلقه</h2>
+                </div>
+
+                <div class="card-body space-y-6">
+
+                    <!-- Time -->
+                    <div>
+                        <div class="text-sm text-gray-500 mb-1">زمان برگزاری</div>
+                        <div class="font-medium">{{ circle.days_of_week or 'نامشخص' }}</div>
+                        <div class="text-sm text-gray-600">
+                            {{ circle.start_time or '--' }} تا {{ circle.end_time or '--' }}
+                        </div>
+                    </div>
+
+                    <!-- Capacity -->
+                    <div>
+                        <div class="text-sm text-gray-500 mb-1">ظرفیت</div>
+
+                        {% if circle.capacity %}
+                            {% set percent = ((circle.current_members / circle.capacity) * 100)|int %}
+                        {% else %}
+                            {% set percent = 0 %}
+                        {% endif %}
+
+                        <div class="flex items-center">
+                            <div class="flex-grow bg-gray-200 rounded-full h-2 ml-3 overflow-hidden">
+                                <div class="bg-green-600 h-2 rounded-full transition-all duration-500 progress-bar"
+                                     data-percent="{{ percent }}">
+                                </div>
+                            </div>
+                            <span class="text-sm font-medium whitespace-nowrap">
+                                {{ circle.current_members }}/{{ circle.capacity if circle.capacity else '∞' }}
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Files -->
+                    <div>
+                        <div class="flex justify-between items-center mb-2">
+                            <div class="text-sm text-gray-500">فایل‌ها</div>
+                        </div>
+
+                        {% if circle.files %}
+                            <ul class="space-y-2">
+                                {% for file in circle.files %}
+                                    <li class="flex justify-between items-center bg-gray-50 p-2 rounded-lg">
+                                        <a href="{{ url_for('circles.download_file', file_id=file.id) }}"
+                                           class="text-blue-600 hover:underline text-sm">
+                                            {{ file.filename }}
+                                        </a>
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        {% else %}
+                            <div class="text-sm text-gray-400">
+                                فایلی وجود ندارد.
+                            </div>
+                        {% endif %}
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- Progress Bar Script (No CSS Errors) -->
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    document.querySelectorAll(".progress-bar").forEach(function (bar) {
+        const percent = bar.getAttribute("data-percent");
+        bar.style.width = percent + "%";
+    });
+});
+</script>
+
+{% endblock %}

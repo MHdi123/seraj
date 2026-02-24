@@ -1,0 +1,231 @@
+{% extends "base.html" %}
+
+{% block title %}داشبورد هوش مصنوعی - سِراج{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto">
+    <!-- Header -->
+    <div class="mb-8">
+        <div class="flex justify-between items-center">
+            <div>
+                <h1 class="text-3xl font-bold mb-2">مدیریت هوش مصنوعی قرآنی</h1>
+                <p class="text-gray-600">مدیریت و مانیتورینگ سیستم هوش مصنوعی قرآنی سِراج</p>
+            </div>
+            <div class="text-left">
+                <span class="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-4 py-2 rounded-full text-sm">
+                    <i class="fas fa-robot ml-2"></i>
+                    سیستم هوش مصنوعی
+                </span>
+            </div>
+        </div>
+    </div>
+    
+    {% if not ai_enabled %}
+        <div class="mb-6 bg-yellow-50 border border-yellow-200 rounded-lg p-6">
+            <div class="flex items-center mb-4">
+                <i class="fas fa-exclamation-triangle text-yellow-600 text-2xl ml-4"></i>
+                <div>
+                    <h3 class="font-bold text-yellow-800 text-lg">سیستم هوش مصنوعی فعال نیست</h3>
+                    <p class="text-yellow-700">فایل quran_ai.py یافت نشد یا خطایی در بارگذاری آن وجود دارد.</p>
+                </div>
+            </div>
+            <div class="bg-white p-4 rounded-lg">
+                <p class="text-sm text-gray-600 mb-2">برای فعال‌سازی کامل هوش مصنوعی:</p>
+                <ol class="list-decimal mr-4 text-sm text-gray-700 space-y-1">
+                    <li>مطمئن شوید فایل <code>quran_ai.py</code> در پوشه پروژه وجود دارد</li>
+                    <li>کتابخانه‌های مورد نیاز را نصب کنید: <code>pip install transformers torch sentence-transformers</code></li>
+                    <li>برنامه را مجدداً راه‌اندازی کنید</li>
+                </ol>
+            </div>
+        </div>
+    {% endif %}
+    
+    <!-- Stats Cards -->
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div class="card">
+            <div class="card-body">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <h3 class="text-2xl font-bold">{{ stats.total_questions }}</h3>
+                        <p class="text-gray-600">کل سوالات</p>
+                    </div>
+                    <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-question-circle text-blue-600 text-xl"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-body">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <h3 class="text-2xl font-bold">{{ stats.quranic_questions }}</h3>
+                        <p class="text-gray-600">سوالات قرآنی</p>
+                    </div>
+                    <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-quran text-green-600 text-xl"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-body">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <h3 class="text-2xl font-bold">{{ stats.unique_users }}</h3>
+                        <p class="text-gray-600">کاربران فعال</p>
+                    </div>
+                    <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-users text-purple-600 text-xl"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-body">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <h3 class="text-2xl font-bold">{{ stats.total_verses }}</h3>
+                        <p class="text-gray-600">آیات در دیتابیس</p>
+                    </div>
+                    <div class="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-book text-yellow-600 text-xl"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <!-- Recent Questions -->
+        <div>
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-bold">آخرین سوالات</h2>
+                <span class="text-sm text-gray-500">
+                    {% if stats.system_status == 'فعال' %}
+                        <span class="text-green-600">
+                            <i class="fas fa-circle ml-2"></i>
+                            سیستم فعال
+                        </span>
+                    {% else %}
+                        <span class="text-yellow-600">
+                            <i class="fas fa-circle ml-2"></i>
+                            {{ stats.system_status }}
+                        </span>
+                    {% endif %}
+                </span>
+            </div>
+            
+            {% if recent_questions and recent_questions|length > 0 %}
+                <div class="card">
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-4 py-3 text-right text-xs font-medium text-gray-500">سوال</th>
+                                    <th class="px-4 py-3 text-right text-xs font-medium text-gray-500">کاربر</th>
+                                    <th class="px-4 py-3 text-right text-xs font-medium text-gray-500">زمان</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                {% for q in recent_questions %}
+                                    <tr>
+                                        <td class="px-4 py-3 max-w-xs">
+                                            <div class="text-sm text-gray-900 truncate">
+                                                {{ q.question[:50] }}{% if q.question|length > 50 %}...{% endif %}
+                                            </div>
+                                        </td>
+                                        <td class="px-4 py-3 text-sm text-gray-500">
+                                            {{ q.user_id if q.user_id else 'مهمان' }}
+                                        </td>
+                                        <td class="px-4 py-3 text-sm text-gray-500">
+                                            {{ q.created_at[:16] if q.created_at else 'نامشخص' }}
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            {% else %}
+                <div class="card text-center py-8">
+                    <i class="fas fa-comment-slash text-4xl text-gray-300 mb-3"></i>
+                    <p class="text-gray-600">هنوز سوالی ثبت نشده است</p>
+                </div>
+            {% endif %}
+        </div>
+        
+        <!-- System Status -->
+        <div>
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-bold">وضعیت سیستم</h2>
+                <span class="px-3 py-1 {% if ai_enabled %}bg-green-100 text-green-800{% else %}bg-yellow-100 text-yellow-800{% endif %} rounded-full text-sm">
+                    <i class="fas fa-check-circle ml-2"></i>
+                    {% if ai_enabled %}فعال{% else %}در حال توسعه{% endif %}
+                </span>
+            </div>
+            
+            <div class="card">
+                <div class="card-body">
+                    <div class="space-y-4">
+                        <div>
+                            <h3 class="font-bold mb-2">مشخصات سیستم:</h3>
+                            <ul class="space-y-2 text-sm text-gray-600">
+                                <li class="flex justify-between">
+                                    <span>وضعیت هوش مصنوعی:</span>
+                                    <span class="font-medium {% if ai_enabled %}text-green-600{% else %}text-yellow-600{% endif %}">
+                                        {% if ai_enabled %}فعال{% else %}نمایشی{% endif %}
+                                    </span>
+                                </li>
+                                <li class="flex justify-between">
+                                    <span>تعداد آیات:</span>
+                                    <span class="font-medium">{{ stats.total_verses }} آیه</span>
+                                </li>
+                                <li class="flex justify-between">
+                                    <span>پایگاه داده:</span>
+                                    <span class="font-medium text-green-600">SQLite - فعال</span>
+                                </li>
+                                <li class="flex justify-between">
+                                    <span>آخرین بروزرسانی:</span>
+                                    <span class="font-medium">امروز</span>
+                                </li>
+                            </ul>
+                        </div>
+                        
+                        <div class="border-t border-gray-200 pt-4">
+                            <h3 class="font-bold mb-2">کنترل‌های مدیریت:</h3>
+                            <div class="space-y-2">
+                                <button class="w-full btn btn-secondary text-sm">
+                                    <i class="fas fa-sync ml-2"></i>
+                                    بروزرسانی دیتابیس آیات
+                                </button>
+                                <button class="w-full btn btn-secondary text-sm">
+                                    <i class="fas fa-download ml-2"></i>
+                                    خروجی گزارش آماری
+                                </button>
+                                <button class="w-full btn btn-secondary text-sm">
+                                    <i class="fas fa-cog ml-2"></i>
+                                    تنظیمات سیستم
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="border-t border-gray-200 pt-4">
+                            <h3 class="font-bold mb-2">API Endpoints:</h3>
+                            <div class="space-y-1">
+                                <code class="text-xs bg-gray-100 p-2 rounded block">POST /ai/api/ask</code>
+                                <code class="text-xs bg-gray-100 p-2 rounded block">POST /ai/api/analyze</code>
+                                <code class="text-xs bg-gray-100 p-2 rounded block">POST /ai/api/suggest</code>
+                                <code class="text-xs bg-gray-100 p-2 rounded block">GET /ai/api/statistics</code>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

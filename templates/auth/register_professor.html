@@ -1,0 +1,378 @@
+{% extends "base.html" %}
+
+{% block title %}ثبت‌نام استاد - سِراج{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    <div class="card">
+        <div class="card-header text-center bg-gradient-to-l from-green-50 to-emerald-50">
+            <div class="w-20 h-20 bg-green-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
+                <i class="fas fa-chalkboard-teacher text-white text-3xl"></i>
+            </div>
+            <h2 class="text-2xl font-bold">ثبت‌نام استاد</h2>
+            <p class="text-gray-600 mt-1">برای همکاری به عنوان استاد مشاور یا مدرس، فرم زیر را تکمیل کنید</p>
+            <p class="text-xs text-red-500 mt-2">* فیلدهای الزامی</p>
+        </div>
+        
+        <div class="card-body">
+            <form method="POST" action="{{ url_for('register_professor') }}" enctype="multipart/form-data" id="registerForm">
+                <!-- ================ اطلاعات هویتی ================ -->
+                <div class="bg-gray-50 p-4 rounded-lg mb-6">
+                    <h3 class="text-lg font-bold mb-4 flex items-center">
+                        <i class="fas fa-user ml-2 text-green-600"></i> اطلاعات هویتی
+                    </h3>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label for="first_name" class="block text-sm font-medium text-gray-700 mb-1">
+                                نام <span class="text-red-500">*</span>
+                            </label>
+                            <input type="text" id="first_name" name="first_name" 
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                                   required>
+                        </div>
+                        
+                        <div>
+                            <label for="last_name" class="block text-sm font-medium text-gray-700 mb-1">
+                                نام خانوادگی <span class="text-red-500">*</span>
+                            </label>
+                            <input type="text" id="last_name" name="last_name" 
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                                   required>
+                        </div>
+                        
+                        <div>
+                            <label for="username" class="block text-sm font-medium text-gray-700 mb-1">
+                                نام کاربری <span class="text-red-500">*</span>
+                            </label>
+                            <input type="text" id="username" name="username" 
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                                   minlength="3" required>
+                            <p class="text-xs text-gray-500 mt-1">حداقل ۳ کاراکتر</p>
+                        </div>
+                        
+                        <div>
+                            <label for="email" class="block text-sm font-medium text-gray-700 mb-1">
+                                ایمیل <span class="text-red-500">*</span>
+                            </label>
+                            <input type="email" id="email" name="email" 
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                                   placeholder="example@university.ac.ir" required>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- ================ اطلاعات شغلی و تخصصی ================ -->
+                <div class="bg-gray-50 p-4 rounded-lg mb-6">
+                    <h3 class="text-lg font-bold mb-4 flex items-center">
+                        <i class="fas fa-briefcase ml-2 text-green-600"></i> اطلاعات شغلی و تخصصی
+                    </h3>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label for="academic_rank" class="block text-sm font-medium text-gray-700 mb-1">
+                                مرتبه علمی <span class="text-red-500">*</span>
+                            </label>
+                            <select id="academic_rank" name="academic_rank" 
+                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                                    required>
+                                <option value="">انتخاب کنید</option>
+                                <option value="استاد">استاد</option>
+                                <option value="دانشیار">دانشیار</option>
+                                <option value="استادیار">استادیار</option>
+                                <option value="مربی">مربی</option>
+                                <option value="مدرس مدعو">مدرس مدعو</option>
+                            </select>
+                        </div>
+                        
+                        <div>
+                            <label for="specialization" class="block text-sm font-medium text-gray-700 mb-1">
+                                حوزه تخصصی <span class="text-red-500">*</span>
+                            </label>
+                            <input type="text" id="specialization" name="specialization" 
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                                   placeholder="مثال: علوم قرآن و حدیث، تفسیر، قرائت" required>
+                        </div>
+                        
+                        <div>
+                            <label for="teaching_experience" class="block text-sm font-medium text-gray-700 mb-1">
+                                سابقه تدریس (سال)
+                            </label>
+                            <input type="number" id="teaching_experience" name="teaching_experience" 
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                                   min="0" max="50">
+                        </div>
+                        
+                        <div>
+                            <label for="professor_code" class="block text-sm font-medium text-gray-700 mb-1">
+                                کد استادی
+                            </label>
+                            <input type="text" id="professor_code" name="professor_code" 
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                                   placeholder="در صورت وجود">
+                        </div>
+                        
+                        <div class="md:col-span-2">
+                            <label for="office_hours" class="block text-sm font-medium text-gray-700 mb-1">
+                                ساعات حضور در دفتر
+                            </label>
+                            <input type="text" id="office_hours" name="office_hours" 
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                                   placeholder="مثال: شنبه و دوشنبه ۱۰-۱۲">
+                        </div>
+                        
+                        <div class="md:col-span-2">
+                            <label for="website" class="block text-sm font-medium text-gray-700 mb-1">
+                                وبسایت شخصی
+                            </label>
+                            <input type="url" id="website" name="website" 
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                                   placeholder="https://">
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- ================ محل خدمت ================ -->
+                <div class="bg-gray-50 p-4 rounded-lg mb-6">
+                    <h3 class="text-lg font-bold mb-4 flex items-center">
+                        <i class="fas fa-university ml-2 text-green-600"></i> محل خدمت
+                    </h3>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label for="university" class="block text-sm font-medium text-gray-700 mb-1">
+                                دانشگاه <span class="text-red-500">*</span>
+                            </label>
+                            <select id="university" name="university" 
+                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                                    required>
+                                <option value="">انتخاب کنید</option>
+                                <option value="تهران">دانشگاه تهران</option>
+                                <option value="شریف">دانشگاه صنعتی شریف</option>
+                                <option value="علم و صنعت">دانشگاه علم و صنعت ایران</option>
+                                <option value="بهشتی">دانشگاه شهید بهشتی</option>
+                                <option value="امیرکبیر">دانشگاه صنعتی امیرکبیر</option>
+                                <option value="علامه طباطبایی">دانشگاه علامه طباطبایی</option>
+                                <option value="تربیت مدرس">دانشگاه تربیت مدرس</option>
+                                <option value="الزهرا">دانشگاه الزهرا</option>
+                                <option value="خواجه نصیر">دانشگاه خواجه نصیرالدین طوسی</option>
+                                <option value="سایر">سایر دانشگاه‌ها</option>
+                            </select>
+                        </div>
+                        
+                        <div>
+                            <label for="faculty" class="block text-sm font-medium text-gray-700 mb-1">
+                                دانشکده <span class="text-red-500">*</span>
+                            </label>
+                            <input type="text" id="faculty" name="faculty" 
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                                   placeholder="مثال: دانشکده الهیات" required>
+                        </div>
+                        
+                        <div>
+                            <label for="province" class="block text-sm font-medium text-gray-700 mb-1">
+                                استان <span class="text-red-500">*</span>
+                            </label>
+                            <select id="province" name="province" 
+                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                                    required>
+                                <option value="">انتخاب کنید</option>
+                                <option value="تهران">تهران</option>
+                                <option value="اصفهان">اصفهان</option>
+                                <option value="خراسان رضوی">خراسان رضوی</option>
+                                <option value="فارس">فارس</option>
+                                <option value="خوزستان">خوزستان</option>
+                                <option value="آذربایجان شرقی">آذربایجان شرقی</option>
+                                <option value="قم">قم</option>
+                                <option value="البرز">البرز</option>
+                                <option value="سایر">سایر استان‌ها</option>
+                            </select>
+                        </div>
+                        
+                        <div>
+                            <label for="city" class="block text-sm font-medium text-gray-700 mb-1">
+                                شهر <span class="text-red-500">*</span>
+                            </label>
+                            <input type="text" id="city" name="city" 
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                                   required>
+                        </div>
+                        
+                        <div class="md:col-span-2">
+                            <label for="address" class="block text-sm font-medium text-gray-700 mb-1">
+                                آدرس کامل
+                            </label>
+                            <textarea id="address" name="address" rows="2"
+                                      class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                                      placeholder="آدرس محل کار"></textarea>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- ================ اطلاعات تماس ================ -->
+                <div class="bg-gray-50 p-4 rounded-lg mb-6">
+                    <h3 class="text-lg font-bold mb-4 flex items-center">
+                        <i class="fas fa-phone ml-2 text-green-600"></i> اطلاعات تماس
+                    </h3>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label for="phone" class="block text-sm font-medium text-gray-700 mb-1">
+                                تلفن همراه <span class="text-red-500">*</span>
+                            </label>
+                            <input type="tel" id="phone" name="phone" 
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                                   placeholder="۰۹۱۲۳۴۵۶۷۸۹" required>
+                        </div>
+                        
+                        <div>
+                            <label for="landline" class="block text-sm font-medium text-gray-700 mb-1">
+                                تلفن ثابت
+                            </label>
+                            <input type="tel" id="landline" name="landline" 
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                                   placeholder="۰۲۱۱۲۳۴۵۶۷۸">
+                        </div>
+                        
+                        <div>
+                            <label for="office_phone" class="block text-sm font-medium text-gray-700 mb-1">
+                                تلفن دفتر کار
+                            </label>
+                            <input type="tel" id="office_phone" name="office_phone" 
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">
+                                جنسیت <span class="text-red-500">*</span>
+                            </label>
+                            <div class="flex space-x-6 space-x-reverse mt-2">
+                                <label class="flex items-center">
+                                    <input type="radio" name="gender" value="male" class="ml-2" required>
+                                    <span>مرد</span>
+                                </label>
+                                <label class="flex items-center">
+                                    <input type="radio" name="gender" value="female" class="ml-2" required>
+                                    <span>زن</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- ================ مدارک و رزومه ================ -->
+                <div class="bg-gray-50 p-4 rounded-lg mb-6">
+                    <h3 class="text-lg font-bold mb-4 flex items-center">
+                        <i class="fas fa-file-pdf ml-2 text-green-600"></i> مدارک و رزومه
+                    </h3>
+                    
+                    <div class="mb-4">
+                        <label for="resume" class="block text-sm font-medium text-gray-700 mb-1">
+                            رزومه (PDF, Word)
+                        </label>
+                        <input type="file" id="resume" name="resume" accept=".pdf,.doc,.docx" 
+                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                        <p class="text-xs text-gray-500 mt-1">حداکثر حجم ۵ مگابایت. فرمت‌های مجاز: PDF, DOC, DOCX</p>
+                    </div>
+                </div>
+                
+                <!-- ================ رمز عبور ================ -->
+                <div class="bg-gray-50 p-4 rounded-lg mb-6">
+                    <h3 class="text-lg font-bold mb-4">امنیت حساب</h3>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label for="password" class="block text-sm font-medium text-gray-700 mb-1">
+                                رمز عبور <span class="text-red-500">*</span>
+                            </label>
+                            <input type="password" id="password" name="password" 
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                                   minlength="6" required>
+                            <p class="text-xs text-gray-500 mt-1">حداقل ۶ کاراکتر</p>
+                        </div>
+                        
+                        <div>
+                            <label for="confirm_password" class="block text-sm font-medium text-gray-700 mb-1">
+                                تکرار رمز عبور <span class="text-red-500">*</span>
+                            </label>
+                            <input type="password" id="confirm_password" name="confirm_password" 
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                                   minlength="6" required>
+                        </div>
+                    </div>
+                    <div id="password-error" class="text-red-500 text-sm mt-2 hidden">رمز عبور و تکرار آن مطابقت ندارند</div>
+                </div>
+                
+                <!-- ================ توضیحات ================ -->
+                <div class="bg-yellow-50 border-r-4 border-yellow-400 p-4 mb-6 rounded-lg">
+                    <div class="flex">
+                        <div class="ml-3">
+                            <p class="text-sm text-yellow-700">
+                                <i class="fas fa-info-circle ml-1"></i>
+                                <strong>توجه:</strong> پس از ثبت‌نام، درخواست شما توسط مدیر بررسی و تأیید خواهد شد. 
+                                این فرآیند حداکثر ۴۸ ساعت طول می‌کشد و نتیجه از طریق ایمیل و اعلان به شما اطلاع‌رسانی می‌شود.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- ================ قوانین ================ -->
+                <div class="mb-6">
+                    <label class="flex items-center">
+                        <input type="checkbox" name="terms" class="ml-2" required>
+                        <span class="text-sm">
+                            با <a href="#" class="text-green-600 hover:underline">شرایط استفاده</a> و 
+                            <a href="#" class="text-green-600 hover:underline">حریم خصوصی</a> موافقت می‌کنم 
+                            <span class="text-red-500">*</span>
+                        </span>
+                    </label>
+                </div>
+                
+                <button type="submit" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded-lg transition-colors duration-200 text-lg">
+                    <i class="fas fa-paper-plane ml-2"></i>
+                    ارسال درخواست همکاری
+                </button>
+            </form>
+            
+            <div class="mt-6 text-center">
+                <p class="text-gray-600">قبلاً ثبت‌نام کرده‌اید؟</p>
+                <a href="{{ url_for('login') }}" class="text-green-600 hover:text-green-800 font-medium">
+                    <i class="fas fa-sign-in-alt ml-2"></i>
+                    ورود به سیستم
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const password = document.getElementById('password');
+    const confirmPassword = document.getElementById('confirm_password');
+    const passwordError = document.getElementById('password-error');
+    
+    function validatePassword() {
+        if (password.value !== confirmPassword.value) {
+            confirmPassword.classList.add('border-red-500');
+            passwordError.classList.remove('hidden');
+            return false;
+        } else {
+            confirmPassword.classList.remove('border-red-500');
+            passwordError.classList.add('hidden');
+            return true;
+        }
+    }
+    
+    password.addEventListener('input', validatePassword);
+    confirmPassword.addEventListener('input', validatePassword);
+    
+    const form = document.getElementById('registerForm');
+    form.addEventListener('submit', function(e) {
+        if (!validatePassword()) {
+            e.preventDefault();
+            alert('رمز عبور و تکرار آن مطابقت ندارند!');
+        }
+    });
+});
+</script>
+{% endblock %}

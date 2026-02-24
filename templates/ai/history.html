@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% block title %}تاریخچه پرسش‌ها - سِراج{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    <div class="mb-8">
+        <div class="flex justify-between items-center">
+            <div>
+                <h1 class="text-3xl font-bold mb-2">تاریخچه پرسش‌ها</h1>
+                <p class="text-gray-600">سوالات و پاسخ‌های قبلی شما</p>
+            </div>
+            <div>
+                <a href="{{ url_for('ai_quran') }}" class="btn btn-primary">
+                    <i class="fas fa-plus ml-2"></i>
+                    سوال جدید
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="card-body">
+            {% if questions %}
+                <div class="space-y-6">
+                    {% for q in questions %}
+                        <div class="border border-gray-200 rounded-lg p-6">
+                            <div class="mb-4">
+                                <h3 class="font-bold text-lg mb-2">سوال:</h3>
+                                <p class="text-gray-700 bg-gray-50 p-3 rounded-lg">{{ q.question }}</p>
+                            </div>
+                            
+                            <div>
+                                <h4 class="font-bold text-lg mb-2">پاسخ:</h4>
+                                <div class="bg-blue-50 p-4 rounded-lg">
+                                    {{ q.answer|truncate(300) }}
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="text-center py-12">
+                    <i class="fas fa-history text-4xl text-gray-300 mb-4"></i>
+                    <h3 class="text-xl font-bold text-gray-700 mb-2">تاریخچه‌ای موجود نیست</h3>
+                    <p class="text-gray-600">هنوز سوالی نپرسیده‌اید</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

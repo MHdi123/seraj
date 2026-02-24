@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+
+{% block title %}انتخاب نوع ثبت‌نام - سِراج{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    <!-- هدر -->
+    <div class="text-center mb-8">
+        <h1 class="text-3xl font-bold">به سِراج خوش آمدید</h1>
+        <p class="text-gray-600 mt-2">لطفاً نوع کاربری خود را انتخاب کنید</p>
+    </div>
+    
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <!-- ثبت‌نام دانشجو -->
+        <a href="{{ url_for('register') }}" class="card hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
+            <div class="card-body text-center p-8">
+                <div class="w-24 h-24 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <i class="fas fa-user-graduate text-blue-600 text-4xl"></i>
+                </div>
+                <h2 class="text-xl font-bold mb-2">دانشجو</h2>
+                <p class="text-gray-600 text-sm mb-4">
+                    ثبت‌نام به عنوان دانشجو برای شرکت در رویدادها، مسابقات و حلقه‌های تلاوت
+                </p>
+                <div class="flex flex-wrap justify-center gap-2 text-sm text-gray-500 mb-4">
+                    <span class="px-2 py-1 bg-blue-50 text-blue-700 rounded-full">✅ ثبت‌نام آنی</span>
+                    <span class="px-2 py-1 bg-blue-50 text-blue-700 rounded-full">🎯 شرکت در رویدادها</span>
+                    <span class="px-2 py-1 bg-blue-50 text-blue-700 rounded-full">📚 دسترسی به همه محتوا</span>
+                </div>
+                <div class="mt-4 text-blue-600 font-medium">
+                    ثبت‌نام دانشجو
+                    <i class="fas fa-arrow-left mr-2"></i>
+                </div>
+            </div>
+        </a>
+        
+        <!-- ثبت‌نام استاد -->
+        <a href="{{ url_for('register_professor') }}" class="card hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 border-t-4 border-green-500">
+            <div class="card-body text-center p-8">
+                <div class="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <i class="fas fa-chalkboard-teacher text-green-600 text-4xl"></i>
+                </div>
+                <h2 class="text-xl font-bold mb-2">استاد</h2>
+                <p class="text-gray-600 text-sm mb-4">
+                    ثبت‌نام به عنوان استاد برای تدریس در حلقه‌های تلاوت، مشاوره و همکاری علمی
+                </p>
+                <div class="flex flex-wrap justify-center gap-2 text-sm text-gray-500 mb-4">
+                    <span class="px-2 py-1 bg-green-50 text-green-700 rounded-full">⏳ نیاز به تأیید</span>
+                    <span class="px-2 py-1 bg-green-50 text-green-700 rounded-full">👨‍🏫 تدریس در حلقه‌ها</span>
+                    <span class="px-2 py-1 bg-green-50 text-green-700 rounded-full">📄 ارسال رزومه</span>
+                </div>
+                <div class="mt-4 text-green-600 font-medium">
+                    ثبت‌نام استاد
+                    <i class="fas fa-arrow-left mr-2"></i>
+                </div>
+            </div>
+        </a>
+        
+        <!-- ثبت‌نام کارمند -->
+        <a href="{{ url_for('register_staff') }}" class="card hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 border-t-4 border-purple-500">
+            <div class="card-body text-center p-8">
+                <div class="w-24 h-24 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <i class="fas fa-users-cog text-purple-600 text-4xl"></i>
+                </div>
+                <h2 class="text-xl font-bold mb-2">کارمند امور فرهنگی</h2>
+                <p class="text-gray-600 text-sm mb-4">
+                    ثبت‌نام به عنوان کارمند برای مدیریت رویدادها، برنامه‌های فرهنگی و همکاری اجرایی
+                </p>
+                <div class="flex flex-wrap justify-center gap-2 text-sm text-gray-500 mb-4">
+                    <span class="px-2 py-1 bg-purple-50 text-purple-700 rounded-full">⏳ نیاز به تأیید</span>
+                    <span class="px-2 py-1 bg-purple-50 text-purple-700 rounded-full">📋 مدیریت رویدادها</span>
+                    <span class="px-2 py-1 bg-purple-50 text-purple-700 rounded-full">🏢 اطلاعات پرسنلی</span>
+                </div>
+                <div class="mt-4 text-purple-600 font-medium">
+                    ثبت‌نام کارمند
+                    <i class="fas fa-arrow-left mr-2"></i>
+                </div>
+            </div>
+        </a>
+    </div>
+    
+    <!-- توضیحات تکمیلی -->
+    <div class="mt-8 bg-yellow-50 border-r-4 border-yellow-400 p-4 rounded-lg">
+        <div class="flex">
+            <div class="ml-3">
+                <p class="text-sm text-yellow-700">
+                    <i class="fas fa-info-circle ml-1"></i>
+                    <strong>نکته مهم:</strong> ثبت‌نام اساتید و کارکنان نیاز به تأیید مدیر سیستم دارد و ممکن است ۲۴ تا ۴۸ ساعت طول بکشد.
+                    پس از تأیید، ایمیل تأییدیه برای شما ارسال خواهد شد.
+                </p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="mt-8 text-center">
+        <p class="text-gray-600">
+            قبلاً ثبت‌نام کرده‌اید؟
+            <a href="{{ url_for('login') }}" class="text-blue-600 hover:text-blue-800 font-medium mr-2">
+                وارد شوید
+            </a>
+        </p>
+    </div>
+</div>
+
+<style>
+.card {
+    transition: all 0.3s ease;
+}
+.card:hover {
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+</style>
+{% endblock %}

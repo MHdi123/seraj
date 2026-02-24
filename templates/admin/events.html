@@ -1,0 +1,224 @@
+{% extends "base.html" %}
+
+{% block title %}مدیریت رویدادها - سِراج{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto">
+
+    <!-- Header -->
+    <div class="mb-8 flex justify-between items-center">
+        <div>
+            <h1 class="text-3xl font-bold mb-2">مدیریت رویدادها</h1>
+            <p class="text-gray-600">ایجاد، ویرایش و حذف رویدادهای قرآنی</p>
+        </div>
+
+        <a href="{{ url_for('create_event') }}" class="btn btn-primary">
+            <i class="fas fa-plus ml-2"></i>
+            رویداد جدید
+        </a>
+    </div>
+
+
+    <!-- Table -->
+    <div class="card">
+        <div class="card-header">
+            <h2 class="text-xl font-bold">لیست رویدادها</h2>
+        </div>
+
+        <div class="card-body">
+
+        {% if events %}
+        <div class="overflow-x-auto">
+
+        <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-50">
+        <tr>
+            <th class="th">عنوان</th>
+            <th class="th">نوع</th>
+            <th class="th">تاریخ</th>
+            <th class="th">ظرفیت</th>
+            <th class="th">وضعیت</th>
+            <th class="th">عملیات</th>
+        </tr>
+        </thead>
+
+
+<tbody class="bg-white divide-y divide-gray-200">
+
+{% for event in events %}
+<tr class="hover:bg-gray-50">
+
+<!-- title -->
+<td class="td">
+<div class="flex items-center">
+
+<div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center ml-3">
+<i class="fas fa-calendar-alt text-blue-600"></i>
+</div>
+
+<div>
+<div class="font-medium text-gray-900">{{ event.title }}</div>
+<div class="text-sm text-gray-500 truncate max-w-xs">{{ event.location }}</div>
+</div>
+
+</div>
+</td>
+
+
+<!-- type -->
+<td class="td">
+<span class="badge badge-{{ event.event_type.value }}">
+
+{% if event.event_type.value == 'workshop' %}
+کارگاه
+{% elif event.event_type.value == 'competition' %}
+مسابقه
+{% elif event.event_type.value == 'halaqah' %}
+حلقه تلاوت
+{% elif event.event_type.value == 'lecture' %}
+سخنرانی
+{% else %}
+دیگر
+{% endif %}
+
+</span>
+</td>
+
+
+<!-- date -->
+<td class="td">
+<div class="text-sm">{{ event.start_date.strftime('%Y/%m/%d') }}</div>
+<div class="text-xs text-gray-500">{{ event.start_date.strftime('%H:%M') }}</div>
+</td>
+
+
+<!-- capacity -->
+<td class="td">
+<div class="flex items-center">
+
+<span class="font-medium">
+{{ event.current_participants }}/{{ event.capacity if event.capacity else '∞' }}
+</span>
+
+{% if event.capacity %}
+<div class="mr-3 w-16 bg-gray-200 rounded-full h-2">
+
+<div
+class="bg-blue-600 h-2 rounded-full progress-bar"
+data-percent="{{ (event.current_participants / event.capacity * 100)|round|int }}">
+</div>
+
+</div>
+{% endif %}
+
+</div>
+</td>
+
+
+<!-- status -->
+<td class="td">
+
+{% if event.is_active %}
+<span class="badge bg-green-100 text-green-800">فعال</span>
+{% else %}
+<span class="badge bg-red-100 text-red-800">غیرفعال</span>
+{% endif %}
+
+</td>
+
+
+<!-- actions -->
+<td class="td text-sm font-medium">
+<div class="flex space-x-3 space-x-reverse">
+
+<a href="{{ url_for('edit_event', event_id=event.id) }}"
+class="text-blue-600 hover:text-blue-900">
+<i class="fas fa-edit"></i>
+</a>
+
+<a href="{{ url_for('event_detail', event_id=event.id) }}"
+class="text-green-600 hover:text-green-900">
+<i class="fas fa-eye"></i>
+</a>
+
+<button class="delete-btn text-red-600 hover:text-red-900"
+data-id="{{ event.id }}">
+<i class="fas fa-trash"></i>
+</button>
+
+</div>
+</td>
+
+</tr>
+{% endfor %}
+
+</tbody>
+</table>
+</div>
+
+{% else %}
+
+<!-- empty -->
+<div class="text-center py-12">
+<div class="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+<i class="fas fa-calendar-plus text-gray-400 text-3xl"></i>
+</div>
+
+<h3 class="text-xl font-bold text-gray-700 mb-2">
+هیچ رویدادی وجود ندارد
+</h3>
+
+<p class="text-gray-600 mb-6">
+هنوز رویدادی ایجاد نکرده‌اید.
+</p>
+
+<a href="{{ url_for('create_event') }}" class="btn btn-primary">
+ایجاد اولین رویداد
+</a>
+</div>
+
+{% endif %}
+
+</div>
+</div>
+</div>
+{% endblock %}
+
+
+{% block scripts %}
+<script>
+
+document.addEventListener("DOMContentLoaded", function(){
+
+/* progress bars */
+document.querySelectorAll(".progress-bar").forEach(el=>{
+let p = el.dataset.percent;
+el.style.width = p + "%";
+});
+
+
+/* delete */
+document.querySelectorAll(".delete-btn").forEach(btn=>{
+btn.addEventListener("click", function(){
+
+let id = this.dataset.id;
+
+if(confirm("آیا از حذف مطمئن هستید؟"))
+{
+fetch("/admin/event/delete/"+id,{
+method:"POST",
+headers:{ "Content-Type":"application/json" }
+})
+.then(r=>r.json())
+.then(res=>{
+alert(res.message);
+if(res.success) location.reload();
+});
+}
+
+});
+});
+
+});
+</script>
+{% endblock %}

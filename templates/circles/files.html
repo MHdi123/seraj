@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+
+{% block title %}فایل‌های {{ circle.name }} - سِراج{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto">
+    <!-- Header -->
+    <div class="mb-8">
+        <div class="flex items-center mb-4">
+            <a href="{{ url_for('circle_detail', circle_id=circle.id) }}" class="text-gray-600 hover:text-gray-900 ml-4">
+                <i class="fas fa-arrow-right"></i>
+            </a>
+            <h1 class="text-3xl font-bold">فایل‌های حلقه {{ circle.name }}</h1>
+        </div>
+        <p class="text-gray-600">کتاب‌ها، جزوات، صوتی و تصویری مرتبط با جلسات</p>
+    </div>
+    
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <!-- Circle Files -->
+        <div>
+            <h2 class="text-xl font-bold mb-4">فایل‌های عمومی حلقه</h2>
+            {% if files %}
+                <div class="card">
+                    <div class="card-body">
+                        <div class="space-y-3">
+                            {% for file in files %}
+                                <div class="flex items-center justify-between p-3 hover:bg-gray-50 rounded-lg border border-gray-100">
+                                    <div class="flex items-center overflow-hidden">
+                                        <i class="fas fa-{{ 'file-pdf' if file.file_type == 'pdf' else 'file-audio' if file.file_type in ['mp3', 'wav'] else 'file-video' if file.file_type in ['mp4', 'mov'] else 'file' }} ml-3 text-2xl text-gray-500"></i>
+                                        <div class="overflow-hidden">
+                                            <a href="{{ url_for('download_circle_file', file_id=file.id) }}" 
+                                               class="font-medium hover:text-blue-600 truncate block">
+                                                {{ file.title }}
+                                            </a>
+                                            {% if file.description %}
+                                                <p class="text-xs text-gray-500 truncate">{{ file.description }}</p>
+                                            {% endif %}
+                                            <div class="flex items-center text-xs text-gray-400 mt-1">
+                                                <span>{{ (file.file_size / 1024)|round|int }} KB</span>
+                                                <span class="mx-2">•</span>
+                                                <span>{{ file.download_count }} دانلود</span>
+                                                <span class="mx-2">•</span>
+                                                <span>{{ file.uploaded_at|persian_date }}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <a href="{{ url_for('download_circle_file', file_id=file.id) }}" 
+                                       class="btn btn-secondary text-sm">
+                                        <i class="fas fa-download ml-2"></i>
+                                        دانلود
+                                    </a>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            {% else %}
+                <div class="card text-center py-8">
+                    <i class="fas fa-folder-open text-4xl text-gray-300 mb-3"></i>
+                    <p class="text-gray-600">هیچ فایل عمومی‌ای آپلود نشده است</p>
+                </div>
+            {% endif %}
+        </div>
+        
+        <!-- Session Files -->
+        <div>
+            <h2 class="text-xl font-bold mb-4">فایل‌های جلسات</h2>
+            {% if session_files %}
+                <div class="card">
+                    <div class="card-body">
+                        <div class="space-y-3">
+                            {% for file in session_files %}
+                                <div class="flex items-center justify-between p-3 hover:bg-gray-50 rounded-lg border border-gray-100">
+                                    <div class="flex items-center overflow-hidden">
+                                        <i class="fas fa-{{ 'file-pdf' if file.file_type == 'pdf' else 'file-audio' if file.file_type in ['mp3', 'wav'] else 'file-video' if file.file_type in ['mp4', 'mov'] else 'file' }} ml-3 text-2xl text-gray-500"></i>
+                                        <div class="overflow-hidden">
+                                            <a href="{{ url_for('download_session_file', file_id=file.id) }}" 
+                                               class="font-medium hover:text-blue-600 truncate block">
+                                                {{ file.title }}
+                                            </a>
+                                            {% if file.description %}
+                                                <p class="text-xs text-gray-500 truncate">{{ file.description }}</p>
+                                            {% endif %}
+                                            <div class="flex items-center text-xs text-gray-400 mt-1">
+                                                <span>جلسه: {{ file.session.title or 'بدون عنوان' }}</span>
+                                                <span class="mx-2">•</span>
+                                                <span>{{ (file.file_size / 1024)|round|int }} KB</span>
+                                                <span class="mx-2">•</span>
+                                                <span>{{ file.download_count }} دانلود</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <a href="{{ url_for('download_session_file', file_id=file.id) }}" 
+                                       class="btn btn-secondary text-sm">
+                                        <i class="fas fa-download ml-2"></i>
+                                        دانلود
+                                    </a>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            {% else %}
+                <div class="card text-center py-8">
+                    <i class="fas fa-file-audio text-4xl text-gray-300 mb-3"></i>
+                    <p class="text-gray-600">هیچ فایلی برای جلسات آپلود نشده است</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

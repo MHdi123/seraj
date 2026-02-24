@@ -1,0 +1,112 @@
+<!-- templates/staff/pending_users.html -->
+{% extends "base.html" %}
+
+{% block title %}کاربران در انتظار تأیید - سِراج{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto">
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-2xl font-bold">کاربران در انتظار تأیید</h1>
+        <div class="flex space-x-2 space-x-reverse">
+            <select id="type-filter" class="border rounded-lg px-4 py-2" onchange="filterUsers()">
+                <option value="all">همه کاربران</option>
+                <option value="professor">اساتید</option>
+                <option value="staff">کارمندان</option>
+            </select>
+        </div>
+    </div>
+    
+    {% if users.items %}
+        <div class="bg-white rounded-lg shadow overflow-hidden">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">کاربر</th>
+                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">نوع کاربر</th>
+                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">اطلاعات تماس</th>
+                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">تاریخ ثبت‌نام</th>
+                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">عملیات</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    {% for user in users.items %}
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-6 py-4">
+                            <div class="flex items-center">
+                                <div class="flex-shrink-0 h-10 w-10 bg-gray-200 rounded-full flex items-center justify-center">
+                                    <i class="fas fa-user text-gray-500"></i>
+                                </div>
+                                <div class="mr-4">
+                                    <div class="text-sm font-medium text-gray-900">{{ user.full_name }}</div>
+                                    <div class="text-sm text-gray-500">{{ user.username }}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4">
+                            {% if user.user_type == 'professor' %}
+                                <span class="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs">استاد</span>
+                                {% if user.academic_rank %}
+                                <div class="text-xs text-gray-500 mt-1">{{ user.get_academic_rank_display() }}</div>
+                                {% endif %}
+                            {% elif user.user_type == 'staff' %}
+                                <span class="px-2 py-1 bg-purple-100 text-purple-800 rounded-full text-xs">کارمند</span>
+                                {% if user.department %}
+                                <div class="text-xs text-gray-500 mt-1">{{ user.department }}</div>
+                                {% endif %}
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4">
+                            <div class="text-sm text-gray-900">{{ user.email }}</div>
+                            <div class="text-sm text-gray-500">{{ user.phone }}</div>
+                        </td>
+                        <td class="px-6 py-4 text-sm text-gray-500">
+                            {{ user.created_at|persian_datetime }}
+                        </td>
+                        <td class="px-6 py-4 text-sm font-medium">
+                            <div class="flex space-x-2 space-x-reverse">
+                                <a href="{{ url_for('staff_user_detail', user_id=user.id) }}" 
+                                   class="text-blue-600 hover:text-blue-900 ml-3" title="مشاهده جزئیات">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                <a href="{{ url_for('staff_verify_user', user_id=user.id) }}" 
+                                   class="text-green-600 hover:text-green-900 ml-3" title="تأیید کاربر"
+                                   onclick="return confirm('آیا از تأیید این کاربر اطمینان دارید؟');">
+                                    <i class="fas fa-check"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- Pagination -->
+        {% if users.pages > 1 %}
+        <div class="flex justify-center mt-6">
+            <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px">
+                {% for page in range(1, users.pages + 1) %}
+                    <a href="{{ url_for('staff_pending_users', page=page, type=user_type) }}" 
+                       class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 {% if page == users.page %}bg-blue-50 text-blue-600{% endif %}">
+                        {{ page }}
+                    </a>
+                {% endfor %}
+            </nav>
+        </div>
+        {% endif %}
+    {% else %}
+        <div class="bg-white rounded-lg shadow p-8 text-center">
+            <i class="fas fa-check-circle text-green-500 text-5xl mb-4"></i>
+            <h3 class="text-lg font-medium text-gray-900 mb-2">کاربری در انتظار تأیید نیست</h3>
+            <p class="text-gray-500">همه درخواست‌ها بررسی شده‌اند.</p>
+        </div>
+    {% endif %}
+</div>
+
+<script>
+function filterUsers() {
+    const type = document.getElementById('type-filter').value;
+    window.location.href = "{{ url_for('staff_pending_users') }}?type=" + type;
+}
+</script>
+{% endblock %}

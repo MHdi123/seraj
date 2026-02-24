@@ -1,0 +1,359 @@
+{% extends "base.html" %}
+
+{% block title %}{{ session.title or 'جلسه' }} - {{ circle.name }} - سِراج{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto">
+    <!-- Header -->
+    <div class="mb-8">
+        <div class="flex items-center mb-4">
+            <a href="{{ url_for('circle_sessions', circle_id=circle.id) }}" class="text-gray-600 hover:text-gray-900 ml-4">
+                <i class="fas fa-arrow-right"></i>
+            </a>
+            <div>
+                <h1 class="text-3xl font-bold mb-2">{{ session.title or 'جلسه حلقه تلاوت' }}</h1>
+                <p class="text-gray-600">{{ circle.name }} - جلسه {{ session.session_date|persian_date }}</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- Main Content -->
+        <div class="lg:col-span-2 space-y-6">
+            <!-- Session Info -->
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="text-xl font-bold">اطلاعات جلسه</h2>
+                </div>
+                <div class="card-body">
+                    <div class="grid grid-cols-2 gap-4 mb-6">
+                        <div>
+                            <div class="text-sm text-gray-500 mb-1">تاریخ برگزاری</div>
+                            <div class="font-medium">{{ session.session_date|persian_date }}</div>
+                        </div>
+                        <div>
+                            <div class="text-sm text-gray-500 mb-1">زمان</div>
+                            <div class="font-medium">{{ session.start_time or '--' }} تا {{ session.end_time or '--' }}</div>
+                        </div>
+                        <div>
+                            <div class="text-sm text-gray-500 mb-1">موضوع</div>
+                            <div class="font-medium">{{ session.topic or 'عمومی' }}</div>
+                        </div>
+                        <div>
+                            <div class="text-sm text-gray-500 mb-1">حاضرین</div>
+                            <div class="font-medium">{{ session.attendance_count }} نفر</div>
+                        </div>
+                    </div>
+                    
+                    {% if session.description %}
+                        <div class="mb-6">
+                            <div class="text-sm text-gray-500 mb-2">توضیحات</div>
+                            <p class="text-gray-700">{{ session.description }}</p>
+                        </div>
+                    {% endif %}
+                    
+                    {% if session.verses_reviewed %}
+                        <div class="mb-6">
+                            <div class="text-sm text-gray-500 mb-2">آیات تلاوت شده</div>
+                            <div class="bg-green-50 p-4 rounded-lg text-gray-700">
+                                {{ session.verses_reviewed }}
+                            </div>
+                        </div>
+                    {% endif %}
+                    
+                    {% if session.notes %}
+                        <div class="mb-6">
+                            <div class="text-sm text-gray-500 mb-2">نکات جلسه</div>
+                            <div class="bg-yellow-50 p-4 rounded-lg text-gray-700">
+                                {{ session.notes }}
+                            </div>
+                        </div>
+                    {% endif %}
+                    
+                    {% if session.homework %}
+                        <div>
+                            <div class="text-sm text-gray-500 mb-2">تکلیف جلسه بعد</div>
+                            <div class="bg-blue-50 p-4 rounded-lg text-gray-700">
+                                {{ session.homework }}
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Attendance List (for teachers/admins) -->
+            {% if current_user.is_admin() %}
+                <div class="card">
+                    <div class="card-header flex justify-between items-center">
+                        <h2 class="text-xl font-bold">حضور و غیاب</h2>
+                        <button onclick="showAttendanceForm()" class="btn btn-primary text-sm">
+                            <i class="fas fa-edit ml-2"></i>
+                            ثبت حضور
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-gray-200">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th class="px-4 py-2 text-right text-xs font-medium text-gray-500">عضو</th>
+                                        <th class="px-4 py-2 text-right text-xs font-medium text-gray-500">وضعیت</th>
+                                        <th class="px-4 py-2 text-right text-xs font-medium text-gray-500">تأخیر</th>
+                                        <th class="px-4 py-2 text-right text-xs font-medium text-gray-500">علت غیبت</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="bg-white divide-y divide-gray-200">
+                                    {% for member in circle.members.filter_by(is_active=True).all() %}
+                                        {% set attendance = session.attendances.filter_by(member_id=member.id).first() %}
+                                        <tr>
+                                            <td class="px-4 py-2">
+                                                <div class="font-medium">{{ member.user.full_name }}</div>
+                                                <div class="text-xs text-gray-500">{{ member.user.email }}</div>
+                                            </td>
+                                            <td class="px-4 py-2">
+                                                {% if attendance and attendance.attended %}
+                                                    <span class="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs">
+                                                        حضور
+                                                    </span>
+                                                {% elif attendance %}
+                                                    <span class="px-2 py-1 bg-red-100 text-red-800 rounded-full text-xs">
+                                                        غایب
+                                                    </span>
+                                                {% else %}
+                                                    <span class="px-2 py-1 bg-gray-100 text-gray-800 rounded-full text-xs">
+                                                        ثبت نشده
+                                                    </span>
+                                                {% endif %}
+                                            </td>
+                                            <td class="px-4 py-2 text-sm text-gray-600">
+                                                {{ attendance.late_minutes if attendance and attendance.late_minutes else '-' }} دقیقه
+                                            </td>
+                                            <td class="px-4 py-2 text-sm text-gray-600">
+                                                {{ attendance.excuse if attendance and attendance.excuse else '-' }}
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+        
+        <!-- Sidebar -->
+        <div class="space-y-6">
+            <!-- Session Files -->
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="text-xl font-bold">فایل‌های جلسه</h2>
+                </div>
+                <div class="card-body">
+                    {% if files %}
+                        <div class="space-y-3">
+                            {% for file in files %}
+                                <div class="flex items-center justify-between p-2 hover:bg-gray-50 rounded-lg">
+                                    <div class="flex items-center overflow-hidden">
+                                        <i class="fas fa-{{ 'file-pdf' if file.file_type == 'pdf' else 'file-audio' if file.file_type in ['mp3', 'wav'] else 'file-video' if file.file_type in ['mp4', 'mov'] else 'file' }} ml-3 text-gray-500"></i>
+                                        <div class="overflow-hidden">
+                                            <a href="{{ url_for('download_session_file', file_id=file.id) }}" 
+                                               class="text-sm font-medium hover:text-blue-600 truncate block">
+                                                {{ file.title }}
+                                            </a>
+                                            <span class="text-xs text-gray-500">{{ (file.file_size / 1024)|round|int }} KB</span>
+                                        </div>
+                                    </div>
+                                    <span class="text-xs text-gray-500">{{ file.download_count }} دانلود</span>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="text-center text-gray-500 py-4">فایلی برای این جلسه آپلود نشده است</p>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Session Info Card -->
+            <div class="card bg-green-50">
+                <div class="card-body">
+                    <h3 class="font-bold mb-3">اطلاعات جلسه</h3>
+                    <ul class="space-y-2 text-sm">
+                        <li class="flex items-center">
+                            <i class="fas fa-calendar ml-2 text-green-600 w-5"></i>
+                            <span>{{ session.session_date|persian_date }}</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-clock ml-2 text-green-600 w-5"></i>
+                            <span>{{ session.start_time or '--' }} تا {{ session.end_time or '--' }}</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-map-marker-alt ml-2 text-green-600 w-5"></i>
+                            <span>{{ circle.location if circle.location else 'آنلاین' }}</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-user-graduate ml-2 text-green-600 w-5"></i>
+                            <span>استاد: {{ circle.teacher_name }}</span>
+                        </li>
+                    </ul>
+                    
+                    {% if circle.is_online and circle.online_link %}
+                        <a href="{{ circle.online_link }}" target="_blank" 
+                           class="mt-4 block text-center bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700">
+                            <i class="fas fa-video ml-2"></i>
+                            ورود به جلسه آنلاین
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Navigation -->
+            <div class="card">
+                <div class="card-body">
+                    <div class="space-y-2">
+                        <a href="{{ url_for('circle_sessions', circle_id=circle.id) }}" 
+                           class="block text-center btn btn-secondary">
+                            <i class="fas fa-calendar-alt ml-2"></i>
+                            همه جلسات
+                        </a>
+                        
+                        <a href="{{ url_for('circle_detail', circle_id=circle.id) }}" 
+                           class="block text-center btn btn-secondary">
+                            <i class="fas fa-info-circle ml-2"></i>
+                            صفحه حلقه
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Attendance Modal (for teachers/admins) -->
+{% if current_user.is_admin() %}
+<div id="attendanceModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+    <div class="bg-white rounded-xl max-w-2xl w-full max-h-[80vh] overflow-y-auto">
+        <div class="p-6">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-bold">ثبت حضور و غیاب جلسه {{ session.title or '' }}</h3>
+                <button onclick="hideAttendanceForm()" class="text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            
+            <form id="attendanceForm">
+                <div class="space-y-4">
+                    {% for member in circle.members.filter_by(is_active=True).all() %}
+                        <div class="border border-gray-200 rounded-lg p-4">
+                            <div class="flex justify-between items-center mb-3">
+                                <div>
+                                    <span class="font-medium">{{ member.user.full_name }}</span>
+                                    <span class="text-sm text-gray-500 mr-3">{{ member.user.email }}</span>
+                                </div>
+                                <label class="flex items-center">
+                                    <input type="checkbox" 
+                                           class="attendance-checkbox w-5 h-5 text-green-600 rounded"
+                                           data-member-id="{{ member.id }}"
+                                           {% if session.attendances.filter_by(member_id=member.id, attended=True).first() %}checked{% endif %}>
+                                    <span class="mr-2">حاضر</span>
+                                </label>
+                            </div>
+                            
+                            <div class="grid grid-cols-2 gap-4 attendance-details {% if not session.attendances.filter_by(member_id=member.id, attended=True).first() %}hidden{% endif %}">
+                                <div>
+                                    <label class="block text-sm text-gray-600 mb-1">دقیقه تأخیر</label>
+                                    <input type="number" 
+                                           class="late-minutes w-full px-3 py-2 border border-gray-300 rounded-lg"
+                                           data-member-id="{{ member.id }}"
+                                           min="0" 
+                                           value="{{ session.attendances.filter_by(member_id=member.id).first().late_minutes if session.attendances.filter_by(member_id=member.id).first() else 0 }}">
+                                </div>
+                                <div>
+                                    <label class="block text-sm text-gray-600 mb-1">علت غیبت</label>
+                                    <input type="text" 
+                                           class="excuse w-full px-3 py-2 border border-gray-300 rounded-lg"
+                                           data-member-id="{{ member.id }}"
+                                           placeholder="در صورت غیبت"
+                                           value="{{ session.attendances.filter_by(member_id=member.id).first().excuse if session.attendances.filter_by(member_id=member.id).first() and not session.attendances.filter_by(member_id=member.id).first().attended else '' }}">
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+                
+                <div class="flex justify-end space-x-3 space-x-reverse mt-6">
+                    <button type="button" onclick="hideAttendanceForm()" 
+                            class="px-6 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200">
+                        انصراف
+                    </button>
+                    <button type="submit" 
+                            class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
+                        ذخیره حضور و غیاب
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+function showAttendanceForm() {
+    document.getElementById('attendanceModal').classList.remove('hidden');
+    document.getElementById('attendanceModal').classList.add('flex');
+}
+
+function hideAttendanceForm() {
+    document.getElementById('attendanceModal').classList.add('hidden');
+    document.getElementById('attendanceModal').classList.remove('flex');
+}
+
+document.querySelectorAll('.attendance-checkbox').forEach(checkbox => {
+    checkbox.addEventListener('change', function() {
+        const details = this.closest('.border').querySelector('.attendance-details');
+        if (this.checked) {
+            details.classList.remove('hidden');
+            details.querySelector('.late-minutes').value = 0;
+            details.querySelector('.excuse').value = '';
+        } else {
+            details.classList.add('hidden');
+            details.querySelector('.late-minutes').value = 0;
+            details.querySelector('.excuse').value = '';
+        }
+    });
+});
+
+document.getElementById('attendanceForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const attendances = [];
+    
+    document.querySelectorAll('.border').forEach(item => {
+        const memberId = item.querySelector('.attendance-checkbox').dataset.memberId;
+        const attended = item.querySelector('.attendance-checkbox').checked;
+        const lateMinutes = attended ? (item.querySelector('.late-minutes').value || 0) : 0;
+        const excuse = !attended ? (item.querySelector('.excuse').value || '') : '';
+        
+        attendances.push({
+            member_id: parseInt(memberId),
+            attended: attended,
+            late_minutes: parseInt(lateMinutes) || 0,
+            excuse: excuse
+        });
+    });
+    
+    // ارسال به سرور
+    Promise.all(attendances.map(data => 
+        fetch('{{ url_for("mark_attendance", session_id=session.id) }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        })
+    )).then(() => {
+        hideAttendanceForm();
+        location.reload();
+    });
+});
+</script>
+{% endif %}
+{% endblock %}

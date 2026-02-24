@@ -1,0 +1,244 @@
+{% extends "base.html" %}
+
+{% block title %}مدیریت کاربران - سِراج{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto">
+    <!-- Header -->
+    <div class="mb-8 flex justify-between items-center">
+        <div>
+            <h1 class="text-3xl font-bold mb-2">مدیریت کاربران</h1>
+            <p class="text-gray-600">مشاهده و مدیریت کاربران سیستم سِراج</p>
+        </div>
+        <span class="bg-blue-100 text-blue-800 px-4 py-2 rounded-full text-sm font-medium">
+            <i class="fas fa-users ml-2"></i>
+            تعداد کل: {{ users|length }} کاربر
+        </span>
+    </div>
+    
+    <!-- Filters -->
+    <div class="card mb-6">
+        <div class="card-body">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">جستجوی کاربر</label>
+                    <input type="text" id="searchUser" placeholder="نام کاربری، ایمیل، نام..." 
+                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">فیلتر نقش</label>
+                    <select id="roleFilter" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        <option value="all">همه نقش‌ها</option>
+                        <option value="admin">مدیر</option>
+                        <option value="manager">مسئول</option>
+                        <option value="participant">دانشجو</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">فیلتر وضعیت</label>
+                    <select id="statusFilter" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        <option value="all">همه وضعیت‌ها</option>
+                        <option value="active">فعال</option>
+                        <option value="inactive">غیرفعال</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Users Table -->
+    <div class="card">
+        <div class="card-body">
+            {% if users %}
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">کاربر</th>
+                                <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">اطلاعات تماس</th>
+                                <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">دانشگاه</th>
+                                <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">نقش</th>
+                                <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">وضعیت</th>
+                                <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">عضویت</th>
+                                <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">عملیات</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            {% for user in users %}
+                                <tr class="hover:bg-gray-50">
+                                    <td class="px-4 py-4 whitespace-nowrap">
+                                        <div class="flex items-center">
+                                            <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center ml-3">
+                                                <i class="fas fa-user text-blue-600"></i>
+                                            </div>
+                                            <div>
+                                                <div class="font-medium text-gray-900">{{ user.full_name }}</div>
+                                                <div class="text-sm text-gray-500">@{{ user.username }}</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="px-4 py-4 whitespace-nowrap">
+                                        <div class="text-sm text-gray-900">{{ user.email }}</div>
+                                        <div class="text-xs text-gray-500">{{ user.phone if user.phone else 'بدون شماره' }}</div>
+                                    </td>
+                                    <td class="px-4 py-4 whitespace-nowrap">
+                                        <div class="text-sm text-gray-900">{{ user.university if user.university else 'نامشخص' }}</div>
+                                        <div class="text-xs text-gray-500">{{ user.faculty if user.faculty else '' }}</div>
+                                    </td>
+                                    <td class="px-4 py-4 whitespace-nowrap">
+                                        <span class="px-2 py-1 text-xs rounded-full 
+                                            {% if user.role.value == 'admin' %}
+                                                bg-purple-100 text-purple-800
+                                            {% elif user.role.value == 'manager' %}
+                                                bg-blue-100 text-blue-800
+                                            {% else %}
+                                                bg-green-100 text-green-800
+                                            {% endif %}">
+                                            {% if user.role.value == 'admin' %}
+                                                <i class="fas fa-crown ml-1"></i> مدیر
+                                            {% elif user.role.value == 'manager' %}
+                                                <i class="fas fa-user-tie ml-1"></i> مسئول
+                                            {% else %}
+                                                <i class="fas fa-user-graduate ml-1"></i> دانشجو
+                                            {% endif %}
+                                        </span>
+                                    </td>
+                                    <td class="px-4 py-4 whitespace-nowrap">
+                                        <span class="px-2 py-1 text-xs rounded-full 
+                                            {% if user.is_active %}
+                                                bg-green-100 text-green-800
+                                            {% else %}
+                                                bg-red-100 text-red-800
+                                            {% endif %}">
+                                            <i class="fas fa-circle ml-1 text-2xs"></i>
+                                            {{ 'فعال' if user.is_active else 'غیرفعال' }}
+                                        </span>
+                                    </td>
+                                    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        {{ user.created_at.strftime('%Y/%m/%d') }}
+                                    </td>
+                                    <td class="px-4 py-4 whitespace-nowrap text-sm font-medium">
+                                        <div class="flex space-x-2 space-x-reverse">
+                                            {% if user.id != current_user.id %}
+                                                <!-- استفاده از لینک مستقیم به جای onclick -->
+                                                <a href="/admin/user/toggle/{{ user.id }}" 
+                                                   class="px-3 py-1 {% if user.is_active %}bg-red-100 text-red-700 hover:bg-red-200{% else %}bg-green-100 text-green-700 hover:bg-green-200{% endif %} rounded-lg text-xs transition-colors"
+                                                    onclick="return confirm(this.dataset.msg);"
+                                                    data-msg="آیا از {{ 'غیرفعال' if user.is_active else 'فعال' }} کردن این کاربر مطمئن هستید؟"
+                                                    <i class="fas fa-{{ 'ban' if user.is_active else 'check' }} ml-1"></i>
+                                                    {{ 'غیرفعال' if user.is_active else 'فعال' }}
+                                                </a>
+                                            {% else %}
+                                                <span class="px-3 py-1 bg-gray-100 text-gray-500 rounded-lg text-xs">
+                                                    <i class="fas fa-user-shield ml-1"></i>
+                                                    خودتان
+                                                </span>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="text-center py-12">
+                    <div class="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-users-slash text-gray-400 text-3xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-700 mb-2">هیچ کاربری وجود ندارد</h3>
+                    <p class="text-gray-600">هنوز کاربری ثبت‌نام نکرده است.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+// فیلتر کردن کاربران - بدون هیچ Jinja2 درون جاوااسکریپت
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('searchUser');
+    const roleFilter = document.getElementById('roleFilter');
+    const statusFilter = document.getElementById('statusFilter');
+    
+    if (searchInput && roleFilter && statusFilter) {
+        function filterUsers() {
+            const searchTerm = searchInput.value.toLowerCase();
+            const roleValue = roleFilter.value;
+            const statusValue = statusFilter.value;
+            
+            const rows = document.querySelectorAll('tbody tr');
+            
+            rows.forEach(row => {
+                const username = row.querySelector('td:first-child .text-gray-500')?.textContent?.toLowerCase() || '';
+                const email = row.querySelector('td:nth-child(2) .text-gray-900')?.textContent?.toLowerCase() || '';
+                const fullname = row.querySelector('td:first-child .font-medium')?.textContent?.toLowerCase() || '';
+                
+                // نقش
+                const roleSpan = row.querySelector('td:nth-child(4) span');
+                const role = roleSpan?.textContent?.includes('مدیر') ? 'admin' : 
+                            roleSpan?.textContent?.includes('مسئول') ? 'manager' : 'participant';
+                
+                // وضعیت
+                const statusSpan = row.querySelector('td:nth-child(5) span');
+                const status = statusSpan?.textContent?.includes('فعال') ? 'active' : 'inactive';
+                
+                let show = true;
+                
+                // جستجو
+                if (searchTerm) {
+                    show = username.includes(searchTerm) || 
+                           email.includes(searchTerm) || 
+                           fullname.includes(searchTerm);
+                }
+                
+                // فیلتر نقش
+                if (show && roleValue !== 'all') {
+                    show = role === roleValue;
+                }
+                
+                // فیلتر وضعیت
+                if (show && statusValue !== 'all') {
+                    show = status === statusValue;
+                }
+                
+                row.style.display = show ? '' : 'none';
+            });
+        }
+        
+        searchInput.addEventListener('input', filterUsers);
+        roleFilter.addEventListener('change', filterUsers);
+        statusFilter.addEventListener('change', filterUsers);
+    }
+});
+</script>
+
+<style>
+.text-2xs {
+    font-size: 0.65rem;
+}
+
+/* ریسپانسیو */
+@media (max-width: 768px) {
+    .px-4.py-4 {
+        padding: 0.5rem;
+    }
+    
+    .flex.space-x-2 {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .flex.space-x-2 a,
+    .flex.space-x-2 span {
+        width: 100%;
+        margin: 0 !important;
+        text-align: center;
+    }
+    
+    .overflow-x-auto {
+        overflow-x: auto;
+    }
+}
+</style>
+{% endblock %}

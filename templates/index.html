@@ -1,0 +1,248 @@
+{% extends "base.html" %}
+
+{% block title %}خانه - سِراج{% endblock %}
+
+{% block content %}
+<!-- Hero Section با طراحی کاملاً ریسپانسیو -->
+<section class="mb-12 sm:mb-16 lg:mb-24">
+    <div class="bg-gradient-to-br from-blue-700 via-blue-800 to-indigo-900 
+                rounded-2xl lg:rounded-3xl 
+                px-8 sm:px-12 lg:px-20 
+                py-12 sm:py-16 lg:py-24 
+                text-white">
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16 items-center">
+
+            <!-- متن اصلی -->
+            <div class="lg:col-span-6 space-y-7 text-center lg:text-right">
+
+                <h1 class="text-3xl sm:text-4xl lg:text-5xl font-bold leading-snug">
+                    <span class="text-yellow-300 block mb-4">
+                        پلتفرم مدیریت
+                    </span>
+
+                    <span class="text-white drop-shadow-lg">
+                        فعالیت‌های قرآنی دانشگاهی
+                    </span>
+                </h1>
+
+                <p class="text-lg text-blue-100/90 leading-relaxed max-w-xl mx-auto lg:mx-0">
+                    سِراج بستری یکپارچه برای سازماندهی، مدیریت و توسعه برنامه‌های قرآنی در محیط دانشگاه است. 
+                    با ما در راه نورانی قرآن همراه شوید.
+                </p>
+
+                <div class="flex flex-wrap gap-4 justify-center lg:justify-start pt-4">
+                    {% if not current_user.is_authenticated %}
+                        <a href="{{ url_for('register') }}" 
+                           class="btn bg-white text-blue-800 hover:bg-gray-100 
+                                  px-8 py-4 text-base font-bold
+                                  shadow-xl hover:shadow-2xl 
+                                  transform hover:scale-105 transition-all">
+                            <i class="fas fa-user-plus ml-2"></i>
+                            ثبت‌نام 
+                        </a>
+                    {% endif %}
+                    
+                    <a href="{{ url_for('events_list') }}" 
+                       class="btn border-2 border-white text-white 
+                              hover:bg-white hover:text-blue-800 
+                              px-8 py-4 text-base font-bold
+                              transform hover:scale-105 transition-all">
+                        <i class="fas fa-calendar-alt ml-2"></i>
+                        مشاهده رویدادها
+                    </a>
+                </div>
+            </div>
+
+            <!-- آیه روز -->
+            {% if daily_verse %}
+            <div class="lg:col-span-6 relative max-w-lg mx-auto lg:mx-0">
+
+                <div class="bg-white/10 backdrop-blur-md 
+                            rounded-3xl 
+                            p-8 lg:p-10 
+                            border border-white/20 
+                            shadow-2xl
+                            transition-all duration-500">
+
+                    <i class="fas fa-quote-right absolute -top-3 -right-3 text-white/20 text-4xl"></i>
+
+                    <p class="text-xl lg:text-2xl text-center leading-relaxed font-semibold px-4">
+                        {{ daily_verse.verse }}
+                    </p>
+
+                    <div class="flex justify-between items-center mt-8 pt-5 border-t border-white/30">
+                        <p class="text-base font-medium">
+                            <i class="fas fa-book-open ml-2"></i>
+                            {{ daily_verse.surah }}
+                        </p>
+
+                        <p class="text-sm bg-white/20 px-4 py-1.5 rounded-full">
+                            <i class="fas fa-calendar ml-2"></i>
+                            {{ current_date|persian_date }}
+                        </p>
+                    </div>
+                </div>
+
+
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</section>
+
+
+<!-- آمار با کارت‌های ریسپانسیو -->
+<section class="mb-10 sm:mb-12 lg:mb-16">
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
+        
+        <div class="card p-4 sm:p-6 text-center hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
+            <div class="w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-3 sm:mb-4 shadow-lg">
+                <i class="fas fa-users text-white text-xl sm:text-2xl"></i>
+            </div>
+            <h3 class="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-800 mb-1">
+                {{ active_students|default('۰')|persian_number }}
+            </h3>
+            <p class="text-xs sm:text-sm text-gray-600">دانشجوی فعال</p>
+        </div>
+        
+        <div class="card p-4 sm:p-6 text-center hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
+            <div class="w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-br from-green-500 to-green-600 rounded-2xl flex items-center justify-center mx-auto mb-3 sm:mb-4 shadow-lg">
+                <i class="fas fa-calendar-check text-white text-xl sm:text-2xl"></i>
+            </div>
+            <h3 class="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-800 mb-1">
+                {{ events_count|default('۰')|persian_number }}
+            </h3>
+            <p class="text-xs sm:text-sm text-gray-600">رویداد برگزار شده</p>
+        </div>
+        
+        <div class="card p-4 sm:p-6 text-center hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
+            <div class="w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-br from-purple-500 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-3 sm:mb-4 shadow-lg">
+                <i class="fas fa-trophy text-white text-xl sm:text-2xl"></i>
+            </div>
+            <h3 class="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-800 mb-1">
+                {{ competitions_count|default('۰')|persian_number }}
+            </h3>
+            <p class="text-xs sm:text-sm text-gray-600">مسابقه قرآنی</p>
+        </div>
+        
+        <div class="card p-4 sm:p-6 text-center hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
+            <div class="w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-br from-yellow-500 to-yellow-600 rounded-2xl flex items-center justify-center mx-auto mb-3 sm:mb-4 shadow-lg">
+                <i class="fas fa-graduation-cap text-white text-xl sm:text-2xl"></i>
+            </div>
+            <h3 class="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-800 mb-1">
+                {{ workshops_count|default('۰')|persian_number }}
+            </h3>
+            <p class="text-xs sm:text-sm text-gray-600">کارگاه آموزشی</p>
+        </div>
+    </div>
+</section>
+
+<!-- رویدادهای پیش‌رو -->
+<section class="mb-10 sm:mb-12 lg:mb-16">
+    <div class="flex flex-col sm:flex-row justify-between items-center mb-6">
+        <h2 class="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-800 mb-3 sm:mb-0">
+            <i class="fas fa-calendar-star text-blue-600 ml-2"></i>
+            رویدادهای پیش‌رو
+        </h2>
+        <a href="{{ url_for('events_list') }}" class="text-blue-600 hover:text-blue-800 flex items-center group">
+            <span>مشاهده همه</span>
+            <i class="fas fa-arrow-left mr-2 group-hover:translate-x-1 transition-transform"></i>
+        </a>
+    </div>
+    
+    {% if events %}
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
+            {% for event in events %}
+                <div class="card group hover:shadow-2xl transition-all duration-300 hover:-translate-y-2">
+                    <!-- بخش هدر با رنگ‌بندی -->
+                    <div class="h-24 bg-gradient-to-r from-blue-600 to-blue-700 relative overflow-hidden">
+                        <div class="absolute inset-0 bg-black opacity-20"></div>
+                        <div class="absolute -right-8 -top-8 w-24 h-24 bg-white/10 rounded-full"></div>
+                        <div class="absolute -left-8 -bottom-8 w-24 h-24 bg-white/10 rounded-full"></div>
+                        
+                        <div class="relative p-4">
+                            <div class="flex justify-between items-start">
+                                <span class="badge badge-{{ event.event_type.value }} text-xs px-3 py-1">
+                                    {% if event.event_type.value == 'workshop' %}
+                                        <i class="fas fa-chalkboard-teacher ml-1"></i> کارگاه
+                                    {% elif event.event_type.value == 'competition' %}
+                                        <i class="fas fa-trophy ml-1"></i> مسابقه
+                                    {% elif event.event_type.value == 'halaqah' %}
+                                        <i class="fas fa-users ml-1"></i> حلقه
+                                    {% elif event.event_type.value == 'lecture' %}
+                                        <i class="fas fa-microphone ml-1"></i> سخنرانی
+                                    {% endif %}
+                                </span>
+                                
+                                {% if event.is_full() %}
+                                    <span class="bg-red-500 text-white text-xs px-2 py-1 rounded-full animate-pulse">
+                                        تکمیل ظرفیت
+                                    </span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="p-4">
+                        <h3 class="font-bold text-base sm:text-lg mb-2 group-hover:text-blue-600 transition-colors line-clamp-2">
+                            {{ event.title }}
+                        </h3>
+                        
+                        <p class="text-gray-600 text-sm mb-4 line-clamp-2">
+                            {{ event.description|truncate(80) }}
+                        </p>
+                        
+                        <div class="space-y-2 text-sm mb-4">
+                            <div class="flex items-center text-gray-600">
+                                <i class="fas fa-calendar ml-2 text-blue-500 w-4"></i>
+                                <span>{{ event.start_date|persian_date }}</span>
+                            </div>
+                            <div class="flex items-center text-gray-600">
+                                <i class="fas fa-clock ml-2 text-blue-500 w-4"></i>
+                                <span>{{ event.start_date.strftime('%H:%M') }}</span>
+                            </div>
+                            {% if event.location %}
+                            <div class="flex items-center text-gray-600">
+                                <i class="fas fa-map-marker-alt ml-2 text-blue-500 w-4"></i>
+                                <span class="truncate">{{ event.location }}</span>
+                            </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="flex justify-between items-center pt-3 border-t border-gray-100">
+                            <div class="text-sm text-gray-500">
+                                <i class="fas fa-users ml-1"></i>
+                                <span class="font-bold">{{ event.current_participants }}</span>
+                                / {{ event.capacity|default('∞') }}
+                            </div>
+                            
+                            <a href="{{ url_for('event_detail', event_id=event.id) }}" 
+                               class="text-blue-600 hover:text-blue-800 flex items-center text-sm font-medium">
+                                جزئیات
+                                <i class="fas fa-chevron-left mr-1 text-xs"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="card p-8 sm:p-12 text-center">
+            <div class="w-20 h-20 sm:w-24 sm:h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i class="fas fa-calendar-times text-gray-400 text-3xl sm:text-4xl"></i>
+            </div>
+            <h3 class="text-lg sm:text-xl font-bold text-gray-700 mb-2">رویدادی برنامه‌ریزی نشده است</h3>
+            <p class="text-gray-600 text-sm sm:text-base mb-4">به زودی رویدادهای جدیدی اضافه خواهند شد.</p>
+            {% if current_user.is_authenticated %}
+                <a href="#" class="text-blue-600 hover:text-blue-800 text-sm font-medium">
+                    تنظیم یادآوری
+                    <i class="fas fa-bell mr-1"></i>
+                </a>
+            {% endif %}
+        </div>
+    {% endif %}
+</section>
+
+
+{% endblock %}

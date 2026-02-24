@@ -1,0 +1,253 @@
+{% extends "base.html" %}
+
+{% block title %}گزارش‌گیری - سِراج{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto">
+    <!-- Header -->
+    <div class="mb-8">
+        <h1 class="text-3xl font-bold mb-2">گزارش‌گیری و آمار</h1>
+        <p class="text-gray-600">آمار و گزارش‌های سیستم سِراج</p>
+    </div>
+    
+    <!-- Stats Cards -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8">
+        <div class="card">
+            <div class="card-body text-center">
+                <div class="text-3xl font-bold text-blue-600 mb-2" id="totalParticipants">0</div>
+                <p class="text-gray-600">کل شرکت‌کنندگان</p>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-body text-center">
+                <div class="text-3xl font-bold text-green-600 mb-2" id="totalEvents">0</div>
+                <p class="text-gray-600">رویدادهای برگزار شده</p>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-body text-center">
+                <div class="text-3xl font-bold text-purple-600 mb-2" id="dailyRegistrations">0</div>
+                <p class="text-gray-600">ثبت‌نام در ۳۰ روز</p>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-body text-center">
+                <div class="text-3xl font-bold text-yellow-600 mb-2" id="avgParticipants">0</div>
+                <p class="text-gray-600">میانگین شرکت‌کنندگان</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Event Participation -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div>
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="text-xl font-bold">پرطرفدارترین رویدادها</h2>
+                </div>
+                <div class="card-body">
+                    {% if event_participation %}
+                    <div class="space-y-4" id="eventList">
+                        {% for item in event_participation %}
+                        <div class="border border-gray-200 rounded-lg p-4 event-item" data-participants="{{ item.participants }}">
+                            <div class="flex justify-between items-center mb-2">
+                                <h3 class="font-medium text-gray-800">{{ item.title }}</h3>
+                                <span class="badge badge-{{ item.event_type_value }}">
+                                    {% if item.event_type_value == 'workshop' %}کارگاه
+                                    {% elif item.event_type_value == 'competition' %}مسابقه
+                                    {% elif item.event_type_value == 'halaqah' %}حلقه تلاوت
+                                    {% elif item.event_type_value == 'lecture' %}سخنرانی
+                                    {% else %}دیگر{% endif %}
+                                </span>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <div class="text-sm text-gray-600">
+                                    <i class="fas fa-users ml-2"></i>
+                                    <span class="participant-count">{{ item.participants }}</span> نفر
+                                </div>
+                                <div class="w-32 bg-gray-200 rounded-full h-2">
+                                    <div class="bg-blue-600 h-2 rounded-full progress-bar"></div>
+                                </div>
+                            </div>
+                            <div class="mt-2 text-xs text-gray-500">
+                                <i class="fas fa-calendar ml-1"></i> {{ item.start_date|persian_date }}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="text-center py-8">
+                        <i class="fas fa-chart-bar text-4xl text-gray-300 mb-3"></i>
+                        <p class="text-gray-600">داده‌ای برای نمایش وجود ندارد</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Daily Registrations -->
+        <div>
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="text-xl font-bold">ثبت‌نام‌های روزانه</h2>
+                </div>
+                <div class="card-body">
+                    {% if daily_registrations %}
+                    <div class="space-y-3" id="dailyList">
+                        {% for day in daily_registrations %}
+                        <div class="flex items-center justify-between day-item" data-count="{{ day.count }}">
+                            <div class="text-sm text-gray-600">{{ day.date }}</div>
+                            <div class="flex items-center">
+                                <div class="w-24 bg-gray-200 rounded-full h-2 ml-3">
+                                    <div class="bg-green-600 h-2 rounded-full day-progress-bar"></div>
+                                </div>
+                                <span class="text-sm font-medium day-count">{{ day.count }} ثبت‌نام</span>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="text-center py-8">
+                        <i class="fas fa-calendar-alt text-4xl text-gray-300 mb-3"></i>
+                        <p class="text-gray-600">داده‌ای برای نمایش وجود ندارد</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- University Statistics -->
+    <div class="mt-8">
+        <div class="card">
+            <div class="card-header">
+                <h2 class="text-xl font-bold">آمار کاربران بر اساس دانشگاه</h2>
+            </div>
+            <div class="card-body">
+                {% if university_stats %}
+                {% set max_university = university_stats|map(attribute='count')|max %}
+                <div class="space-y-3" id="universityList">
+                    {% for uni in university_stats %}
+                    <div class="flex items-center justify-between university-item" data-count="{{ uni.count }}">
+                        <div class="text-sm font-medium text-gray-700">{{ uni.university }}</div>
+                        <div class="flex items-center">
+                            <div class="w-24 bg-gray-200 rounded-full h-2 ml-3">
+                                <div class="bg-purple-600 h-2 rounded-full university-progress-bar"></div>
+                            </div>
+                            <span class="text-sm font-medium">{{ uni.count }} کاربر</span>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="text-center py-8">
+                    <i class="fas fa-university text-4xl text-gray-300 mb-3"></i>
+                    <p class="text-gray-600">داده‌ای برای نمایش وجود ندارد</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Export Options -->
+    <div class="mt-8">
+        <div class="card">
+            <div class="card-header">
+                <h2 class="text-xl font-bold">خروجی گزارش</h2>
+            </div>
+            <div class="card-body">
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <button class="btn btn-secondary" onclick="exportToPDF()">
+                        <i class="fas fa-file-pdf ml-2"></i> خروجی PDF
+                    </button>
+                    <button class="btn btn-secondary" onclick="exportToExcel()">
+                        <i class="fas fa-file-excel ml-2"></i> خروجی Excel
+                    </button>
+                    <button class="btn btn-secondary" onclick="exportToCSV()">
+                        <i class="fas fa-file-csv ml-2"></i> خروجی CSV
+                    </button>
+                    <button class="btn btn-primary" onclick="window.print()">
+                        <i class="fas fa-print ml-2"></i> چاپ گزارش
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// ================== محاسبه و ست کردن نوار پیشرفت ==================
+document.addEventListener('DOMContentLoaded', function() {
+    // Event bars
+    const eventItems = document.querySelectorAll('.event-item');
+    let totalParticipants = 0;
+    let maxParticipants = 0;
+    eventItems.forEach(item => {
+        const count = parseInt(item.dataset.participants || 0);
+        totalParticipants += count;
+        if(count > maxParticipants) maxParticipants = count;
+    });
+    eventItems.forEach(item => {
+        const bar = item.querySelector('.progress-bar');
+        const count = parseInt(item.dataset.participants || 0);
+        if(bar && maxParticipants>0) bar.style.width = Math.round(count/maxParticipants*100) + '%';
+    });
+    document.getElementById('totalParticipants').textContent = totalParticipants;
+    document.getElementById('totalEvents').textContent = eventItems.length;
+    document.getElementById('avgParticipants').textContent = eventItems.length>0 ? Math.round(totalParticipants/eventItems.length) : 0;
+
+    // Daily bars
+    const dayItems = document.querySelectorAll('.day-item');
+    let totalDaily = 0;
+    let maxDaily = 0;
+    dayItems.forEach(item => {
+        const count = parseInt(item.dataset.count || 0);
+        totalDaily += count;
+        if(count>maxDaily) maxDaily=count;
+    });
+    dayItems.forEach(item => {
+        const bar = item.querySelector('.day-progress-bar');
+        const count = parseInt(item.dataset.count || 0);
+        if(bar && maxDaily>0) bar.style.width = Math.round(count/maxDaily*100) + '%';
+    });
+    document.getElementById('dailyRegistrations').textContent = totalDaily;
+
+    // University bars
+    const uniItems = document.querySelectorAll('.university-item');
+    let maxUni = Math.max(...Array.from(uniItems).map(u=>parseInt(u.dataset.count || 0)));
+    uniItems.forEach(item=>{
+        const bar = item.querySelector('.university-progress-bar');
+        const count = parseInt(item.dataset.count || 0);
+        if(bar && maxUni>0) bar.style.width = Math.round(count/maxUni*100) + '%';
+    });
+});
+
+// ================== خروجی‌ها ==================
+function exportToPDF(){ alert('📄 قابلیت خروجی PDF به زودی اضافه می‌شود.'); }
+function exportToExcel(){ alert('📊 قابلیت خروجی Excel به زودی اضافه می‌شود.'); }
+function exportToCSV(){ alert('📑 قابلیت خروجی CSV به زودی اضافه می‌شود.'); }
+</script>
+
+<style>
+.progress-bar, .day-progress-bar, .university-progress-bar {
+    transition: width 0.5s ease-in-out;
+    width: 0;
+}
+.badge {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    border-radius: 9999px;
+}
+.badge-workshop { background-color: #dbeafe; color: #1e40af; }
+.badge-competition { background-color: #dcfce7; color: #166534; }
+.badge-halaqah { background-color: #f3e8ff; color: #6b21a8; }
+.badge-lecture { background-color: #fef9c3; color: #854d0e; }
+.badge-other { background-color: #f1f5f9; color: #334155; }
+
+@media print {
+    .btn, .card-header a, footer, header, .no-print { display: none !important; }
+}
+</style>
+{% endblock %}

@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+
+{% block title %}نصب برنامه - سِراج{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto py-8">
+    
+    <!-- هدر -->
+    <div class="mb-6 text-center">
+        <div class="w-16 h-16 bg-gray-900 rounded-sm flex items-center justify-center mx-auto mb-3">
+            <span class="text-white text-2xl font-bold">س</span>
+        </div>
+        <h1 class="text-xl font-light text-gray-900 mb-2">نصب برنامه سِراج روی دستگاه</h1>
+        <p class="text-xs text-gray-500">با نصب برنامه، دسترسی سریع‌تر و آفلاین به محتوای قرآنی خواهید داشت</p>
+    </div>
+    
+    <!-- راهنما برای سیستعامل‌های مختلف -->
+    <div class="space-y-4 mb-8">
+        
+        <div class="border border-gray-200 p-4">
+            <div class="flex items-center gap-3 mb-3">
+                <div class="w-8 h-8 bg-gray-100 rounded-sm flex items-center justify-center">
+                    <i class="fab fa-android text-gray-700 text-sm"></i>
+                </div>
+                <h2 class="text-sm font-medium">اندروید (مرورگر Chrome)</h2>
+            </div>
+            <div class="space-y-2 pr-11">
+                <p class="text-xs text-gray-600">1. منوی سه نقطه را در مرورگر باز کنید</p>
+                <p class="text-xs text-gray-600">2. گزینه "Add to Home screen" را انتخاب کنید</p>
+                <p class="text-xs text-gray-600">3. روی "Add" کلیک کنید</p>
+            </div>
+        </div>
+        
+        <div class="border border-gray-200 p-4">
+            <div class="flex items-center gap-3 mb-3">
+                <div class="w-8 h-8 bg-gray-100 rounded-sm flex items-center justify-center">
+                    <i class="fab fa-apple text-gray-700 text-sm"></i>
+                </div>
+                <h2 class="text-sm font-medium">آیفون و آیپد (مرورگر Safari)</h2>
+            </div>
+            <div class="space-y-2 pr-11">
+                <p class="text-xs text-gray-600">1. دکمه Share (اشتراک‌گذاری) را بزنید</p>
+                <p class="text-xs text-gray-600">2. گزینه "Add to Home Screen" را انتخاب کنید</p>
+                <p class="text-xs text-gray-600">3. روی "Add" در بالا سمت راست کلیک کنید</p>
+            </div>
+        </div>
+        
+        <div class="border border-gray-200 p-4">
+            <div class="flex items-center gap-3 mb-3">
+                <div class="w-8 h-8 bg-gray-100 rounded-sm flex items-center justify-center">
+                    <i class="fas fa-desktop text-gray-700 text-sm"></i>
+                </div>
+                <h2 class="text-sm font-medium">ویندوز و مک (مرورگر Chrome و Edge)</h2>
+            </div>
+            <div class="space-y-2 pr-11">
+                <p class="text-xs text-gray-600">1. روی آیکون نصب در نوار آدرس کلیک کنید</p>
+                <p class="text-xs text-gray-600">2. گزینه "Install" را انتخاب کنید</p>
+                <p class="text-xs text-gray-600">3. برنامه در منوی Start یا Launchpad اضافه می‌شود</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- ویژگی‌های برنامه -->
+    <div class="border-t border-gray-100 pt-6 mb-6">
+        <h2 class="text-sm font-medium mb-3 text-center">ویژگی‌های برنامه نصب‌شده</h2>
+        <div class="grid grid-cols-2 gap-3">
+            <div class="text-center">
+                <i class="far fa-bolt text-gray-500 text-lg mb-1"></i>
+                <p class="text-2xs text-gray-600">سرعت بیشتر</p>
+            </div>
+            <div class="text-center">
+                <i class="far fa-wifi-slash text-gray-500 text-lg mb-1"></i>
+                <p class="text-2xs text-gray-600">کاربری آفلاین</p>
+            </div>
+            <div class="text-center">
+                <i class="far fa-bell text-gray-500 text-lg mb-1"></i>
+                <p class="text-2xs text-gray-600">اعلان‌ها</p>
+            </div>
+            <div class="text-center">
+                <i class="far fa-mobile text-gray-500 text-lg mb-1"></i>
+                <p class="text-2xs text-gray-600">ظاهر تمام‌صفحه</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- دکمه بازگشت -->
+    <div class="text-center">
+        <a href="{{ url_for('index') }}" class="inline-block text-xs bg-gray-900 text-white px-5 py-2.5 hover:bg-gray-800 transition">
+            بازگشت به صفحه اصلی
+        </a>
+    </div>
+    
+    <!-- نکته -->
+    <p class="text-2xs text-gray-400 text-center mt-6">
+        پس از نصب، آیکون برنامه به صفحه اصلی دستگاه شما اضافه می‌شود
+    </p>
+</div>
+{% endblock %}
