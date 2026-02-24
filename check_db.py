@@ -206,7 +206,15 @@ other_tables = [
     ('notifications', 'اعلان‌ها'),
     ('ai_questions', 'سوالات هوش مصنوعی'),
     ('quran_verses', 'آیات قرآن'),
-    ('password_reset_tokens', 'توکن‌های بازنشانی رمز')
+    ('password_reset_tokens', 'توکن‌های بازنشانی رمز'),
+    ('quran_circles', 'حلقه‌های تلاوت'),
+    ('circle_members', 'اعضای حلقه'),
+    ('circle_sessions', 'جلسات حلقه'),
+    ('session_attendances', 'حضور و غیاب'),
+    ('circle_files', 'فایل‌های حلقه'),
+    ('session_files', 'فایل‌های جلسات'),
+    ('user_fcm_tokens', 'توکن‌های نوتیفیکیشن'),
+    ('verification_logs', 'لاگ تأیید کاربران')
 ]
 
 for table, persian_name in other_tables:
@@ -234,11 +242,14 @@ print("-" * 60)
 issues = []
 
 # بررسی users
-if 'users' in [t[0] for t in cursor.execute("SELECT name FROM sqlite_master WHERE type='table'").fetchall()]:
+all_tables = [t[0] for t in cursor.execute("SELECT name FROM sqlite_master WHERE type='table'").fetchall()]
+if 'users' in all_tables:
     print("✅ جدول users: موجود")
     # بررسی فیلدهای جدید
+    cursor.execute("PRAGMA table_info(users)")
+    user_columns = [col[1] for col in cursor.fetchall()]
     for field in ['landline', 'gender', 'entrance_year', 'degree', 'field_of_study', 'province', 'city']:
-        if field in found_columns:
+        if field in user_columns:
             print(f"   ✅ {field}: موجود")
         else:
             print(f"   ❌ {field}: وجود ندارد")
@@ -248,7 +259,10 @@ else:
     issues.append("جدول users وجود ندارد")
 
 # بررسی events
-if 'events' in [t[0] for t in cursor.execute("SELECT name FROM sqlite_master WHERE type='table'").fetchall()]:
+if 'events' in all_tables:
+    cursor.execute("PRAGMA table_info(events)")
+    event_columns = [col[1] for col in cursor.fetchall()]
+    has_image = 'image' in event_columns
     if has_image:
         print("✅ جدول events: موجود (ستون image: ✅)")
     else:
@@ -259,7 +273,10 @@ else:
     issues.append("جدول events وجود ندارد")
 
 # بررسی registrations
-if 'registrations' in [t[0] for t in cursor.execute("SELECT name FROM sqlite_master WHERE type='table'").fetchall()]:
+if 'registrations' in all_tables:
+    cursor.execute("PRAGMA table_info(registrations)")
+    reg_columns = [col[1] for col in cursor.fetchall()]
+    has_attended = 'attended' in reg_columns
     if has_attended:
         print("✅ جدول registrations: موجود (ستون attended: ✅)")
     else:
