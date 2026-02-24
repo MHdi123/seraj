@@ -1,4 +1,4 @@
-# check_db_complete.py
+# check_db.py
 import sqlite3
 import os
 from datetime import datetime
