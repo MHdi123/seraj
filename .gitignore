@@ -1,43 +1,5 @@
-# ==========================================
-# Script: CleanGitSensitiveFiles.ps1
-# کارکرد: حذف فایل‌ها و پوشه‌های حساس از گیت، آپدیت .gitignore، کامیت و پوش
-# ==========================================
-
-# 1️⃣ مسیر پروژه رو تنظیم کن (پوشه گیت)
-$repoPath = "F:\seraj"
-Set-Location $repoPath
-
-Write-Host "🚀 شروع فرآیند پاکسازی فایل‌های حساس و پوشه‌ها از گیت..." -ForegroundColor Cyan
-
-# 2️⃣ فایل‌ها و پوشه‌هایی که نباید ردیابی بشن
-$ignoreFiles = @(
-    "node_modules",
-    "firebase-adminsdk.json",
-    "*.db",
-    "instance",
-    "static/uploads"
-)
-
-# 3️⃣ حذف فایل‌ها و پوشه‌های ردیابی شده از گیت (cached)
-foreach ($item in $ignoreFiles) {
-    if (Test-Path $item) {
-        Write-Host "🗑️ حذف $item از گیت (cached)" -ForegroundColor Yellow
-        git rm -r --cached $item -f
-    } else {
-        Write-Host "✅ $item وجود ندارد یا قبلاً حذف شده" -ForegroundColor Green
-    }
-}
-
-# 4️⃣ اضافه کردن .gitignore
-Write-Host "📄 اضافه کردن .gitignore" -ForegroundColor Cyan
-git add .gitignore
-
-# 5️⃣ کامیت تغییرات
-Write-Host "💾 ایجاد کامیت" -ForegroundColor Cyan
-git commit -m "Update .gitignore and remove sensitive files from repo"
-
-# 6️⃣ پوش به گیت‌هاب
-Write-Host "📤 پوش کردن تغییرات به گیت‌هاب" -ForegroundColor Cyan
-git push origin main
-
-Write-Host "✅ فرآیند کامل شد! فایل‌ها و پوشه‌های حساس دیگر روی گیت ردیابی نمی‌شوند." -ForegroundColor Green
+node_modules/
+firebase-adminsdk.json
+*.db
+instance/
+static/uploads/
