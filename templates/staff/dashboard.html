@@ -1,1129 +1,294 @@
 {% extends "base.html" %}
 
-{% block title %}داشبورد کارکنان - سِراج{% endblock %}
-
-{% block head %}
-<!-- اضافه کردن انیمیشن‌های CSS -->
-<style>
-    @keyframes fadeInUp {
-        from {
-            opacity: 0;
-            transform: translateY(20px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-    
-    @keyframes pulse {
-        0%, 100% {
-            transform: scale(1);
-        }
-        50% {
-            transform: scale(1.05);
-        }
-    }
-    
-    .fade-in-up {
-        animation: fadeInUp 0.6s ease-out forwards;
-        opacity: 0;
-    }
-    
-    .delay-1 { animation-delay: 0.1s; }
-    .delay-2 { animation-delay: 0.2s; }
-    .delay-3 { animation-delay: 0.3s; }
-    .delay-4 { animation-delay: 0.4s; }
-    
-    .pulse-effect {
-        animation: pulse 2s infinite;
-    }
-    
-    .pulse-effect:hover {
-        animation: pulse 1s infinite;
-    }
-    
-    /* استایل‌های پیشرفته */
-    :root {
-        --primary-color: #4361ee;
-        --success-color: #06d6a0;
-        --warning-color: #ffb703;
-        --danger-color: #ef476f;
-        --info-color: #4cc9f0;
-        --dark-color: #2b2d42;
-        --light-color: #f8f9fa;
-    }
-    
-    .bg-gradient-primary {
-        background: linear-gradient(135deg, var(--primary-color), #3a0ca3);
-    }
-    
-    .bg-gradient-success {
-        background: linear-gradient(135deg, var(--success-color), #118ab2);
-    }
-    
-    .bg-gradient-warning {
-        background: linear-gradient(135deg, #f77f00, var(--warning-color));
-    }
-    
-    .bg-gradient-danger {
-        background: linear-gradient(135deg, #d9042b, var(--danger-color));
-    }
-    
-    .bg-gradient-info {
-        background: linear-gradient(135deg, var(--info-color), #0096c7);
-    }
-    
-    .bg-primary-soft { background-color: rgba(67, 97, 238, 0.1); }
-    .bg-success-soft { background-color: rgba(6, 214, 160, 0.1); }
-    .bg-warning-soft { background-color: rgba(255, 183, 3, 0.1); }
-    .bg-danger-soft { background-color: rgba(239, 71, 111, 0.1); }
-    .bg-info-soft { background-color: rgba(76, 201, 240, 0.1); }
-    .bg-dark-soft { background-color: rgba(43, 45, 66, 0.1); }
-    .bg-secondary-soft { background-color: rgba(108, 117, 125, 0.1); }
-    .bg-white-20 { background-color: rgba(255, 255, 255, 0.2); }
-    
-    .text-white-75 { color: rgba(255, 255, 255, 0.75); }
-    
-    /* استایل کارت‌های آمار */
-    .stat-card {
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        border: 1px solid rgba(0,0,0,0.05);
-        position: relative;
-        overflow: hidden;
-        border-radius: 1rem !important;
-        height: 100%;
-    }
-    
-    .stat-card::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        right: 0;
-        width: 100%;
-        height: 100%;
-        background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1));
-        transform: translateX(-100%);
-        transition: transform 0.6s;
-    }
-    
-    .stat-card:hover::before {
-        transform: translateX(0);
-    }
-    
-    .stat-card:hover {
-        transform: translateY(-5px) scale(1.02);
-        box-shadow: 0 20px 30px -10px rgba(0,0,0,0.2) !important;
-    }
-    
-    .stat-icon-wrapper {
-        width: 60px;
-        height: 60px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border-radius: 1rem;
-        flex-shrink: 0;
-    }
-    
-    /* استایل پیشرفت */
-    .progress {
-        height: 6px;
-        border-radius: 1rem;
-        background-color: #e9ecef;
-        overflow: hidden;
-    }
-    
-    .progress-bar {
-        transition: width 0.6s ease;
-    }
-    
-    /* استایل کارت‌های اصلی */
-    .modern-card {
-        border: none;
-        border-radius: 1.5rem;
-        overflow: hidden;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-        transition: all 0.3s ease;
-        height: 100%;
-    }
-    
-    .modern-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 20px 40px rgba(0,0,0,0.15);
-    }
-    
-    .card-header-modern {
-        padding: 1.25rem 1.5rem;
-        border-bottom: none;
-    }
-    
-    /* استایل دکمه‌ها */
-    .btn-modern {
-        border-radius: 2rem;
-        padding: 0.5rem 1.5rem;
-        font-weight: 500;
-        transition: all 0.3s ease;
-        border: none;
-        white-space: nowrap;
-    }
-    
-    @media (max-width: 768px) {
-        .btn-modern {
-            padding: 0.4rem 1rem;
-            font-size: 0.85rem;
-        }
-    }
-    
-    .btn-modern:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-    }
-    
-    .btn-outline-modern {
-        background: transparent;
-        border: 2px solid currentColor;
-        border-radius: 2rem;
-        padding: 0.4rem 1.2rem;
-        transition: all 0.3s ease;
-    }
-    
-    .btn-outline-modern:hover {
-        transform: scale(1.05);
-    }
-    
-    .hover-scale {
-        transition: transform 0.2s ease;
-    }
-    
-    .hover-scale:hover {
-        transform: scale(1.05);
-    }
-    
-    /* استایل جدول - بهبود یافته برای موبایل */
-    .modern-table {
-        border-collapse: separate;
-        border-spacing: 0 0.5rem;
-        width: 100%;
-    }
-    
-    .modern-table thead th {
-        border: none;
-        background-color: var(--light-color);
-        padding: 1rem;
-        font-weight: 600;
-        color: var(--dark-color);
-        white-space: nowrap;
-    }
-    
-    .modern-table tbody tr {
-        background-color: white;
-        border-radius: 1rem;
-        transition: all 0.3s ease;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-    }
-    
-    .modern-table tbody tr:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 10px 20px rgba(0,0,0,0.1);
-    }
-    
-    .modern-table tbody td {
-        padding: 1rem;
-        border: none;
-        vertical-align: middle;
-    }
-    
-    @media (max-width: 768px) {
-        .modern-table {
-            display: block;
-            overflow-x: auto;
-            white-space: nowrap;
-        }
-        
-        .modern-table tbody td {
-            padding: 0.75rem;
-        }
-    }
-    
-    .modern-table tbody td:first-child {
-        border-top-right-radius: 1rem;
-        border-bottom-right-radius: 1rem;
-    }
-    
-    .modern-table tbody td:last-child {
-        border-top-left-radius: 1rem;
-        border-bottom-left-radius: 1rem;
-    }
-    
-    /* استایل کاربران */
-    .user-avatar {
-        width: 45px;
-        height: 45px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border-radius: 50%;
-        font-weight: bold;
-        color: white;
-        flex-shrink: 0;
-    }
-    
-    @media (max-width: 768px) {
-        .user-avatar {
-            width: 35px;
-            height: 35px;
-            font-size: 0.9rem;
-        }
-    }
-    
-    .badge-modern {
-        padding: 0.5rem 1rem;
-        border-radius: 2rem;
-        font-weight: 500;
-        font-size: 0.8rem;
-        display: inline-block;
-        white-space: nowrap;
-    }
-    
-    /* استایل مودال */
-    .modern-modal .modal-content {
-        border: none;
-        border-radius: 1.5rem;
-        overflow: hidden;
-    }
-    
-    .modern-modal .modal-header {
-        padding: 1.5rem;
-        border: none;
-    }
-    
-    .modern-modal .modal-body {
-        padding: 2rem;
-    }
-    
-    .modern-modal .modal-footer {
-        padding: 1.5rem;
-        border: none;
-        background-color: var(--light-color);
-    }
-    
-    @media (max-width: 576px) {
-        .modern-modal .modal-body {
-            padding: 1.5rem;
-        }
-        
-        .modern-modal .modal-header,
-        .modern-modal .modal-footer {
-            padding: 1rem;
-        }
-    }
-    
-    /* استایل دسترسی سریع */
-    .quick-access-card {
-        text-decoration: none;
-        color: var(--dark-color);
-        display: block;
-        transition: all 0.3s ease;
-        height: 100%;
-    }
-    
-    .quick-access-card .card {
-        border: 2px solid transparent;
-        transition: all 0.3s ease;
-        height: 100%;
-    }
-    
-    .quick-access-card:hover .card {
-        border-color: var(--primary-color);
-        transform: translateY(-5px);
-        box-shadow: 0 15px 30px rgba(67, 97, 238, 0.2) !important;
-    }
-    
-    .quick-access-card .quick-icon {
-        width: 60px;
-        height: 60px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border-radius: 50%;
-        margin: 0 auto 1rem;
-        transition: all 0.3s ease;
-    }
-    
-    @media (max-width: 576px) {
-        .quick-access-card .quick-icon {
-            width: 45px;
-            height: 45px;
-        }
-        
-        .quick-access-card .quick-icon i {
-            font-size: 1.5rem;
-        }
-    }
-    
-    .quick-access-card:hover .quick-icon {
-        transform: rotate(360deg) scale(1.1);
-    }
-    
-    /* استایل تاریخ و زمان */
-    .date-time-display {
-        white-space: nowrap;
-    }
-    
-    @media (max-width: 992px) {
-        .date-time-display {
-            display: none;
-        }
-    }
-    
-    /* استایل گپ و فواصل */
-    .gap-2 {
-        gap: 0.5rem;
-    }
-    
-    .gap-3 {
-        gap: 1rem;
-    }
-    
-    .gap-4 {
-        gap: 1.5rem;
-    }
-    
-    /* استایل برای متن‌های طولانی */
-    .text-truncate-mobile {
-        max-width: 150px;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-    }
-    
-    @media (max-width: 768px) {
-        .text-truncate-mobile {
-            max-width: 100px;
-        }
-    }
-    
-    /* بهبود ریسپانسیو گرید */
-    .row.g-4 {
-        --bs-gutter-y: 1.5rem;
-    }
-    
-    @media (max-width: 768px) {
-        .row.g-4 {
-            --bs-gutter-y: 1rem;
-        }
-    }
-    
-    /* استایل برای بخش خوش‌آمدگویی در موبایل */
-    @media (max-width: 768px) {
-        .user-avatar[style*="70px"] {
-            width: 50px !important;
-            height: 50px !important;
-        }
-        
-        .user-avatar[style*="70px"] i {
-            font-size: 1.8rem !important;
-        }
-    }
-    
-    /* استایل برای لیست فعالیت‌ها در موبایل */
-    @media (max-width: 576px) {
-        .list-group-item .d-flex {
-            flex-direction: column;
-            align-items: flex-start !important;
-        }
-        
-        .list-group-item .text-muted {
-            margin-top: 0.25rem;
-        }
-    }
-    
-    /* کلاس‌های کمکی */
-    .min-width-0 {
-        min-width: 0;
-    }
-    
-    .fs-6 {
-        font-size: 1rem;
-    }
-    
-    .fs-5 {
-        font-size: 1.25rem;
-    }
-    
-    @media (min-width: 768px) {
-        .fs-md-4 {
-            font-size: 1.5rem;
-        }
-        
-        .fs-md-5 {
-            font-size: 1.25rem;
-        }
-    }
-</style>
-{% endblock %}
+{% block title %}داشبورد کارمند امور فرهنگی - {{ current_user.university_name }}{% endblock %}
 
 {% block content %}
-<div class="container-fluid mt-2 mt-md-4 px-2 px-md-3">
-    <!-- مسیر ناوبری مدرن -->
-    <div class="row mb-3 mb-md-4 fade-in-up">
-        <div class="col-12">
-            <div class="modern-card p-2 p-md-3">
-                <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between">
-                    <div class="d-flex align-items-center mb-2 mb-md-0">
-                        <div class="stat-icon-wrapper bg-primary-soft ml-2 ml-md-3">
-                            <i class="fas fa-tachometer-alt fa-2x text-primary"></i>
-                        </div>
-                        <div>
-                            <h4 class="mb-0 fw-bold fs-5 fs-md-4">داشبورد مدیریت</h4>
-                            <nav aria-label="breadcrumb">
-                                <ol class="breadcrumb mb-0 mt-1 bg-transparent p-0">
-                                    <li class="breadcrumb-item"><a href="{{ url_for('index') }}" class="text-decoration-none">خانه</a></li>
-                                    <li class="breadcrumb-item active">داشبورد کارکنان</li>
-                                </ol>
-                            </nav>
-                        </div>
-                    </div>
-                    <div class="date-time-display bg-light p-2 p-md-3 rounded-3">
-                        <i class="fas fa-calendar-alt text-primary ml-1"></i>
-                        <span class="persian-date small">{{ current_date }}</span>
-                        <span class="mx-2 d-none d-sm-inline">|</span>
-                        <i class="fas fa-clock text-primary ml-1 d-none d-sm-inline"></i>
-                        <span class="persian-time small d-none d-sm-inline">{{ now.strftime('%H:%M') if now else '' }}</span>
-                    </div>
-                </div>
+<div class="container mx-auto px-4 py-6" dir="rtl">
+    <!-- هدر -->
+    <div class="mb-8">
+        <div class="flex justify-between items-center">
+            <div>
+                <h1 class="text-3xl font-bold mb-2">داشبورد امور فرهنگی</h1>
+                <p class="text-gray-600">
+                    <i class="fas fa-user ml-2"></i>
+                    {{ current_user.full_name }}
+                    <span class="mx-2">|</span>
+                    <span class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm">
+                        {{ current_user.university_name }}
+                    </span>
+                </p>
+            </div>
+            <div>
+                <span class="bg-green-100 text-green-800 px-4 py-2 rounded-full text-sm">
+                    <i class="fas fa-check-circle ml-2"></i>
+                    دسترسی: {{ current_user.university_name }}
+                </span>
+            </div>
+        </div>
+        <div class="mt-4 text-sm text-gray-500">
+            <i class="fas fa-clock ml-2"></i>
+            آخرین بروزرسانی: {{ now|persian_datetime }}
+        </div>
+    </div>
+
+    <!-- کارت‌های آماری -->
+    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
+        <!-- کلاس‌های فعال -->
+        <div class="bg-white rounded-lg shadow p-4 border-t-4 border-blue-500">
+            <div class="text-sm text-gray-500 mb-1">کلاس‌های فعال</div>
+            <div class="text-2xl font-bold text-blue-600">{{ stats.active_classes }}</div>
+            <div class="text-xs text-gray-400 mt-2">
+                <i class="fas fa-calendar ml-1"></i>{{ stats.classes_this_week }} این هفته
+            </div>
+        </div>
+
+        <!-- کل دانشجویان -->
+        <div class="bg-white rounded-lg shadow p-4 border-t-4 border-green-500">
+            <div class="text-sm text-gray-500 mb-1">کل دانشجویان</div>
+            <div class="text-2xl font-bold text-green-600">{{ stats.total_students }}</div>
+            <div class="text-xs text-gray-400 mt-2">
+                <i class="fas fa-user-plus ml-1"></i>{{ stats.new_students_month }} جدید
+            </div>
+        </div>
+
+        <!-- میانگین حضور -->
+        <div class="bg-white rounded-lg shadow p-4 border-t-4 border-purple-500">
+            <div class="text-sm text-gray-500 mb-1">میانگین حضور</div>
+            <div class="text-2xl font-bold text-purple-600">{{ stats.avg_attendance }}%</div>
+            <div class="text-xs mt-2">
+                {% if stats.avg_attendance > 80 %}
+                <span class="text-green-600"><i class="fas fa-arrow-up ml-1"></i>عالی</span>
+                {% elif stats.avg_attendance > 60 %}
+                <span class="text-yellow-600"><i class="fas fa-minus ml-1"></i>قابل قبول</span>
+                {% else %}
+                <span class="text-red-600"><i class="fas fa-arrow-down ml-1"></i>نیاز به بهبود</span>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- جلسات برگزار شده -->
+        <div class="bg-white rounded-lg shadow p-4 border-t-4 border-orange-500">
+            <div class="text-sm text-gray-500 mb-1">جلسات برگزار شده</div>
+            <div class="text-2xl font-bold text-orange-600">{{ stats.completed_sessions }}</div>
+            <div class="text-xs text-gray-400 mt-2">از ابتدای ترم</div>
+        </div>
+
+        <!-- جلسات پیش رو -->
+        <div class="bg-white rounded-lg shadow p-4 border-t-4 border-yellow-500">
+            <div class="text-sm text-gray-500 mb-1">جلسات پیش رو</div>
+            <div class="text-2xl font-bold text-yellow-600">{{ stats.upcoming_sessions }}</div>
+            <div class="text-xs text-blue-600 mt-2">{{ stats.next_session_date }}</div>
+        </div>
+
+        <!-- درصد تکمیل ترم -->
+        <div class="bg-white rounded-lg shadow p-4 border-t-4 border-red-500">
+            <div class="text-sm text-gray-500 mb-1">درصد تکمیل ترم</div>
+            <div class="text-2xl font-bold text-red-600">{{ stats.semester_completion }}%</div>
+            <div class="w-full bg-gray-200 rounded-full h-1.5 mt-2">
+                <div class="bg-red-600 h-1.5 rounded-full" ></div>
             </div>
         </div>
     </div>
 
-    <!-- خوش‌آمدگویی پیشرفته -->
-    <div class="row mb-3 mb-md-4 fade-in-up">
-        <div class="col-12">
-            <div class="modern-card bg-gradient-primary text-white p-3 p-md-4">
-                <div class="row align-items-center g-3">
-                    <div class="col-md-8">
-                        <div class="d-flex align-items-center">
-                            <!-- اصلاح شده - حذف تکرار استایل -->
-                            <div class="user-avatar bg-white-20 ml-2 ml-md-3" style="width: 70px; height: 70px;">
-                                <i class="fas fa-user-tie fa-3x text-white"></i>
-                            </div>
-                            <div>
-                                <h3 class="mb-1 fw-bold fs-5 fs-md-4">{{ current_user.full_name }}</h3>
-                                <p class="mb-2 text-white-75 small">
-                                    <i class="fas fa-clock ml-1"></i>
-                                    آخرین ورود: {{ current_user.last_login.strftime('%Y-%m-%d %H:%M') if current_user.last_login else 'اولین ورود' }}
-                                </p>
-                                <div class="d-flex flex-wrap gap-2">
-                                    <span class="badge bg-white text-primary px-2 px-md-3 py-1 py-md-2 rounded-pill">
-                                        <i class="fas fa-user-tag ml-1"></i>
-                                        {% if current_user.user_type == 'professor' %}
-                                            استاد
-                                        {% elif current_user.user_type == 'staff' %}
-                                            کارمند
-                                        {% else %}
-                                            مدیر
-                                        {% endif %}
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-4 text-md-left">
-                        <div class="d-flex flex-wrap gap-2 justify-content-start justify-content-md-end">
-                            <a href="{{ url_for('profile') }}" class="btn btn-light btn-modern">
-                                <i class="fas fa-user-edit ml-1"></i>
-                                <span class="d-none d-sm-inline">ویرایش پروفایل</span>
-                                <span class="d-sm-none">پروفایل</span>
-                            </a>
-                            <a href="{{ url_for('notifications') }}" class="btn btn-light btn-modern position-relative">
-                                <i class="fas fa-bell ml-1"></i>
-                                <span class="d-none d-sm-inline">اعلان‌ها</span>
-                                {% set unread_count = current_user.notifications|selectattr('is_read', 'equalto', False)|list|length %}
-                                {% if unread_count > 0 %}
-                                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.6rem;">
-                                    {{ unread_count }}
-                                </span>
-                                {% endif %}
-                            </a>
-                        </div>
-                    </div>
-                </div>
+    <!-- کلاس‌های من -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+        <div class="bg-white rounded-lg shadow">
+            <div class="p-4 border-b">
+                <h3 class="font-bold">کلاس‌های من</h3>
             </div>
-        </div>
-    </div>
-
-    <!-- کارت‌های آمار پیشرفته -->
-    <div class="row g-3 g-md-4 mb-3 mb-md-4">
-        <!-- دانشجویان -->
-        <div class="col-xl-3 col-md-6 col-sm-6 fade-in-up delay-1">
-            <div class="stat-card bg-white p-2 p-md-3">
-                <div class="d-flex align-items-center">
-                    <div class="stat-icon-wrapper bg-primary-soft ml-2 ml-md-3">
-                        <i class="fas fa-user-graduate fa-2x text-primary"></i>
-                    </div>
-                    <div class="flex-grow-1 min-width-0">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div>
-                                <p class="text-muted mb-1 small">دانشجویان</p>
-                                <h3 class="fw-bold mb-0 fs-5 fs-md-4">{{ total_students }}</h3>
-                            </div>
-                            <div class="trend-indicator text-success d-none d-sm-block">
-                                <i class="fas fa-arrow-up"></i>
-                                <small>۱۲٪</small>
-                            </div>
-                        </div>
-                        <div class="progress mt-2">
-                            <div class="progress-bar bg-primary" role="progressbar" style="width: 75%;"></div>
-                        </div>
-                        <a href="{{ url_for('admin_users') }}?type=student" class="stretched-link"></a>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- اساتید -->
-        <div class="col-xl-3 col-md-6 col-sm-6 fade-in-up delay-2">
-            <div class="stat-card bg-white p-2 p-md-3">
-                <div class="d-flex align-items-center">
-                    <div class="stat-icon-wrapper bg-info-soft ml-2 ml-md-3">
-                        <i class="fas fa-chalkboard-teacher fa-2x text-info"></i>
-                    </div>
-                    <div class="flex-grow-1 min-width-0">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div>
-                                <p class="text-muted mb-1 small">اساتید</p>
-                                <h3 class="fw-bold mb-0 fs-5 fs-md-4">{{ total_professors }}</h3>
-                            </div>
-                            <div class="trend-indicator text-success d-none d-sm-block">
-                                <i class="fas fa-arrow-up"></i>
-                                <small>۸٪</small>
-                            </div>
-                        </div>
-                        <div class="progress mt-2">
-                            <div class="progress-bar bg-info" role="progressbar" style="width: 60%;"></div>
-                        </div>
-                        <a href="{{ url_for('admin_users') }}?type=professor" class="stretched-link"></a>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- کارمندان -->
-        <div class="col-xl-3 col-md-6 col-sm-6 fade-in-up delay-3">
-            <div class="stat-card bg-white p-2 p-md-3">
-                <div class="d-flex align-items-center">
-                    <div class="stat-icon-wrapper bg-warning-soft ml-2 ml-md-3">
-                        <i class="fas fa-user-tie fa-2x text-warning"></i>
-                    </div>
-                    <div class="flex-grow-1 min-width-0">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div>
-                                <p class="text-muted mb-1 small">کارمندان</p>
-                                <h3 class="fw-bold mb-0 fs-5 fs-md-4">{{ total_staff }}</h3>
-                            </div>
-                            <div class="trend-indicator text-danger d-none d-sm-block">
-                                <i class="fas fa-arrow-down"></i>
-                                <small>۳٪</small>
-                            </div>
-                        </div>
-                        <div class="progress mt-2">
-                            <div class="progress-bar bg-warning" role="progressbar" style="width: 40%;"></div>
-                        </div>
-                        <a href="{{ url_for('admin_users') }}?type=staff" class="stretched-link"></a>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- در انتظار تأیید -->
-        <div class="col-xl-3 col-md-6 col-sm-6 fade-in-up delay-4">
-            <div class="stat-card bg-gradient-danger text-white p-2 p-md-3">
-                <div class="d-flex align-items-center">
-                    <div class="stat-icon-wrapper bg-white-20 ml-2 ml-md-3">
-                        <i class="fas fa-clock fa-2x text-white"></i>
-                    </div>
-                    <div class="flex-grow-1 min-width-0">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div>
-                                <p class="text-white-75 mb-1 small">در انتظار تأیید</p>
-                                <h3 class="fw-bold mb-0 fs-5 fs-md-4">{{ pending_approvals }}</h3>
-                            </div>
-                            {% if pending_approvals > 0 %}
-                            <span class="badge bg-white text-danger rounded-pill px-2 px-md-3 py-1 py-md-2 pulse-effect" style="font-size: 0.7rem;">
-                                فوری
-                            </span>
-                            {% endif %}
-                        </div>
-                        <div class="mt-2">
-                            <a href="#pending-users" class="text-white text-decoration-none small">
-                                <i class="fas fa-arrow-left ml-1"></i>
-                                <span class="d-none d-sm-inline">مشاهده و بررسی</span>
-                                <span class="d-sm-none">بررسی</span>
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- کارت‌های آمار رویدادها و حلقه‌ها -->
-    <div class="row g-3 g-md-4 mb-3 mb-md-4">
-        <!-- کل رویدادها -->
-        <div class="col-xl-3 col-md-6 col-6 fade-in-up">
-            <div class="stat-card bg-white p-2 p-md-3">
-                <div class="d-flex align-items-center">
-                    <div class="stat-icon-wrapper bg-success-soft ml-2 ml-md-3">
-                        <i class="fas fa-calendar-alt fa-2x text-success"></i>
-                    </div>
-                    <div class="flex-grow-1">
-                        <p class="text-muted mb-1 small">کل رویدادها</p>
-                        <h3 class="fw-bold mb-0 fs-5 fs-md-4">{{ total_events }}</h3>
-                        <a href="{{ url_for('admin_events') }}" class="stretched-link"></a>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- رویدادهای فعال -->
-        <div class="col-xl-3 col-md-6 col-6 fade-in-up">
-            <div class="stat-card bg-white p-2 p-md-3">
-                <div class="d-flex align-items-center">
-                    <div class="stat-icon-wrapper bg-info-soft ml-2 ml-md-3">
-                        <i class="fas fa-check-circle fa-2x text-info"></i>
-                    </div>
-                    <div class="flex-grow-1">
-                        <p class="text-muted mb-1 small">رویدادهای فعال</p>
-                        <h3 class="fw-bold mb-0 fs-5 fs-md-4">{{ active_events }}</h3>
-                        <a href="{{ url_for('admin_events') }}?active=1" class="stretched-link"></a>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- حلقه‌های تلاوت -->
-        <div class="col-xl-3 col-md-6 col-6 fade-in-up">
-            <div class="stat-card bg-white p-2 p-md-3">
-                <div class="d-flex align-items-center">
-                    <div class="stat-icon-wrapper bg-secondary-soft ml-2 ml-md-3">
-                        <i class="fas fa-circle fa-2x text-secondary"></i>
-                    </div>
-                    <div class="flex-grow-1">
-                        <p class="text-muted mb-1 small">حلقه‌های تلاوت</p>
-                        <h3 class="fw-bold mb-0 fs-5 fs-md-4">{{ total_circles }}</h3>
-                        <a href="{{ url_for('circles_list') }}" class="stretched-link"></a>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- رویدادهای پیش‌رو -->
-        <div class="col-xl-3 col-md-6 col-6 fade-in-up">
-            <div class="stat-card bg-white p-2 p-md-3">
-                <div class="d-flex align-items-center">
-                    <div class="stat-icon-wrapper bg-success-soft ml-2 ml-md-3">
-                        <i class="fas fa-hourglass-start fa-2x text-success"></i>
-                    </div>
-                    <div class="flex-grow-1">
-                        <p class="text-muted mb-1 small">رویدادهای پیش‌رو</p>
-                        <h3 class="fw-bold mb-0 fs-5 fs-md-4">{{ upcoming_events }}</h3>
-                        <a href="#upcoming-events" class="stretched-link"></a>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- بخش اصلی: درخواست‌های تأیید نشده و رویدادهای پیش‌رو -->
-    <div class="row g-3 g-md-4 mt-2">
-        <!-- درخواست‌های تأیید نشده -->
-        <div class="col-lg-6 mb-3 mb-lg-0" id="pending-users">
-            <div class="modern-card">
-                <div class="card-header-modern bg-gradient-warning text-white p-3 p-md-4">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <h5 class="mb-0 fw-bold fs-6 fs-md-5">
-                            <i class="fas fa-clock ml-2"></i>
-                            <span class="d-none d-sm-inline">درخواست‌های تأیید نشده</span>
-                            <span class="d-sm-none">درخواست‌ها</span>
-                        </h5>
-                        <span class="badge bg-white text-warning px-2 px-md-3 py-1 py-md-2 rounded-pill">
-                            {{ pending_users|length }} مورد
-                        </span>
-                    </div>
-                </div>
-                <div class="card-body p-3 p-md-4">
-                    {% if pending_users %}
-                    <div class="table-responsive">
-                        <table class="modern-table w-100">
-                            <thead>
-                                <tr>
-                                    <th>کاربر</th>
-                                    <th class="d-none d-sm-table-cell">نوع</th>
-                                    <th class="d-none d-md-table-cell">تاریخ</th>
-                                    <th>عملیات</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for user in pending_users %}
-                                <tr>
-                                    <td>
-                                        <div class="d-flex align-items-center">
-                                            <div class="user-avatar bg-primary-soft text-primary ml-2">
-                                                {{ user.full_name[:1] }}
-                                            </div>
-                                            <div class="min-width-0">
-                                                <strong class="d-block text-truncate" style="max-width: 120px;">{{ user.full_name }}</strong>
-                                                <small class="text-muted d-block d-sm-none">{{ user.user_type }}</small>
-                                                <small class="text-muted d-none d-sm-block">{{ user.username }}</small>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td class="d-none d-sm-table-cell">
-                                        {% if user.user_type == 'professor' %}
-                                            <span class="badge-modern bg-info-soft text-info">
-                                                <i class="fas fa-chalkboard-teacher ml-1"></i>
-                                                استاد
-                                            </span>
-                                        {% elif user.user_type == 'staff' %}
-                                            <span class="badge-modern bg-warning-soft text-warning">
-                                                <i class="fas fa-building ml-1"></i>
-                                                کارمند
-                                            </span>
-                                        {% else %}
-                                            <span class="badge-modern bg-primary-soft text-primary">
-                                                <i class="fas fa-user-graduate ml-1"></i>
-                                                دانشجو
-                                            </span>
-                                        {% endif %}
-                                    </td>
-                                    <td class="d-none d-md-table-cell">
-                                        <small>{{ user.created_at.strftime('%Y-%m-%d') if user.created_at else '' }}</small>
-                                        <br>
-                                        <small class="text-muted">{{ user.created_at.strftime('%H:%M') if user.created_at else '' }}</small>
-                                    </td>
-                                    <td>
-                                        <div class="d-flex gap-2">
-                                            <a href="{{ url_for('staff_verify_user', user_id=user.id) }}" 
-                                               class="btn btn-success btn-sm rounded-pill hover-scale"
-                                               onclick="return confirm('آیا از تأیید این کاربر اطمینان دارید؟');"
-                                               title="تأیید کاربر">
-                                                <i class="fas fa-check"></i>
-                                            </a>
-                                            <button type="button" 
-                                                    class="btn btn-danger btn-sm rounded-pill hover-scale"
-                                                    data-bs-toggle="modal" 
-                                                    data-bs-target="#rejectModal{{ user.id }}"
-                                                    title="رد درخواست">
-                                                <i class="fas fa-times"></i>
-                                            </button>
-                                            <a href="{{ url_for('staff_user_detail', user_id=user.id) }}" 
-                                               class="btn btn-info btn-sm rounded-pill hover-scale d-none d-sm-inline-block"
-                                               title="مشاهده جزئیات">
-                                                <i class="fas fa-eye"></i>
-                                            </a>
-                                        </div>
-
-                                        <!-- مودال رد درخواست -->
-                                        <div class="modal fade modern-modal" id="rejectModal{{ user.id }}" tabindex="-1">
-                                            <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
-                                                <div class="modal-content">
-                                                    <div class="modal-header bg-gradient-danger text-white p-3 p-md-4">
-                                                        <h5 class="modal-title fs-6 fs-md-5">
-                                                            <i class="fas fa-exclamation-triangle ml-2"></i>
-                                                            رد درخواست کاربر
-                                                        </h5>
-                                                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                                                    </div>
-                                                    <form action="{{ url_for('staff_reject_user', user_id=user.id) }}" method="post">
-                                                        <div class="modal-body p-3 p-md-4">
-                                                            <div class="text-center mb-4">
-                                                                <!-- اصلاح شده - حذف تکرار استایل -->
-                                                                <div class="user-avatar bg-danger-soft text-danger mx-auto mb-3" style="width: 70px; height: 70px;">
-                                                                    <i class="fas fa-user-slash fa-2x"></i>
-                                                                </div>
-                                                                <h6 class="fs-6">آیا از رد درخواست <strong>{{ user.full_name }}</strong> اطمینان دارید؟</h6>
-                                                            </div>
-                                                            
-                                                            <div class="mb-3">
-                                                                <label class="form-label fw-bold">
-                                                                    <i class="fas fa-pencil-alt ml-1 text-danger"></i>
-                                                                    دلیل رد (اختیاری)
-                                                                </label>
-                                                                <textarea class="form-control" 
-                                                                          name="reason" 
-                                                                          rows="3"
-                                                                          placeholder="لطفاً دلیل رد درخواست را وارد کنید..."></textarea>
-                                                            </div>
-                                                            
-                                                            <div class="bg-light p-3 rounded-3">
-                                                                <p class="small text-muted mb-2">
-                                                                    <i class="fas fa-lightbulb text-warning ml-1"></i>
-                                                                    پیشنهادات:
-                                                                </p>
-                                                                <div class="d-flex flex-wrap gap-2">
-                                                                    <span class="badge bg-light text-dark p-2 hover-scale" onclick="setReason(this, 'مدارک ناقص')">مدارک ناقص</span>
-                                                                    <span class="badge bg-light text-dark p-2 hover-scale" onclick="setReason(this, 'اطلاعات نامعتبر')">اطلاعات نامعتبر</span>
-                                                                    <span class="badge bg-light text-dark p-2 hover-scale" onclick="setReason(this, 'عدم تطابق با شرایط')">عدم تطابق با شرایط</span>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                        <div class="modal-footer p-3 p-md-4">
-                                                            <button type="button" class="btn btn-secondary px-3 px-md-4" data-bs-dismiss="modal">
-                                                                <i class="fas fa-times ml-1"></i>
-                                                                انصراف
-                                                            </button>
-                                                            <button type="submit" class="btn btn-danger px-3 px-md-4">
-                                                                <i class="fas fa-check ml-1"></i>
-                                                                تأیید و رد
-                                                            </button>
-                                                        </div>
-                                                    </form>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                    {% else %}
-                    <div class="text-center py-4 py-md-5">
-                        <div class="stat-icon-wrapper bg-success-soft mx-auto mb-3">
-                            <i class="fas fa-check-circle fa-3x text-success"></i>
-                        </div>
-                        <h5 class="fw-bold text-success mb-2 fs-6 fs-md-5">همه درخواست‌ها بررسی شده‌اند!</h5>
-                        <p class="text-muted small">در حال حاضر هیچ کاربری در انتظار تأیید نیست.</p>
-                    </div>
-                    {% endif %}
-                </div>
-            </div>
-        </div>
-
-        <!-- رویدادهای پیش‌رو -->
-        <div class="col-lg-6" id="upcoming-events">
-            <div class="modern-card">
-                <div class="card-header-modern bg-gradient-success text-white p-3 p-md-4">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <h5 class="mb-0 fw-bold fs-6 fs-md-5">
-                            <i class="fas fa-calendar-alt ml-2"></i>
-                            <span class="d-none d-sm-inline">رویدادهای پیش‌رو</span>
-                            <span class="d-sm-none">رویدادها</span>
-                        </h5>
-                        <a href="{{ url_for('admin_events') }}" class="btn btn-light btn-sm rounded-pill px-2 px-md-3 hover-scale">
-                            <span class="d-none d-sm-inline">مدیریت همه</span>
-                            <span class="d-sm-none">همه</span>
-                            <i class="fas fa-arrow-left mr-1"></i>
-                        </a>
-                    </div>
-                </div>
-                <div class="card-body p-3 p-md-4">
-                    {% if events %}
-                    <div class="list-group list-group-flush">
-                        {% for event in events %}
-                        {# محاسبه درصد پیشرفت #}
-                        {% if event.capacity and event.capacity > 0 %}
-                            {% set percent = ((event.current_participants / event.capacity) * 100)|round|int %}
-                        {% else %}
-                            {% set percent = 0 %}
-                        {% endif %}
-                        <a href="{{ url_for('event_detail', event_id=event.id) }}" class="list-group-item list-group-item-action border-0 mb-2 p-2 p-md-3 rounded-3 hover-scale" style="background-color: var(--light-color);">
-                            <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center">
-                                <div class="mb-2 mb-sm-0">
-                                    <h6 class="fw-bold mb-1 fs-6">{{ event.title }}</h6>
-                                    <div class="d-flex flex-wrap gap-2 gap-sm-3 small text-muted">
-                                        <span><i class="fas fa-calendar ml-1"></i> {{ event.start_date.strftime('%Y-%m-%d') if event.start_date else '' }}</span>
-                                        <span class="d-none d-sm-inline"><i class="fas fa-map-marker-alt ml-1"></i> {{ event.location|truncate(20) if event.location else '' }}</span>
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead class="bg-gray-50 text-xs">
+                        <tr>
+                            <th class="px-4 py-2 text-right">نام کلاس</th>
+                            <th class="px-4 py-2 text-right">کد</th>
+                            <th class="px-4 py-2 text-right">دانشجو</th>
+                            <th class="px-4 py-2 text-right">درصد حضور</th>
+                            <th class="px-4 py-2 text-right">وضعیت</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y">
+                        {% for class in my_classes %}
+                        <tr class="hover:bg-gray-50">
+                            <td class="px-4 py-2">{{ class.name }}</td>
+                            <td class="px-4 py-2">{{ class.code }}</td>
+                            <td class="px-4 py-2">{{ class.student_count }}</td>
+                            <td class="px-4 py-2">
+                                <div class="flex items-center">
+                                    <span class="ml-2">{{ class.attendance_percent }}%</span>
+                                    <div class="w-16 bg-gray-200 rounded-full h-1.5">
+                                        <div class="bg-blue-600 h-1.5 rounded-full" ></div>
                                     </div>
                                 </div>
-                                <div class="text-sm-left">
-                                    <span class="badge-modern 
-                                        {% if event.event_type and event.event_type.value == 'workshop' %}bg-primary-soft text-primary
-                                        {% elif event.event_type and event.event_type.value == 'competition' %}bg-warning-soft text-warning
-                                        {% elif event.event_type and event.event_type.value == 'lecture' %}bg-info-soft text-info
-                                        {% else %}bg-secondary-soft text-secondary{% endif %}">
-                                        {% if event.event_type and event.event_type.value == 'workshop' %}
-                                            کارگاه
-                                        {% elif event.event_type and event.event_type.value == 'competition' %}
-                                            مسابقه
-                                        {% elif event.event_type and event.event_type.value == 'lecture' %}
-                                            سخنرانی
-                                        {% else %}
-                                            رویداد
-                                        {% endif %}
-                                    </span>
-                                    <br>
-                                    <small class="text-muted">{{ event.current_participants }}/{{ event.capacity }} نفر</small>
-                                </div>
-                          <div class="progress mt-2">
-    <div class="progress-bar bg-success"
-         role="progressbar"
-         data-percent="{{ percent }}"
-         aria-valuemin="0"
-         aria-valuemax="100">
-    </div>
-</div>
-                        </a>
+                            </td>
+                            <td class="px-4 py-2">
+                                {% if class.attendance_percent < 50 %}
+                                <span class="bg-red-100 text-red-800 text-xs px-2 py-1 rounded">کم‌حضور</span>
+                                {% elif class.attendance_percent < 70 %}
+                                <span class="bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded">متوسط</span>
+                                {% else %}
+                                <span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded">عالی</span>
+                                {% endif %}
+                            </td>
+                        </tr>
                         {% endfor %}
-                    </div>
-                    {% else %}
-                    <div class="text-center py-4 py-md-5">
-                        <div class="stat-icon-wrapper bg-warning-soft mx-auto mb-3">
-                            <i class="fas fa-calendar-times fa-3x text-warning"></i>
-                        </div>
-                        <h5 class="fw-bold mb-2 fs-6 fs-md-5">رویدادی برای نمایش وجود ندارد</h5>
-                        <a href="{{ url_for('create_event') }}" class="btn btn-primary btn-modern mt-2">
-                            <i class="fas fa-plus-circle ml-1"></i>
-                            ایجاد رویداد جدید
-                        </a>
-                    </div>
-                    {% endif %}
-                </div>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- جلسات آینده -->
+        <div class="bg-white rounded-lg shadow">
+            <div class="p-4 border-b">
+                <h3 class="font-bold">جلسات آینده</h3>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead class="bg-gray-50 text-xs">
+                        <tr>
+                            <th class="px-4 py-2 text-right">کلاس</th>
+                            <th class="px-4 py-2 text-right">موضوع</th>
+                            <th class="px-4 py-2 text-right">تاریخ</th>
+                            <th class="px-4 py-2 text-right">ساعت</th>
+                            <th class="px-4 py-2 text-right">مکان</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y">
+                        {% for session in upcoming_sessions %}
+                        <tr class="hover:bg-gray-50">
+                            <td class="px-4 py-2">{{ session.class_name }}</td>
+                            <td class="px-4 py-2">{{ session.title }}</td>
+                            <td class="px-4 py-2">{{ session.date|persian_date }}</td>
+                            <td class="px-4 py-2">{{ session.time }}</td>
+                            <td class="px-4 py-2">{{ session.location }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- دانشجویان کم‌حضور -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+        <div class="bg-red-50 rounded-lg shadow border-2 border-red-200">
+            <div class="p-4 bg-red-100 rounded-t-lg">
+                <h3 class="font-bold text-red-800">دانشجویان کم‌حضور (هشدار)</h3>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead class="bg-red-100 text-xs">
+                        <tr>
+                            <th class="px-4 py-2 text-right">نام دانشجو</th>
+                            <th class="px-4 py-2 text-right">شماره دانشجویی</th>
+                            <th class="px-4 py-2 text-right">کلاس</th>
+                            <th class="px-4 py-2 text-right">درصد</th>
+                            <th class="px-4 py-2 text-right">عملیات</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y">
+                        {% for student in low_attendance_students %}
+                        <tr>
+                            <td class="px-4 py-2">{{ student.name }}</td>
+                            <td class="px-4 py-2">{{ student.student_id }}</td>
+                            <td class="px-4 py-2">{{ student.class_name }}</td>
+                            <td class="px-4 py-2 text-red-600 font-bold">{{ student.attendance_percent }}%</td>
+                            <td class="px-4 py-2">
+                                <button  class="text-blue-600 hover:text-blue-800 text-sm">
+                                    <i class="fas fa-bell ml-1"></i>اخطار
+                                </button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- دانشجویان دانشگاه -->
+        <div class="bg-white rounded-lg shadow">
+            <div class="p-4 border-b">
+                <h3 class="font-bold">دانشجویان {{ current_user.university_name }}</h3>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead class="bg-gray-50 text-xs">
+                        <tr>
+                            <th class="px-4 py-2 text-right">نام</th>
+                            <th class="px-4 py-2 text-right">شماره دانشجویی</th>
+                            <th class="px-4 py-2 text-right">رشته</th>
+                            <th class="px-4 py-2 text-right">وضعیت</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y">
+                        {% for student in university_students[:5] %}
+                        <tr>
+                            <td class="px-4 py-2">
+                                <div class="flex items-center">
+                                    <div class="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center ml-2">
+                                        <i class="fas fa-user text-gray-600"></i>
+                                    </div>
+                                    <div>
+                                        <div>{{ student.full_name }}</div>
+                                        <div class="text-xs text-gray-500">{{ student.email }}</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-4 py-2">{{ student.student_id }}</td>
+                            <td class="px-4 py-2">{{ student.major }}</td>
+                            <td class="px-4 py-2">
+                                {% if student.is_active %}
+                                <span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded">فعال</span>
+                                {% else %}
+                                <span class="bg-red-100 text-red-800 text-xs px-2 py-1 rounded">غیرفعال</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
 
     <!-- دسترسی سریع -->
-    <div class="row mt-3 mt-md-4">
-        <div class="col-12">
-            <div class="modern-card">
-                <div class="card-header-modern bg-gradient-primary text-white p-3 p-md-4">
-                    <h5 class="mb-0 fw-bold fs-6 fs-md-5">
-                        <i class="fas fa-bolt ml-2"></i>
-                        دسترسی سریع
-                    </h5>
-                </div>
-                <div class="card-body p-3 p-md-4">
-                    <div class="row g-2 g-md-3">
-                        <div class="col-md-3 col-6">
-                            <a href="{{ url_for('admin_users') }}" class="quick-access-card">
-                                <div class="card border-0 shadow-sm rounded-4 p-2 p-md-3">
-                                    <div class="quick-icon bg-primary-soft">
-                                        <i class="fas fa-users fa-2x text-primary"></i>
-                                    </div>
-                                    <h6 class="fw-bold mb-1 fs-6">مدیریت کاربران</h6>
-                                    <small class="text-muted d-none d-sm-block">مشاهده و ویرایش</small>
-                                </div>
-                            </a>
-                        </div>
-                        <div class="col-md-3 col-6">
-                            <a href="{{ url_for('create_event') }}" class="quick-access-card">
-                                <div class="card border-0 shadow-sm rounded-4 p-2 p-md-3">
-                                    <div class="quick-icon bg-success-soft">
-                                        <i class="fas fa-plus-circle fa-2x text-success"></i>
-                                    </div>
-                                    <h6 class="fw-bold mb-1 fs-6">ایجاد رویداد</h6>
-                                    <small class="text-muted d-none d-sm-block">رویداد جدید</small>
-                                </div>
-                            </a>
-                        </div>
-                        <div class="col-md-3 col-6">
-                            <a href="{{ url_for('admin_events') }}" class="quick-access-card">
-                                <div class="card border-0 shadow-sm rounded-4 p-2 p-md-3">
-                                    <div class="quick-icon bg-info-soft">
-                                        <i class="fas fa-calendar-alt fa-2x text-info"></i>
-                                    </div>
-                                    <h6 class="fw-bold mb-1 fs-6">مدیریت رویدادها</h6>
-                                    <small class="text-muted d-none d-sm-block">لیست رویدادها</small>
-                                </div>
-                            </a>
-                        </div>
-                        <div class="col-md-3 col-6">
-                            <a href="{{ url_for('admin_reports') }}" class="quick-access-card">
-                                <div class="card border-0 shadow-sm rounded-4 p-2 p-md-3">
-                                    <div class="quick-icon bg-warning-soft">
-                                        <i class="fas fa-chart-bar fa-2x text-warning"></i>
-                                    </div>
-                                    <h6 class="fw-bold mb-1 fs-6">گزارش‌گیری</h6>
-                                    <small class="text-muted d-none d-sm-block">آمار و نمودارها</small>
-                                </div>
-                            </a>
-                        </div>
-                    </div>
-                </div>
+    <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+        <div class="bg-white rounded-lg shadow lg:col-span-3">
+            <div class="p-4 border-b">
+                <h3 class="font-bold">دسترسی سریع</h3>
+            </div>
+            <div class="p-4 grid grid-cols-2 md:grid-cols-4 gap-3">
+                <a href="#" class="bg-gray-50 hover:bg-blue-50 p-3 rounded text-center">
+                    <i class="fas fa-calendar-plus text-blue-600 text-xl mb-2"></i>
+                    <span class="block text-sm">جلسه جدید</span>
+                </a>
+                <a href="#" class="bg-gray-50 hover:bg-green-50 p-3 rounded text-center">
+                    <i class="fas fa-user-plus text-green-600 text-xl mb-2"></i>
+                    <span class="block text-sm">دانشجو جدید</span>
+                </a>
+                <a href="#" class="bg-gray-50 hover:bg-purple-50 p-3 rounded text-center">
+                    <i class="fas fa-chart-bar text-purple-600 text-xl mb-2"></i>
+                    <span class="block text-sm">گزارش</span>
+                </a>
+                <a href="#" class="bg-gray-50 hover:bg-yellow-50 p-3 rounded text-center">
+                    <i class="fas fa-bell text-yellow-600 text-xl mb-2"></i>
+                    <span class="block text-sm">اعلان</span>
+                </a>
             </div>
         </div>
-    </div>
-
-    <!-- فعالیت‌های اخیر -->
-    <div class="row mt-3 mt-md-4">
-        <div class="col-12">
-            <div class="modern-card">
-                <div class="card-header-modern bg-gradient-info text-white p-3 p-md-4">
-                    <h5 class="mb-0 fw-bold fs-6 fs-md-5">
-                        <i class="fas fa-history ml-2"></i>
-                        فعالیت‌های اخیر
-                    </h5>
-                </div>
-                <div class="card-body p-3 p-md-4">
-                    <div class="row g-3 g-md-4">
-                        <div class="col-md-6">
-                            <h6 class="fw-bold mb-3 fs-6">
-                                <i class="fas fa-user-plus text-success ml-2"></i>
-                                کاربران جدید
-                            </h6>
-                            <div class="list-group list-group-flush">
-                                {% if recent_users %}
-                                    {% for user in recent_users %}
-                                    <div class="list-group-item border-0 p-2">
-                                        <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center">
-                                            <div class="d-flex align-items-center mb-2 mb-sm-0">
-                                                <!-- اصلاح شده - حذف تکرار استایل -->
-                                                <div class="user-avatar bg-primary-soft text-primary ml-2" style="width: 35px; height: 35px;">
-                                                    {{ user.full_name[:1] if user.full_name else '?' }}
-                                                </div>
-                                                <div>
-                                                    <strong class="fs-6">{{ user.full_name }}</strong>
-                                                    <br>
-                                                    <small class="text-muted">
-                                                        {% if user.user_type == 'professor' %}
-                                                            استاد
-                                                        {% elif user.user_type == 'staff' %}
-                                                            کارمند
-                                                        {% else %}
-                                                            دانشجو
-                                                        {% endif %}
-                                                    </small>
-                                                </div>
-                                            </div>
-                                            <small class="text-muted">{{ user.created_at.strftime('%Y-%m-%d') if user.created_at else '' }}</small>
-                                        </div>
-                                    </div>
-                                    {% endfor %}
-                                {% else %}
-                                    <div class="text-center py-3">
-                                        <small class="text-muted">کاربر جدیدی یافت نشد</small>
-                                    </div>
-                                {% endif %}
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <h6 class="fw-bold mb-3 fs-6">
-                                <i class="fas fa-calendar-check text-primary ml-2"></i>
-                                ثبت‌نام‌های جدید
-                            </h6>
-                            <div class="list-group list-group-flush">
-                                {% if recent_registrations %}
-                                    {% for reg in recent_registrations %}
-                                    <div class="list-group-item border-0 p-2">
-                                        <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center">
-                                            <div class="mb-2 mb-sm-0">
-                                                <strong class="fs-6">{{ reg.user.full_name if reg.user else '' }}</strong>
-                                                <br>
-                                                <small class="text-muted">{{ reg.event.title if reg.event else '' }}</small>
-                                            </div>
-                                            <small class="text-muted">{{ reg.registration_date.strftime('%Y-%m-%d') if reg.registration_date else '' }}</small>
-                                        </div>
-                                    </div>
-                                    {% endfor %}
-                                {% else %}
-                                    <div class="text-center py-3">
-                                        <small class="text-muted">ثبت‌نام جدیدی وجود ندارد</small>
-                                    </div>
-                                {% endif %}
-                            </div>
-                        </div>
+        <div class="bg-gradient-to-br from-blue-600 to-blue-800 rounded-lg shadow text-white p-4">
+            <div class="text-center">
+                <i class="fas fa-university text-4xl mb-2"></i>
+                <h4 class="font-bold">{{ current_user.university_name }}</h4>
+                <p class="text-sm opacity-90 mt-2">دانشگاه محل خدمت</p>
+                <div class="border-t border-blue-400 mt-3 pt-3">
+                    <div class="flex justify-between text-sm">
+                        <span>دانشکده‌ها:</span>
+                        <span class="font-bold">{{ stats.faculties_count }}</span>
+                    </div>
+                    <div class="flex justify-between text-sm mt-1">
+                        <span>کلاس‌ها:</span>
+                        <span class="font-bold">{{ stats.total_classes }}</span>
                     </div>
                 </div>
             </div>
@@ -1131,44 +296,83 @@
     </div>
 </div>
 
+<!-- اسکریپت‌ها -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-// تابع برای تنظیم دلیل رد
-function setReason(element, reason) {
-    var textarea = element.closest('.modal-body').querySelector('textarea');
-    if (textarea) {
-        textarea.value = reason;
+function sendAlert(id) {
+    if (confirm('آیا برای این دانشجو اخطار ارسال شود؟')) {
+        alert('اخطار با موفقیت ارسال شد');
     }
 }
 
-// انیمیشن اعداد
-function animateNumbers() {
-    document.querySelectorAll('.stat-card h3').forEach(function(element) {
-        var value = parseInt(element.innerText);
-        if (!isNaN(value)) {
-            var current = 0;
-            var increment = value / 50;
-            var timer = setInterval(function() {
-                current += increment;
-                if (current >= value) {
-                    element.innerText = value;
-                    clearInterval(timer);
-                } else {
-                    element.innerText = Math.floor(current);
-                }
-            }, 20);
-        }
-    });
-}
-
-// اجرای انیمیشن اعداد بعد از لود صفحه
-window.addEventListener('load', animateNumbers);
-
-// تنظیم viewport برای موبایل
 document.addEventListener('DOMContentLoaded', function() {
-    var viewport = document.querySelector('meta[name=viewport]');
-    if (viewport) {
-        viewport.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes');
+    var chart1 = document.getElementById('chart1');
+    if (chart1) {
+        new Chart(chart1, {
+            type: 'line',
+            data: {
+                labels: ['فروردین','اردیبهشت','خرداد','تیر','مرداد','شهریور'],
+                datasets: [{
+                    data: [65,70,75,80,85,82],
+                    borderColor: '#2563eb',
+                    backgroundColor: 'rgba(37,99,235,0.1)',
+                    tension: 0.3,
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } }
+            }
+        });
+    }
+
+    var chart2 = document.getElementById('chart2');
+    if (chart2) {
+        new Chart(chart2, {
+            type: 'bar',
+            data: {
+                labels: ['فروردین','اردیبهشت','خرداد','تیر','مرداد','شهریور'],
+                datasets: [{
+                    data: [20,30,25,35,40,45],
+                    backgroundColor: '#10b981'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } }
+            }
+        });
+    }
+
+    var chart3 = document.getElementById('chart3');
+    if (chart3) {
+        new Chart(chart3, {
+            type: 'doughnut',
+            data: {
+                labels: ['فعال','غیرفعال','متوقف'],
+                datasets: [{
+                    data: [60,25,15],
+                    backgroundColor: ['#34d399','#fbbf24','#f87171']
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { position: 'bottom' } }
+            }
+        });
     }
 });
 </script>
+
+<style>
+@keyframes pulse {
+    0%,100%{opacity:1}
+    50%{opacity:0.5}
+}
+.bg-red-50{animation:pulse 2s infinite}
+</style>
 {% endblock %}

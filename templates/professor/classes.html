@@ -1,0 +1,305 @@
+{% extends "base.html" %}
+
+{% block title %}کلاس‌های من - سِراج{% endblock %}
+
+{% block head %}
+<style>
+    .progress-bar-custom {
+        transition: width 0.3s ease;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="mb-6">
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-800 mb-1">کلاس‌های من</h1>
+            <p class="text-sm text-gray-600">مدیریت کلاس‌ها، دانشجویان و جلسات</p>
+        </div>
+        <div class="flex gap-2">
+            <a href="{{ url_for('professor_dashboard') }}" class="btn btn-secondary px-4 py-2 text-sm">
+                <i class="fas fa-arrow-right ml-2"></i>
+                بازگشت به داشبورد
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- فیلترها -->
+<div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4 mb-6">
+    <form method="GET" action="{{ url_for('professor_classes') }}" class="flex flex-wrap gap-3">
+        <div class="flex items-center gap-2">
+            <label class="text-sm text-gray-600">ترم:</label>
+            <select name="term" onchange="this.form.submit()" class="border border-gray-300 rounded-lg px-3 py-2 text-sm">
+                <option value="current" {% if term == 'current' %}selected{% endif %}>ترم جاری</option>
+                <option value="past" {% if term == 'past' %}selected{% endif %}>ترم‌های گذشته</option>
+                <option value="all" {% if term == 'all' %}selected{% endif %}>همه ترم‌ها</option>
+            </select>
+        </div>
+    </form>
+</div>
+
+<!-- لیست کلاس‌ها -->
+{% if classes and classes.items %}
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+    {% for class_item in classes.items %}
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition">
+        <!-- هدر کلاس -->
+        <div class="bg-gradient-to-l from-blue-600 to-blue-700 px-4 py-3">
+            <div class="flex justify-between items-start">
+                <div>
+                    <h3 class="font-bold text-white">{{ class_item.name }}</h3>
+                    <p class="text-xs text-blue-100 mt-1">{{ class_item.code }}</p>
+                </div>
+                <span class="bg-white/20 text-white text-xs px-2 py-1 rounded-full">
+                    {{ class_item.credits|default(3)|persian_number }} واحد
+                </span>
+            </div>
+        </div>
+        
+        <!-- بدنه -->
+        <div class="p-4">
+            <!-- آمار -->
+            <div class="grid grid-cols-3 gap-2 mb-3">
+                <div class="text-center">
+                    <span class="block text-lg font-bold text-gray-800">{{ class_item.student_count|persian_number }}</span>
+                    <span class="text-xs text-gray-500">دانشجو</span>
+                </div>
+                <div class="text-center">
+                    <span class="block text-lg font-bold text-gray-800">{{ class_item.total_sessions|persian_number }}</span>
+                    <span class="text-xs text-gray-500">جلسات</span>
+                </div>
+                <div class="text-center">
+                    <span class="block text-lg font-bold text-gray-800">{{ class_item.attendance_rate|persian_number }}%</span>
+                    <span class="text-xs text-gray-500">حضور</span>
+                </div>
+            </div>
+            
+            <!-- اطلاعات -->
+            <div class="space-y-2 text-sm text-gray-600 mb-3">
+                <div class="flex items-center gap-2">
+                    <i class="fas fa-calendar text-blue-500 w-4"></i>
+                    <span>شروع: {{ class_item.start_date|persian_date if class_item.start_date else '---' }}</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <i class="fas fa-map-marker-alt text-blue-500 w-4"></i>
+                    <span>{{ class_item.location or 'مکان مشخص نشده' }}</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <i class="fas fa-clock text-blue-500 w-4"></i>
+                    <span>{{ class_item.schedule or 'زمان مشخص نشده' }}</span>
+                </div>
+            </div>
+            
+            <!-- نوار پیشرفت - با استفاده از data attribute و JS -->
+            <div class="mt-3">
+                <div class="flex justify-between text-xs text-gray-600 mb-1">
+                    <span>پیشرفت ترم</span>
+                    {% set total_sessions = class_item.total_sessions %}
+                    {% set completed_sessions = class_item.completed_sessions %}
+                    {% set progress = (completed_sessions / total_sessions * 100) if total_sessions and total_sessions > 0 else 0 %}
+                    <span class="font-bold progress-value">{{ progress|int|persian_number }}%</span>
+                </div>
+                <div class="w-full bg-gray-200 rounded-full h-2">
+                    <div class="bg-blue-600 h-2 rounded-full progress-bar-custom" data-progress="{{ progress|int }}"></div>
+                </div>
+                <div class="flex justify-between text-xs text-gray-500 mt-1">
+                    <span>{{ class_item.completed_sessions|default(0)|persian_number }} جلسه برگزار شده</span>
+                    <span>{{ (class_item.total_sessions - class_item.completed_sessions)|default(0)|persian_number }} جلسه باقیمانده</span>
+                </div>
+            </div>
+            
+            <!-- دکمه‌ها -->
+            <div class="grid grid-cols-3 gap-2 mt-4">
+                <a href="{{ url_for('professor_class_detail', class_id=class_item.id) }}" 
+                   class="text-center bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs py-2 rounded-lg transition">
+                    <i class="fas fa-info-circle ml-1"></i>
+                    جزئیات
+                </a>
+                <a href="{{ url_for('professor_attendance', class_id=class_item.id) }}" 
+                   class="text-center bg-green-100 hover:bg-green-200 text-green-700 text-xs py-2 rounded-lg transition">
+                    <i class="fas fa-check-circle ml-1"></i>
+                    حضور
+                </a>
+                <a href="{{ url_for('professor_grades', class_id=class_item.id) }}" 
+                   class="text-center bg-yellow-100 hover:bg-yellow-200 text-yellow-700 text-xs py-2 rounded-lg transition">
+                    <i class="fas fa-star ml-1"></i>
+                    نمرات
+                </a>
+            </div>
+            
+            <!-- فایل‌ها -->
+            <div class="mt-3 pt-3 border-t border-gray-100">
+                <a href="{{ url_for('professor_files', class_id=class_item.id) }}" 
+                   class="flex items-center justify-between text-sm text-blue-600 hover:text-blue-800">
+                    <span><i class="fas fa-folder-open ml-1"></i> فایل‌های کلاس</span>
+                    <i class="fas fa-chevron-left text-xs"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- صفحه‌بندی -->
+{% if classes.pages > 1 %}
+<div class="flex justify-center mt-6">
+    <div class="flex gap-2">
+        {% if classes.has_prev %}
+        <a href="{{ url_for('professor_classes', page=classes.prev_num, term=term) }}" 
+           class="px-3 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-50">
+            قبلی
+        </a>
+        {% endif %}
+        
+        {% for page_num in classes.iter_pages() %}
+            {% if page_num %}
+                {% if page_num == classes.page %}
+                <span class="px-3 py-2 bg-blue-600 text-white rounded-lg text-sm">{{ page_num|persian_number }}</span>
+                {% else %}
+                <a href="{{ url_for('professor_classes', page=page_num, term=term) }}" 
+                   class="px-3 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-50">
+                    {{ page_num|persian_number }}
+                </a>
+                {% endif %}
+            {% endif %}
+        {% endfor %}
+        
+        {% if classes.has_next %}
+        <a href="{{ url_for('professor_classes', page=classes.next_num, term=term) }}" 
+           class="px-3 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-50">
+            بعدی
+        </a>
+        {% endif %}
+    </div>
+</div>
+{% endif %}
+
+{% elif classes %}
+<!-- وقتی classes وجود داره ولی items نداره -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+    {% for class_item in classes %}
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition">
+        <!-- هدر کلاس -->
+        <div class="bg-gradient-to-l from-blue-600 to-blue-700 px-4 py-3">
+            <div class="flex justify-between items-start">
+                <div>
+                    <h3 class="font-bold text-white">{{ class_item.name }}</h3>
+                    <p class="text-xs text-blue-100 mt-1">{{ class_item.code }}</p>
+                </div>
+                <span class="bg-white/20 text-white text-xs px-2 py-1 rounded-full">
+                    {{ class_item.credits|default(3)|persian_number }} واحد
+                </span>
+            </div>
+        </div>
+        
+        <!-- بدنه -->
+        <div class="p-4">
+            <!-- آمار -->
+            <div class="grid grid-cols-3 gap-2 mb-3">
+                <div class="text-center">
+                    <span class="block text-lg font-bold text-gray-800">{{ class_item.student_count|persian_number }}</span>
+                    <span class="text-xs text-gray-500">دانشجو</span>
+                </div>
+                <div class="text-center">
+                    <span class="block text-lg font-bold text-gray-800">{{ class_item.total_sessions|persian_number }}</span>
+                    <span class="text-xs text-gray-500">جلسات</span>
+                </div>
+                <div class="text-center">
+                    <span class="block text-lg font-bold text-gray-800">{{ class_item.attendance_rate|persian_number }}%</span>
+                    <span class="text-xs text-gray-500">حضور</span>
+                </div>
+            </div>
+            
+            <!-- اطلاعات -->
+            <div class="space-y-2 text-sm text-gray-600 mb-3">
+                <div class="flex items-center gap-2">
+                    <i class="fas fa-calendar text-blue-500 w-4"></i>
+                    <span>شروع: {{ class_item.start_date|persian_date if class_item.start_date else '---' }}</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <i class="fas fa-map-marker-alt text-blue-500 w-4"></i>
+                    <span>{{ class_item.location or 'مکان مشخص نشده' }}</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <i class="fas fa-clock text-blue-500 w-4"></i>
+                    <span>{{ class_item.schedule or 'زمان مشخص نشده' }}</span>
+                </div>
+            </div>
+            
+            <!-- نوار پیشرفت - با استفاده از data attribute و JS -->
+            <div class="mt-3">
+                <div class="flex justify-between text-xs text-gray-600 mb-1">
+                    <span>پیشرفت ترم</span>
+                    {% set total_sessions = class_item.total_sessions %}
+                    {% set completed_sessions = class_item.completed_sessions %}
+                    {% set progress = (completed_sessions / total_sessions * 100) if total_sessions and total_sessions > 0 else 0 %}
+                    <span class="font-bold progress-value">{{ progress|int|persian_number }}%</span>
+                </div>
+                <div class="w-full bg-gray-200 rounded-full h-2">
+                    <div class="bg-blue-600 h-2 rounded-full progress-bar-custom" data-progress="{{ progress|int }}"></div>
+                </div>
+                <div class="flex justify-between text-xs text-gray-500 mt-1">
+                    <span>{{ class_item.completed_sessions|default(0)|persian_number }} جلسه برگزار شده</span>
+                    <span>{{ (class_item.total_sessions - class_item.completed_sessions)|default(0)|persian_number }} جلسه باقیمانده</span>
+                </div>
+            </div>
+            
+            <!-- دکمه‌ها -->
+            <div class="grid grid-cols-3 gap-2 mt-4">
+                <a href="{{ url_for('professor_class_detail', class_id=class_item.id) }}" 
+                   class="text-center bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs py-2 rounded-lg transition">
+                    <i class="fas fa-info-circle ml-1"></i>
+                    جزئیات
+                </a>
+                <a href="{{ url_for('professor_attendance', class_id=class_item.id) }}" 
+                   class="text-center bg-green-100 hover:bg-green-200 text-green-700 text-xs py-2 rounded-lg transition">
+                    <i class="fas fa-check-circle ml-1"></i>
+                    حضور
+                </a>
+                <a href="{{ url_for('professor_grades', class_id=class_item.id) }}" 
+                   class="text-center bg-yellow-100 hover:bg-yellow-200 text-yellow-700 text-xs py-2 rounded-lg transition">
+                    <i class="fas fa-star ml-1"></i>
+                    نمرات
+                </a>
+            </div>
+            
+            <!-- فایل‌ها -->
+            <div class="mt-3 pt-3 border-t border-gray-100">
+                <a href="{{ url_for('professor_files', class_id=class_item.id) }}" 
+                   class="flex items-center justify-between text-sm text-blue-600 hover:text-blue-800">
+                    <span><i class="fas fa-folder-open ml-1"></i> فایل‌های کلاس</span>
+                    <i class="fas fa-chevron-left text-xs"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+{% else %}
+<!-- حالت خالی -->
+<div class="bg-white rounded-xl shadow-sm border border-gray-100 p-8 text-center">
+    <div class="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+        <i class="fas fa-chalkboard-teacher text-gray-400 text-3xl"></i>
+    </div>
+    <h3 class="text-lg font-bold text-gray-700 mb-2">کلاسی یافت نشد</h3>
+    <p class="text-sm text-gray-600 mb-4">شما در حال حاضر کلاسی ندارید</p>
+    <p class="text-xs text-gray-500">برای اضافه شدن کلاس جدید با مدیر سیستم تماس بگیرید</p>
+</div>
+{% endif %}
+
+<script>
+// تنظیم عرض نوار پیشرفت با استفاده از data attribute
+document.addEventListener('DOMContentLoaded', function() {
+    var progressBars = document.querySelectorAll('.progress-bar-custom');
+    progressBars.forEach(function(bar) {
+        var progress = bar.getAttribute('data-progress');
+        if (progress) {
+            bar.style.width = progress + '%';
+        }
+    });
+});
+</script>
+{% endblock %}

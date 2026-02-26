@@ -1,0 +1,304 @@
+{% extends "base.html" %}
+
+{% block title %}فایل‌های کلاس - {{ class_obj.name }}{% endblock %}
+
+{% block head %}
+<style>
+    .file-card {
+        transition: all 0.3s ease;
+    }
+    .file-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="mb-6">
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-800 mb-1">مدیریت فایل‌ها</h1>
+            <p class="text-sm text-gray-600">{{ class_obj.name }} - {{ class_obj.code }}</p>
+        </div>
+        <div class="flex gap-2">
+            <a href="{{ url_for('professor_class_detail', class_id=class_obj.id) }}" class="btn btn-secondary px-4 py-2 text-sm">
+                <i class="fas fa-arrow-right ml-2"></i>
+                بازگشت
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- دکمه آپلود فایل -->
+<div class="mb-6">
+    <button onclick="openUploadModal()" class="btn btn-primary px-6 py-3">
+        <i class="fas fa-upload ml-2"></i>
+        آپلود فایل جدید
+    </button>
+</div>
+
+<!-- دو بخش فایل‌ها -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <!-- فایل‌های عمومی کلاس -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+        <div class="px-4 py-3 bg-gradient-to-l from-blue-600 to-blue-700">
+            <h2 class="font-bold text-white">
+                <i class="fas fa-folder-open ml-1"></i>
+                فایل‌های عمومی کلاس
+            </h2>
+        </div>
+        
+        <div class="p-4">
+            {% if class_files %}
+            <div class="space-y-3">
+                {% for file in class_files %}
+                <div class="file-card bg-gray-50 rounded-lg p-3 border border-gray-200">
+                    <div class="flex items-start justify-between">
+                        <div class="flex items-start gap-3">
+                            <div class="w-10 h-10 rounded-lg flex items-center justify-center
+                                {% if file.file_type == 'pdf' %}bg-red-100
+                                {% elif file.file_type in ['jpg', 'jpeg', 'png', 'gif'] %}bg-blue-100
+                                {% elif file.file_type in ['mp4', 'avi', 'mov'] %}bg-purple-100
+                                {% elif file.file_type in ['mp3', 'wav'] %}bg-green-100
+                                {% else %}bg-gray-100{% endif %}">
+                                <i class="fas 
+                                    {% if file.file_type == 'pdf' %}fa-file-pdf text-red-600
+                                    {% elif file.file_type in ['jpg', 'jpeg', 'png', 'gif'] %}fa-file-image text-blue-600
+                                    {% elif file.file_type in ['mp4', 'avi', 'mov'] %}fa-file-video text-purple-600
+                                    {% elif file.file_type in ['mp3', 'wav'] %}fa-file-audio text-green-600
+                                    {% elif file.file_type in ['doc', 'docx'] %}fa-file-word text-blue-600
+                                    {% elif file.file_type in ['xls', 'xlsx'] %}fa-file-excel text-green-600
+                                    {% else %}fa-file text-gray-600{% endif %} text-lg">
+                                </i>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-gray-800">{{ file.title }}</h3>
+                                {% if file.description %}
+                                <p class="text-xs text-gray-600 mt-1">{{ file.description }}</p>
+                                {% endif %}
+                                <div class="flex items-center gap-3 mt-2 text-xs text-gray-500">
+                                    <span><i class="fas fa-calendar ml-1"></i>{{ file.uploaded_at|persian_date }}</span>
+                                    <span><i class="fas fa-download ml-1"></i>{{ file.download_count|persian_number }} دانلود</span>
+                                    <span><i class="fas fa-user ml-1"></i>{{ file.uploader.full_name }}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex gap-2">
+                            <a href="{{ url_for('download_class_file', file_id=file.id) }}" 
+                               class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center text-blue-600 hover:bg-blue-200 transition"
+                               title="دانلود">
+                                <i class="fas fa-download"></i>
+                            </a>
+                            <button 
+                                    class="w-8 h-8 bg-red-100 rounded-lg flex items-center justify-center text-red-600 hover:bg-red-200 transition"
+                                    title="حذف">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="text-center py-8">
+                <i class="fas fa-folder-open text-4xl text-gray-300 mb-3"></i>
+                <p class="text-gray-500">هیچ فایلی آپلود نشده است</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    
+    <!-- فایل‌های جلسات -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+        <div class="px-4 py-3 bg-gradient-to-l from-purple-600 to-purple-700">
+            <h2 class="font-bold text-white">
+                <i class="fas fa-video ml-1"></i>
+                فایل‌های جلسات
+            </h2>
+        </div>
+        
+        <div class="p-4">
+            {% if session_files %}
+            <div class="space-y-3">
+                {% for file in session_files %}
+                <div class="file-card bg-gray-50 rounded-lg p-3 border border-gray-200">
+                    <div class="flex items-start justify-between">
+                        <div class="flex items-start gap-3">
+                            <div class="w-10 h-10 rounded-lg flex items-center justify-center
+                                {% if file.file_type == 'pdf' %}bg-red-100
+                                {% elif file.file_type in ['jpg', 'jpeg', 'png', 'gif'] %}bg-blue-100
+                                {% elif file.file_type in ['mp4', 'avi', 'mov'] %}bg-purple-100
+                                {% elif file.file_type in ['mp3', 'wav'] %}bg-green-100
+                                {% else %}bg-gray-100{% endif %}">
+                                <i class="fas 
+                                    {% if file.file_type == 'pdf' %}fa-file-pdf text-red-600
+                                    {% elif file.file_type in ['jpg', 'jpeg', 'png', 'gif'] %}fa-file-image text-blue-600
+                                    {% elif file.file_type in ['mp4', 'avi', 'mov'] %}fa-file-video text-purple-600
+                                    {% elif file.file_type in ['mp3', 'wav'] %}fa-file-audio text-green-600
+                                    {% else %}fa-file text-gray-600{% endif %} text-lg">
+                                </i>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-gray-800">{{ file.title }}</h3>
+                                <p class="text-xs text-gray-500 mt-1">جلسه: {{ file.session.title }}</p>
+                                {% if file.description %}
+                                <p class="text-xs text-gray-600 mt-1">{{ file.description }}</p>
+                                {% endif %}
+                                <div class="flex items-center gap-3 mt-2 text-xs text-gray-500">
+                                    <span><i class="fas fa-calendar ml-1"></i>{{ file.uploaded_at|persian_date }}</span>
+                                    <span><i class="fas fa-download ml-1"></i>{{ file.download_count|persian_number }} دانلود</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex gap-2">
+                            <a href="{{ url_for('download_session_file', file_id=file.id) }}" 
+                               class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center text-blue-600 hover:bg-blue-200 transition"
+                               title="دانلود">
+                                <i class="fas fa-download"></i>
+                            </a>
+                            <button 
+                                    class="w-8 h-8 bg-red-100 rounded-lg flex items-center justify-center text-red-600 hover:bg-red-200 transition"
+                                    title="حذف">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="text-center py-8">
+                <i class="fas fa-video text-4xl text-gray-300 mb-3"></i>
+                <p class="text-gray-500">هیچ فایلی برای جلسات آپلود نشده است</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- مودال آپلود فایل -->
+<div id="uploadModal" class="fixed inset-0 bg-gray-900 bg-opacity-50 hidden items-center justify-center z-50">
+    <div class="bg-white rounded-xl shadow-xl max-w-md w-full mx-4">
+        <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+            <h3 class="font-bold text-lg">آپلود فایل جدید</h3>
+            <button onclick="closeUploadModal()" class="text-gray-400 hover:text-gray-600">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <form id="uploadForm" method="POST" enctype="multipart/form-data">
+            <div class="p-6 space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">
+                        <i class="fas fa-heading ml-1 text-blue-600"></i>
+                        عنوان فایل
+                    </label>
+                    <input type="text" name="title" required 
+                           class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">
+                        <i class="fas fa-align-left ml-1 text-blue-600"></i>
+                        توضیحات (اختیاری)
+                    </label>
+                    <textarea name="description" rows="2" 
+                              class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"></textarea>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">
+                        <i class="fas fa-folder ml-1 text-blue-600"></i>
+                        محل ذخیره
+                    </label>
+                    <select name="type" id="fileTypeSelect" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        <option value="general">فایل عمومی کلاس</option>
+                        <option value="session">فایل مربوط به جلسه</option>
+                    </select>
+                </div>
+                
+                <div id="sessionSelectDiv" class="hidden">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">
+                        <i class="fas fa-calendar ml-1 text-blue-600"></i>
+                        انتخاب جلسه
+                    </label>
+                    <select name="session_id" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        <option value="">-- جلسه را انتخاب کنید --</option>
+                        {% for session in sessions %}
+                        <option value="{{ session.id }}">{{ session.session_date|persian_date }} - {{ session.title }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">
+                        <i class="fas fa-file ml-1 text-blue-600"></i>
+                        انتخاب فایل
+                    </label>
+                    <input type="file" name="file" required 
+                           class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    <p class="text-xs text-gray-500 mt-1">فرمت‌های مجاز: pdf, doc, docx, xls, xlsx, jpg, png, mp4, mp3</p>
+                </div>
+            </div>
+            
+            <div class="px-6 py-4 border-t border-gray-200 flex justify-end gap-3">
+                <button type="button" onclick="closeUploadModal()" class="btn btn-secondary px-4 py-2">
+                    انصراف
+                </button>
+                <button type="submit" class="btn btn-primary px-4 py-2">
+                    <i class="fas fa-upload ml-2"></i>
+                    آپلود
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+function openUploadModal() {
+    document.getElementById('uploadModal').classList.remove('hidden');
+    document.getElementById('uploadModal').classList.add('flex');
+}
+
+function closeUploadModal() {
+    document.getElementById('uploadModal').classList.add('hidden');
+    document.getElementById('uploadModal').classList.remove('flex');
+}
+
+document.getElementById('fileTypeSelect').addEventListener('change', function() {
+    const sessionDiv = document.getElementById('sessionSelectDiv');
+    if (this.value === 'session') {
+        sessionDiv.classList.remove('hidden');
+    } else {
+        sessionDiv.classList.add('hidden');
+    }
+});
+
+function deleteFile(fileId, fileType) {
+    if (confirm('آیا از حذف این فایل اطمینان دارید؟')) {
+        fetch(`/professor/file/delete/${fileId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('خطا در حذف فایل: ' + data.message);
+            }
+        });
+    }
+}
+
+// بستن مودال با کلیک خارج از آن
+document.getElementById('uploadModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeUploadModal();
+    }
+});
+</script>
+{% endblock %}

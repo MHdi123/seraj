@@ -1,0 +1,155 @@
+{% extends "base.html" %}
+
+{% block title %}حضور و غیاب - {{ class_obj.name }}{% endblock %}
+
+{% block content %}
+<div class="mb-6">
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-800 mb-1">حضور و غیاب</h1>
+            <p class="text-sm text-gray-600">{{ class_obj.name }} - {{ class_obj.code }}</p>
+        </div>
+        <div class="flex gap-2">
+            <a href="{{ url_for('professor_class_detail', class_id=class_obj.id) }}" class="btn btn-secondary px-4 py-2 text-sm">
+                <i class="fas fa-arrow-right ml-2"></i>
+                بازگشت
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- انتخاب جلسه -->
+<div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4 mb-6">
+    <form method="GET" action="{{ url_for('professor_attendance', class_id=class_obj.id) }}" class="flex flex-wrap items-end gap-4">
+        <div class="flex-grow">
+            <label class="block text-sm font-medium text-gray-700 mb-1">
+                <i class="fas fa-calendar-alt ml-1 text-blue-600"></i>
+                انتخاب جلسه
+            </label>
+            <select name="session_id" class="w-full md:w-96 border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                <option value="">-- جلسه را انتخاب کنید --</option>
+                {% for session in sessions %}
+                <option value="{{ session.id }}" {% if selected_session == session.id %}selected{% endif %}>
+                    {{ session.session_date|persian_date }} - {{ session.start_time.strftime('%H:%M') if session.start_time else '---' }} - {{ session.title or 'جلسه ' + loop.index|string }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+        <button type="submit" class="btn btn-primary px-6 py-2">
+            <i class="fas fa-search ml-2"></i>
+            نمایش
+        </button>
+    </form>
+</div>
+
+{% if selected_session %}
+<!-- اطلاعات جلسه -->
+<div class="bg-gradient-to-l from-blue-600 to-blue-700 rounded-xl p-4 mb-6 text-white">
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div>
+            <h2 class="text-lg font-bold mb-1">{{ session_title }}</h2>
+            <p class="text-sm text-blue-100">{{ session_date|persian_date }} - {{ session_time }}</p>
+        </div>
+        <div class="flex gap-2">
+            <span class="bg-white/20 px-3 py-1 rounded-full text-sm">
+                <i class="fas fa-users ml-1"></i>
+                {{ students|length|persian_number }} دانشجو
+            </span>
+            <span class="bg-white/20 px-3 py-1 rounded-full text-sm">
+                <i class="fas fa-check-circle ml-1"></i>
+                {{ present_count|default(0)|persian_number }} حاضر
+            </span>
+        </div>
+    </div>
+</div>
+
+<!-- فرم حضور و غیاب -->
+<div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+    <div class="px-4 py-3 bg-gray-50 border-b border-gray-100">
+        <h3 class="font-bold text-gray-800">
+            <i class="fas fa-check-circle text-green-600 ml-1"></i>
+            ثبت حضور و غیاب
+        </h3>
+    </div>
+    
+    <form method="POST" class="p-4">
+        <input type="hidden" name="session_id" value="{{ selected_session }}">
+        
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+                <thead class="bg-gray-50 text-gray-600">
+                    <tr>
+                        <th class="px-4 py-3 text-right">ردیف</th>
+                        <th class="px-4 py-3 text-right">نام و نام خانوادگی</th>
+                        <th class="px-4 py-3 text-right">شماره دانشجویی</th>
+                        <th class="px-4 py-3 text-center">وضعیت حضور</th>
+                        <th class="px-4 py-3 text-center">دقیقه تأخیر</th>
+                        <th class="px-4 py-3 text-center">توضیحات</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-100">
+                    {% for student in students %}
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-4 py-3 text-gray-600">{{ loop.index|persian_number }}</td>
+                        <td class="px-4 py-3 font-medium">{{ student.full_name }}</td>
+                        <td class="px-4 py-3 text-gray-600">{{ student.student_id|default('---') }}</td>
+                        <td class="px-4 py-3">
+                            <input type="hidden" name="student_ids[]" value="{{ student.id }}">
+                            <select name="attendance[]" class="border border-gray-300 rounded-lg px-3 py-1 text-sm focus:ring-2 focus:ring-blue-500">
+                                <option value="present" {% if attendances[student.id] == 'present' %}selected{% endif %}>✅ حاضر</option>
+                                <option value="absent" {% if attendances[student.id] == 'absent' %}selected{% endif %}>❌ غایب</option>
+                                <option value="late" {% if attendances[student.id] == 'late' %}selected{% endif %}>⏰ تأخیر</option>
+                                <option value="excused" {% if attendances[student.id] == 'excused' %}selected{% endif %}>📋 موجه</option>
+                            </select>
+                        </td>
+                        <td class="px-4 py-3">
+                            <input type="number" name="late_minutes[]" value="0" min="0" max="120" 
+                                   class="w-20 text-center border border-gray-300 rounded-lg px-2 py-1 text-sm">
+                        </td>
+                        <td class="px-4 py-3">
+                            <input type="text" name="excuse[]" placeholder="توضیحات" 
+                                   class="w-full border border-gray-300 rounded-lg px-2 py-1 text-sm">
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="mt-6 flex gap-3">
+            <button type="submit" class="btn btn-primary px-6 py-3">
+                <i class="fas fa-save ml-2"></i>
+                ثبت حضور و غیاب
+            </button>
+            <a href="{{ url_for('professor_attendance', class_id=class_obj.id) }}" class="btn btn-secondary px-6 py-3">
+                انصراف
+            </a>
+        </div>
+    </form>
+</div>
+
+<!-- خلاصه حضور -->
+<div class="grid grid-cols-1 md:grid-cols-4 gap-4 mt-6">
+    <div class="bg-green-50 rounded-lg p-4 text-center">
+        <i class="fas fa-check-circle text-green-600 text-2xl mb-2"></i>
+        <p class="text-sm text-gray-600">حاضر</p>
+        <p class="text-2xl font-bold text-green-600">{{ present_count|default(0)|persian_number }}</p>
+    </div>
+    <div class="bg-red-50 rounded-lg p-4 text-center">
+        <i class="fas fa-times-circle text-red-600 text-2xl mb-2"></i>
+        <p class="text-sm text-gray-600">غایب</p>
+        <p class="text-2xl font-bold text-red-600">{{ absent_count|default(0)|persian_number }}</p>
+    </div>
+    <div class="bg-yellow-50 rounded-lg p-4 text-center">
+        <i class="fas fa-clock text-yellow-600 text-2xl mb-2"></i>
+        <p class="text-sm text-gray-600">تأخیر</p>
+        <p class="text-2xl font-bold text-yellow-600">{{ late_count|default(0)|persian_number }}</p>
+    </div>
+    <div class="bg-purple-50 rounded-lg p-4 text-center">
+        <i class="fas fa-file-alt text-purple-600 text-2xl mb-2"></i>
+        <p class="text-sm text-gray-600">موجه</p>
+        <p class="text-2xl font-bold text-purple-600">{{ excused_count|default(0)|persian_number }}</p>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

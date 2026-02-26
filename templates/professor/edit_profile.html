@@ -1,0 +1,279 @@
+{% extends "base.html" %}
+
+{% block title %}ویرایش پروفایل استاد - سِراج{% endblock %}
+
+{% block content %}
+<div class="mb-6">
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-800 mb-1">ویرایش پروفایل</h1>
+            <p class="text-sm text-gray-600">به‌روزرسانی اطلاعات شخصی و حرفه‌ای</p>
+        </div>
+        <div class="flex gap-2">
+            <a href="{{ url_for('professor_profile') }}" class="btn btn-secondary px-4 py-2">
+                <i class="fas fa-arrow-right ml-2"></i>
+                بازگشت
+            </a>
+        </div>
+    </div>
+</div>
+
+<form method="POST" enctype="multipart/form-data" class="space-y-6">
+    <!-- اطلاعات پایه -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+        <div class="px-6 py-4 bg-gradient-to-l from-blue-600 to-blue-700">
+            <h2 class="font-bold text-white">
+                <i class="fas fa-user-circle ml-1"></i>
+                اطلاعات پایه
+            </h2>
+        </div>
+        <div class="p-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">
+                        <i class="fas fa-user ml-1 text-blue-600"></i>
+                        نام
+                    </label>
+                    <input type="text" name="first_name" value="{{ current_user.first_name }}" required
+                           class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">
+                        <i class="fas fa-user ml-1 text-blue-600"></i>
+                        نام خانوادگی
+                    </label>
+                    <input type="text" name="last_name" value="{{ current_user.last_name }}" required
+                           class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">
+                        <i class="fas fa-envelope ml-1 text-blue-600"></i>
+                        ایمیل
+                    </label>
+                    <input type="email" name="email" value="{{ current_user.email }}" required
+                           class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">
+                        <i class="fas fa-phone ml-1 text-blue-600"></i>
+                        تلفن همراه
+                    </label>
+                    <input type="text" name="phone" value="{{ current_user.phone }}" required
+                           class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">
+                        <i class="fas fa-phone-alt ml-1 text-blue-600"></i>
+                        تلفن ثابت (اختیاری)
+                    </label>
+                    <input type="text" name="landline" value="{{ current_user.landline or '' }}"
+                           class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">
+                        <i class="fas fa-venus-mars ml-1 text-blue-600"></i>
+                        جنسیت
+                    </label>
+                    <select name="gender" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500">
+                        <option value="male" {% if current_user.gender == 'male' %}selected{% endif %}>مرد</option>
+                        <option value="female" {% if current_user.gender == 'female' %}selected{% endif %}>زن</option>
+                        <option value="other" {% if current_user.gender == 'other' %}selected{% endif %}>سایر</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- اطلاعات حرفه‌ای -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+        <div class="px-6 py-4 bg-gradient-to-l from-green-600 to-green-700">
+            <h2 class="font-bold text-white">
+                <i class="fas fa-briefcase ml-1"></i>
+                اطلاعات حرفه‌ای
+            </h2>
+        </div>
+        <div class="p-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">
+                        <i class="fas fa-graduation-cap ml-1 text-blue-600"></i>
+                        مرتبه علمی
+                    </label>
+                    <select name="academic_rank" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500">
+                        <option value="">--- انتخاب کنید ---</option>
+                        <option value="PROFESSOR" {% if current_user.academic_rank == 'PROFESSOR' %}selected{% endif %}>استاد</option>
+                        <option value="ASSOCIATE_PROFESSOR" {% if current_user.academic_rank == 'ASSOCIATE_PROFESSOR' %}selected{% endif %}>دانشیار</option>
+                        <option value="ASSISTANT_PROFESSOR" {% if current_user.academic_rank == 'ASSISTANT_PROFESSOR' %}selected{% endif %}>استادیار</option>
+                        <option value="INSTRUCTOR" {% if current_user.academic_rank == 'INSTRUCTOR' %}selected{% endif %}>مربی</option>
+                        <option value="VISITING_LECTURER" {% if current_user.academic_rank == 'VISITING_LECTURER' %}selected{% endif %}>مدرس مدعو</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">
+                        <i class="fas fa-id-card ml-1 text-blue-600"></i>
+                        کد استادی
+                    </label>
+                    <input type="text" name="professor_code" value="{{ current_user.professor_code or '' }}"
+                           class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">
+                        <i class="fas fa-flask ml-1 text-blue-600"></i>
+                        تخصص
+                    </label>
+                    <input type="text" name="specialization" value="{{ current_user.specialization or '' }}"
+                           class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">
+                        <i class="fas fa-clock ml-1 text-blue-600"></i>
+                        سابقه تدریس (سال)
+                    </label>
+                    <input type="number" name="teaching_experience" value="{{ current_user.teaching_experience or '' }}"
+                           class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">
+                        <i class="fas fa-university ml-1 text-blue-600"></i>
+                        دانشگاه
+                    </label>
+                    <input type="text" name="university" value="{{ current_user.university }}"
+                           class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">
+                        <i class="fas fa-building ml-1 text-blue-600"></i>
+                        دانشکده
+                    </label>
+                    <input type="text" name="faculty" value="{{ current_user.faculty }}"
+                           class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">
+                        <i class="fas fa-sitemap ml-1 text-blue-600"></i>
+                        گروه آموزشی
+                    </label>
+                    <input type="text" name="department" value="{{ current_user.department or '' }}"
+                           class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">
+                        <i class="fas fa-globe ml-1 text-blue-600"></i>
+                        وبسایت
+                    </label>
+                    <input type="url" name="website" value="{{ current_user.website or '' }}"
+                           class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500">
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- اطلاعات تماس و مکان -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+        <div class="px-6 py-4 bg-gradient-to-l from-purple-600 to-purple-700">
+            <h2 class="font-bold text-white">
+                <i class="fas fa-map-marker-alt ml-1"></i>
+                اطلاعات تماس و مکان
+            </h2>
+        </div>
+        <div class="p-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">
+                        <i class="fas fa-city ml-1 text-blue-600"></i>
+                        استان
+                    </label>
+                    <input type="text" name="province" value="{{ current_user.province }}"
+                           class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">
+                        <i class="fas fa-city ml-1 text-blue-600"></i>
+                        شهر
+                    </label>
+                    <input type="text" name="city" value="{{ current_user.city }}"
+                           class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div class="md:col-span-2">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">
+                        <i class="fas fa-address-card ml-1 text-blue-600"></i>
+                        آدرس کامل
+                    </label>
+                    <textarea name="address" rows="2" 
+                              class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500">{{ current_user.address or '' }}</textarea>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">
+                        <i class="fas fa-phone-office ml-1 text-blue-600"></i>
+                        تلفن دفتر
+                    </label>
+                    <input type="text" name="office_phone" value="{{ current_user.office_phone or '' }}"
+                           class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">
+                        <i class="fas fa-map-pin ml-1 text-blue-600"></i>
+                        محل دفتر
+                    </label>
+                    <input type="text" name="office_location" value="{{ current_user.office_location or '' }}"
+                           class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">
+                        <i class="fas fa-clock ml-1 text-blue-600"></i>
+                        ساعات حضور در دفتر
+                    </label>
+                    <input type="text" name="office_hours" value="{{ current_user.office_hours or '' }}"
+                           class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500"
+                           placeholder="مثال: شنبه تا چهارشنبه ۱۰-۱۴">
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- آپلود رزومه -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+        <div class="px-6 py-4 bg-gradient-to-l from-yellow-600 to-yellow-700">
+            <h2 class="font-bold text-white">
+                <i class="fas fa-file-pdf ml-1"></i>
+                رزومه
+            </h2>
+        </div>
+        <div class="p-6">
+            {% if current_user.resume_file %}
+            <div class="mb-4 p-3 bg-gray-50 rounded-lg flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <i class="fas fa-file-pdf text-red-500 text-xl"></i>
+                    <span class="text-sm">فایل فعلی: {{ current_user.resume_file.split('/')[-1] }}</span>
+                </div>
+                <a href="{{ url_for('download_resume') }}" class="text-blue-600 hover:text-blue-800 text-sm">
+                    <i class="fas fa-download ml-1"></i>
+                    دانلود
+                </a>
+            </div>
+            {% endif %}
+            
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">
+                    <i class="fas fa-upload ml-1 text-blue-600"></i>
+                    آپلود رزومه جدید (PDF, DOC, DOCX)
+                </label>
+                <input type="file" name="resume" accept=".pdf,.doc,.docx"
+                       class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500">
+                <p class="text-xs text-gray-500 mt-1">حداکثر حجم: ۵ مگابایت</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- دکمه‌ها -->
+    <div class="flex gap-3">
+        <button type="submit" class="btn btn-primary px-6 py-3">
+            <i class="fas fa-save ml-2"></i>
+            ذخیره تغییرات
+        </button>
+        <a href="{{ url_for('professor_profile') }}" class="btn btn-secondary px-6 py-3">
+            انصراف
+        </a>
+    </div>
+</form>
+{% endblock %}

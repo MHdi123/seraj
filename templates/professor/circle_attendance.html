@@ -1,0 +1,336 @@
+{% extends "base.html" %}
+
+{% block title %}حضور و غیاب - {{ circle.name }}{% endblock %}
+
+{% block content %}
+<div class="mb-6">
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-800 mb-1">حضور و غیاب جلسه</h1>
+            <p class="text-sm text-gray-600">{{ circle.name }} - {{ session.title or 'جلسه ' + session.id|string }}</p>
+        </div>
+        <div class="flex gap-2">
+            <a href="{{ url_for('professor_circle_detail', circle_id=circle.id) }}" class="btn btn-secondary px-4 py-2">
+                <i class="fas fa-arrow-right ml-2"></i>
+                بازگشت
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- اطلاعات جلسه -->
+<div class="bg-gradient-to-l from-purple-600 to-purple-700 rounded-xl p-4 mb-6 text-white">
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div>
+            <h2 class="text-lg font-bold mb-1">{{ session.title or 'جلسه حلقه' }}</h2>
+            <p class="text-sm text-purple-100">
+                <i class="fas fa-calendar ml-1"></i>
+                {{ session.session_date|persian_date }}
+                {% if session.start_time %} - {{ session.start_time }} تا {{ session.end_time }}{% endif %}
+            </p>
+            {% if session.topic %}
+            <p class="text-sm text-purple-100 mt-1">
+                <i class="fas fa-tag ml-1"></i>
+                {{ session.topic }}
+            </p>
+            {% endif %}
+        </div>
+        <div class="flex gap-2">
+            <span class="bg-white/20 px-3 py-1 rounded-full text-sm">
+                <i class="fas fa-users ml-1"></i>
+                {{ members|length|persian_number }} عضو
+            </span>
+            <span class="bg-white/20 px-3 py-1 rounded-full text-sm">
+                <i class="fas fa-check-circle ml-1"></i>
+                <span id="presentCount">{{ present_count|default(0)|persian_number }}</span> حاضر
+            </span>
+        </div>
+    </div>
+</div>
+
+<!-- خلاصه حضور -->
+<div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+    <div class="bg-green-50 rounded-lg p-4 text-center">
+        <i class="fas fa-check-circle text-green-600 text-2xl mb-2"></i>
+        <p class="text-sm text-gray-600">حاضر</p>
+        <p class="text-2xl font-bold text-green-600" id="presentCount">{{ present_count|default(0)|persian_number }}</p>
+    </div>
+    <div class="bg-red-50 rounded-lg p-4 text-center">
+        <i class="fas fa-times-circle text-red-600 text-2xl mb-2"></i>
+        <p class="text-sm text-gray-600">غایب</p>
+        <p class="text-2xl font-bold text-red-600" id="absentCount">{{ (members|length - (present_count|default(0)))|persian_number }}</p>
+    </div>
+    <div class="bg-yellow-50 rounded-lg p-4 text-center">
+        <i class="fas fa-clock text-yellow-600 text-2xl mb-2"></i>
+        <p class="text-sm text-gray-600">تأخیر</p>
+        <p class="text-2xl font-bold text-yellow-600" id="lateCount">{{ late_count|default(0)|persian_number }}</p>
+    </div>
+    <div class="bg-blue-50 rounded-lg p-4 text-center">
+        <i class="fas fa-percent text-blue-600 text-2xl mb-2"></i>
+        <p class="text-sm text-gray-600">درصد حضور</p>
+        <p class="text-2xl font-bold text-blue-600" id="attendancePercent">
+            {% if members|length > 0 %}
+                {{ ((present_count|default(0) / members|length) * 100)|round|persian_number }}%
+            {% else %}
+                ۰%
+            {% endif %}
+        </p>
+    </div>
+</div>
+
+<!-- فرم حضور و غیاب -->
+<div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+    <div class="px-4 py-3 bg-gray-50 border-b border-gray-100">
+        <h3 class="font-bold text-gray-800">
+            <i class="fas fa-check-circle text-purple-600 ml-1"></i>
+            ثبت حضور و غیاب اعضا
+        </h3>
+    </div>
+    
+    <div class="p-4">
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+                <thead class="bg-gray-50 text-gray-600">
+                    <tr>
+                        <th class="px-4 py-3 text-right">ردیف</th>
+                        <th class="px-4 py-3 text-right">نام و نام خانوادگی</th>
+                        <th class="px-4 py-3 text-center">وضعیت حضور</th>
+                        <th class="px-4 py-3 text-center">دقیقه تأخیر</th>
+                        <th class="px-4 py-3 text-center">توضیحات</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-100" id="attendanceTable">
+                    {% for member in members %}
+                    <tr class="hover:bg-gray-50" data-member-id="{{ member.id }}">
+                        <td class="px-4 py-3 text-gray-600">{{ loop.index|persian_number }}</td>
+                        <td class="px-4 py-3 font-medium">{{ member.full_name }}</td>
+                        <td class="px-4 py-3 text-center">
+                            <select class="attendance-status border border-gray-300 rounded-lg px-3 py-1 text-sm focus:ring-2 focus:ring-purple-500"
+                                    onchange="updateAttendance( this.value)">
+                                <option value="present" {% if attendance_dict[member.id] and attendance_dict[member.id].attended %}selected{% endif %}>✅ حاضر</option>
+                                <option value="absent" {% if attendance_dict[member.id] and not attendance_dict[member.id].attended and not attendance_dict[member.id].late_minutes %}selected{% endif %}>❌ غایب</option>
+                                <option value="late" {% if attendance_dict[member.id] and attendance_dict[member.id].late_minutes > 0 %}selected{% endif %}>⏰ تأخیر</option>
+                                <option value="excused" {% if attendance_dict[member.id] and attendance_dict[member.id].excuse %}selected{% endif %}>📋 موجه</option>
+                            </select>
+                        </td>
+                        <td class="px-4 py-3 text-center">
+                            <input type="number" class="late-minutes w-20 text-center border border-gray-300 rounded-lg px-2 py-1 text-sm"
+                                   value="{{ attendance_dict[member.id].late_minutes if attendance_dict[member.id] and attendance_dict[member.id].late_minutes else 0 }}"
+                                   min="0" max="120" onchange="updateLateMinutes( this.value)">
+                        </td>
+                        <td class="px-4 py-3">
+                            <input type="text" class="excuse w-full border border-gray-300 rounded-lg px-2 py-1 text-sm"
+                                   value="{{ attendance_dict[member.id].excuse if attendance_dict[member.id] and attendance_dict[member.id].excuse else '' }}"
+                                   placeholder="توضیحات" onchange="updateExcuse( this.value)">
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="mt-6 flex gap-3">
+            <button onclick="saveAllAttendances()" class="btn btn-primary px-6 py-3 bg-purple-600 hover:bg-purple-700">
+                <i class="fas fa-save ml-2"></i>
+                ذخیره همه تغییرات
+            </button>
+            <button onclick="resetForm()" class="btn btn-secondary px-6 py-3">
+                <i class="fas fa-undo ml-2"></i>
+                بازنشانی
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- آیات جلسه و تکالیف -->
+{% if session.verses_reviewed or session.notes or session.homework %}
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+    {% if session.verses_reviewed %}
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
+        <h3 class="font-bold text-gray-800 mb-2 flex items-center">
+            <i class="fas fa-quran text-purple-600 ml-1"></i>
+            آیات تلاوت شده
+        </h3>
+        <p class="text-sm text-gray-700">{{ session.verses_reviewed }}</p>
+    </div>
+    {% endif %}
+    
+    {% if session.notes %}
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
+        <h3 class="font-bold text-gray-800 mb-2 flex items-center">
+            <i class="fas fa-sticky-note text-purple-600 ml-1"></i>
+            نکات جلسه
+        </h3>
+        <p class="text-sm text-gray-700">{{ session.notes }}</p>
+    </div>
+    {% endif %}
+    
+    {% if session.homework %}
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4 md:col-span-2">
+        <h3 class="font-bold text-gray-800 mb-2 flex items-center">
+            <i class="fas fa-home text-purple-600 ml-1"></i>
+            تکلیف جلسه بعد
+        </h3>
+        <p class="text-sm text-gray-700">{{ session.homework }}</p>
+    </div>
+    {% endif %}
+</div>
+{% endif %}
+
+<script>
+let attendanceChanges = {};
+
+function updateAttendance(memberId, status) {
+    if (!attendanceChanges[memberId]) {
+        attendanceChanges[memberId] = {};
+    }
+    attendanceChanges[memberId].status = status;
+    
+    if (status === 'late') {
+        if (!attendanceChanges[memberId].late_minutes) {
+            attendanceChanges[memberId].late_minutes = 5;
+            let input = document.querySelector('tr[data-member-id="' + memberId + '"] .late-minutes');
+            if (input) input.value = 5;
+        }
+    } else if (status === 'excused') {
+        if (!attendanceChanges[memberId].excuse) {
+            attendanceChanges[memberId].excuse = 'موجه';
+            let input = document.querySelector('tr[data-member-id="' + memberId + '"] .excuse');
+            if (input) input.value = 'موجه';
+        }
+    }
+    
+    updateStatistics();
+}
+
+function updateLateMinutes(memberId, minutes) {
+    if (!attendanceChanges[memberId]) {
+        attendanceChanges[memberId] = {};
+    }
+    attendanceChanges[memberId].late_minutes = parseInt(minutes) || 0;
+    
+    if (minutes > 0) {
+        attendanceChanges[memberId].status = 'late';
+        let select = document.querySelector('tr[data-member-id="' + memberId + '"] .attendance-status');
+        if (select) select.value = 'late';
+    }
+    
+    updateStatistics();
+}
+
+function updateExcuse(memberId, excuse) {
+    if (!attendanceChanges[memberId]) {
+        attendanceChanges[memberId] = {};
+    }
+    attendanceChanges[memberId].excuse = excuse;
+    
+    if (excuse && excuse.trim() !== '') {
+        attendanceChanges[memberId].status = 'excused';
+        let select = document.querySelector('tr[data-member-id="' + memberId + '"] .attendance-status');
+        if (select) select.value = 'excused';
+    }
+}
+
+function updateStatistics() {
+    let present = 0, absent = 0, late = 0;
+    let rows = document.querySelectorAll('#attendanceTable tr');
+    
+    rows.forEach(function(row) {
+        let memberId = row.dataset.memberId;
+        let statusSelect = row.querySelector('.attendance-status');
+        let lateInput = row.querySelector('.late-minutes');
+        
+        let status;
+        if (attendanceChanges[memberId] && attendanceChanges[memberId].status) {
+            status = attendanceChanges[memberId].status;
+        } else {
+            status = statusSelect.value;
+        }
+        
+        let lateMinutes = parseInt(lateInput.value) || 0;
+        
+        if (status === 'present' || status === 'late' || status === 'excused') {
+            present++;
+        } else {
+            absent++;
+        }
+        
+        if (status === 'late') {
+            late++;
+        }
+    });
+    
+    document.getElementById('presentCount').textContent = persianNumber(present);
+    document.getElementById('absentCount').textContent = persianNumber(absent);
+    document.getElementById('lateCount').textContent = persianNumber(late);
+    
+    let total = rows.length;
+    let percent = total > 0 ? Math.round((present / total) * 100) : 0;
+    document.getElementById('attendancePercent').textContent = persianNumber(percent) + '%';
+}
+
+function saveAllAttendances() {
+    let attendances = [];
+    let rows = document.querySelectorAll('#attendanceTable tr');
+    
+    rows.forEach(function(row) {
+        let memberId = row.dataset.memberId;
+        let statusSelect = row.querySelector('.attendance-status');
+        let lateInput = row.querySelector('.late-minutes');
+        let excuseInput = row.querySelector('.excuse');
+        
+        let status;
+        if (attendanceChanges[memberId] && attendanceChanges[memberId].status) {
+            status = attendanceChanges[memberId].status;
+        } else {
+            status = statusSelect.value;
+        }
+        
+        let lateMinutes = parseInt(lateInput.value) || 0;
+        let excuse = excuseInput.value || '';
+        
+        attendances.push({
+            member_id: parseInt(memberId),
+            attended: status !== 'absent',
+            late_minutes: lateMinutes,
+            excuse: excuse
+        });
+    });
+    
+    fetch('/professor/circle/{{ circle.id }}/attendance/{{ session.id }}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ attendances: attendances })
+    })
+    .then(function(response) {
+        return response.json();
+    })
+    .then(function(data) {
+        if (data.success) {
+            alert('✅ حضور و غیاب با موفقیت ثبت شد');
+            attendanceChanges = {};
+        } else {
+            alert('❌ خطا در ثبت حضور و غیاب: ' + data.message);
+        }
+    })
+    .catch(function(error) {
+        alert('❌ خطا در ارتباط با سرور');
+    });
+}
+
+function resetForm() {
+    if (confirm('آیا از بازنشانی تغییرات اطمینان دارید؟')) {
+        location.reload();
+    }
+}
+
+function persianNumber(num) {
+    let persianDigits = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
+    return num.toString().replace(/\d/g, function(x) {
+        return persianDigits[x];
+    });
+}
+</script>
+{% endblock %}

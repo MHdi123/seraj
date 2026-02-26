@@ -1,0 +1,270 @@
+{% extends "base.html" %}
+
+{% block title %}پروفایل استاد - {{ current_user.full_name }}{% endblock %}
+
+{% block content %}
+<div class="mb-6">
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-800 mb-1">پروفایل استاد</h1>
+            <p class="text-sm text-gray-600">مشاهده و ویرایش اطلاعات شخصی و حرفه‌ای</p>
+        </div>
+        <div class="flex gap-2">
+            <a href="{{ url_for('professor_edit_profile') }}" class="btn btn-primary px-4 py-2">
+                <i class="fas fa-edit ml-2"></i>
+                ویرایش پروفایل
+            </a>
+            <a href="{{ url_for('professor_dashboard') }}" class="btn btn-secondary px-4 py-2">
+                <i class="fas fa-arrow-right ml-2"></i>
+                بازگشت
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <!-- ستون راست - اطلاعات اصلی -->
+    <div class="lg:col-span-2 space-y-6">
+        <!-- کارت اطلاعات پایه -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+            <div class="px-6 py-4 bg-gradient-to-l from-blue-600 to-blue-700">
+                <h2 class="font-bold text-white">
+                    <i class="fas fa-user-circle ml-1"></i>
+                    اطلاعات پایه
+                </h2>
+            </div>
+            <div class="p-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <p class="text-xs text-gray-500 mb-1">نام و نام خانوادگی</p>
+                        <p class="font-bold text-gray-800">{{ current_user.full_name }}</p>
+                    </div>
+                    <div>
+                        <p class="text-xs text-gray-500 mb-1">نام کاربری</p>
+                        <p class="font-bold text-gray-800">{{ current_user.username }}</p>
+                    </div>
+                    <div>
+                        <p class="text-xs text-gray-500 mb-1">ایمیل</p>
+                        <p class="font-bold text-gray-800" dir="ltr">{{ current_user.email }}</p>
+                    </div>
+                    <div>
+                        <p class="text-xs text-gray-500 mb-1">تلفن همراه</p>
+                        <p class="font-bold text-gray-800" dir="ltr">{{ current_user.phone }}</p>
+                    </div>
+                    <div>
+                        <p class="text-xs text-gray-500 mb-1">تلفن ثابت</p>
+                        <p class="font-bold text-gray-800" dir="ltr">{{ current_user.landline or '---' }}</p>
+                    </div>
+                    <div>
+                        <p class="text-xs text-gray-500 mb-1">جنسیت</p>
+                        <p class="font-bold text-gray-800">{{ current_user.get_gender_display() }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- کارت اطلاعات حرفه‌ای -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+            <div class="px-6 py-4 bg-gradient-to-l from-green-600 to-green-700">
+                <h2 class="font-bold text-white">
+                    <i class="fas fa-briefcase ml-1"></i>
+                    اطلاعات حرفه‌ای
+                </h2>
+            </div>
+            <div class="p-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <p class="text-xs text-gray-500 mb-1">مرتبه علمی</p>
+                        <p class="font-bold text-gray-800">{{ current_user.get_academic_rank_display() or '---' }}</p>
+                    </div>
+                    <div>
+                        <p class="text-xs text-gray-500 mb-1">کد استادی</p>
+                        <p class="font-bold text-gray-800">{{ current_user.professor_code or '---' }}</p>
+                    </div>
+                    <div>
+                        <p class="text-xs text-gray-500 mb-1">تخصص</p>
+                        <p class="font-bold text-gray-800">{{ current_user.specialization or '---' }}</p>
+                    </div>
+                    <div>
+                        <p class="text-xs text-gray-500 mb-1">سابقه تدریس</p>
+                        <p class="font-bold text-gray-800">{{ current_user.teaching_experience|persian_number or '---' }} سال</p>
+                    </div>
+                    <div>
+                        <p class="text-xs text-gray-500 mb-1">دانشگاه</p>
+                        <p class="font-bold text-gray-800">{{ current_user.university or '---' }}</p>
+                    </div>
+                    <div>
+                        <p class="text-xs text-gray-500 mb-1">دانشکده</p>
+                        <p class="font-bold text-gray-800">{{ current_user.faculty or '---' }}</p>
+                    </div>
+                    <div>
+                        <p class="text-xs text-gray-500 mb-1">گروه آموزشی</p>
+                        <p class="font-bold text-gray-800">{{ current_user.department or '---' }}</p>
+                    </div>
+                    <div>
+                        <p class="text-xs text-gray-500 mb-1">وبسایت</p>
+                        {% if current_user.website %}
+                        <a href="{{ current_user.website }}" target="_blank" class="text-blue-600 hover:underline font-bold">
+                            {{ current_user.website }}
+                        </a>
+                        {% else %}
+                        <p class="font-bold text-gray-800">---</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- کارت اطلاعات تماس و مکان -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+            <div class="px-6 py-4 bg-gradient-to-l from-purple-600 to-purple-700">
+                <h2 class="font-bold text-white">
+                    <i class="fas fa-map-marker-alt ml-1"></i>
+                    اطلاعات تماس و مکان
+                </h2>
+            </div>
+            <div class="p-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <p class="text-xs text-gray-500 mb-1">استان</p>
+                        <p class="font-bold text-gray-800">{{ current_user.province or '---' }}</p>
+                    </div>
+                    <div>
+                        <p class="text-xs text-gray-500 mb-1">شهر</p>
+                        <p class="font-bold text-gray-800">{{ current_user.city or '---' }}</p>
+                    </div>
+                    <div>
+                        <p class="text-xs text-gray-500 mb-1">آدرس</p>
+                        <p class="font-bold text-gray-800">{{ current_user.address or '---' }}</p>
+                    </div>
+                    <div>
+                        <p class="text-xs text-gray-500 mb-1">تلفن دفتر</p>
+                        <p class="font-bold text-gray-800" dir="ltr">{{ current_user.office_phone or '---' }}</p>
+                    </div>
+                    <div>
+                        <p class="text-xs text-gray-500 mb-1">محل دفتر</p>
+                        <p class="font-bold text-gray-800">{{ current_user.office_location or '---' }}</p>
+                    </div>
+                    <div>
+                        <p class="text-xs text-gray-500 mb-1">ساعات حضور در دفتر</p>
+                        <p class="font-bold text-gray-800">{{ current_user.office_hours or '---' }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- رزومه -->
+     {% if current_user.resume_file %}
+<div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+    <div class="px-6 py-4 bg-gradient-to-l from-yellow-600 to-yellow-700">
+        <h2 class="font-bold text-white">
+            <i class="fas fa-file-pdf ml-1"></i>
+            رزومه
+        </h2>
+    </div>
+    <div class="p-6">
+        <div class="flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <i class="fas fa-file-pdf text-red-500 text-2xl"></i>
+                <div>
+                    <p class="font-bold text-gray-800">فایل رزومه</p>
+                    <p class="text-xs text-gray-500">آخرین به‌روزرسانی: {{ current_user.updated_at|persian_date if current_user.updated_at else '---' }}</p>
+                </div>
+            </div>
+            <a href="{{ url_for('download_resume') }}" class="btn btn-primary px-4 py-2">
+                <i class="fas fa-download ml-2"></i>
+                دانلود
+            </a>
+        </div>
+    </div>
+</div>
+{% endif %}
+    </div>
+    
+    <!-- ستون چپ - آمار و اطلاعات سریع -->
+    <div class="space-y-6">
+        <!-- کارت آمار تدریس -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+            <div class="px-4 py-3 bg-gray-50 border-b border-gray-100">
+                <h3 class="font-bold text-gray-800">
+                    <i class="fas fa-chart-bar text-blue-600 ml-1"></i>
+                    آمار تدریس
+                </h3>
+            </div>
+            <div class="p-4">
+                <div class="space-y-4">
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-600">کلاس‌های فعال:</span>
+                        <span class="font-bold text-lg">{{ teaching_stats.total_classes|persian_number }}</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-600">تعداد دانشجویان:</span>
+                        <span class="font-bold text-lg">{{ teaching_stats.total_students|persian_number }}</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-600">جلسات برگزار شده:</span>
+                        <span class="font-bold text-lg">{{ teaching_stats.total_sessions|persian_number }}</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-600">حلقه‌های تلاوت:</span>
+                        <span class="font-bold text-lg">{{ teaching_stats.total_circles|persian_number }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- کارت دروس ارائه شده -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+            <div class="px-4 py-3 bg-gray-50 border-b border-gray-100">
+                <h3 class="font-bold text-gray-800">
+                    <i class="fas fa-book-open text-green-600 ml-1"></i>
+                    دروس ارائه شده
+                </h3>
+            </div>
+            <div class="p-4">
+                {% if courses %}
+                <div class="space-y-2">
+                    {% for course in courses %}
+                    <div class="p-2 hover:bg-gray-50 rounded-lg">
+                        <p class="font-bold text-sm">{{ course.name }}</p>
+                        <p class="text-xs text-gray-500">{{ course.code }} | {{ course.credits }} واحد</p>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p class="text-gray-500 text-sm text-center py-2">درسی ارائه نشده است</p>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- کارت اطلاعات سیستم -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+            <div class="px-4 py-3 bg-gray-50 border-b border-gray-100">
+                <h3 class="font-bold text-gray-800">
+                    <i class="fas fa-clock text-purple-600 ml-1"></i>
+                    اطلاعات سیستم
+                </h3>
+            </div>
+            <div class="p-4">
+                <div class="space-y-3 text-sm">
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">تاریخ عضویت:</span>
+                        <span class="font-bold">{{ current_user.created_at|persian_date }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">آخرین بازدید:</span>
+                        <span class="font-bold">{{ current_user.last_seen|time_ago|default('امروز') }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">وضعیت حساب:</span>
+                        <span class="flex items-center">
+                            <span class="w-2 h-2 bg-green-400 rounded-full ml-1 animate-pulse"></span>
+                            <span>فعال</span>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
