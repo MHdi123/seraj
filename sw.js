@@ -1,40 +1,45 @@
-const cacheName = 'seraj-cache-v1';
-const filesToCache = [
+const CACHE_NAME = 'seraj-cache-v1';
+
+const FILES_TO_CACHE = [
   '/',
-  '/index.html',
-  '/static/css/tailwind.css',
-  '/static/js/main.js',
-  '/static/logo/192.png',
-  '/static/logo/512.png'
+  '/static/icons/192.png',
+  '/static/icons/512.png'
 ];
 
-// نصب Service Worker و کش فایل‌ها
+// نصب و کش اولیه
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(cacheName).then((cache) => cache.addAll(filesToCache))
+    caches.open(CACHE_NAME)
+      .then((cache) => cache.addAll(FILES_TO_CACHE))
   );
+  self.skipWaiting();
 });
 
-// فعال‌سازی و پاکسازی کش قدیمی
+// فعال‌سازی و حذف کش‌های قدیمی
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((keys) =>
-      Promise.all(keys.map((key) => {
-        if (key !== cacheName) return caches.delete(key);
-      }))
+      Promise.all(
+        keys.map((key) => {
+          if (key !== CACHE_NAME) {
+            return caches.delete(key);
+          }
+        })
+      )
     )
   );
+  self.clients.claim();
 });
 
-// پاسخ به درخواست‌ها از کش یا شبکه
+// هندل کردن درخواست‌ها
 self.addEventListener('fetch', (event) => {
   event.respondWith(
-    caches.match(event.request).then((response) => response || fetch(event.request))
+    caches.match(event.request)
+      .then((response) => {
+        return response || fetch(event.request);
+      })
+      .catch(() => {
+        return caches.match('/');
+      })
   );
 });
-
-event.respondWith(
-  caches.match(event.request)
-    .then((response) => response || fetch(event.request))
-    .catch(() => caches.match('/offline.html'))
-);
