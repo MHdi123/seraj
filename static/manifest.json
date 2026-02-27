@@ -6,7 +6,6 @@
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
-  "display_override": ["standalone", "minimal-ui"],
   "background_color": "#ffffff",
   "theme_color": "#1e3a8a",
   "orientation": "portrait",
@@ -69,9 +68,9 @@
 
   "shortcuts": [
     {
-      "name": "رویدادهای قرآنی",
+      "name": "رویدادها",
       "short_name": "رویدادها",
-      "description": "مشاهده و ثبت‌نام در رویدادهای قرآنی",
+      "description": "مشاهده رویدادهای قرآنی",
       "url": "/events",
       "icons": [
         {
@@ -84,7 +83,7 @@
     {
       "name": "حلقه‌های تلاوت",
       "short_name": "حلقه‌ها",
-      "description": "مشاهده حلقه‌های تلاوت دانشگاهی",
+      "description": "مشاهده حلقه‌های تلاوت",
       "url": "/circles",
       "icons": [
         {
@@ -96,7 +95,7 @@
     },
     {
       "name": "سِراج‌یار",
-      "short_name": "هوش قرآنی",
+      "short_name": "سِراج‌یار",
       "description": "پرسش و پاسخ قرآنی با هوش مصنوعی",
       "url": "/ai/quran",
       "icons": [
@@ -110,6 +109,5 @@
   ],
 
   "categories": ["education", "books", "religion"],
-
   "prefer_related_applications": false
 }
