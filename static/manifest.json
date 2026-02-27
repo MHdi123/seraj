@@ -35,19 +35,19 @@
   "screenshots": [
     {
       "src": "/static/screenshots/home.png",
-      "sizes": "540x720",
+      "sizes": "720x533",
       "type": "image/png",
       "form_factor": "narrow"
     },
     {
       "src": "/static/screenshots/events.png",
-      "sizes": "540x720",
+      "sizes": "720x533",
       "type": "image/png",
       "form_factor": "narrow"
     },
     {
       "src": "/static/screenshots/dashboard.png",
-      "sizes": "720x540",
+      "sizes": "720x533",
       "type": "image/png",
       "form_factor": "wide"
     }
