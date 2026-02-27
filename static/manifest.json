@@ -32,6 +32,27 @@
     }
   ],
 
+  "screenshots": [
+    {
+      "src": "/static/screenshots/home.png",
+      "sizes": "540x720",
+      "type": "image/png",
+      "form_factor": "narrow"
+    },
+    {
+      "src": "/static/screenshots/events.png",
+      "sizes": "540x720",
+      "type": "image/png",
+      "form_factor": "narrow"
+    },
+    {
+      "src": "/static/screenshots/dashboard.png",
+      "sizes": "720x540",
+      "type": "image/png",
+      "form_factor": "wide"
+    }
+  ],
+
   "shortcuts": [
     {
       "name": "رویدادها",
@@ -76,3 +97,6 @@
 
   "categories": ["education", "books", "religion"]
 }
+
+
+
