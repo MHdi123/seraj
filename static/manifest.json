@@ -45,12 +45,12 @@
   "type": "image/png",
   "form_factor": "narrow"
 },
-    {
-      "src": "/static/screenshots/dashboard.png",
-      "sizes": "720x533",
-      "type": "image/png",
-      "form_factor": "wide"
-    }
+{
+  "src": "/static/screenshots/dashboard.png",
+  "sizes": "743x540",
+  "type": "image/png",
+  "form_factor": "wide"
+}
   ],
 
   "shortcuts": [
