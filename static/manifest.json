@@ -1,14 +1,15 @@
 {
   "name": "سِراج - پلتفرم مدیریت فعالیت‌های قرآن",
-  "id": "/",
   "short_name": "سِراج",
+  "id": "/",
   "description": "پلتفرم جامع مدیریت فعالیت‌های قرآنی دانشگاهی با امکان ثبت‌نام در رویدادها، حلقه‌های تلاوت و پرسش و پاسخ قرآنی",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
+  "display_override": ["standalone", "minimal-ui"],
   "background_color": "#ffffff",
   "theme_color": "#1e3a8a",
-  "orientation": "any",
+  "orientation": "portrait",
   "dir": "rtl",
   "lang": "fa",
 
@@ -16,48 +17,61 @@
     {
       "src": "/static/icons/96.png",
       "sizes": "96x96",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any"
     },
     {
       "src": "/static/icons/192.png",
       "sizes": "192x192",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
+    },
+    {
+      "src": "/static/icons/192-maskable.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
     },
     {
       "src": "/static/icons/512.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
+    },
+    {
+      "src": "/static/icons/512-maskable.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
     }
   ],
 
   "screenshots": [
     {
       "src": "/static/screenshots/home.png",
-      "sizes": "720x533",
+      "sizes": "720x530",
       "type": "image/png",
       "form_factor": "narrow"
     },
-  {
-  "src": "/static/screenshots/events.png",
-  "sizes": "720x530",
-  "type": "image/png",
-  "form_factor": "narrow"
-},
-{
-  "src": "/static/screenshots/dashboard.png",
-  "sizes": "743x540",
-  "type": "image/png",
-  "form_factor": "wide"
-}
+    {
+      "src": "/static/screenshots/events.png",
+      "sizes": "720x530",
+      "type": "image/png",
+      "form_factor": "narrow"
+    },
+    {
+      "src": "/static/screenshots/dashboard.png",
+      "sizes": "743x540",
+      "type": "image/png",
+      "form_factor": "wide"
+    }
   ],
 
   "shortcuts": [
     {
-      "name": "رویدادها",
+      "name": "رویدادهای قرآنی",
       "short_name": "رویدادها",
-      "description": "مشاهده رویدادهای قرآنی",
+      "description": "مشاهده و ثبت‌نام در رویدادهای قرآنی",
       "url": "/events",
       "icons": [
         {
@@ -70,7 +84,7 @@
     {
       "name": "حلقه‌های تلاوت",
       "short_name": "حلقه‌ها",
-      "description": "مشاهده حلقه‌های تلاوت",
+      "description": "مشاهده حلقه‌های تلاوت دانشگاهی",
       "url": "/circles",
       "icons": [
         {
@@ -82,7 +96,7 @@
     },
     {
       "name": "سِراج‌یار",
-      "short_name": "سِراج‌یار",
+      "short_name": "هوش قرآنی",
       "description": "پرسش و پاسخ قرآنی با هوش مصنوعی",
       "url": "/ai/quran",
       "icons": [
@@ -95,8 +109,7 @@
     }
   ],
 
-  "categories": ["education", "books", "religion"]
+  "categories": ["education", "books", "religion"],
+
+  "prefer_related_applications": false
 }
-
-
-
