@@ -1,0 +1,237 @@
+{% extends "base.html" %}
+{% block title %}مراحل مسابقه - {{ competition.title }}{% endblock %}
+{% block content %}
+<div class="max-w-5xl mx-auto px-4 sm:px-6 py-6 md:py-10">
+    <!-- هدر با دکمه بازگشت -->
+    <div class="flex flex-wrap items-center justify-between gap-3 mb-6">
+        <div class="flex items-center gap-3">
+            <a href="{{ url_for('admin_competitions') }}" 
+               class="text-gray-500 hover:text-gray-700 transition">
+                <i class="fas fa-arrow-right text-lg"></i>
+            </a>
+            <h1 class="text-xl sm:text-2xl md:text-3xl font-bold text-gray-800">
+                مراحل مسابقه: {{ competition.title }}
+            </h1>
+        </div>
+        <div class="text-xs sm:text-sm text-gray-500">
+            <i class="fas fa-layer-group ml-1"></i>
+            تعداد مراحل: {{ rounds|length }}
+        </div>
+    </div>
+
+    <!-- ذخیره ID مسابقه در data attribute -->
+    <div id="competitionData" data-competition-id="{{ competition.id }}" style="display: none;"></div>
+
+    <div class="flex flex-col lg:flex-row gap-6">
+        <!-- لیست مراحل فعلی -->
+        <div class="flex-1">
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                <div class="px-5 py-4 bg-gradient-to-r from-gray-50 to-white border-b border-gray-100">
+                    <h2 class="text-base md:text-lg font-bold text-gray-800 flex items-center gap-2">
+                        <i class="fas fa-list-ol text-blue-500"></i>
+                        مراحل فعلی
+                    </h2>
+                </div>
+                
+                {% if rounds %}
+                <div class="divide-y divide-gray-100">
+                    {% for round in rounds %}
+                    <div class="p-4 hover:bg-gray-50 transition group" data-round-id="{{ round.id }}">
+                        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
+                            <div class="flex items-center gap-3">
+                                <div class="w-8 h-8 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center font-bold text-sm">
+                                    {{ round.round_number }}
+                                </div>
+                                <div>
+                                    <h3 class="font-semibold text-gray-800">{{ round.title }}</h3>
+                                    <p class="text-xs text-gray-400 mt-0.5">حداکثر امتیاز: {{ round.max_score }}</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">
+                                    <i class="fas fa-check-circle ml-1 text-xs"></i>
+                                    ایجاد شده
+                                </span>
+                                <button type="button" class="delete-round-btn text-gray-400 hover:text-red-500 transition opacity-0 group-hover:opacity-100" data-round-id="{{ round.id }}">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="p-8 text-center">
+                    <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                        <i class="fas fa-inbox text-gray-400 text-2xl"></i>
+                    </div>
+                    <p class="text-gray-500">هیچ مرحله‌ای تعریف نشده است.</p>
+                    <p class="text-xs text-gray-400 mt-1">با استفاده از فرم زیر مراحل مسابقه را اضافه کنید</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- فرم افزودن مرحله جدید -->
+        <div class="lg:w-96">
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden sticky top-20">
+                <div class="px-5 py-4 bg-gradient-to-r from-blue-50 to-white border-b border-gray-100">
+                    <h2 class="text-base md:text-lg font-bold text-gray-800 flex items-center gap-2">
+                        <i class="fas fa-plus-circle text-blue-500"></i>
+                        افزودن مرحله جدید
+                    </h2>
+                </div>
+                <div class="p-5">
+                    <form id="addRoundForm" class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                شماره مرحله <span class="text-red-500">*</span>
+                            </label>
+                            <input type="number" id="round_number" name="round_number" 
+                                   placeholder="مثال: 1"
+                                   required 
+                                   class="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+                            <p class="text-xs text-gray-400 mt-1">ترتیب مراحل مسابقه</p>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                عنوان مرحله <span class="text-red-500">*</span>
+                            </label>
+                            <input type="text" id="title" name="title" 
+                                   placeholder="مثال: مرحله مقدماتی"
+                                   required 
+                                   class="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                حداکثر امتیاز
+                            </label>
+                            <input type="number" id="max_score" name="max_score" 
+                                   placeholder="100"
+                                   value="100" 
+                                   class="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+                        </div>
+                        
+                        <button type="submit" 
+                                class="w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-xl font-medium transition shadow-sm flex items-center justify-center gap-2">
+                            <i class="fas fa-plus"></i>
+                            اضافه کردن مرحله
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- راهنمایی -->
+            <div class="mt-4 bg-amber-50 rounded-xl p-4 border border-amber-200">
+                <div class="flex gap-3">
+                    <i class="fas fa-lightbulb text-amber-500 text-lg"></i>
+                    <div>
+                        <h4 class="text-sm font-semibold text-amber-800">نکته مهم</h4>
+                        <p class="text-xs text-amber-700 mt-1">
+                            مراحل مسابقه به ترتیب شماره مرحله مرتب می‌شوند. 
+                            داوران می‌توانند برای هر مرحله به صورت جداگانه نمره ثبت کنند.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // دریافت ID مسابقه از data attribute
+    var competitionIdElem = document.getElementById('competitionData');
+    var competitionId = competitionIdElem ? parseInt(competitionIdElem.getAttribute('data-competition-id')) : 0;
+    
+    // فرم افزودن مرحله
+    var addForm = document.getElementById('addRoundForm');
+    if (addForm) {
+        addForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            var roundNumber = document.getElementById('round_number').value;
+            var title = document.getElementById('title').value.trim();
+            var maxScore = document.getElementById('max_score').value;
+            
+            if (!roundNumber || !title) {
+                alert('لطفاً شماره مرحله و عنوان را وارد کنید.');
+                return;
+            }
+            
+            var submitBtn = this.querySelector('button[type="submit"]');
+            var originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> در حال افزودن...';
+            submitBtn.disabled = true;
+            
+            fetch('/admin/competition/' + competitionId + '/round/add', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    round_number: roundNumber,
+                    title: title,
+                    max_score: maxScore
+                })
+            })
+            .then(function(response) {
+                return response.json();
+            })
+            .then(function(data) {
+                if (data.success) {
+                    location.reload();
+                } else {
+                    alert(data.message || 'خطا در افزودن مرحله');
+                    submitBtn.innerHTML = originalText;
+                    submitBtn.disabled = false;
+                }
+            })
+            .catch(function() {
+                alert('خطا در ارتباط با سرور');
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+            });
+        });
+    }
+    
+    // دکمه‌های حذف مرحله
+    var deleteButtons = document.querySelectorAll('.delete-round-btn');
+    for (var i = 0; i < deleteButtons.length; i++) {
+        deleteButtons[i].addEventListener('click', function() {
+            var roundId = this.getAttribute('data-round-id');
+            if (confirm('آیا از حذف این مرحله مطمئن هستید؟')) {
+                fetch('/admin/competition/round/' + roundId + '/delete', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'}
+                })
+                .then(function(response) {
+                    return response.json();
+                })
+                .then(function(data) {
+                    if (data.success) {
+                        location.reload();
+                    } else {
+                        alert(data.message || 'خطا در حذف مرحله');
+                    }
+                })
+                .catch(function() {
+                    alert('خطا در ارتباط با سرور');
+                });
+            }
+        });
+    }
+</script>
+
+<style>
+    /* بهبود نمایش در موبایل */
+    @media (max-width: 640px) {
+        .rounded-2xl {
+            border-radius: 1rem;
+        }
+        .sticky {
+            position: relative;
+            top: 0;
+        }
+    }
+</style>
+{% endblock %}

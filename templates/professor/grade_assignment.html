@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+
+{% block title %}تصحیح تکالیف{% endblock %}
+
+{% block content %}
+<div style="max-width: 1000px; margin: 0 auto; padding: 1rem;">
+    <div style="background: white; border-radius: 12px; border: 1px solid #e9ecef; padding: 1.5rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+            <h2 style="margin: 0; font-size: 1.25rem;">
+                <i class="fas fa-star" style="color: #f5a623;"></i> تصحیح تکالیف
+            </h2>
+            <a href="{{ url_for('professor_assignments', class_id=class_obj.id) }}" style="background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 8px; padding: 0.35rem 0.75rem; font-size: 0.75rem; color: #495057; text-decoration: none;">
+                <i class="fas fa-arrow-right"></i> بازگشت
+            </a>
+        </div>
+        
+        <div style="background: #f8f9fa; border-radius: 10px; padding: 1rem; margin-bottom: 1.5rem;">
+            <h3 style="margin: 0 0 0.5rem 0; font-size: 1rem;">{{ assignment.title }}</h3>
+            <p style="margin: 0; color: #6c757d; font-size: 0.85rem;">ددلاین: {{ assignment.due_date|persian_date }}</p>
+        </div>
+        
+        {% if submissions %}
+            <div style="overflow-x: auto;">
+                <table style="width: 100%; border-collapse: collapse;">
+                    <thead>
+                        <tr style="background: #f8f9fa; border-bottom: 1px solid #e9ecef;">
+                            <th style="padding: 0.75rem; text-align: right;">دانشجو</th>
+                            <th style="padding: 0.75rem; text-align: right;">تاریخ ارسال</th>
+                            <th style="padding: 0.75rem; text-align: right;">نمره</th>
+                            <th style="padding: 0.75rem; text-align: right;"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for sub in submissions %}
+                        {% set grade_value = sub.grade if sub.grade else '' %}
+                        <tr style="border-bottom: 1px solid #e9ecef;">
+                            <td style="padding: 0.75rem; font-size: 0.85rem;">{{ sub.student.full_name }}</td>
+                            <td style="padding: 0.75rem; font-size: 0.85rem;">{{ sub.submitted_at|persian_date }}</td>
+                            <td style="padding: 0.75rem; font-size: 0.85rem;">
+                                {% if sub.grade %}
+                                    <span style="font-weight: 500;">{{ sub.grade }}</span>
+                                {% else %}
+                                    <span style="color: #f5a623;">ثبت نشده</span>
+                                {% endif %}
+                            </td>
+                            <td style="padding: 0.75rem;">
+                                <button onclick='openGradeModal("{{ sub.id }}", "{{ sub.student.full_name }}", "{{ grade_value }}")' style="color: #4a6cf7; background: none; border: none; cursor: pointer; font-size: 0.8rem;">
+                                    ثبت نمره
+                                </button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div style="text-align: center; padding: 3rem;">
+                <i class="fas fa-inbox" style="font-size: 3rem; color: #dee2e6; margin-bottom: 1rem;"></i>
+                <p style="color: #6c757d;">هیچ پاسخی ارسال نشده است.</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+function openGradeModal(submissionId, studentName, currentGrade) {
+    var grade = prompt('نمره دانشجو ' + studentName + ' را وارد کنید:', currentGrade);
+    if (grade !== null && grade !== '') {
+        var gradeNum = parseFloat(grade);
+        if (isNaN(gradeNum)) {
+            alert('لطفاً یک عدد معتبر وارد کنید.');
+            return;
+        }
+        if (gradeNum < 0 || gradeNum > 100) {
+            alert('نمره باید بین 0 تا 100 باشد.');
+            return;
+        }
+        
+        fetch('/professor/assignment/' + submissionId + '/grade', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ grade: gradeNum })
+        })
+        .then(function(response) {
+            return response.json();
+        })
+        .then(function(data) {
+            if (data.success) {
+                alert('نمره با موفقیت ثبت شد.');
+                location.reload();
+            } else {
+                alert('خطا: ' + data.message);
+            }
+        })
+        .catch(function(error) {
+            alert('خطا در ارتباط با سرور.');
+        });
+    }
+}
+</script>
+{% endblock %}

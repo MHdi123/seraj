@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% block title %}تقویم برنامه - استاد{% endblock %}
+
+{% block content %}
+<div style="max-width: 1200px; margin: 0 auto; padding: 1rem;">
+    <div style="background: white; border-radius: 12px; border: 1px solid #e9ecef; padding: 1.5rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+            <h2 style="margin: 0; font-size: 1.25rem;">
+                <i class="fas fa-calendar-alt" style="color: #4a6cf7;"></i> تقویم برنامه درسی
+            </h2>
+            <a href="{{ url_for('professor_dashboard') }}" style="background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 8px; padding: 0.35rem 0.75rem; font-size: 0.75rem; color: #495057; text-decoration: none;">
+                <i class="fas fa-arrow-right"></i> بازگشت
+            </a>
+        </div>
+        
+        {% if sessions %}
+            <div style="overflow-x: auto;">
+                <table style="width: 100%; border-collapse: collapse;">
+                    <thead>
+                        <tr style="background: #f8f9fa; border-bottom: 1px solid #e9ecef;">
+                            <th style="padding: 0.75rem; text-align: right;">تاریخ</th>
+                            <th style="padding: 0.75rem; text-align: right;">ساعت</th>
+                            <th style="padding: 0.75rem; text-align: right;">کلاس</th>
+                            <th style="padding: 0.75rem; text-align: right;">عنوان جلسه</th>
+                            <th style="padding: 0.75rem; text-align: right;">مکان</th>
+                            <th style="padding: 0.75rem; text-align: right;">وضعیت</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for session in sessions %}
+                        <tr style="border-bottom: 1px solid #e9ecef;">
+                            <td style="padding: 0.75rem; font-size: 0.85rem;">{{ session.session_date|persian_date }}</td>
+                            <td style="padding: 0.75rem; font-size: 0.85rem;">{{ session.start_time.strftime('%H:%M') }}</td>
+                            <td style="padding: 0.75rem; font-size: 0.85rem;">{{ session.class_obj.name }}</td>
+                            <td style="padding: 0.75rem; font-size: 0.85rem;">{{ session.title or '---' }}</td>
+                            <td style="padding: 0.75rem; font-size: 0.85rem;">{{ session.location or '---' }}</td>
+                            <td style="padding: 0.75rem;">
+                                {% if session.session_date < now.date() %}
+                                    <span style="background: #e9ecef; color: #6c757d; padding: 0.2rem 0.5rem; border-radius: 20px; font-size: 0.7rem;">برگزار شده</span>
+                                {% else %}
+                                    <span style="background: #e3f5ec; color: #20b759; padding: 0.2rem 0.5rem; border-radius: 20px; font-size: 0.7rem;">در پیش رو</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div style="text-align: center; padding: 3rem;">
+                <i class="fas fa-calendar-times" style="font-size: 3rem; color: #dee2e6; margin-bottom: 1rem;"></i>
+                <p style="color: #6c757d;">هیچ جلسه‌ای برنامه‌ریزی نشده است.</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

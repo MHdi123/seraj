@@ -1,0 +1,145 @@
+{% extends "base.html" %}
+
+{% block title %}جزئیات درخواست حلقه{% endblock %}
+
+{% block content %}
+<div style="max-width: 800px; margin: 0 auto; padding: 1rem;">
+    <div style="background: white; border-radius: 12px; border: 1px solid #e9ecef; padding: 1.5rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+            <h2 style="margin: 0; font-size: 1.25rem;">
+                <i class="fas fa-quran" style="color: #9b59b6;"></i> جزئیات درخواست حلقه
+            </h2>
+            <a href="{{ url_for('admin_circle_requests') }}" style="background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 8px; padding: 0.35rem 0.75rem; font-size: 0.75rem; text-decoration: none; color: #495057;">
+                <i class="fas fa-arrow-right"></i> بازگشت
+            </a>
+        </div>
+        
+        <div style="background: #f8f9fa; border-radius: 10px; padding: 1rem; margin-bottom: 1rem;">
+            <h3 style="margin: 0 0 0.5rem 0;">{{ request.name }}</h3>
+            <p style="margin: 0; color: #6c757d; font-size: 0.85rem;">استاد: {{ request.professor.full_name }} | تاریخ ثبت: {{ request.created_at|persian_date }}</p>
+        </div>
+        
+        <div style="margin-bottom: 1rem;">
+            <h4 style="margin: 0 0 0.5rem 0; font-size: 0.9rem;">توضیحات</h4>
+            <p style="color: #495057; font-size: 0.85rem;">{{ request.description }}</p>
+        </div>
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+            <div>
+                <h4 style="margin: 0 0 0.25rem 0; font-size: 0.8rem; color: #6c757d;">نوع حلقه</h4>
+                <p>{{ request.circle_type or '---' }}</p>
+            </div>
+            <div>
+                <h4 style="margin: 0 0 0.25rem 0; font-size: 0.8rem; color: #6c757d;">سطح</h4>
+                <p>{{ request.level or '---' }}</p>
+            </div>
+        </div>
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+            <div>
+                <h4 style="margin: 0 0 0.25rem 0; font-size: 0.8rem; color: #6c757d;">روزهای جلسه</h4>
+                <p>{{ request.meeting_days or '---' }}</p>
+            </div>
+            <div>
+                <h4 style="margin: 0 0 0.25rem 0; font-size: 0.8rem; color: #6c757d;">ساعت جلسه</h4>
+                <p>{{ request.meeting_time or '---' }}</p>
+            </div>
+        </div>
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+            <div>
+                <h4 style="margin: 0 0 0.25rem 0; font-size: 0.8rem; color: #6c757d;">مکان برگزاری</h4>
+                <p>{{ request.meeting_location or '---' }}</p>
+            </div>
+            <div>
+                <h4 style="margin: 0 0 0.25rem 0; font-size: 0.8rem; color: #6c757d;">مدت جلسه</h4>
+                <p>{{ request.duration_hours }} ساعت</p>
+            </div>
+        </div>
+        
+        <div style="margin-bottom: 1.5rem;">
+            <h4 style="margin: 0 0 0.25rem 0; font-size: 0.8rem; color: #6c757d;">حداکثر ظرفیت</h4>
+            <p>{{ request.max_members }} نفر</p>
+        </div>
+        
+        {% if request.status == 'pending' %}
+        <div style="border-top: 1px solid #e9ecef; padding-top: 1rem;">
+            <div style="margin-bottom: 1rem;">
+                <label style="display: block; margin-bottom: 0.5rem;">یادداشت (اختیاری)</label>
+                <textarea id="adminNotes" rows="2" style="width: 100%; padding: 0.5rem; border: 1px solid #dee2e6; border-radius: 8px;" placeholder="دلیل تأیید یا رد را وارد کنید..."></textarea>
+            </div>
+            <div style="display: flex; gap: 1rem;">
+                <button onclick="approveRequest()" style="background: #20b759; color: white; border: none; border-radius: 8px; padding: 0.5rem 1.5rem; cursor: pointer;">
+                    <i class="fas fa-check"></i> تأیید
+                </button>
+                <button onclick="rejectRequest()" style="background: #e74c3c; color: white; border: none; border-radius: 8px; padding: 0.5rem 1.5rem; cursor: pointer;">
+                    <i class="fas fa-times"></i> رد
+                </button>
+            </div>
+        </div>
+        {% elif request.status == 'approved' %}
+        <div style="background: #e3f5ec; border-radius: 8px; padding: 1rem;">
+            <p style="margin: 0; color: #20b759;">
+                <i class="fas fa-check-circle"></i> این درخواست در تاریخ {{ request.reviewed_at|persian_date }} تأیید شده است.
+            </p>
+        </div>
+        {% else %}
+        <div style="background: #fce8e8; border-radius: 8px; padding: 1rem;">
+            <p style="margin: 0; color: #e74c3c;">
+                <i class="fas fa-times-circle"></i> این درخواست در تاریخ {{ request.reviewed_at|persian_date }} رد شده است.
+            </p>
+            {% if request.admin_notes %}
+            <p style="margin-top: 0.5rem; font-size: 0.85rem;">دلیل: {{ request.admin_notes }}</p>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+function approveRequest() {
+    var notes = document.getElementById('adminNotes').value;
+    fetch('{{ url_for("admin_approve_circle_request", request_id=request.id) }}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ reason: notes })
+    })
+    .then(function(response) { return response.json(); })
+    .then(function(data) {
+        if (data.success) {
+            alert('حلقه با موفقیت تأیید شد.');
+            location.reload();
+        } else {
+            alert('خطا: ' + data.message);
+        }
+    });
+}
+
+function rejectRequest() {
+    var notes = document.getElementById('adminNotes').value;
+    if (!notes) {
+        if (!confirm('آیا بدون ذکر دلیل می‌خواهید این درخواست را رد کنید؟')) {
+            return;
+        }
+    }
+    fetch('{{ url_for("admin_reject_circle_request", request_id=request.id) }}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ reason: notes })
+    })
+    .then(function(response) { return response.json(); })
+    .then(function(data) {
+        if (data.success) {
+            alert('درخواست با موفقیت رد شد.');
+            location.reload();
+        } else {
+            alert('خطا: ' + data.message);
+        }
+    });
+}
+</script>
+{% endblock %}

@@ -3,47 +3,82 @@
 {% block title %}تاریخچه پرسش‌ها - سِراج{% endblock %}
 
 {% block content %}
-<div class="max-w-4xl mx-auto">
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
     <div class="mb-8">
-        <div class="flex justify-between items-center">
+        <div class="flex flex-col sm:flex-row justify-between items-center gap-4">
             <div>
-                <h1 class="text-3xl font-bold mb-2">تاریخچه پرسش‌ها</h1>
-                <p class="text-gray-600">سوالات و پاسخ‌های قبلی شما</p>
+                <h1 class="text-2xl sm:text-3xl font-bold mb-2 bg-gradient-to-l from-emerald-600 to-teal-600 bg-clip-text text-transparent">
+                    تاریخچه پرسش‌ها
+                </h1>
+                <p class="text-gray-600 text-sm sm:text-base">سوالات و پاسخ‌های قبلی شما</p>
             </div>
             <div>
-                <a href="{{ url_for('ai_quran') }}" class="btn btn-primary">
-                    <i class="fas fa-plus ml-2"></i>
+                <a href="{{ url_for('ai_quran') }}" class="inline-flex items-center gap-2 bg-gradient-to-l from-emerald-600 to-teal-600 text-white font-semibold py-2 px-5 rounded-xl hover:from-emerald-700 hover:to-teal-700 transition-all">
+                    <i class="fas fa-plus"></i>
                     سوال جدید
                 </a>
             </div>
         </div>
     </div>
     
-    <div class="card">
-        <div class="card-body">
+    <div class="bg-white rounded-2xl shadow-xl overflow-hidden">
+        <div class="p-4 sm:p-6">
             {% if questions %}
                 <div class="space-y-6">
                     {% for q in questions %}
-                        <div class="border border-gray-200 rounded-lg p-6">
+                        <div class="border border-gray-200 rounded-xl p-4 sm:p-6 hover:shadow-lg transition-all">
                             <div class="mb-4">
-                                <h3 class="font-bold text-lg mb-2">سوال:</h3>
+                                <h3 class="font-bold text-lg mb-2 text-gray-800">
+                                    <i class="fas fa-question-circle ml-2 text-emerald-600"></i>
+                                    سوال:
+                                </h3>
                                 <p class="text-gray-700 bg-gray-50 p-3 rounded-lg">{{ q.question }}</p>
                             </div>
                             
                             <div>
-                                <h4 class="font-bold text-lg mb-2">پاسخ:</h4>
-                                <div class="bg-blue-50 p-4 rounded-lg">
+                                <h4 class="font-bold text-lg mb-2 text-gray-800">
+                                    <i class="fas fa-comment-dots ml-2 text-teal-600"></i>
+                                    پاسخ:
+                                </h4>
+                                <div class="bg-gradient-to-r from-blue-50 to-cyan-50 p-4 rounded-lg text-gray-700">
                                     {{ q.answer|truncate(300) }}
                                 </div>
+                            </div>
+                            
+                            <div class="mt-3 text-xs text-gray-400">
+                                <i class="fas fa-calendar-alt ml-1"></i>
+                                {{ q.created_at|persian_date if q.created_at else '' }}
                             </div>
                         </div>
                     {% endfor %}
                 </div>
+                
+                <!-- صفحه‌بندی -->
+                {% if questions.pages > 1 %}
+                <div class="flex justify-center gap-2 mt-8">
+                    {% for page in range(1, questions.pages + 1) %}
+                        <a href="{{ url_for('ai_history', page=page) }}" 
+                           class="w-9 h-9 flex items-center justify-center rounded-lg transition-all
+                                  {% if page == questions.page %}
+                                      bg-emerald-600 text-white
+                                  {% else %}
+                                      bg-gray-100 text-gray-600 hover:bg-gray-200
+                                  {% endif %}">
+                            {{ page }}
+                        </a>
+                    {% endfor %}
+                </div>
+                {% endif %}
+                
             {% else %}
                 <div class="text-center py-12">
-                    <i class="fas fa-history text-4xl text-gray-300 mb-4"></i>
+                    <i class="fas fa-history text-5xl text-gray-300 mb-4"></i>
                     <h3 class="text-xl font-bold text-gray-700 mb-2">تاریخچه‌ای موجود نیست</h3>
                     <p class="text-gray-600">هنوز سوالی نپرسیده‌اید</p>
+                    <a href="{{ url_for('ai_quran') }}" class="inline-block mt-4 text-emerald-600 hover:text-emerald-700">
+                        <i class="fas fa-plus ml-1"></i>
+                        اولین سوال خود را بپرسید
+                    </a>
                 </div>
             {% endif %}
         </div>

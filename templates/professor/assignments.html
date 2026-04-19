@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% block title %}تکالیف کلاس{% endblock %}
+
+{% block content %}
+<div style="max-width: 1000px; margin: 0 auto; padding: 1rem;">
+    <div style="background: white; border-radius: 12px; border: 1px solid #e9ecef; padding: 1.5rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+            <h2 style="margin: 0; font-size: 1.25rem;">
+                <i class="fas fa-tasks" style="color: #4a6cf7;"></i> تکالیف {{ class_obj.name }}
+            </h2>
+            <a href="{{ url_for('professor_class_detail', class_id=class_obj.id) }}" style="background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 8px; padding: 0.35rem 0.75rem; font-size: 0.75rem; color: #495057; text-decoration: none;">
+                <i class="fas fa-arrow-right"></i> بازگشت
+            </a>
+        </div>
+        
+        {% if assignments %}
+            <div style="overflow-x: auto;">
+                <table style="width: 100%; border-collapse: collapse;">
+                    <thead>
+                        <tr style="background: #f8f9fa; border-bottom: 1px solid #e9ecef;">
+                            <th style="padding: 0.75rem; text-align: right;">عنوان</th>
+                            <th style="padding: 0.75rem; text-align: right;">ددلاین</th>
+                            <th style="padding: 0.75rem; text-align: right;">تعداد پاسخ</th>
+                            <th style="padding: 0.75rem; text-align: right;">وضعیت</th>
+                            <th style="padding: 0.75rem; text-align: right;"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for assignment in assignments %}
+                        <tr style="border-bottom: 1px solid #e9ecef;">
+                            <td style="padding: 0.75rem; font-size: 0.85rem;">{{ assignment.title }}</td>
+                            <td style="padding: 0.75rem; font-size: 0.85rem;">{{ assignment.due_date|persian_date }}</td>
+                            <td style="padding: 0.75rem; font-size: 0.85rem;">{{ assignment.submissions|length }}</td>
+                            <td style="padding: 0.75rem;">
+                                {% if assignment.due_date < now %}
+                                    <span style="background: #e9ecef; color: #6c757d; padding: 0.2rem 0.5rem; border-radius: 20px; font-size: 0.7rem;">بسته شده</span>
+                                {% else %}
+                                    <span style="background: #e3f5ec; color: #20b759; padding: 0.2rem 0.5rem; border-radius: 20px; font-size: 0.7rem;">فعال</span>
+                                {% endif %}
+                            </td>
+                            <td style="padding: 0.75rem;">
+                                <a href="{{ url_for('professor_grade_assignment', assignment_id=assignment.id) }}" style="color: #4a6cf7; text-decoration: none; font-size: 0.8rem;">تصحیح</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div style="text-align: center; padding: 3rem;">
+                <i class="fas fa-inbox" style="font-size: 3rem; color: #dee2e6; margin-bottom: 1rem;"></i>
+                <p style="color: #6c757d;">هیچ تکلیفی تعریف نشده است.</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

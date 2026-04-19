@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+
+{% block title %}ایجاد حلقه تلاوت جدید{% endblock %}
+
+{% block content %}
+<div style="max-width: 700px; margin: 0 auto; padding: 1rem;">
+    <div style="background: white; border-radius: 12px; border: 1px solid #e9ecef; padding: 1.5rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+            <h2 style="margin: 0; font-size: 1.25rem;">
+                <i  style="color: #9b59b6;"></i> ایجاد حلقه تلاوت جدید
+            </h2>
+            <a href="{{ url_for('professor_circles') }}" style="background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 8px; padding: 0.35rem 0.75rem; font-size: 0.75rem; color: #495057; text-decoration: none;">
+                <i class="fas fa-arrow-right"></i> بازگشت
+            </a>
+        </div>
+        
+        <form method="POST">
+            <div style="margin-bottom: 1rem;">
+                <label style="display: block; margin-bottom: 0.5rem; font-size: 0.85rem; font-weight: 500;">نام حلقه *</label>
+                <input type="text" name="name" required style="width: 100%; padding: 0.5rem; border: 1px solid #dee2e6; border-radius: 8px;">
+                <div style="font-size: 0.7rem; color: #6c757d; margin-top: 0.25rem;">نام حلقه تلاوت خود را وارد کنید</div>
+            </div>
+            
+            <div style="margin-bottom: 1rem;">
+                <label style="display: block; margin-bottom: 0.5rem; font-size: 0.85rem; font-weight: 500;">توضیحات *</label>
+                <textarea name="description" rows="4" required style="width: 100%; padding: 0.5rem; border: 1px solid #dee2e6; border-radius: 8px;"></textarea>
+                <div style="font-size: 0.7rem; color: #6c757d; margin-top: 0.25rem;">توضیحات کامل درباره حلقه، اهداف و برنامه‌ها</div>
+            </div>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+                <div>
+                    <label style="display: block; margin-bottom: 0.5rem; font-size: 0.85rem; font-weight: 500;">نوع حلقه</label>
+                    <select name="circle_type" style="width: 100%; padding: 0.5rem; border: 1px solid #dee2e6; border-radius: 8px;">
+                        <option value="quran">قرآن</option>
+                        <option value="tajweed">تجوید</option>
+                        <option value="memorization">حفظ</option>
+                        <option value="tafseer">تفسیر</option>
+                    </select>
+                </div>
+                <div>
+                    <label style="display: block; margin-bottom: 0.5rem; font-size: 0.85rem; font-weight: 500;">سطح</label>
+                    <select name="level" style="width: 100%; padding: 0.5rem; border: 1px solid #dee2e6; border-radius: 8px;">
+                        <option value="beginner">مبتدی</option>
+                        <option value="intermediate">متوسط</option>
+                        <option value="advanced">پیشرفته</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+                <div>
+                    <label style="display: block; margin-bottom: 0.5rem; font-size: 0.85rem; font-weight: 500;">روزهای جلسه</label>
+                    <input type="text" name="meeting_days" placeholder="مثال: شنبه, دوشنبه" style="width: 100%; padding: 0.5rem; border: 1px solid #dee2e6; border-radius: 8px;">
+                </div>
+                <div>
+                    <label style="display: block; margin-bottom: 0.5rem; font-size: 0.85rem; font-weight: 500;">ساعت جلسه</label>
+                    <input type="time" name="meeting_time" style="width: 100%; padding: 0.5rem; border: 1px solid #dee2e6; border-radius: 8px;">
+                </div>
+            </div>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+                <div>
+                    <label style="display: block; margin-bottom: 0.5rem; font-size: 0.85rem; font-weight: 500;">مکان برگزاری</label>
+                    <input type="text" name="meeting_location" placeholder="مثال: سالن جلسات، کلاس ۲۰۳" style="width: 100%; padding: 0.5rem; border: 1px solid #dee2e6; border-radius: 8px;">
+                </div>
+                <div>
+                    <label style="display: block; margin-bottom: 0.5rem; font-size: 0.85rem; font-weight: 500;">مدت جلسه (ساعت)</label>
+                    <input type="number" name="duration_hours" value="1" min="1" max="4" style="width: 100%; padding: 0.5rem; border: 1px solid #dee2e6; border-radius: 8px;">
+                </div>
+            </div>
+            
+            <div style="margin-bottom: 1.5rem;">
+                <label style="display: block; margin-bottom: 0.5rem; font-size: 0.85rem; font-weight: 500;">حداکثر ظرفیت</label>
+                <input type="number" name="max_members" value="20" min="5" max="50" style="width: 100%; padding: 0.5rem; border: 1px solid #dee2e6; border-radius: 8px;">
+            </div>
+            
+            <div style="background: #e8edff; padding: 0.75rem; border-radius: 8px; margin-bottom: 1.5rem;">
+                <p style="margin: 0; font-size: 0.75rem; color: #4a6cf7;">
+                    <i class="fas fa-info-circle"></i> پس از ثبت درخواست، ادمین آن را بررسی و تأیید خواهد کرد. پس از تأیید، حلقه شما فعال می‌شود.
+                </p>
+            </div>
+            
+            <div style="display: flex; gap: 1rem;">
+                <button type="submit" style="background: #4a6cf7; color: white; border: none; border-radius: 8px; padding: 0.5rem 1.5rem; cursor: pointer;">
+                    <i class="fas fa-save"></i> ثبت درخواست
+                </button>
+                <a href="{{ url_for('professor_circles') }}" style="background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 8px; padding: 0.5rem 1.5rem; text-decoration: none; color: #495057;">
+                    انصراف
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

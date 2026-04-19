@@ -1,5 +1,5 @@
 # routes.py
-from flask import render_template, request, redirect, url_for, flash, jsonify, send_file
+from flask import render_template, request, redirect, url_for, flash, jsonify, send_file, render_template_string
 from flask_login import login_user, logout_user, login_required, current_user
 from models import User
 from extensions import db
@@ -39,7 +39,14 @@ from models import (
     Notification,
     PasswordResetToken,
     QuranVerse,
-    UserRole
+    UserRole,
+    Banner,
+    # اضافه کردن مدل‌های مسابقات
+    Competition,
+    CompetitionCategory,
+    CompetitionRegistration,
+    CompetitionRound,
+    JudgeScore,
 )
 import jdatetime
 from decorators import admin_required, staff_required, verified_required
@@ -47,8 +54,8 @@ from sqlalchemy import func, and_, or_, desc
 
 try:
     from quran_ai import (
-        ask_quran_ai, 
-        analyze_quranic_text, 
+        ask_quran_ai,
+        analyze_quranic_text,
         get_verse_suggestions,
         get_ai_statistics,
         get_recent_qa
@@ -75,72 +82,199 @@ def init_routes(app):
         return dict(endpoint_exists=endpoint_exists)
     
     # ============================================
-    # توابع کمکی آیه روز
+    # توابع کمکی آیه روز و حدیث
     # ============================================
-    
-    def get_daily_verse():
-        """برمی‌گرداند آیه روز با اطلاعات کامل از جدول quran_verses"""
-        with app.app_context():
-            try:
-                # دریافت همه آیات
-                verses = QuranVerse.query.all()
-                
-                if not verses:
-                    print("⚠️ هیچ آیه‌ای در دیتابیس وجود ندارد!")
-                    return {
-                        'title': 'آیه روز',
-                        'verse': 'بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ',
-                        'surah': 'سوره حمد',
-                        'verse_number': 1,
-                        'arabic_text': 'بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ',
-                        'translation': 'به نام خداوند بخشنده مهربان'
-                    }
-                
-                # انتخاب آیه بر اساس تاریخ (تغییر روزانه)
-                today = date.today()
-                random.seed(today.toordinal())
-                verse = random.choice(verses)
-                
-                # ساخت آبجکت برای تمپلیت
-                daily_verse = {
-                    'title': 'آیه روز',
-                    'verse': getattr(verse, 'verse_persian', getattr(verse, 'translation', '')),
-                    'surah': getattr(verse, 'surah_name', 'قرآن'),
-                    'verse_number': getattr(verse, 'verse_number', ''),
-                    'arabic_text': getattr(verse, 'verse_arabic', ''),
-                    'translation': getattr(verse, 'verse_persian', getattr(verse, 'translation', ''))
-                }
-                
-                return daily_verse
-                
-            except Exception as e:
-                print(f"❌ خطا در دریافت آیه روز: {e}")
-                return {
-                    'title': 'آیه روز',
-                    'verse': 'إِنَّ مَعَ الْعُسْرِ يُسْرًا',
-                    'surah': 'سوره شرح',
-                    'verse_number': 6,
-                    'arabic_text': 'إِنَّ مَعَ الْعُسْرِ يُسْرًا',
-                    'translation': 'همانا با سختی آسانی است'
-                }
 
     def get_persian_date():
-        """برمی‌گرداند تاریخ امروز به شمسی"""
         try:
             today = jdatetime.date.today()
-            
             persian_months = {
                 1: 'فروردین', 2: 'اردیبهشت', 3: 'خرداد', 4: 'تیر',
                 5: 'مرداد', 6: 'شهریور', 7: 'مهر', 8: 'آبان',
                 9: 'آذر', 10: 'دی', 11: 'بهمن', 12: 'اسفند'
             }
-            
             month_name = persian_months[today.month]
             return f"{today.day} {month_name} {today.year}"
-            
         except:
             today = date.today()
             return today.strftime("%d %B %Y")
+
+    def get_daily_verse():
+        """برمی‌گرداند آیه روز یا حدیث روز (۵۰٪ شانس) - بدون دیتابیس اضافی"""
+        import random
+        from datetime import date
+
+        hadiths = [
+            {'title': 'پیامبر اکرم (ص)', 'arabic': 'الْقُرْآنُ مَأْدُبَةُ اللَّهِ، فَتَعَلَّمُوا مَأْدُبَتَهُ مَا اسْتَطَعْتُمْ.', 'persian': 'قرآن سفرهٔ الهی است، پس تا می‌توانید از این سفره بیاموزید.', 'source': 'نهج‌الفصاحه'},
+            {'title': 'امام علی (ع)', 'arabic': 'وَ اعْلَمُوا أَنَّ هَذَا الْقُرْآنَ هُوَ النَّاصِحُ الَّذِي لَا يَغُشُّ، وَ الْهَادِي الَّذِي لَا يُضِلُّ، وَ الْمُحَدِّثُ الَّذِي لَا يَكْذِبُ.', 'persian': 'بدانید که این قرآن، اندرزگویی است که فریب نمی‌دهد، راهنمایی است که گمراه نمی‌کند، و سخنگویی است که دروغ نمی‌گوید.', 'source': 'نهج‌البلاغه، خطبه ۱۷۶'},
+            {'title': 'امام صادق (ع)', 'arabic': 'إِنَّ الْقُرْآنَ حَيٌ لَمْ يَمُتْ، وَ إِنَّهُ جَارٍ كَمَا يَجْرِي اللَّيْلُ وَ النَّهَارُ، وَ كَمَا يَجْرِي الشَّمْسُ وَ الْقَمَرُ.', 'persian': 'قرآن زنده است و نمی‌میرد؛ جاری است چنانکه شب و روز جاری است، و چنانکه خورشید و ماه جاری هستند.', 'source': 'الکافی، ج۲، ص۶۰۳'},
+            {'title': 'امام باقر (ع)', 'arabic': 'مَنْ قَرَأَ الْقُرْآنَ وَ هُوَ شَابٌّ مُؤْمِنٌ، اخْتَلَطَ الْقُرْآنُ بِلَحْمِهِ وَ دَمِهِ، وَ جَعَلَهُ اللَّهُ مَعَ السَّفَرَةِ الْكِرَامِ الْبَرَرَةِ.', 'persian': 'هر جوان مؤمنی که قرآن بخواند، قرآن با گوشت و خونش آمیخته می‌شود و خداوند او را با فرشتگان بزرگوار و نیکوکار محشور می‌گرداند.', 'source': 'الکافی، ج۲، ص۶۰۴'},
+            {'title': 'پیامبر اکرم (ص)', 'arabic': 'شِفَاءُ مَا فِي الصُّدُورِ الْقُرْآنُ.', 'persian': 'قرآن درمان آنچه در سینه‌ها (دل‌ها) است، می‌باشد.', 'source': 'بحارالانوار، ج۹۲، ص۲۱'},
+            {'title': 'امام رضا (ع)', 'arabic': 'إِنَّ الْقُرْآنَ حَبْلُ اللَّهِ الْمَتِينُ وَ عُرْوَتُهُ الْوُثْقَى وَ الصِّرَاطُ الْمُسْتَقِیمُ.', 'persian': 'قرآن، ریسمان محکم خدا و دستاویز استوار و راه راست است.', 'source': 'عیون اخبار الرضا، ج۱، ص۲۹'},
+            {'title': 'امیرالمؤمنین (ع)', 'arabic': 'فَاسْتَشْفُوهُ مِنْ أَدْوَائِكُمْ، وَ اسْتَعِينُوا بِهِ عَلَى لَأْوَائِكُمْ، فَإِنَّ فِيهِ شِفَاءً مِنْ أَكْبَرِ الدَّاءِ وَ هُوَ الْكُفْرُ وَ النِّفَاقُ.', 'persian': 'پس از قرآن برای درمان بیماری‌هایتان شفا بجویید و در سختی‌ها از آن یاری بخواهید؛ زیرا در قرآن درمان بزرگ‌ترین بیماری‌ها یعنی کفر و نفاق است.', 'source': 'نهج‌البلاغه، خطبه ۱۷۶'},
+            {'title': 'امام سجاد (ع)', 'arabic': 'آيَاتُ الْقُرْآنِ خَزَائِنُ الرَّحْمَةِ، فَإِذَا فُتِحَتْ خَزَائِنُ الرَّحْمَةِ فَلَا تَنْبَغِي أَنْ تُقْفَلَ.', 'persian': 'آیات قرآن گنجینه‌های رحمتند؛ پس هنگامی که گشوده شدند، شایسته نیست که بسته شوند.', 'source': 'تحف العقول'}
+        ]
+
+        if random.choice([True, False]):
+            hadith = random.choice(hadiths)
+            return {
+                'title': hadith['title'],
+                'verse': hadith['persian'],
+                'arabic_text': hadith['arabic'],
+                'translation': hadith['persian'],
+                'surah': hadith['source'],
+                'verse_number': '',
+                'is_hadith': True
+            }
+
+        with app.app_context():
+            try:
+                verses = QuranVerse.query.all()
+                if not verses:
+                    hadith = hadiths[0]
+                    return {
+                        'title': hadith['title'],
+                        'verse': hadith['persian'],
+                        'arabic_text': hadith['arabic'],
+                        'translation': hadith['persian'],
+                        'surah': hadith['source'],
+                        'verse_number': '',
+                        'is_hadith': True
+                    }
+                today = date.today()
+                random.seed(today.toordinal())
+                verse = random.choice(verses)
+                return {
+                    'title': 'آیه روز',
+                    'verse': getattr(verse, 'verse_persian', getattr(verse, 'translation', '')),
+                    'arabic_text': getattr(verse, 'verse_arabic', ''),
+                    'translation': getattr(verse, 'verse_persian', getattr(verse, 'translation', '')),
+                    'surah': getattr(verse, 'surah_name', 'قرآن'),
+                    'verse_number': getattr(verse, 'verse_number', ''),
+                    'is_hadith': False
+                }
+            except Exception as e:
+                print(f"❌ خطا در دریافت آیه: {e}")
+                hadith = hadiths[0]
+                return {
+                    'title': hadith['title'],
+                    'verse': hadith['persian'],
+                    'arabic_text': hadith['arabic'],
+                    'translation': hadith['persian'],
+                    'surah': hadith['source'],
+                    'verse_number': '',
+                    'is_hadith': True
+                }
+            
+                # ============================================
+    # توابع هوش مصنوعی قرآنی
+    # ============================================
+    
+    def find_best_answer(question):
+        """پیدا کردن بهترین پاسخ برای سوال کاربر از دیتابیس"""
+        from sqlalchemy import or_
+        
+        # نرمال کردن سوال
+        question_clean = question.strip().lower()
+        
+        # جستجو در جدول QuranQA
+        # 1. جستجوی دقیق
+        exact_match = QuranQA.query.filter(
+            QuranQA.is_active == True,
+            QuranQA.question == question_clean
+        ).first()
+        
+        if exact_match:
+            return exact_match
+        
+        # 2. جستجو با contains
+        contains_match = QuranQA.query.filter(
+            QuranQA.is_active == True,
+            or_(
+                QuranQA.question.contains(question_clean),
+                QuranQA.keywords.contains(question_clean)
+            )
+        ).order_by(QuranQA.priority.desc()).first()
+        
+        if contains_match:
+            return contains_match
+        
+        # 3. جستجو بر اساس کلمات کلیدی (تجزیه سوال)
+        keywords = question_clean.split()
+        for keyword in keywords:
+            if len(keyword) > 2:
+                keyword_match = QuranQA.query.filter(
+                    QuranQA.is_active == True,
+                    QuranQA.keywords.contains(keyword)
+                ).order_by(QuranQA.priority.desc()).first()
+                if keyword_match:
+                    return keyword_match
+        
+        return None
+    
+    def get_suggestions_by_mood(mood):
+        """دریافت آیات پیشنهادی بر اساس حال و هوا"""
+        suggestions = QuranSuggestion.query.filter_by(
+            mood=mood, 
+            is_active=True
+        ).order_by(QuranSuggestion.order).limit(5).all()
+        
+        verses = []
+        for s in suggestions:
+            verses.append({
+                'text': s.verse_text,
+                'translation': s.verse_translation,
+                'surah': s.surah_name,
+                'ayah': s.verse_number
+            })
+        return verses
+    
+    def save_user_chat(user_id, question, answer, related_verses=None):
+        """ذخیره تاریخچه چت کاربر"""
+        try:
+            chat = UserQuranChat(
+                user_id=user_id,
+                question=question,
+                answer=answer,
+                related_verses=related_verses
+            )
+            db.session.add(chat)
+            db.session.commit()
+        except Exception as e:
+            print(f"خطا در ذخیره چت: {e}")
+    
+    def format_answer_with_verses(qa_obj):
+        """فرمت کردن پاسخ با آیات مرتبط"""
+        import json
+        
+        answer_text = qa_obj.answer
+        
+        # اضافه کردن منبع در انتها
+        answer_text += "\n\n📚 **منبع:** پاسخ بر اساس قرآن کریم و تفاسیر معتبر"
+        
+        related_verses = []
+        if qa_obj.related_verses:
+            try:
+                related_verses = json.loads(qa_obj.related_verses)
+            except:
+                pass
+        
+        suggestions = []
+        if qa_obj.category:
+            suggestions = [
+                f"تفسیر آیات مربوط به {qa_obj.category}",
+                f"آیات مشابه در قرآن",
+                "معنای عمیق‌تر این مفهوم"
+            ]
+        
+        return {
+            "success": True,
+            "answer": answer_text,
+            "is_quranic": True,
+            "related_verses": related_verses,
+            "suggestions": suggestions
+        }
+
     
     # ============================================
     # توابع کمکی
@@ -230,6 +364,12 @@ def init_routes(app):
         except:
             upcoming_events = []
         
+        # دریافت بنرهای فعال
+        try:
+            banners = Banner.query.filter_by(is_active=True).order_by(Banner.order).all()
+        except:
+            banners = []
+        
         # دریافت آیه روز
         daily_verse = get_daily_verse()
         
@@ -248,14 +388,26 @@ def init_routes(app):
             competitions_count = 0
             workshops_count = 0
         
+        # دریافت مسابقات پیش‌رو
+        upcoming_competitions = []
+        try:
+            upcoming_competitions = Competition.query.filter(
+                Competition.start_date >= datetime.utcnow(),
+                Competition.is_active == True
+            ).order_by(Competition.start_date).limit(6).all()
+        except:
+            pass
+        
         return render_template('index.html', 
                              events=upcoming_events,
+                             banners=banners,
                              daily_verse=daily_verse,
                              current_date=current_date,
                              active_students=active_students,
                              events_count=events_count,
                              competitions_count=competitions_count,
                              workshops_count=workshops_count,
+                             competitions=upcoming_competitions,
                              current_user=current_user)
     
     @app.route('/events')
@@ -435,8 +587,8 @@ def init_routes(app):
             user = User(
                 username=username,
                 email=email,
-                first_name=first_name,
-                last_name=last_name,
+                first_name=request.form.get('first_name', ''),
+                last_name=request.form.get('last_name', ''),
                 student_id=student_id,
                 university=university,
                 faculty=faculty,
@@ -2219,81 +2371,68 @@ def init_routes(app):
                              current_user=current_user)
 
 
+     # ============================================
+    # ========== حلقه‌های تلاوت (استاد و عمومی) ==========
+    # ============================================
+
     @app.route('/professor/circles')
     @login_required
     def professor_circles():
-        """لیست حلقه‌های تلاوت استاد"""
         if not current_user.is_admin() and not current_user.is_professor():
             flash('⛔ دسترسی غیرمجاز', 'error')
             return redirect(url_for('dashboard'))
-        
         page = request.args.get('page', 1, type=int)
-        
         try:
             circles = QuranCircle.query\
                 .filter_by(created_by=current_user.id)\
                 .order_by(QuranCircle.created_at.desc())\
                 .paginate(page=page, per_page=10, error_out=False)
-            
-            # آمار کلی
             total_members = 0
             total_sessions = 0
             for circle in circles.items:
                 total_members += circle.current_members
                 total_sessions += circle.sessions.count()
-            
             avg_attendance = 0
             if circles.items:
                 total_attendance = 0
                 for circle in circles.items:
                     total_attendance += circle.attendance_rate
                 avg_attendance = int(total_attendance / len(circles.items))
-            
         except Exception as e:
             print(f"خطا در دریافت حلقه‌ها: {e}")
             circles = []
             total_members = 0
             total_sessions = 0
             avg_attendance = 0
-        
         return render_template('professor/circles.html',
-                             circles=circles,
-                             total_members=total_members,
-                             total_sessions=total_sessions,
-                             avg_attendance=avg_attendance,
-                             current_user=current_user)
-
+                               circles=circles,
+                               total_members=total_members,
+                               total_sessions=total_sessions,
+                               avg_attendance=avg_attendance,
+                               current_user=current_user)
 
     @app.route('/professor/circle/<int:circle_id>')
     @login_required
     def professor_circle_detail(circle_id):
-        """جزئیات حلقه تلاوت"""
         try:
             circle = QuranCircle.query.get_or_404(circle_id)
         except:
             flash('حلقه مورد نظر یافت نشد.', 'error')
             return redirect(url_for('professor_circles'))
-        
         if circle.created_by != current_user.id and not current_user.is_admin():
             flash('⛔ دسترسی غیرمجاز', 'error')
             return redirect(url_for('professor_circles'))
-        
         # اعضای حلقه
         try:
             members = CircleMember.query\
                 .filter_by(circle_id=circle_id, is_active=True)\
                 .join(User, User.id == CircleMember.user_id)\
                 .add_columns(
-                    User.id,
-                    User.first_name,
-                    User.last_name,
-                    User.email,
-                    User.phone
+                    User.id, User.first_name, User.last_name,
+                    User.email, User.phone
                 ).all()
-            
             circle_members = []
             for member, user_id, first_name, last_name, email, phone in members:
-                # درصد حضور
                 attendance_rate = 0
                 total_sessions = circle.sessions.count()
                 if total_sessions > 0:
@@ -2304,7 +2443,6 @@ def init_routes(app):
                         .filter(SessionAttendance.attended == True)\
                         .count()
                     attendance_rate = int((attended / total_sessions) * 100)
-                
                 circle_members.append({
                     'id': user_id,
                     'full_name': f"{first_name} {last_name}",
@@ -2317,8 +2455,6 @@ def init_routes(app):
         except Exception as e:
             print(f"خطا در دریافت اعضا: {e}")
             circle_members = []
-        
-        # جلسات
         try:
             sessions = CircleSession.query\
                 .filter_by(circle_id=circle_id)\
@@ -2326,31 +2462,24 @@ def init_routes(app):
                 .all()
         except:
             sessions = []
-        
         return render_template('professor/circle_detail.html',
-                             circle=circle,
-                             members=circle_members,
-                             sessions=sessions,
-                             current_user=current_user)
-
+                               circle=circle,
+                               members=circle_members,
+                               sessions=sessions,
+                               current_user=current_user)
 
     @app.route('/professor/circle/<int:circle_id>/session/create', methods=['POST'])
     @login_required
     def professor_create_session(circle_id):
-        """ایجاد جلسه جدید برای حلقه"""
         try:
             circle = QuranCircle.query.get_or_404(circle_id)
         except:
             return jsonify({'success': False, 'message': 'حلقه یافت نشد.'}), 404
-        
         if circle.created_by != current_user.id and not current_user.is_admin():
             return jsonify({'success': False, 'message': 'دسترسی غیرمجاز.'}), 403
-        
         data = request.get_json()
-        
         try:
             session_date = datetime.strptime(data.get('session_date'), '%Y-%m-%d').date()
-            
             session = CircleSession(
                 circle_id=circle_id,
                 title=data.get('title'),
@@ -2363,104 +2492,71 @@ def init_routes(app):
                 notes=data.get('notes'),
                 homework=data.get('homework')
             )
-            
             db.session.add(session)
             db.session.commit()
-            
-            return jsonify({
-                'success': True,
-                'message': 'جلسه با موفقیت ایجاد شد.',
-                'session_id': session.id
-            })
-            
+            return jsonify({'success': True, 'message': 'جلسه با موفقیت ایجاد شد.', 'session_id': session.id})
         except Exception as e:
             return jsonify({'success': False, 'message': str(e)}), 500
-
 
     @app.route('/professor/circle/<int:circle_id>/attendance/<int:session_id>')
     @login_required
     def professor_circle_attendance(circle_id, session_id):
-        """حضور و غیاب جلسه حلقه"""
         try:
             circle = QuranCircle.query.get_or_404(circle_id)
             session = CircleSession.query.get_or_404(session_id)
         except:
             flash('اطلاعات مورد نظر یافت نشد.', 'error')
             return redirect(url_for('professor_circles'))
-        
         if circle.created_by != current_user.id and not current_user.is_admin():
             flash('⛔ دسترسی غیرمجاز', 'error')
             return redirect(url_for('professor_circles'))
-        
-        # اعضای فعال
         try:
             members = CircleMember.query\
                 .filter_by(circle_id=circle_id, is_active=True)\
                 .join(User, User.id == CircleMember.user_id)\
-                .add_columns(
-                    User.id,
-                    User.first_name,
-                    User.last_name
-                ).all()
+                .add_columns(User.id, User.first_name, User.last_name).all()
         except:
             members = []
-        
-        # حضورهای ثبت شده
+        attendances = {}
+        present_count = 0
+        late_count = 0
         try:
-            attendances = SessionAttendance.query\
-                .filter_by(session_id=session_id)\
-                .all()
-            
-            attendance_dict = {}
-            present_count = 0
-            late_count = 0
-            
-            for a in attendances:
-                attendance_dict[a.member_id] = {
+            atts = SessionAttendance.query.filter_by(session_id=session_id).all()
+            for a in atts:
+                attendances[a.member_id] = {
                     'attended': a.attended,
                     'late_minutes': a.late_minutes,
                     'excuse': a.excuse
                 }
                 if a.attended:
                     present_count += 1
-                if a.late_minutes > 0:
-                    late_count += 1
+                    if a.late_minutes > 0:
+                        late_count += 1
         except:
-            attendance_dict = {}
-            present_count = 0
-            late_count = 0
-        
+            pass
         return render_template('professor/circle_attendance.html',
-                             circle=circle,
-                             session=session,
-                             members=members,
-                             attendance_dict=attendance_dict,
-                             present_count=present_count,
-                             late_count=late_count,
-                             current_user=current_user)
-
+                               circle=circle,
+                               session=session,
+                               members=members,
+                               attendance_dict=attendances,
+                               present_count=present_count,
+                               late_count=late_count,
+                               current_user=current_user)
 
     @app.route('/professor/circle/<int:circle_id>/attendance/<int:session_id>', methods=['POST'])
     @login_required
     def professor_save_circle_attendance(circle_id, session_id):
-        """ذخیره حضور و غیاب جلسه حلقه"""
         try:
             circle = QuranCircle.query.get_or_404(circle_id)
             session = CircleSession.query.get_or_404(session_id)
         except:
             return jsonify({'success': False, 'message': 'اطلاعات یافت نشد.'}), 404
-        
         if circle.created_by != current_user.id and not current_user.is_admin():
             return jsonify({'success': False, 'message': 'دسترسی غیرمجاز.'}), 403
-        
         data = request.get_json()
         attendances = data.get('attendances', [])
-        
         try:
-            # پاک کردن حضورهای قبلی
             SessionAttendance.query.filter_by(session_id=session_id).delete()
-            
-            # ثبت حضورهای جدید
             for att in attendances:
                 attendance = SessionAttendance(
                     session_id=session_id,
@@ -2471,14 +2567,107 @@ def init_routes(app):
                     marked_by=current_user.id
                 )
                 db.session.add(attendance)
-            
             db.session.commit()
             return jsonify({'success': True, 'message': 'حضور و غیاب با موفقیت ثبت شد.'})
-            
         except Exception as e:
             db.session.rollback()
             return jsonify({'success': False, 'message': str(e)}), 500
 
+    # ======================= درخواست ایجاد حلقه تلاوت توسط استاد =======================
+    @app.route('/professor/circle-request', methods=['GET', 'POST'])
+    @login_required
+    def professor_circle_request():
+        if not current_user.is_professor():
+            flash('⛔ فقط اساتید می‌توانند درخواست ایجاد حلقه تلاوت بدهند.', 'error')
+            return redirect(url_for('dashboard'))
+
+        if request.method == 'POST':
+            name = request.form.get('name')
+            description = request.form.get('description')
+            max_members = request.form.get('max_members', type=int)
+            circle_type = request.form.get('circle_type', 'public')
+            if not name or not description:
+                flash('لطفاً نام و توضیحات حلقه را وارد کنید.', 'error')
+                return redirect(url_for('professor_circle_request'))
+
+            # ایجاد حلقه جدید – فقط یکبار از capacity استفاده کنید
+            new_circle = QuranCircle(
+                name=name,
+                description=description,
+                capacity=max_members,                 # max_members به capacity نگاشت می‌شود
+                circle_type=circle_type,
+                created_by=current_user.id,
+                status='pending',
+                teacher_name=current_user.full_name,  # فیلد اجباری
+                is_active=True
+            )
+            db.session.add(new_circle)
+            db.session.commit()
+
+            admins = User.query.filter_by(role=UserRole.ADMIN).all()
+            for admin in admins:
+                create_notification(
+                    admin.id,
+                    'درخواست جدید ایجاد حلقه تلاوت',
+                    f'استاد {current_user.full_name} درخواست ایجاد حلقه "{new_circle.name}" را داده است.'
+                )
+            flash('درخواست شما با موفقیت ثبت شد. پس از تأیید مدیر، حلقه فعال خواهد شد.', 'success')
+            return redirect(url_for('professor_dashboard'))
+
+        return render_template('professor/circle_request.html', current_user=current_user)
+
+    @app.route('/professor/circle-requests')
+    @login_required
+    def professor_circle_requests():
+        if not current_user.is_professor():
+            flash('⛔ دسترسی غیرمجاز', 'error')
+            return redirect(url_for('dashboard'))
+        status = request.args.get('status', 'all')
+        page = request.args.get('page', 1, type=int)
+        query = QuranCircle.query.filter_by(created_by=current_user.id)
+        if status != 'all':
+            query = query.filter_by(status=status)
+        pagination = query.order_by(QuranCircle.created_at.desc()).paginate(page=page, per_page=10, error_out=False)
+        return render_template('professor/circle_requests.html', requests=pagination, status=status, current_user=current_user)
+
+    @app.route('/professor/circle-request/<int:request_id>')
+    @login_required
+    def professor_circle_request_detail(request_id):
+        if not current_user.is_professor():
+            flash('⛔ دسترسی غیرمجاز', 'error')
+            return redirect(url_for('dashboard'))
+        circle = QuranCircle.query.get_or_404(request_id)
+        if circle.created_by != current_user.id:
+            flash('⛔ دسترسی غیرمجاز', 'error')
+            return redirect(url_for('professor_circle_requests'))
+        return render_template('professor/circle_request_detail.html', request=circle, current_user=current_user)
+
+    # ======================= مدیریت درخواست‌های حلقه توسط ادمین =======================
+    @app.route('/admin/circle-requests')
+    @login_required
+    @admin_required
+    def admin_circle_requests():
+        pending_circles = QuranCircle.query.filter_by(status='pending').all()
+        return render_template('admin/circle_requests.html', circles=pending_circles, current_user=current_user)
+
+    @app.route('/admin/circle-request/<int:request_id>')
+    @login_required
+    @admin_required
+    def admin_circle_request_detail(request_id):
+        circle = QuranCircle.query.get_or_404(request_id)
+        req_data = {
+            'id': circle.id,
+            'name': circle.name,
+            'description': circle.description,
+            'professor': User.query.get(circle.created_by),
+            'created_at': circle.created_at,
+            'circle_type': circle.circle_type,
+            'max_members': circle.capacity,  # اصلاح: از capacity استفاده شد
+            'status': circle.status,
+            'rejection_reason': circle.rejection_reason
+        }
+        return render_template('admin/circle_request_detail.html', request=req_data, current_user=current_user)
+     
     # ============================================
     # ========== مسیر دانلود رزومه استاد ==========
     # ============================================
@@ -2510,6 +2699,8 @@ def init_routes(app):
         except Exception as e:
             flash(f'❌ خطا در دانلود فایل: {str(e)}', 'error')
             return redirect(url_for('professor_profile'))
+
+            
     
     # ============================================
     # ========== مسیرهای مدیریتی (ادمین) ==========
@@ -2592,157 +2783,124 @@ def init_routes(app):
                              current_date=current_date,
                              pending_count=pending_count,
                              current_user=current_user)
+ 
+      # ============================================
+    # مسیرهای مدیریت رویداد (فقط ادمین)
+    # ============================================
     
     @app.route('/admin/events')
     @login_required
     @admin_required
     def admin_events():
-        """مدیریت رویدادها"""
-        try:
-            events = Event.query.order_by(Event.start_date.desc()).all()
-        except:
-            events = []
-        
-        return render_template('admin/events.html',
-                             events=events,
-                             current_user=current_user)
+        events = Event.query.order_by(Event.created_at.desc()).all()
+        return render_template('admin/events.html', events=events, current_user=current_user)
     
     @app.route('/admin/event/create', methods=['GET', 'POST'])
     @login_required
     @admin_required
     def create_event():
-        """ایجاد رویداد جدید"""
         if request.method == 'POST':
             title = request.form.get('title')
             description = request.form.get('description')
             event_type = request.form.get('event_type')
-            start_date_str = request.form.get('start_date')
-            end_date_str = request.form.get('end_date')
+            start_date_shamsi = request.form.get('start_date_shamsi')
+            start_time = request.form.get('start_time')
             location = request.form.get('location')
             capacity = request.form.get('capacity', type=int)
             
-            try:
-                start_date = datetime.fromisoformat(start_date_str)
-                end_date = datetime.fromisoformat(end_date_str)
-            except:
-                flash('فرمت تاریخ نامعتبر است.', 'error')
+            if not title or not description or not event_type or not start_date_shamsi or not start_time:
+                flash('لطفاً تمام فیلدهای ضروری (عنوان، توضیحات، نوع رویداد، تاریخ شمسی و ساعت شروع) را پر کنید.', 'error')
                 return redirect(url_for('create_event'))
             
-            # ذخیره تصویر
+            try:
+                start_datetime_str = f"{start_date_shamsi} {start_time}"
+                jstart = jdatetime.datetime.strptime(start_datetime_str, '%Y/%m/%d %H:%M')
+                start_date = jstart.togregorian()
+            except Exception as e:
+                flash('فرمت تاریخ یا ساعت نامعتبر است.', 'error')
+                return redirect(url_for('create_event'))
+            
+            end_date = start_date
+            
             image_path = None
             if 'image' in request.files:
                 file = request.files['image']
-                image_path = save_uploaded_file(file, 'events')
+                if file and file.filename:
+                    image_path = save_uploaded_file(file, 'events')
             
-            # ایجاد رویداد
             event = Event(
-                title=title,
-                description=description,
-                event_type=EventType(event_type),
-                start_date=start_date,
-                end_date=end_date,
-                location=location,
-                capacity=capacity,
-                image=image_path,
-                created_by=current_user.id,
-                is_active=True
+                title=title, description=description, event_type=EventType(event_type),
+                start_date=start_date, end_date=end_date, location=location,
+                capacity=capacity, image=image_path, created_by=current_user.id, is_active=True
             )
-            
             db.session.add(event)
             db.session.commit()
-            
-            # اعلان به همه کاربران
-            try:
-                users = User.query.filter_by(is_active=True).all()
-                for user in users:
-                    create_notification(
-                        user.id,
-                        'رویداد جدید',
-                        f'رویداد "{title}" به زودی برگزار می‌شود. برای اطلاعات بیشتر به صفحه رویدادها مراجعه کنید.'
-                    )
-            except:
-                pass
-            
             flash('رویداد با موفقیت ایجاد شد.', 'success')
             return redirect(url_for('admin_events'))
         
-        return render_template('admin/event_form.html',
-                             event=None,
-                             event_types=EventType,
-                             current_user=current_user)
+        return render_template('admin/event_form.html', event=None, event_types=EventType, current_user=current_user)
     
     @app.route('/admin/event/edit/<int:event_id>', methods=['GET', 'POST'])
     @login_required
     @admin_required
     def edit_event(event_id):
-        """ویرایش رویداد"""
-        try:
-            event = Event.query.get_or_404(event_id)
-        except:
-            flash('رویداد مورد نظر یافت نشد.', 'error')
-            return redirect(url_for('admin_events'))
-        
+        event = Event.query.get_or_404(event_id)
         if request.method == 'POST':
             event.title = request.form.get('title')
             event.description = request.form.get('description')
             event.event_type = EventType(request.form.get('event_type'))
-            event.start_date = datetime.fromisoformat(request.form.get('start_date'))
-            event.end_date = datetime.fromisoformat(request.form.get('end_date'))
+            
+            start_date_shamsi = request.form.get('start_date_shamsi')
+            start_time = request.form.get('start_time')
+            
+            if not start_date_shamsi or not start_time:
+                flash('تاریخ و ساعت شروع الزامی است.', 'error')
+                return redirect(url_for('edit_event', event_id=event_id))
+            
+            try:
+                start_datetime_str = f"{start_date_shamsi} {start_time}"
+                jstart = jdatetime.datetime.strptime(start_datetime_str, '%Y/%m/%d %H:%M')
+                event.start_date = jstart.togregorian()
+            except Exception as e:
+                flash('فرمت تاریخ یا ساعت نامعتبر است.', 'error')
+                return redirect(url_for('edit_event', event_id=event_id))
+            
+            event.end_date = event.start_date
             event.location = request.form.get('location')
             event.capacity = request.form.get('capacity', type=int)
             event.is_active = request.form.get('is_active') == 'on'
             
-            # به‌روزرسانی تصویر
             if 'image' in request.files:
                 file = request.files['image']
                 if file and file.filename:
-                    # حذف تصویر قدیمی
                     if event.image:
                         old_path = os.path.join(app.config['UPLOAD_FOLDER'], event.image)
                         if os.path.exists(old_path):
                             os.remove(old_path)
-                    
                     event.image = save_uploaded_file(file, 'events')
             
             db.session.commit()
             flash('رویداد با موفقیت به‌روزرسانی شد.', 'success')
             return redirect(url_for('admin_events'))
         
-        # اضافه کردن متغیرهای مورد نیاز قالب
         total_registrations = event.registrations.count()
         attended_count = event.registrations.filter_by(attended=True).count()
-        
-        return render_template('admin/event_form.html',
-                             event=event,
-                             event_types=EventType,
-                             total_registrations=total_registrations,
-                             attended_count=attended_count,
-                             current_user=current_user)
+        return render_template('admin/event_form.html', event=event, event_types=EventType,
+                             total_registrations=total_registrations, attended_count=attended_count, current_user=current_user)
     
     @app.route('/admin/event/delete/<int:event_id>', methods=['POST'])
     @login_required
     @admin_required
     def delete_event(event_id):
-        """حذف رویداد"""
-        try:
-            event = Event.query.get_or_404(event_id)
-        except:
-            return jsonify({'success': False, 'message': 'رویداد مورد نظر یافت نشد.'}), 404
-        
-        # حذف تصویر
+        event = Event.query.get_or_404(event_id)
         if event.image:
             image_path = os.path.join(app.config['UPLOAD_FOLDER'], event.image)
             if os.path.exists(image_path):
                 os.remove(image_path)
-        
-        # حذف ثبت‌نام‌های مرتبط
         Registration.query.filter_by(event_id=event_id).delete()
-        
         db.session.delete(event)
         db.session.commit()
-        
         return jsonify({'success': True, 'message': 'رویداد با موفقیت حذف شد'})
-    
     @app.route('/admin/users')
     @login_required
     @admin_required
@@ -2875,28 +3033,33 @@ def init_routes(app):
     @login_required
     @admin_required
     def admin_reject_user(user_id):
-        """رد درخواست کاربر توسط ادمین"""
         try:
             user = User.query.get_or_404(user_id)
         except:
             return jsonify({'success': False, 'message': 'کاربر مورد نظر یافت نشد.'}), 404
-        
-        data = request.get_json()
-        reason = data.get('reason', 'دلیل خاصی ذکر نشده است.')
-        
-        # ارسال اعلان به کاربر
+
+        # تشخیص نوع درخواست (JSON یا فرم)
+        if request.is_json:
+            data = request.get_json()
+            reason = data.get('reason', 'دلیل خاصی ذکر نشده است.')
+        else:
+            reason = request.form.get('reason', 'دلیل خاصی ذکر نشده است.')
+
         create_notification(
             user.id,
             '❌ رد درخواست تأیید',
             f'درخواست تأیید حساب کاربری شما رد شد. دلیل: {reason}'
         )
-        
-        # غیرفعال کردن کاربر
+
         user.is_active = False
         user.verification_notes = reason
         db.session.commit()
-        
-        return jsonify({'success': True, 'message': f'درخواست کاربر {user.full_name} رد شد.'})
+
+        if request.is_json:
+            return jsonify({'success': True, 'message': f'درخواست کاربر {user.full_name} رد شد.'})
+        else:
+            flash(f'درخواست کاربر {user.full_name} رد شد.', 'danger')
+            return redirect(url_for('admin_pending_users'))
 
     @app.route('/admin/user/<int:user_id>')
     @login_required
@@ -3056,16 +3219,183 @@ def init_routes(app):
                              recent_questions=recent_questions,
                              ai_enabled=AI_ENABLED,
                              current_user=current_user)
-    
+      # ============================================
+    # ========== مدیریت بنرها (ادمین) ==========
     # ============================================
-    # مسیرهای هوش مصنوعی برای کاربران
-    # ============================================
     
+    @app.route('/admin/banners')
+    @login_required
+    @admin_required
+    def admin_banners_list():
+        """لیست تمام بنرها"""
+        banners = Banner.query.order_by(Banner.order, Banner.id).all()
+        return render_template('admin/admin_banners.html', banners=banners, current_user=current_user)
+
+    @app.route('/admin/banners/add', methods=['POST'])
+    @login_required
+    @admin_required
+    def admin_add_banner():
+        """افزودن بنر جدید"""
+        title = request.form.get('title')
+        link_url = request.form.get('link_url')
+        alt_text = request.form.get('alt_text')
+        order = request.form.get('order', 0)
+        
+        if not title:
+            return jsonify({'success': False, 'message': 'عنوان بنر الزامی است'})
+        
+        # مدیریت آپلود تصویر
+        image_url = None
+        if 'image' in request.files:
+            file = request.files['image']
+            if file and file.filename:
+                filename = secure_filename(f"{datetime.now().strftime('%Y%m%d_%H%M%S')}_{file.filename}")
+                # استفاده از مسیر static/uploads/banners
+                upload_path = os.path.join(app.root_path, 'static', 'uploads', 'banners')
+                os.makedirs(upload_path, exist_ok=True)
+                file.save(os.path.join(upload_path, filename))
+                image_url = f'/static/uploads/banners/{filename}'
+        
+        # یا آدرس تصویر از ورودی
+        if not image_url and request.form.get('image_url'):
+            image_url = request.form.get('image_url')
+        
+        if not image_url:
+            return jsonify({'success': False, 'message': 'تصویر بنر الزامی است'})
+        
+        banner = Banner(
+            title=title,
+            image_url=image_url,
+            link_url=link_url,
+            alt_text=alt_text,
+            order=int(order) if order else 0,
+            is_active=True
+        )
+        
+        db.session.add(banner)
+        db.session.commit()
+        
+        return jsonify({'success': True, 'message': 'بنر با موفقیت اضافه شد'})
+
+    @app.route('/admin/banners/edit/<int:banner_id>', methods=['POST'])
+    @login_required
+    @admin_required
+    def admin_edit_banner(banner_id):
+        """ویرایش بنر"""
+        banner = Banner.query.get_or_404(banner_id)
+        
+        banner.title = request.form.get('title', banner.title)
+        banner.link_url = request.form.get('link_url')
+        banner.alt_text = request.form.get('alt_text')
+        banner.order = int(request.form.get('order', banner.order))
+        
+        # آپلود تصویر جدید
+        if 'image' in request.files:
+            file = request.files['image']
+            if file and file.filename:
+                # حذف تصویر قدیمی
+                if banner.image_url:
+                    old_path = os.path.join(app.root_path, banner.image_url.lstrip('/'))
+                    if os.path.exists(old_path):
+                        try:
+                            os.remove(old_path)
+                        except:
+                            pass
+                
+                filename = secure_filename(f"{datetime.now().strftime('%Y%m%d_%H%M%S')}_{file.filename}")
+                upload_path = os.path.join(app.root_path, 'static', 'uploads', 'banners')
+                os.makedirs(upload_path, exist_ok=True)
+                file.save(os.path.join(upload_path, filename))
+                banner.image_url = f'/static/uploads/banners/{filename}'
+        
+        # آدرس تصویر از ورودی
+        if request.form.get('image_url'):
+            banner.image_url = request.form.get('image_url')
+        
+        db.session.commit()
+        
+        return jsonify({'success': True, 'message': 'بنر با موفقیت ویرایش شد'})
+
+    @app.route('/admin/banners/toggle/<int:banner_id>', methods=['POST'])
+    @login_required
+    @admin_required
+    def admin_toggle_banner(banner_id):
+        """فعال/غیرفعال کردن بنر"""
+        banner = Banner.query.get_or_404(banner_id)
+        banner.is_active = not banner.is_active
+        db.session.commit()
+        
+        return jsonify({'success': True, 'is_active': banner.is_active})
+
+    @app.route('/admin/banners/delete/<int:banner_id>', methods=['POST'])
+    @login_required
+    @admin_required
+    def admin_delete_banner(banner_id):
+        """حذف بنر"""
+        banner = Banner.query.get_or_404(banner_id)
+        
+        # حذف فایل تصویر
+        if banner.image_url:
+            file_path = os.path.join(app.root_path, banner.image_url.lstrip('/'))
+            if os.path.exists(file_path):
+                try:
+                    os.remove(file_path)
+                except:
+                    pass
+        
+        db.session.delete(banner)
+        db.session.commit()
+        
+        return jsonify({'success': True, 'message': 'بنر با موفقیت حذف شد'})
+
+    @app.route('/admin/banners/reorder', methods=['POST'])
+    @login_required
+    @admin_required
+    def admin_reorder_banners():
+        """تنظیم ترتیب بنرها"""
+        data = request.get_json()
+        orders = data.get('orders', [])
+        
+        for item in orders:
+            banner = Banner.query.get(item['id'])
+            if banner:
+                banner.order = item['order']
+        
+        db.session.commit()
+        
+        return jsonify({'success': True, 'message': 'ترتیب بنرها ذخیره شد'})
+    @app.route('/admin/banners/api/banner/<int:banner_id>')
+    @login_required
+    @admin_required
+    def admin_get_banner(banner_id):
+        """دریافت اطلاعات یک بنر (برای ویرایش)"""
+        banner = Banner.query.get_or_404(banner_id)
+        return jsonify({
+            'id': banner.id,
+            'title': banner.title,
+            'image_url': banner.image_url,
+            'link_url': banner.link_url,
+            'alt_text': banner.alt_text,
+            'order': banner.order,
+            'is_active': banner.is_active
+        })
+
+    @app.route('/admin/circle-request/<int:circle_id>/approve', methods=['POST'])
+    @login_required
+    @admin_required
+    def approve_circle_request(circle_id):
+        circle = QuranCircle.query.get_or_404(circle_id)
+        if circle.status != 'pending':
+            return jsonify({'success': False, 'message': 'این درخواست قبلاً بررسی شده است.'})
+        circle.status = 'approved'
+        db.session.commit()
+        create_notification(circle.created_by, '✅ تأیید درخواست حلقه تلاوت', f'درخواست شما برای ایجاد حلقه "{circle.name}" توسط مدیر تأیید شد.')
+        return jsonify({'success': True})
     @app.route('/ai/quran', methods=['GET', 'POST'])
     @login_required
     @verified_required
     def ai_quran():
-        """پرسش و پاسخ قرآنی"""
+        """پرسش و پاسخ قرآنی با استفاده از دیتابیس"""
         answer = None
         question = ""
         recent_questions = []
@@ -3075,8 +3405,8 @@ def init_routes(app):
         try:
             stats = {
                 'total_verses': QuranVerse.query.count(),
-                'total_questions': AIQuestion.query.count(),
-                'user_questions': AIQuestion.query.filter_by(user_id=current_user.id).count()
+                'total_questions': QuranQA.query.count(),
+                'user_questions': UserQuranChat.query.filter_by(user_id=current_user.id).count()
             }
         except:
             stats = {
@@ -3089,76 +3419,60 @@ def init_routes(app):
             question = request.form.get('question', '').strip()
             
             if question:
-                if AI_ENABLED:
-                    try:
-                        # ذخیره سوال در دیتابیس
-                        ai_question = AIQuestion(
-                            user_id=current_user.id,
-                            question=question
-                        )
-                        db.session.add(ai_question)
-                        db.session.commit()
-                        
-                        answer = ask_quran_ai(question, current_user.id)
-                        
-                        # به‌روزرسانی پاسخ
-                        ai_question.answer = answer.get('answer', '')
-                        ai_question.is_quranic = answer.get('is_quranic', True)
-                        db.session.commit()
-                    except:
-                        answer = {
-                            "success": False,
-                            "answer": "خطا در ارتباط با هوش مصنوعی. لطفاً بعداً تلاش کنید.",
-                            "is_quranic": True
-                        }
+                # جستجو در دیتابیس
+                qa_obj = find_best_answer(question)
+                
+                if qa_obj:
+                    # پاسخ از دیتابیس
+                    answer = format_answer_with_verses(qa_obj)
+                    # ذخیره در تاریخچه
+                    save_user_chat(current_user.id, question, answer['answer'], qa_obj.related_verses)
                 else:
-                    # حالت ساده
+                    # پاسخ پیش‌فرض برای سوالات بدون پاسخ
                     answer = {
                         "success": True,
-                        "answer": f"""📖 **پاسخ ساده به سوال قرآنی:**
+                        "answer": f"""📖 **پاسخ به سوال شما:**
 
-**سوال شما:** {question}
+**سوال:** {question}
 
-**پاسخ:**
-این سیستم هوش مصنوعی قرآنی در حال توسعه است. 
-برای پاسخ دقیق به سوال شما، می‌توانید به تفاسیر معتبر قرآن مانند:
-- تفسیر المیزان
-- تفسیر نمونه
-- تفسیر نور
+**پاسخ:** 
+سوال خوبی پرسیدید! در حال حاضر پاسخ دقیقی برای این سوال در پایگاه داده من موجود نیست. 
+پیشنهاد می‌کنم:
 
-مراجعه کنید.
+1. سوال خود را با عبارات ساده‌تر بپرسید
+2. از کلمات کلیدی اصلی موضوع استفاده کنید
+3. به بخش «پیشنهاد آیات» مراجعه کنید
 
-**آیه نمونه:**
-«بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ»
-(سوره الفاتحة، آیه ۱)
+اگر سوال شما تخصصی‌تر است، می‌توانید با پشتیبانی تماس بگیرید.
 
-هر کاری را با نام خداوند بخشنده مهربان شروع کنید.
-                        """,
+**آیه پیشنهادی برای مطالعه:**
+«وَمَنْ يَتَّقِ اللَّهَ يَجْعَلْ لَهُ مَخْرَجًا»
+(سوره طلاق، آیه ۲)
+هر کس تقوای الهی پیشه کند، خداوند راه نجاتی برای او قرار می‌دهد.""",
                         "is_quranic": True,
-                        "main_verse": {
-                            "surah": "الفاتحة",
-                            "ayah": 1,
-                            "text": "بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ",
-                            "translation": "به نام خداوند بخشنده مهربان"
-                        }
+                        "suggestions": [
+                            "تفسیر قرآن",
+                            "مفاهیم پایه قرآنی",
+                            "آیات مشابه"
+                        ]
                     }
+                    # ذخیره در تاریخچه
+                    save_user_chat(current_user.id, question, answer['answer'], None)
         
-        # دریافت سوالات اخیر کاربر با فرمت تاریخ مناسب
+        # دریافت سوالات اخیر کاربر
         try:
-            recent_questions_raw = AIQuestion.query.filter_by(
+            recent_chats = UserQuranChat.query.filter_by(
                 user_id=current_user.id
-            ).order_by(AIQuestion.created_at.desc()).limit(5).all()
+            ).order_by(UserQuranChat.created_at.desc()).limit(5).all()
             
-            # تبدیل تاریخ به فرمت رشته برای نمایش در تمپلیت
-            for q in recent_questions_raw:
-                question_obj = {
-                    'id': q.id,
-                    'question': q.question,
-                    'answer': q.answer,
-                    'created_at': q.created_at.strftime('%Y-%m-%d') if q.created_at else '',
-                    'is_quranic': q.is_quranic
-                }
-                recent_questions.append(question_obj)
+            for chat in recent_chats:
+                recent_questions.append({
+                    'id': chat.id,
+                    'question': chat.question[:50] + '...' if len(chat.question) > 50 else chat.question,
+                    'answer': chat.answer[:100] if chat.answer else '',
+                    'created_at': chat.created_at.strftime('%Y-%m-%d') if chat.created_at else '',
+                    'is_quranic': True
+                })
         except:
             recent_questions = []
         
@@ -3176,6 +3490,81 @@ def init_routes(app):
                              stats=stats,
                              ai_enabled=AI_ENABLED,
                              current_user=current_user)
+    @app.route('/admin/quran-qa/<int:qa_id>/get')
+    @login_required
+    @admin_required
+    def admin_get_quran_qa(qa_id):
+        qa = QuranQA.query.get_or_404(qa_id)
+        return jsonify({
+            'success': True,
+            'qa': {
+                'id': qa.id,
+                'question': qa.question,
+                'keywords': qa.keywords,
+                'answer': qa.answer,
+                'related_verses': qa.related_verses,
+                'category': qa.category,
+                'priority': qa.priority
+            }
+        })
+
+    @app.route('/admin/quran-qa/<int:qa_id>/edit', methods=['POST'])
+    @login_required
+    @admin_required
+    def admin_edit_quran_qa(qa_id):
+        qa = QuranQA.query.get_or_404(qa_id)
+        data = request.get_json()
+        
+        qa.question = data.get('question')
+        qa.keywords = data.get('keywords')
+        qa.answer = data.get('answer')
+        qa.related_verses = data.get('related_verses')
+        qa.category = data.get('category')
+        qa.priority = data.get('priority', 0)
+        qa.updated_at = datetime.utcnow()
+        
+        db.session.commit()
+        return jsonify({'success': True, 'message': 'بروزرسانی شد'})
+        @app.route('/admin/quran-qa/add', methods=['POST'])
+        @login_required
+        @admin_required
+        def admin_add_quran_qa():
+            """افزودن پرسش و پاسخ جدید"""
+        data = request.get_json()
+        
+        qa = QuranQA(
+            question=data.get('question'),
+            keywords=data.get('keywords'),
+            answer=data.get('answer'),
+            related_verses=data.get('related_verses'),
+            category=data.get('category'),
+            priority=data.get('priority', 0),
+            is_active=True
+        )
+        db.session.add(qa)
+        db.session.commit()
+        
+        return jsonify({'success': True, 'message': 'پرسش و پاسخ با موفقیت اضافه شد'})
+
+    @app.route('/admin/quran-qa/<int:qa_id>/delete', methods=['POST'])
+    @login_required
+    @admin_required
+    def admin_delete_quran_qa(qa_id):
+        """حذف پرسش و پاسخ"""
+        qa = QuranQA.query.get_or_404(qa_id)
+        db.session.delete(qa)
+        db.session.commit()
+        return jsonify({'success': True, 'message': 'حذف شد'})
+
+    @app.route('/admin/quran-qa/<int:qa_id>/toggle', methods=['POST'])
+    @login_required
+    @admin_required
+    def admin_toggle_quran_qa(qa_id):
+        """فعال/غیرفعال کردن پرسش و پاسخ"""
+        qa = QuranQA.query.get_or_404(qa_id)
+        qa.is_active = not qa.is_active
+        db.session.commit()
+        return jsonify({'success': True, 'is_active': qa.is_active})
     
     @app.route('/ai/history')
     @login_required
@@ -3341,65 +3730,46 @@ def init_routes(app):
                              ai_enabled=AI_ENABLED,
                              current_user=current_user)
     
-    @app.route('/ai/suggest', methods=['GET', 'POST'])
-    @login_required
-    @verified_required
-    def ai_suggest():
-        """پیشنهاد آیات بر اساس حال و هوا"""
-        verses = []
-        mood = "general"
+        @app.route('/ai/suggest', methods=['GET', 'POST'])
+        @login_required
+        @verified_required
+        def ai_suggest():
+            """پیشنهاد آیات بر اساس حال و هوا"""
+            verses = []
+            mood = "general"
         
-        if request.method == 'POST':
-            mood = request.form.get('mood', 'general')
+            if request.method == 'POST':
+               mood = request.form.get('mood', 'general')
             
-            try:
-                # پیشنهاد آیات بر اساس mood
-                if mood == 'امید':
-                    # آیات امیدبخش
-                    verses = QuranVerse.query.filter(
-                        QuranVerse.verse_persian.contains('رحمت') |
-                        QuranVerse.verse_persian.contains('امید')
-                    ).order_by(func.random()).limit(5).all()
-                elif mood == 'آرامش':
-                    # آیات آرامش‌بخش
-                    verses = QuranVerse.query.filter(
-                        QuranVerse.verse_persian.contains('آرامش') |
-                        QuranVerse.verse_persian.contains('اطمینان')
-                    ).order_by(func.random()).limit(5).all()
-                elif mood == 'توکل':
-                    # آیات توکل
-                    verses = QuranVerse.query.filter(
-                        QuranVerse.verse_persian.contains('توکل') |
-                        QuranVerse.verse_persian.contains('توسل')
-                    ).order_by(func.random()).limit(5).all()
-                else:
-                    # آیات تصادفی
-                    verses = QuranVerse.query.order_by(func.random()).limit(5).all()
-            except:
-                verses = []
+            # نقشه mood به فارسی
+            mood_map = {
+                'امید': 'امید',
+                'آرامش': 'آرامش',
+                'توکل': 'توکل'
+            }
             
-            # اگر آیات کافی نبود، از آیات پیش‌فرض استفاده کن
+            mood_key = mood_map.get(mood, 'general')
+            
+            # دریافت از دیتابیس
+            if mood_key != 'general':
+                verses = get_suggestions_by_mood(mood_key)
+            
+            # اگر آیات کافی نبود، از جدول QuranVerse استفاده کن
             if not verses or len(verses) < 3:
                 try:
-                    verses = QuranVerse.query.order_by(func.random()).limit(5).all()
+                    random_verses = QuranVerse.query.order_by(func.random()).limit(5).all()
+                    for v in random_verses:
+                        verses.append({
+                            'text': v.verse_arabic if hasattr(v, 'verse_arabic') else '',
+                            'translation': v.verse_persian if hasattr(v, 'verse_persian') else v.translation if hasattr(v, 'translation') else '',
+                            'surah': v.surah_name if hasattr(v, 'surah_name') else '',
+                            'ayah': v.verse_number if hasattr(v, 'verse_number') else ''
+                        })
                 except:
-                    verses = []
-        
-        # تبدیل به فرمت مورد نیاز تمپلیت
-        formatted_verses = []
-        for verse in verses:
-            try:
-                formatted_verses.append({
-                    'text': verse.verse_arabic,
-                    'translation': verse.verse_persian,
-                    'surah': verse.surah_name,
-                    'ayah': verse.verse_number
-                })
-            except:
-                pass
+                    pass
         
         return render_template('ai/suggest.html',
-                             verses=formatted_verses,
+                             verses=verses,
                              mood=mood,
                              ai_enabled=AI_ENABLED,
                              current_user=current_user)
@@ -4346,6 +4716,363 @@ def init_routes(app):
             return redirect(url_for('login'))
         
         return render_template('auth/register_staff.html')
+
+
+    # ============================================
+    # مسیرهای مدیریت مسابقات (Competitions)
+    # ============================================
+
+    # تابع به‌روزرسانی لیدربورد (قبل از استفاده تعریف شود)
+    def update_leaderboard(competition_id):
+        registrations = CompetitionRegistration.query.filter_by(competition_id=competition_id).all()
+        for reg in registrations:
+            total_score = db.session.query(db.func.sum(JudgeScore.score)).filter_by(registration_id=reg.id).scalar() or 0
+            reg.final_score = total_score
+        db.session.commit()
+        sorted_regs = CompetitionRegistration.query.filter_by(competition_id=competition_id).order_by(CompetitionRegistration.final_score.desc()).all()
+        for idx, reg in enumerate(sorted_regs, 1):
+            reg.rank = idx
+        db.session.commit()
+
+    @app.route('/competitions')
+    def competitions_list():
+        """لیست همه مسابقات"""
+        page = request.args.get('page', 1, type=int)
+        category = request.args.get('category')
+        search = request.args.get('search')
+        
+        query = Competition.query.filter_by(is_active=True)
+        
+        if category:
+            try:
+                query = query.filter(Competition.category == CompetitionCategory(category))
+            except:
+                pass
+        
+        if search:
+            query = query.filter(
+                (Competition.title.contains(search)) |
+                (Competition.description.contains(search))
+            )
+        
+        competitions = query.order_by(Competition.start_date).paginate(page=page, per_page=12, error_out=False)
+        
+        # آمار برای هر مسابقه (تعداد شرکت‌کنندگان)
+        for comp in competitions.items:
+            comp.registered_count = CompetitionRegistration.query.filter_by(competition_id=comp.id).count()
+        
+        return render_template('competitions/index.html', competitions=competitions, categories=CompetitionCategory, current_user=current_user)
+
+    @app.route('/competition/<int:comp_id>')
+    def competition_detail(comp_id):
+        """جزئیات یک مسابقه"""
+        competition = Competition.query.get_or_404(comp_id)
+        
+        is_registered = False
+        if current_user.is_authenticated:
+            reg = CompetitionRegistration.query.filter_by(competition_id=comp_id, user_id=current_user.id).first()
+            is_registered = reg is not None
+        
+        # لیست شرکت‌کنندگان برای نمایش در لیدربورد (فقط ۱۰ نفر اول)
+        leaderboard = CompetitionRegistration.query.filter_by(competition_id=comp_id)\
+            .order_by(CompetitionRegistration.final_score.desc()).limit(10).all()
+        
+        return render_template('competitions/detail.html', competition=competition, is_registered=is_registered, leaderboard=leaderboard, current_user=current_user)
+
+    @app.route('/competition/<int:comp_id>/register', methods=['POST'])
+    @login_required
+    @verified_required
+    def register_for_competition(comp_id):
+        """ثبت‌نام در مسابقه"""
+        competition = Competition.query.get_or_404(comp_id)
+        
+        if not competition.can_register():
+            flash('زمان ثبت‌نام به پایان رسیده یا ظرفیت تکمیل شده است.', 'error')
+            return redirect(url_for('competition_detail', comp_id=comp_id))
+        
+        existing = CompetitionRegistration.query.filter_by(competition_id=comp_id, user_id=current_user.id).first()
+        if existing:
+            flash('شما قبلاً در این مسابقه ثبت‌نام کرده‌اید.', 'warning')
+            return redirect(url_for('competition_detail', comp_id=comp_id))
+        
+        reg = CompetitionRegistration(competition_id=comp_id, user_id=current_user.id)
+        competition.current_participants += 1
+        db.session.add(reg)
+        db.session.commit()
+        
+        create_notification(current_user.id, 'ثبت‌نام در مسابقه', f'ثبت‌نام شما در مسابقه "{competition.title}" با موفقیت انجام شد.')
+        
+        flash('ثبت‌نام شما با موفقیت انجام شد.', 'success')
+        return redirect(url_for('competition_detail', comp_id=comp_id))
+
+    @app.route('/competition/<int:comp_id>/leaderboard')
+    def competition_leaderboard(comp_id):
+        """تابلوی امتیازات مسابقه"""
+        competition = Competition.query.get_or_404(comp_id)
+        leaderboard = CompetitionRegistration.query.filter_by(competition_id=comp_id)\
+            .order_by(CompetitionRegistration.final_score.desc()).all()
+        return render_template('competitions/leaderboard.html', competition=competition, leaderboard=leaderboard, current_user=current_user)
+
+    # ============================================
+    # بخش مدیریت مسابقات (فقط ادمین)
+    # ============================================
+
+
+    
+    @app.route('/admin/competitions')
+    @login_required
+    @admin_required
+    def admin_competitions():
+        """مدیریت مسابقات - لیست"""
+        competitions = Competition.query.order_by(Competition.created_at.desc()).all()
+        return render_template('admin/competitions/index.html', competitions=competitions, current_user=current_user)
+
+    @app.route('/admin/competition/create', methods=['GET', 'POST'])
+    @login_required
+    @admin_required
+    def admin_create_competition():
+        """ایجاد مسابقه جدید"""
+        if request.method == 'POST':
+            title = request.form.get('title')
+            description = request.form.get('description')
+            category = request.form.get('category')
+            rules = request.form.get('rules')
+            evaluation_criteria = request.form.get('evaluation_criteria')
+            start_date_shamsi = request.form.get('start_date_shamsi')
+            start_time = request.form.get('start_time')
+            end_date_shamsi = request.form.get('end_date_shamsi')
+            end_time = request.form.get('end_time')
+            reg_deadline_shamsi = request.form.get('registration_deadline_shamsi')
+            max_participants = request.form.get('max_participants', type=int)
+            
+            # تبدیل تاریخ‌ها
+            try:
+                start_datetime_str = f"{start_date_shamsi} {start_time}"
+                jstart = jdatetime.datetime.strptime(start_datetime_str, '%Y/%m/%d %H:%M')
+                start_date = jstart.togregorian()
+                
+                end_datetime_str = f"{end_date_shamsi} {end_time}"
+                jend = jdatetime.datetime.strptime(end_datetime_str, '%Y/%m/%d %H:%M')
+                end_date = jend.togregorian()
+                
+                reg_deadline_str = f"{reg_deadline_shamsi} 23:59"
+                jreg = jdatetime.datetime.strptime(reg_deadline_str, '%Y/%m/%d %H:%M')
+                registration_deadline = jreg.togregorian()
+            except Exception as e:
+                flash('فرمت تاریخ یا ساعت نامعتبر است.', 'error')
+                return redirect(url_for('admin_create_competition'))
+            
+            # ذخیره تصویر
+            image_path = None
+            if 'image' in request.files:
+                file = request.files['image']
+                if file and file.filename:
+                    # بررسی حجم فایل (مثلاً حداکثر 5 مگابایت)
+                    file.seek(0, os.SEEK_END)
+                    file_size = file.tell()
+                    file.seek(0)
+                    
+                    if file_size > 5 * 1024 * 1024:  # 5MB
+                        flash('حجم فایل تصویر نباید بیشتر از 5 مگابایت باشد.', 'error')
+                        return redirect(url_for('admin_create_competition'))
+                    
+                    image_path = save_uploaded_file(file, 'competitions')
+            
+            competition = Competition(
+                title=title,
+                description=description,
+                category=CompetitionCategory(category),
+                rules=rules,
+                evaluation_criteria=evaluation_criteria,
+                start_date=start_date,
+                end_date=end_date,
+                registration_deadline=registration_deadline,
+                max_participants=max_participants,
+                image=image_path,
+                created_by=current_user.id,
+                is_active=True
+            )
+            db.session.add(competition)
+            db.session.commit()
+            
+            flash('مسابقه با موفقیت ایجاد شد.', 'success')
+            return redirect(url_for('admin_competitions'))
+        
+        return render_template('admin/competitions/form.html', competition=None, categories=CompetitionCategory, current_user=current_user)
+    @app.route('/admin/competition/<int:comp_id>/edit', methods=['GET', 'POST'])
+    @login_required
+    @admin_required
+    def admin_edit_competition(comp_id):
+        """ویرایش مسابقه"""
+        competition = Competition.query.get_or_404(comp_id)
+        
+        if request.method == 'POST':
+            competition.title = request.form.get('title')
+            competition.description = request.form.get('description')
+            competition.category = CompetitionCategory(request.form.get('category'))
+            competition.rules = request.form.get('rules')
+            competition.evaluation_criteria = request.form.get('evaluation_criteria')
+            competition.max_participants = request.form.get('max_participants', type=int)
+            competition.is_active = 'is_active' in request.form
+            
+            # تبدیل تاریخ‌ها (مشابه create - برای خلاصه فقط تاریخ شروع و پایان را به‌روز می‌کنیم)
+            start_date_shamsi = request.form.get('start_date_shamsi')
+            start_time = request.form.get('start_time')
+            end_date_shamsi = request.form.get('end_date_shamsi')
+            end_time = request.form.get('end_time')
+            reg_deadline_shamsi = request.form.get('registration_deadline_shamsi')
+            
+            try:
+                start_datetime_str = f"{start_date_shamsi} {start_time}"
+                jstart = jdatetime.datetime.strptime(start_datetime_str, '%Y/%m/%d %H:%M')
+                competition.start_date = jstart.togregorian()
+                
+                end_datetime_str = f"{end_date_shamsi} {end_time}"
+                jend = jdatetime.datetime.strptime(end_datetime_str, '%Y/%m/%d %H:%M')
+                competition.end_date = jend.togregorian()
+                
+                reg_deadline_str = f"{reg_deadline_shamsi} 23:59"
+                jreg = jdatetime.datetime.strptime(reg_deadline_str, '%Y/%m/%d %H:%M')
+                competition.registration_deadline = jreg.togregorian()
+            except:
+                flash('فرمت تاریخ یا ساعت نامعتبر است.', 'error')
+                return redirect(url_for('admin_edit_competition', comp_id=comp_id))
+            
+            if 'image' in request.files:
+                file = request.files['image']
+                if file and file.filename:
+                    if competition.image:
+                        old_path = os.path.join(app.config['UPLOAD_FOLDER'], competition.image)
+                        if os.path.exists(old_path):
+                            os.remove(old_path)
+                    competition.image = save_uploaded_file(file, 'competitions')
+            
+            db.session.commit()
+            flash('مسابقه با موفقیت به‌روزرسانی شد.', 'success')
+            return redirect(url_for('admin_competitions'))
+        
+        return render_template('admin/competitions/form.html', competition=competition, categories=CompetitionCategory, current_user=current_user)
+
+    @app.route('/admin/competition/<int:comp_id>/delete', methods=['POST'])
+    @login_required
+    @admin_required
+    def admin_delete_competition(comp_id):
+        """حذف مسابقه"""
+        competition = Competition.query.get_or_404(comp_id)
+        # حذف فایل تصویر
+        if competition.image:
+            img_path = os.path.join(app.config['UPLOAD_FOLDER'], competition.image)
+            if os.path.exists(img_path):
+                os.remove(img_path)
+        db.session.delete(competition)
+        db.session.commit()
+        return jsonify({'success': True, 'message': 'مسابقه حذف شد.'})
+
+    @app.route('/admin/competition/<int:comp_id>/rounds')
+    @login_required
+    @admin_required
+    def admin_competition_rounds(comp_id):
+        """مدیریت مراحل مسابقه"""
+        competition = Competition.query.get_or_404(comp_id)
+        rounds = CompetitionRound.query.filter_by(competition_id=comp_id).order_by(CompetitionRound.round_number).all()
+        return render_template('admin/competitions/rounds.html', competition=competition, rounds=rounds, current_user=current_user)
+
+    @app.route('/admin/competition/<int:comp_id>/round/add', methods=['POST'])
+    @login_required
+    @admin_required
+    def admin_add_round(comp_id):
+        """افزودن مرحله جدید به مسابقه"""
+        data = request.get_json()
+        round_number = data.get('round_number')
+        title = data.get('title')
+        max_score = data.get('max_score', 100)
+        
+        existing = CompetitionRound.query.filter_by(competition_id=comp_id, round_number=round_number).first()
+        if existing:
+            return jsonify({'success': False, 'message': 'شماره مرحله تکراری است.'})
+        
+        round_obj = CompetitionRound(
+            competition_id=comp_id,
+            round_number=round_number,
+            title=title,
+            max_score=max_score
+        )
+        db.session.add(round_obj)
+        db.session.commit()
+        return jsonify({'success': True, 'message': 'مرحله اضافه شد.', 'round_id': round_obj.id})
+
+    # ============================================
+    # بخش نمره‌دهی داوران (دسترسی استاد و ادمین)
+    # ============================================
+
+    @app.route('/judge/competitions')
+    @login_required
+    def judge_competitions():
+        """لیست مسابقاتی که کاربر به عنوان داور در آنها است (در اینجا فعلاً همه مسابقات فعال را نشان می‌دهیم)"""
+        # در نسخه کامل باید یک جدول Judges داشته باشیم، اما فعلاً همه اساتید می‌توانند نمره دهند.
+        if not (current_user.is_admin() or current_user.is_professor()):
+            flash('دسترسی غیرمجاز', 'error')
+            return redirect(url_for('dashboard'))
+        
+        competitions = Competition.query.filter_by(is_active=True).all()
+        return render_template('judge/competitions.html', competitions=competitions, current_user=current_user)
+
+    @app.route('/judge/competition/<int:comp_id>/score')
+    @login_required
+    def judge_score_competition(comp_id):
+        """صفحه نمره‌دهی برای یک مسابقه"""
+        if not (current_user.is_admin() or current_user.is_professor()):
+            flash('دسترسی غیرمجاز', 'error')
+            return redirect(url_for('dashboard'))
+        
+        competition = Competition.query.get_or_404(comp_id)
+        registrations = CompetitionRegistration.query.filter_by(competition_id=comp_id).all()
+        rounds = CompetitionRound.query.filter_by(competition_id=comp_id).order_by(CompetitionRound.round_number).all()
+        
+        # دریافت نمرات قبلی
+        scores = {}
+        for reg in registrations:
+            scores[reg.id] = {}
+            for round_obj in rounds:
+                score_entry = JudgeScore.query.filter_by(round_id=round_obj.id, registration_id=reg.id, judge_id=current_user.id).first()
+                scores[reg.id][round_obj.id] = score_entry.score if score_entry else None
+        
+        return render_template('judge/score.html', competition=competition, registrations=registrations, rounds=rounds, scores=scores, current_user=current_user)
+
+    @app.route('/judge/save-score', methods=['POST'])
+    @login_required
+    def save_judge_score():
+        """ذخیره نمره یک داور برای یک شرکت‌کننده در یک مرحله"""
+        if not (current_user.is_admin() or current_user.is_professor()):
+            return jsonify({'success': False, 'message': 'دسترسی غیرمجاز'})
+        
+        data = request.get_json()
+        round_id = data.get('round_id')
+        registration_id = data.get('registration_id')
+        score = data.get('score')
+        feedback = data.get('feedback', '')
+        
+        # بررسی وجود مرحله و ثبت‌نام
+        round_obj = CompetitionRound.query.get_or_404(round_id)
+        reg = CompetitionRegistration.query.get_or_404(registration_id)
+        
+        # به‌روزرسانی یا ایجاد نمره
+        score_entry = JudgeScore.query.filter_by(round_id=round_id, registration_id=registration_id, judge_id=current_user.id).first()
+        if score_entry:
+            score_entry.score = score
+            score_entry.feedback = feedback
+            score_entry.scored_at = datetime.utcnow()
+        else:
+            score_entry = JudgeScore(round_id=round_id, registration_id=registration_id, judge_id=current_user.id, score=score, feedback=feedback)
+            db.session.add(score_entry)
+        
+        db.session.commit()
+        
+        # به‌روزرسانی نمره نهایی و رتبه‌بندی
+        update_leaderboard(reg.competition_id)
+        
+        return jsonify({'success': True, 'message': 'نمره ذخیره شد.'})
+
     
     # ============================================
     # مسیرهای FCM (Firebase Cloud Messaging)
@@ -4459,5 +5186,3 @@ def init_routes(app):
         db.session.rollback()
         return render_template('500.html'), 500
     
-
-  

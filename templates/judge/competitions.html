@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}نمره‌دهی مسابقات{% endblock %}
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 py-8">
+    <h1 class="text-2xl font-bold mb-6">مسابقات برای نمره‌دهی</h1>
+    <div class="grid gap-4">
+        {% for comp in competitions %}
+        <div class="bg-white p-4 rounded-xl shadow flex justify-between items-center">
+            <div><h2 class="font-bold">{{ comp.title }}</h2><p class="text-sm text-gray-500">{{ comp.start_date|persian_date }}</p></div>
+            <a href="{{ url_for('judge_score_competition', comp_id=comp.id) }}" class="bg-purple-600 text-white px-4 py-2 rounded-lg">ورود به نمره‌دهی</a>
+        </div>
+        {% else %}<p class="text-gray-500">هیچ مسابقه‌ای برای نمره‌دهی وجود ندارد.</p>{% endfor %}
+    </div>
+</div>
+{% endblock %}

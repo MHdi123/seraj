@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+
+{% block title %}{{ competition.title }} | سِراج{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 py-8">
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden mb-8">
+        {% if competition.image %}
+        <img src="{{ url_for('static', filename='uploads/' + competition.image) }}" class="w-full h-64 object-cover">
+        {% endif %}
+        <div class="p-6">
+            <h1 class="text-2xl md:text-3xl font-bold text-gray-800">{{ competition.title }}</h1>
+            <div class="flex flex-wrap gap-4 mt-4 text-sm text-gray-500">
+                <span><i class="fas fa-calendar-alt ml-1"></i> شروع: {{ competition.start_date|persian_datetime }}</span>
+                <span><i class="fas fa-calendar-check ml-1"></i> پایان: {{ competition.end_date|persian_datetime }}</span>
+                <span><i class="fas fa-clock ml-1"></i> مهلت ثبت‌نام: {{ competition.registration_deadline|persian_datetime }}</span>
+            </div>
+            <div class="mt-4 p-3 bg-gray-50 rounded-xl">
+                <p class="text-gray-700">{{ competition.description }}</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-8">
+        <div class="flex flex-col md:flex-row justify-between items-center gap-4">
+            <div>
+                <p>ظرفیت باقی‌مانده: <strong>{{ competition.max_participants - competition.current_participants if competition.max_participants else 'نامحدود' }}</strong></p>
+                <p>تعداد شرکت‌کنندگان: {{ competition.current_participants }}</p>
+            </div>
+            {% if current_user.is_authenticated %}
+                {% if is_registered %}
+                    <div class="bg-green-100 text-green-700 px-6 py-3 rounded-xl">✅ شما ثبت‌نام کرده‌اید</div>
+                {% elif competition.can_register() %}
+                    <form method="POST" action="{{ url_for('register_for_competition', comp_id=competition.id) }}">
+                        <button class="bg-purple-600 text-white px-8 py-3 rounded-xl hover:bg-purple-700">ثبت‌نام در مسابقه</button>
+                    </form>
+                {% else %}
+                    <div class="bg-red-100 text-red-700 px-6 py-3 rounded-xl">زمان ثبت‌نام به پایان رسیده</div>
+                {% endif %}
+            {% else %}
+                <a href="{{ url_for('login') }}" class="bg-gray-600 text-white px-8 py-3 rounded-xl">ورود برای ثبت‌نام</a>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="grid md:grid-cols-2 gap-6 mb-8">
+        <div class="bg-white p-5 rounded-xl border">
+            <h2 class="text-xl font-bold mb-3">قوانین</h2>
+            <div class="text-gray-600">{{ competition.rules or 'هنوز ثبت نشده' }}</div>
+        </div>
+        <div class="bg-white p-5 rounded-xl border">
+            <h2 class="text-xl font-bold mb-3">معیارهای ارزیابی</h2>
+            <div class="text-gray-600">{{ competition.evaluation_criteria or 'هنوز ثبت نشده' }}</div>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-2xl p-5 border">
+        <div class="flex justify-between items-center mb-4">
+            <h2 class="text-xl font-bold">تابلوی امتیازات (۱۰ نفر برتر)</h2>
+            <a href="{{ url_for('competition_leaderboard', comp_id=competition.id) }}" class="text-sm text-purple-500">مشاهده همه</a>
+        </div>
+        {% if leaderboard %}
+        <table class="min-w-full">
+            <thead class="bg-gray-50">
+                <tr><th class="px-4 py-2 text-right">رتبه</th><th class="px-4 py-2 text-right">نام</th><th class="px-4 py-2 text-right">امتیاز</th></tr>
+            </thead>
+            <tbody>
+                {% for reg in leaderboard %}
+                <tr class="border-t"><td class="px-4 py-2">#{{ reg.rank }}</td><td class="px-4 py-2">{{ reg.user.full_name }}</td><td class="px-4 py-2">{{ reg.final_score|default(0) }}</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p class="text-center text-gray-400 py-4">هنوز امتیازی ثبت نشده است.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

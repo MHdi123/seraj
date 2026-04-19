@@ -364,6 +364,19 @@ class QuranVerse(db.Model):
     def __repr__(self):
         return f'<QuranVerse {self.surah_name} - {self.verse_number}>'
 
+class Hadith(db.Model):
+    __tablename__ = 'hadiths'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(200), nullable=False)          # عنوان: پیامبر اکرم (ص)
+    arabic_text = db.Column(db.Text, nullable=False)           # متن عربی
+    persian_text = db.Column(db.Text, nullable=False)          # ترجمه فارسی
+    source = db.Column(db.String(200), nullable=False)         # منبع
+    is_active = db.Column(db.Boolean, default=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    def __repr__(self):
+        return f'<Hadith {self.title}>'
 
 # ================================
 # PASSWORD RESET TOKEN
@@ -730,11 +743,11 @@ class SessionFile(db.Model):
 
 
 # ================================
-# QURAN CIRCLE MODELS
+# QURAN CIRCLE MODELS (تنها یک بار)
 # ================================
 
 class QuranCircle(db.Model):
-    __tablename__ = "quran_circles"
+    __tablename__ = "quran_circles"  # توجه: نام جدول "quran_circles" (جمع)
     
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(200), nullable=False)
@@ -755,6 +768,10 @@ class QuranCircle(db.Model):
     is_active = db.Column(db.Boolean, default=True)
     created_by = db.Column(db.Integer, db.ForeignKey("users.id"))
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    # فیلدهای جدید برای سیستم درخواست و تأیید
+    status = db.Column(db.String(20), default='pending')        # pending, approved, rejected
+    rejection_reason = db.Column(db.String(255), nullable=True) # دلیل رد
     
     # روابط
     creator = db.relationship("User", foreign_keys=[created_by], backref="created_circles")
@@ -983,3 +1000,205 @@ class VerificationLog(db.Model):
     
     def __repr__(self):
         return f'<VerificationLog {self.user_id} - {self.action} by {self.performed_by}>'
+
+
+# ================================
+# BANNER MODEL
+# ================================
+
+class Banner(db.Model):
+    __tablename__ = 'banners'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(200), nullable=False)
+    image_url = db.Column(db.String(500), nullable=False)
+    link_url = db.Column(db.String(500), nullable=True)
+    alt_text = db.Column(db.String(200), nullable=True)
+    order = db.Column(db.Integer, default=0)
+    is_active = db.Column(db.Boolean, default=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    def __repr__(self):
+        return f'<Banner {self.title}>'
+
+        # ================================
+# COMPETITION MODELS
+# ================================
+
+class CompetitionCategory(enum.Enum):
+    MEMORIZATION = "memorization"      # حفظ
+    TARTEEL = "tarteel"                # ترتیل
+    TAFSIR = "tafsir"                  # تفسیر
+    AZAN = "azan"                      # اذان
+    RECITATION = "recitation"          # تلاوت تحقیق
+    OTHER = "other"
+
+class Competition(db.Model):
+    __tablename__ = "competitions"
+    
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(200), nullable=False)
+    description = db.Column(db.Text, nullable=False)
+    category = db.Column(db.Enum(CompetitionCategory), nullable=False)
+    rules = db.Column(db.Text)                     # قوانین مسابقه
+    evaluation_criteria = db.Column(db.Text)       # معیارهای ارزیابی
+    start_date = db.Column(db.DateTime, nullable=False)
+    end_date = db.Column(db.DateTime, nullable=False)
+    registration_deadline = db.Column(db.DateTime, nullable=False)
+    max_participants = db.Column(db.Integer)
+    current_participants = db.Column(db.Integer, default=0)
+    image = db.Column(db.String(200))
+    is_active = db.Column(db.Boolean, default=True)
+    created_by = db.Column(db.Integer, db.ForeignKey("users.id"))
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    # روابط
+    creator = db.relationship("User", foreign_keys=[created_by], backref="created_competitions")
+    registrations = db.relationship("CompetitionRegistration", backref="competition", lazy="dynamic", cascade="all, delete-orphan")
+    rounds = db.relationship("CompetitionRound", backref="competition", lazy="dynamic", cascade="all, delete-orphan")
+    
+    def is_full(self):
+        return self.max_participants and self.current_participants >= self.max_participants
+    
+    def can_register(self):
+        return self.is_active and not self.is_full() and datetime.utcnow() < self.registration_deadline
+    
+    def __repr__(self):
+        return f'<Competition {self.title}>'
+
+class CompetitionRegistration(db.Model):
+    __tablename__ = "competition_registrations"
+    
+    id = db.Column(db.Integer, primary_key=True)
+    competition_id = db.Column(db.Integer, db.ForeignKey("competitions.id"), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
+    registration_date = db.Column(db.DateTime, default=datetime.utcnow)
+    status = db.Column(db.String(20), default="registered")  # registered, confirmed, rejected, disqualified
+    notes = db.Column(db.Text)
+    final_score = db.Column(db.Float, default=0)
+    rank = db.Column(db.Integer)
+    
+    user = db.relationship("User", foreign_keys=[user_id], backref="competition_registrations")
+    
+    __table_args__ = (
+        db.UniqueConstraint("competition_id", "user_id", name="unique_competition_registration"),
+    )
+    
+    def __repr__(self):
+        return f'<CompetitionRegistration {self.competition_id} - {self.user_id}>'
+
+class CompetitionRound(db.Model):
+    __tablename__ = "competition_rounds"
+    
+    id = db.Column(db.Integer, primary_key=True)
+    competition_id = db.Column(db.Integer, db.ForeignKey("competitions.id"), nullable=False)
+    round_number = db.Column(db.Integer, nullable=False)
+    title = db.Column(db.String(200))
+    description = db.Column(db.Text)
+    start_date = db.Column(db.DateTime)
+    end_date = db.Column(db.DateTime)
+    max_score = db.Column(db.Float, default=100)
+    
+    # روابط
+    scores = db.relationship("JudgeScore", backref="round", lazy="dynamic", cascade="all, delete-orphan")
+    
+    __table_args__ = (
+        db.UniqueConstraint("competition_id", "round_number", name="unique_round_number"),
+    )
+    
+    def __repr__(self):
+        return f'<CompetitionRound {self.competition_id} - R{self.round_number}>'
+
+class JudgeScore(db.Model):
+    __tablename__ = "judge_scores"
+    
+    id = db.Column(db.Integer, primary_key=True)
+    round_id = db.Column(db.Integer, db.ForeignKey("competition_rounds.id"), nullable=False)
+    registration_id = db.Column(db.Integer, db.ForeignKey("competition_registrations.id"), nullable=False)
+    judge_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
+    score = db.Column(db.Float, nullable=False)
+    feedback = db.Column(db.Text)
+    scored_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    # روابط
+    registration = db.relationship("CompetitionRegistration", foreign_keys=[registration_id], backref="scores")
+    judge = db.relationship("User", foreign_keys=[judge_id], backref="given_scores")
+    
+    __table_args__ = (
+        db.UniqueConstraint("round_id", "registration_id", "judge_id", name="unique_judge_score"),
+    )
+    
+    def __repr__(self):
+        return f'<JudgeScore {self.round_id} - {self.registration_id} - {self.score}>'
+
+# برای محاسبه خودکار لیدربورد می‌توانیم یک ویو یا متد در مدل داشته باشیم
+def update_leaderboard(competition_id):
+    """به‌روزرسانی نمرات نهایی و رتبه‌بندی شرکت‌کنندگان یک مسابقه"""
+    registrations = CompetitionRegistration.query.filter_by(competition_id=competition_id).all()
+    for reg in registrations:
+        total_score = db.session.query(db.func.sum(JudgeScore.score)).filter_by(registration_id=reg.id).scalar() or 0
+        reg.final_score = total_score
+    db.session.commit()
+    
+    # محاسبه رتبه
+    sorted_regs = CompetitionRegistration.query.filter_by(competition_id=competition_id).order_by(CompetitionRegistration.final_score.desc()).all()
+    for idx, reg in enumerate(sorted_regs, 1):
+        reg.rank = idx
+    db.session.commit()
+
+   # ============================================
+# مدل‌های هوش مصنوعی قرآنی
+# ============================================
+
+class QuranQA(db.Model):
+    __tablename__ = 'quran_qa'
+    __table_args__ = {'extend_existing': True}
+    
+    id = db.Column(db.Integer, primary_key=True)
+    question = db.Column(db.String(500), nullable=False)
+    keywords = db.Column(db.String(500))
+    answer = db.Column(db.Text, nullable=False)
+    related_verses = db.Column(db.Text)
+    category = db.Column(db.String(100))
+    priority = db.Column(db.Integer, default=0)
+    is_active = db.Column(db.Boolean, default=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    def __repr__(self):
+        return f'<QuranQA {self.question[:50]}>'
+
+
+class UserQuranChat(db.Model):
+    __tablename__ = 'user_quran_chats'
+    __table_args__ = {'extend_existing': True}
+    
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
+    question = db.Column(db.Text, nullable=False)
+    answer = db.Column(db.Text, nullable=False)
+    related_verses = db.Column(db.Text)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    user = db.relationship("User", foreign_keys=[user_id], backref="quran_chats")
+    
+    def __repr__(self):
+        return f'<UserQuranChat {self.user_id} - {self.created_at}>'
+
+
+class QuranSuggestion(db.Model):
+    __tablename__ = 'quran_suggestions'
+    __table_args__ = {'extend_existing': True}
+    
+    id = db.Column(db.Integer, primary_key=True)
+    mood = db.Column(db.String(50), nullable=False)
+    verse_text = db.Column(db.Text, nullable=False)
+    verse_translation = db.Column(db.Text, nullable=False)
+    surah_name = db.Column(db.String(100))
+    verse_number = db.Column(db.Integer)
+    order = db.Column(db.Integer, default=0)
+    is_active = db.Column(db.Boolean, default=True)
+    
+    def __repr__(self):
+        return f'<QuranSuggestion {self.mood} - {self.surah_name}:{self.verse_number}>'

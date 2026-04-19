@@ -1,0 +1,335 @@
+{% extends "base.html" %}
+
+{% block title %}مدیریت بنرها - سِراج{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="flex justify-between items-center mb-6">
+        <div>
+            <h1 class="text-2xl font-bold">مدیریت بنرها</h1>
+            <p class="text-gray-600 mt-1">افزودن، ویرایش و حذف بنرهای صفحه اصلی</p>
+        </div>
+        <button id="addBannerBtn" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2">
+            <i class="fas fa-plus"></i>
+            بنر جدید
+        </button>
+    </div>
+
+    <!-- لیست بنرها -->
+    <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+        <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+                <tr>
+                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">تصویر</th>
+                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">عنوان</th>
+                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">لینک</th>
+                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">ترتیب</th>
+                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">وضعیت</th>
+                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">عملیات</th>
+                </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200" id="banners-list">
+                {% for banner in banners %}
+                <tr id="banner-row-{{ banner.id }}" data-id="{{ banner.id }}" data-order="{{ banner.order }}">
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <img src="{{ banner.image_url }}" class="w-20 h-12 object-cover rounded" alt="{{ banner.alt_text }}">
+                    </td>
+                    <td class="px-6 py-4">{{ banner.title }}</td>
+                    <td class="px-6 py-4">
+                        <span class="text-sm text-gray-500">{{ banner.link_url or 'ندارد' }}</span>
+                    </td>
+                    <td class="px-6 py-4">
+                        <input type="number" class="w-16 border rounded px-2 py-1 order-input" value="{{ banner.order }}" data-id="{{ banner.id }}">
+                    </td>
+                    <td class="px-6 py-4">
+                        <button class="toggle-btn status-toggle" data-id="{{ banner.id }}">
+                            {% if banner.is_active %}
+                                <span class="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800">فعال</span>
+                            {% else %}
+                                <span class="px-2 py-1 text-xs rounded-full bg-gray-100 text-gray-800">غیرفعال</span>
+                            {% endif %}
+                        </button>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                        <button class="edit-btn text-blue-600 hover:text-blue-900 ml-3" data-id="{{ banner.id }}">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="delete-btn text-red-600 hover:text-red-900" data-id="{{ banner.id }}">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="6" class="px-6 py-8 text-center text-gray-500">
+                        <i class="fas fa-images text-4xl mb-2 block"></i>
+                        هیچ بنری وجود ندارد. اولین بنر را اضافه کنید.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="mt-4 flex justify-end">
+        <button id="saveOrderBtn" class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg">
+            <i class="fas fa-save ml-2"></i>
+            ذخیره ترتیب
+        </button>
+    </div>
+</div>
+
+<!-- مودال افزودن/ویرایش بنر -->
+<div id="bannerModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+    <div class="bg-white rounded-xl w-full max-w-lg mx-4 p-6">
+        <div class="flex justify-between items-center mb-4">
+            <h2 class="text-xl font-bold" id="modalTitle">افزودن بنر جدید</h2>
+            <button id="closeModalBtn" class="text-gray-400 hover:text-gray-600">
+                <i class="fas fa-times text-xl"></i>
+            </button>
+        </div>
+        
+        <form id="bannerForm" enctype="multipart/form-data">
+            <input type="hidden" name="banner_id" id="bannerId">
+            
+            <div class="mb-4">
+                <label class="block text-gray-700 mb-2">عنوان بنر *</label>
+                <input type="text" name="title" id="title" class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+            </div>
+            
+            <div class="mb-4">
+                <label class="block text-gray-700 mb-2">تصویر بنر</label>
+                <div id="currentImagePreview" class="hidden mb-2">
+                    <img id="currentImage" src="" class="w-full h-32 object-cover rounded">
+                    <p class="text-xs text-gray-500 mt-1">تصویر فعلی</p>
+                </div>
+                <input type="file" name="image" id="image" accept="image/*" class="w-full border rounded-lg px-3 py-2">
+                <p class="text-xs text-gray-500 mt-1">یا آدرس تصویر را وارد کنید:</p>
+                <input type="text" name="image_url" id="imageUrl" class="w-full border rounded-lg px-3 py-2 mt-1" placeholder="https://...">
+            </div>
+            
+            <div class="mb-4">
+                <label class="block text-gray-700 mb-2">لینک هدف (اختیاری)</label>
+                <input type="text" name="link_url" id="linkUrl" class="w-full border rounded-lg px-3 py-2" placeholder="/events">
+            </div>
+            
+            <div class="mb-4">
+                <label class="block text-gray-700 mb-2">متن جایگزین (alt)</label>
+                <input type="text" name="alt_text" id="altText" class="w-full border rounded-lg px-3 py-2">
+            </div>
+            
+            <div class="mb-4">
+                <label class="block text-gray-700 mb-2">ترتیب نمایش</label>
+                <input type="number" name="order" id="order" class="w-full border rounded-lg px-3 py-2" value="0">
+            </div>
+            
+            <div class="flex gap-3 justify-end">
+                <button type="button" id="cancelModalBtn" class="px-4 py-2 border rounded-lg hover:bg-gray-50">انصراف</button>
+                <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">ذخیره</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // المان‌ها
+        const addBtn = document.getElementById('addBannerBtn');
+        const saveOrderBtn = document.getElementById('saveOrderBtn');
+        const modal = document.getElementById('bannerModal');
+        const closeModalBtn = document.getElementById('closeModalBtn');
+        const cancelModalBtn = document.getElementById('cancelModalBtn');
+        const bannerForm = document.getElementById('bannerForm');
+        
+        let editingId = null;
+        
+        // توابع کمکی
+        function showModal() {
+            modal.classList.remove('hidden');
+            modal.style.display = 'flex';
+        }
+        
+        function hideModal() {
+            modal.classList.add('hidden');
+            modal.style.display = 'none';
+        }
+        
+        function resetForm() {
+            bannerForm.reset();
+            document.getElementById('currentImagePreview').classList.add('hidden');
+            document.getElementById('bannerId').value = '';
+            editingId = null;
+        }
+        
+        // نمایش مودال افزودن
+        addBtn.addEventListener('click', function() {
+            resetForm();
+            document.getElementById('modalTitle').innerText = 'افزودن بنر جدید';
+            showModal();
+        });
+        
+        // بستن مودال
+        closeModalBtn.addEventListener('click', hideModal);
+        cancelModalBtn.addEventListener('click', hideModal);
+        
+        // بستن با کلیک خارج از مودال
+        modal.addEventListener('click', function(e) {
+            if (e.target === modal) {
+                hideModal();
+            }
+        });
+        
+        // ویرایش بنر
+        document.querySelectorAll('.edit-btn').forEach(function(btn) {
+            btn.addEventListener('click', async function() {
+                const id = this.dataset.id;
+                editingId = id;
+                
+                try {
+                    const response = await fetch('/admin/banners/api/banner/' + id);
+                    const data = await response.json();
+                    
+                    document.getElementById('modalTitle').innerText = 'ویرایش بنر';
+                    document.getElementById('bannerId').value = data.id;
+                    document.getElementById('title').value = data.title;
+                    document.getElementById('linkUrl').value = data.link_url || '';
+                    document.getElementById('altText').value = data.alt_text || '';
+                    document.getElementById('order').value = data.order;
+                    
+                    if (data.image_url) {
+                        document.getElementById('currentImage').src = data.image_url;
+                        document.getElementById('currentImagePreview').classList.remove('hidden');
+                    } else {
+                        document.getElementById('currentImagePreview').classList.add('hidden');
+                    }
+                    
+                    showModal();
+                } catch (error) {
+                    alert('خطا در دریافت اطلاعات بنر');
+                }
+            });
+        });
+        
+        // حذف بنر
+        document.querySelectorAll('.delete-btn').forEach(function(btn) {
+            btn.addEventListener('click', async function() {
+                const id = this.dataset.id;
+                if (!confirm('آیا از حذف این بنر مطمئن هستید؟')) return;
+                
+                try {
+                    const response = await fetch('/admin/banners/delete/' + id, { method: 'POST' });
+                    const result = await response.json();
+                    if (result.success) {
+                        alert(result.message);
+                        location.reload();
+                    } else {
+                        alert(result.message);
+                    }
+                } catch (error) {
+                    alert('خطا در ارتباط با سرور');
+                }
+            });
+        });
+        
+        // تغییر وضعیت فعال/غیرفعال
+        document.querySelectorAll('.toggle-btn').forEach(function(btn) {
+            btn.addEventListener('click', async function() {
+                const id = this.dataset.id;
+                
+                try {
+                    const response = await fetch('/admin/banners/toggle/' + id, { method: 'POST' });
+                    const result = await response.json();
+                    if (result.success) {
+                        location.reload();
+                    } else {
+                        alert(result.message);
+                    }
+                } catch (error) {
+                    alert('خطا در ارتباط با سرور');
+                }
+            });
+        });
+        
+        // ذخیره ترتیب
+        saveOrderBtn.addEventListener('click', async function() {
+            const orders = [];
+            const rows = document.querySelectorAll('#banners-list tr[data-id]');
+            
+            for (let i = 0; i < rows.length; i++) {
+                const row = rows[i];
+                const input = row.querySelector('.order-input');
+                if (input) {
+                    orders.push({
+                        id: parseInt(row.dataset.id),
+                        order: parseInt(input.value)
+                    });
+                }
+            }
+            
+            try {
+                const response = await fetch('/admin/banners/reorder', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ orders: orders })
+                });
+                const result = await response.json();
+                if (result.success) {
+                    alert('ترتیب بنرها ذخیره شد');
+                    location.reload();
+                } else {
+                    alert(result.message);
+                }
+            } catch (error) {
+                alert('خطا در ارتباط با سرور');
+            }
+        });
+        
+        // ارسال فرم
+        bannerForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            const bannerId = document.getElementById('bannerId').value;
+            let url = '/admin/banners/add';
+            if (bannerId) {
+                url = '/admin/banners/edit/' + bannerId;
+            }
+            
+            try {
+                const response = await fetch(url, { method: 'POST', body: formData });
+                const result = await response.json();
+                
+                if (result.success) {
+                    alert(result.message);
+                    location.reload();
+                } else {
+                    alert(result.message);
+                }
+            } catch (error) {
+                alert('خطا در ارتباط با سرور');
+            }
+        });
+    });
+</script>
+
+<style>
+    #bannerModal {
+        display: none;
+    }
+    #bannerModal.flex {
+        display: flex;
+    }
+    .status-toggle {
+        cursor: pointer;
+        background: none;
+        border: none;
+    }
+    .order-input {
+        text-align: center;
+    }
+    .edit-btn, .delete-btn {
+        background: none;
+        border: none;
+        cursor: pointer;
+    }
+</style>
+{% endblock %}

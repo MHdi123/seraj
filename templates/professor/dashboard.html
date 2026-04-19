@@ -4,376 +4,653 @@
 
 {% block head %}
 <style>
-    .stat-card {
-        transition: all 0.3s ease;
+    /* فونت شبنم */
+    @font-face {
+        font-family: 'Shabnam';
+        src: url('/static/fonts/Shabnam.woff2') format('woff2');
+        font-weight: normal;
+        font-style: normal;
     }
-    .stat-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    
+    * {
+        font-family: 'Shabnam', Tahoma, sans-serif;
     }
-    .progress-ring {
-        transition: stroke-dashoffset 0.35s;
-        transform: rotate(-90deg);
-        transform-origin: 50% 50%;
+    
+    /* انیمیشن ساده */
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
     }
+    
+    .fade-in {
+        animation: fadeIn 0.3s ease-out;
+    }
+    
+    body {
+        background-color: #f8f9fa;
+    }
+    
+    .card {
+        background: white;
+        border-radius: 12px;
+        border: 1px solid #e9ecef;
+        padding: 1.25rem;
+        transition: all 0.2s;
+    }
+    
+    .card:hover {
+        border-color: #dee2e6;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    }
+    
+    .header-card {
+        background: white;
+        border-radius: 12px;
+        border: 1px solid #e9ecef;
+        padding: 1.25rem;
+    }
+    
+    .stat-number {
+        font-size: 1.75rem;
+        font-weight: 600;
+        color: #1a1a2e;
+        margin-top: 0.25rem;
+    }
+    
+    .stat-label {
+        font-size: 0.75rem;
+        color: #6c757d;
+    }
+    
+    .btn-outline {
+        background: transparent;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        padding: 0.35rem 0.75rem;
+        font-size: 0.75rem;
+        color: #495057;
+        cursor: pointer;
+        transition: all 0.2s;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+    }
+    
+    .btn-outline:hover {
+        background: #f8f9fa;
+        border-color: #adb5bd;
+    }
+    
+    .btn-link {
+        background: transparent;
+        border: none;
+        color: #4a6cf7;
+        font-size: 0.75rem;
+        cursor: pointer;
+        text-decoration: none;
+    }
+    
+    .btn-link:hover {
+        color: #3a5bd4;
+        text-decoration: underline;
+    }
+    
+    .action-btn {
+        background: #f8f9fa;
+        border: 1px solid #e9ecef;
+        border-radius: 6px;
+        padding: 0.35rem 0.5rem;
+        font-size: 0.7rem;
+        color: #495057;
+        text-align: center;
+        text-decoration: none;
+        transition: all 0.2s;
+    }
+    
+    .action-btn:hover {
+        background: #e9ecef;
+    }
+    
+    .progress-bar {
+        width: 100%;
+        background: #e9ecef;
+        border-radius: 10px;
+        height: 4px;
+        overflow: hidden;
+    }
+    
+    .progress-fill {
+        background: #4a6cf7;
+        height: 4px;
+        border-radius: 10px;
+        transition: width 0.3s;
+    }
+    
+    .icon-bg {
+        width: 2.5rem;
+        height: 2.5rem;
+        background: #f0f3ff;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .divider {
+        border-top: 1px solid #e9ecef;
+        margin: 0.75rem 0;
+    }
+    
+    .hover-row:hover {
+        background: #fafbfc;
+    }
+    
+    .badge {
+        font-size: 0.65rem;
+        padding: 0.2rem 0.5rem;
+        border-radius: 20px;
+    }
+    
+    .badge-blue {
+        background: #e8edff;
+        color: #4a6cf7;
+    }
+    
+    .badge-green {
+        background: #e3f5ec;
+        color: #20b759;
+    }
+    
+    .badge-amber {
+        background: #fff3e0;
+        color: #e67e22;
+    }
+    
+    .badge-purple {
+        background: #f0e6ff;
+        color: #9b59b6;
+    }
+    
+    .alert-warning {
+        background: #fff8e7;
+        border-right: 3px solid #f5a623;
+        border-radius: 8px;
+        padding: 0.75rem;
+        font-size: 0.75rem;
+    }
+    
+    .quote-box {
+        background: #f8f9fa;
+        border-radius: 10px;
+        padding: 0.75rem;
+        text-align: center;
+        font-size: 0.75rem;
+        color: #6c757d;
+    }
+    
+    .grid-4 {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 1rem;
+    }
+    
+    .grid-3 {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 1.5rem;
+    }
+    
+    @media (max-width: 768px) {
+        .flex-between { flex-direction: column; align-items: flex-start; gap: 1rem; }
+        .grid-4 { grid-template-columns: 1fr; }
+        .grid-3 { grid-template-columns: 1fr; }
+    }
+    
+    .flex-between {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+    
+    .flex {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+    
+    .gap-2 { gap: 0.5rem; }
+    .gap-3 { gap: 0.75rem; }
+    .mt-2 { margin-top: 0.5rem; }
+    .mt-3 { margin-top: 0.75rem; }
+    .mb-2 { margin-bottom: 0.5rem; }
+    .mb-3 { margin-bottom: 0.75rem; }
+    .mb-4 { margin-bottom: 1rem; }
+    .mb-6 { margin-bottom: 1.5rem; }
+    .p-3 { padding: 0.75rem; }
+    .p-4 { padding: 1rem; }
+    .w-100 { width: 100%; }
+    .text-center { text-align: center; }
+    .text-sm { font-size: 0.75rem; }
+    .text-xs { font-size: 0.7rem; }
+    .text-gray { color: #6c757d; }
+    .text-dark { color: #1a1a2e; }
+    .fw-500 { font-weight: 500; }
+    .fw-600 { font-weight: 600; }
 </style>
 {% endblock %}
 
 {% block content %}
-<!-- خوش‌آمدگویی -->
-<div class="mb-8">
-    <div class="bg-gradient-to-l from-blue-700 to-indigo-800 rounded-2xl p-6 text-white">
-        <div class="flex flex-col md:flex-row justify-between items-center gap-4">
-            <div class="flex items-center gap-4">
-                <div class="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm border-2 border-white/30">
-                    <i class="fas fa-chalkboard-teacher text-3xl"></i>
+<div class="fade-in" style="max-width: 1400px; margin: 0 auto; padding: 0 1rem;">
+
+    <!-- ==================== هدر ==================== -->
+    <div class="header-card mb-4">
+        <div class="flex-between">
+            <div class="flex">
+                <div class="icon-bg">
+                    <i class="fas fa-chalkboard-teacher" style="color: #4a6cf7; font-size: 1.25rem;"></i>
                 </div>
                 <div>
-                    <h1 class="text-2xl font-bold mb-1">خوش آمدید، {{ current_user.full_name }}</h1>
-                    <p class="text-blue-100 text-sm">
-                        <i class="fas fa-graduation-cap ml-1"></i>
-                        {{ current_user.get_academic_rank_display() }} - {{ current_user.university }}
-                    </p>
+                    <h2 style="margin: 0 0 4px 0; font-size: 1.25rem; font-weight: 500;">خوش آمدید، {{ current_user.full_name }}</h2>
+                    <p class="text-sm text-gray" style="margin: 0;">{{ current_user.get_academic_rank_display() }} | {{ current_user.university }}</p>
                 </div>
             </div>
             <div class="flex gap-2">
-                <a href="{{ url_for('professor_profile') }}" class="bg-white/20 hover:bg-white/30 px-4 py-2 rounded-lg text-sm transition">
-                    <i class="fas fa-user-edit ml-1"></i>
-                    ویرایش پروفایل
+                <a href="{{ url_for('professor_profile') }}" class="btn-outline">
+                    <i class="fas fa-user-edit"></i> پروفایل
                 </a>
-                <a href="{{ url_for('professor_classes') }}" class="bg-white/20 hover:bg-white/30 px-4 py-2 rounded-lg text-sm transition">
-                    <i class="fas fa-book-open ml-1"></i>
-                    کلاس‌های من
+                <a href="{{ url_for('professor_classes') }}" class="btn-outline">
+                    <i class="fas fa-book-open"></i> کلاس‌ها
                 </a>
             </div>
         </div>
     </div>
-</div>
 
-<!-- کارت‌های آمار -->
-<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-    <!-- کلاس‌های فعال -->
-    <div class="stat-card bg-white rounded-xl p-5 shadow-sm border border-gray-100">
-        <div class="flex items-center gap-3">
-            <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
-                <i class="fas fa-chalkboard text-blue-600 text-xl"></i>
-            </div>
-            <div>
-                <p class="text-gray-500 text-sm">کلاس‌های فعال</p>
-                <h3 class="text-2xl font-bold text-gray-800">{{ stats.my_classes|default('۰')|persian_number }}</h3>
-            </div>
-        </div>
-        <div class="mt-3 text-xs text-gray-500">
-            <i class="fas fa-arrow-up text-green-500 ml-1"></i>
-            {{ stats.total_students|default('۰')|persian_number }} دانشجو
-        </div>
-    </div>
-    
-    <!-- دانشجویان -->
-    <div class="stat-card bg-white rounded-xl p-5 shadow-sm border border-gray-100">
-        <div class="flex items-center gap-3">
-            <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
-                <i class="fas fa-users text-green-600 text-xl"></i>
-            </div>
-            <div>
-                <p class="text-gray-500 text-sm">دانشجویان</p>
-                <h3 class="text-2xl font-bold text-gray-800">{{ stats.total_students|default('۰')|persian_number }}</h3>
-            </div>
-        </div>
-        <div class="mt-3 text-xs text-gray-500">
-            <i class="fas fa-clock text-gray-400 ml-1"></i>
-            {{ stats.today_sessions|default('۰')|persian_number }} جلسه امروز
-        </div>
-    </div>
-    
-    <!-- حلقه‌های تلاوت -->
-    <div class="stat-card bg-white rounded-xl p-5 shadow-sm border border-gray-100">
-        <div class="flex items-center gap-3">
-            <div class="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center">
-                <i class="fas fa-quran text-purple-600 text-xl"></i>
-            </div>
-            <div>
-                <p class="text-gray-500 text-sm">حلقه‌های تلاوت</p>
-                <h3 class="text-2xl font-bold text-gray-800">{{ stats.my_circles|default('۰')|persian_number }}</h3>
-            </div>
-        </div>
-        <div class="mt-3 text-xs text-gray-500">
-            <i class="fas fa-calendar text-purple-400 ml-1"></i>
-            مدیریت جلسات
-        </div>
-    </div>
-    
-    <!-- نمرات ثبت نشده -->
-    <div class="stat-card bg-white rounded-xl p-5 shadow-sm border border-gray-100">
-        <div class="flex items-center gap-3">
-            <div class="w-12 h-12 bg-yellow-100 rounded-xl flex items-center justify-center">
-                <i class="fas fa-star text-yellow-600 text-xl"></i>
-            </div>
-            <div>
-                <p class="text-gray-500 text-sm">نمرات ثبت نشده</p>
-                <h3 class="text-2xl font-bold text-gray-800">{{ stats.pending_grades|default('۰')|persian_number }}</h3>
-            </div>
-        </div>
-        <div class="mt-3 text-xs text-gray-500">
-            <i class="fas fa-exclamation-circle text-yellow-500 ml-1"></i>
-            نیاز به ثبت
-        </div>
-    </div>
-</div>
-
-<!-- دو ستون اصلی -->
-<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-    <!-- ستون راست (۲/۳) -->
-    <div class="lg:col-span-2 space-y-6">
+    <!-- ==================== کارت‌های آمار ==================== -->
+    <div class="grid-4 mb-4">
         <!-- کلاس‌های فعال -->
-        <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-            <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center">
-                <h2 class="font-bold text-gray-800">
-                    <i class="fas fa-chalkboard-teacher text-blue-600 ml-2"></i>
-                    کلاس‌های فعال
-                </h2>
-                <a href="{{ url_for('professor_classes') }}" class="text-sm text-blue-600 hover:text-blue-800">
-                    مشاهده همه
-                    <i class="fas fa-arrow-left mr-1"></i>
-                </a>
+        <div class="card">
+            <div class="flex-between">
+                <div class="icon-bg" style="background: #e8edff;">
+                    <i class="fas fa-chalkboard" style="color: #4a6cf7;"></i>
+                </div>
+                <span class="badge badge-blue">ترم جاری</span>
             </div>
+            <div class="stat-number">{{ stats.my_classes|default('۰') }}</div>
+            <div class="stat-label">کلاس‌های فعال</div>
+            <div class="divider"></div>
+            <div class="text-sm text-gray"><i class="fas fa-users"></i> {{ stats.total_students|default('۰') }} دانشجو</div>
+        </div>
+
+        <!-- دانشجویان -->
+        <div class="card">
+            <div class="icon-bg" style="background: #e3f5ec;">
+                <i class="fas fa-users" style="color: #20b759;"></i>
+            </div>
+            <div class="stat-number">{{ stats.total_students|default('۰') }}</div>
+            <div class="stat-label">کل دانشجویان</div>
+            <div class="divider"></div>
+            <div class="text-sm text-gray"><i class="fas fa-user-check"></i> {{ stats.active_students|default('۰') }} فعال</div>
+        </div>
+
+        <!-- حلقه‌های تلاوت -->
+        <div class="card">
+            <div class="icon-bg" style="background: #f0e6ff;">
+                <i class="fas fa-quran" style="color: #9b59b6;"></i>
+            </div>
+            <div class="stat-number">{{ stats.my_circles|default('۰') }}</div>
+            <div class="stat-label">حلقه‌های تلاوت</div>
+            <div class="divider"></div>
+            <div><a href="{{ url_for('professor_circles') }}" class="btn-link">مدیریت <i class="fas fa-arrow-left"></i></a></div>
+        </div>
+
+        <!-- نمرات ثبت نشده -->
+        <div class="card">
+            <div class="icon-bg" style="background: #fff3e0;">
+                <i class="fas fa-star" style="color: #e67e22;"></i>
+            </div>
+            <div class="stat-number pending-grades-number">{{ stats.pending_grades|default('۰') }}</div>
+            <div class="stat-label">نمرات ثبت نشده</div>
+            <div class="divider"></div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="pendingGradesProgress" style="width: 0%; background: #e67e22;"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== هشدارها ==================== -->
+    {% if alerts %}
+    <div class="alert-warning mb-4">
+        <div class="flex" style="align-items: flex-start;">
+            <i class="fas fa-exclamation-triangle" style="color: #f5a623;"></i>
+            <div style="flex: 1;">
+                <strong>هشدارهای مهم</strong>
+                <ul style="margin: 0.25rem 0 0 1rem; padding: 0;">
+                    {% for alert in alerts %}
+                    <li>{{ alert }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+            <button onclick="this.parentElement.parentElement.style.display='none'" style="background: none; border: none; cursor: pointer; color: #999;">✕</button>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- ==================== دو ستون اصلی ==================== -->
+    <div class="grid-3">
+        
+        <!-- ستون راست (بزرگتر) -->
+        <div style="grid-column: span 2;">
             
-            {% if active_classes %}
-            <div class="divide-y divide-gray-100">
-                {% for class in active_classes %}
-                <div class="p-4 hover:bg-gray-50 transition">
-                    <div class="flex justify-between items-start mb-2">
+            <!-- کلاس‌های فعال -->
+            <div class="card mb-4">
+                <div class="flex-between mb-3">
+                    <h3 style="margin: 0; font-size: 0.9rem; font-weight: 500;"><i class="fas fa-chalkboard-teacher" style="color: #4a6cf7;"></i> کلاس‌های فعال</h3>
+                    <div class="flex gap-2">
+                        <input type="text" id="classSearch" placeholder="جستجو..." style="border: 1px solid #dee2e6; border-radius: 6px; padding: 0.25rem 0.5rem; font-size: 0.7rem; width: 120px;">
+                        <select id="classFilter" style="border: 1px solid #dee2e6; border-radius: 6px; padding: 0.25rem 0.5rem; font-size: 0.7rem; background: white;">
+                            <option value="all">همه</option>
+                            <option value="high">پیشرفت بالا</option>
+                            <option value="medium">پیشرفت متوسط</option>
+                            <option value="low">پیشرفت کم</option>
+                        </select>
+                        <a href="{{ url_for('professor_classes') }}" class="btn-link">همه <i class="fas fa-arrow-left"></i></a>
+                    </div>
+                </div>
+                
+                {% if active_classes %}
+                <div id="classesList">
+                    {% for class in active_classes %}
+                    <div class="class-item hover-row" style="padding: 0.75rem 0; border-top: 1px solid #e9ecef;" data-progress="{{ class.progress }}" data-name="{{ class.name }}">
+                        <div class="flex-between" style="margin-bottom: 0.5rem;">
+                            <div>
+                                <strong style="font-size: 0.85rem;">{{ class.name }}</strong>
+                                <div class="text-xs text-gray">{{ class.code }}</div>
+                            </div>
+                            <span class="badge badge-blue">{{ class.student_count }} دانشجو</span>
+                        </div>
+                        
                         <div>
-                            <h3 class="font-bold text-gray-800">{{ class.name }}</h3>
-                            <p class="text-xs text-gray-500 mt-1">{{ class.code }}</p>
+                            <div class="flex-between text-xs text-gray mb-1">
+                                <span>پیشرفت ترم</span>
+                                <span class="class-progress-value">{{ class.progress }}%</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill class-progress-fill" data-width="{{ class.progress }}" style="width: 0%;"></div>
+                            </div>
+                            <div class="flex-between text-xs text-gray mt-1">
+                                <span>{{ class.completed_sessions }} جلسه برگزار شده</span>
+                                <span>{{ (class.total_sessions - class.completed_sessions) }} جلسه باقیمانده</span>
+                            </div>
                         </div>
-                        <span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">
-                            {{ class.student_count|persian_number }} دانشجو
-                        </span>
-                    </div>
-                    
-                    <!-- نوار پیشرفت -->
-                    <div class="mt-3">
-                        <div class="flex justify-between text-xs text-gray-600 mb-1">
-                            <span>پیشرفت ترم</span>
-                            <span class="font-bold">{{ class.progress|persian_number }}%</span>
-                        </div>
-                        <div class="w-full bg-gray-200 rounded-full h-2">
-                            <div class="bg-blue-600 h-2 rounded-full"></div>
-                        </div>
-                        <div class="flex justify-between text-xs text-gray-500 mt-1">
-                            <span>{{ class.completed_sessions|persian_number }} جلسه برگزار شده</span>
-                            <span>{{ (class.total_sessions - class.completed_sessions)|persian_number }} جلسه باقیمانده</span>
+                        
+                        <div class="flex gap-2" style="margin-top: 0.75rem;">
+                            <a href="{{ url_for('professor_class_detail', class_id=class.id) }}" class="action-btn"><i class="fas fa-info-circle"></i> جزئیات</a>
+                            <a href="{{ url_for('professor_attendance', class_id=class.id) }}" class="action-btn"><i class="fas fa-check-circle"></i> حضور</a>
+                            <a href="{{ url_for('professor_grades', class_id=class.id) }}" class="action-btn"><i class="fas fa-star"></i> نمرات</a>
+                            <span class="action-btn" style="background:#e9ecef; cursor:default;"><i class="fas fa-tasks"></i> تکالیف (به زودی)</span>
                         </div>
                     </div>
-                    
-                    <div class="flex gap-2 mt-3">
-                        <a href="{{ url_for('professor_class_detail', class_id=class.id) }}" 
-                           class="flex-1 text-center bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs py-2 rounded-lg transition">
-                            <i class="fas fa-info-circle ml-1"></i>
-                            جزئیات
-                        </a>
-                        <a href="{{ url_for('professor_attendance', class_id=class.id) }}" 
-                           class="flex-1 text-center bg-green-100 hover:bg-green-200 text-green-700 text-xs py-2 rounded-lg transition">
-                            <i class="fas fa-check-circle ml-1"></i>
-                            حضور و غیاب
-                        </a>
-                        <a href="{{ url_for('professor_grades', class_id=class.id) }}" 
-                           class="flex-1 text-center bg-yellow-100 hover:bg-yellow-200 text-yellow-700 text-xs py-2 rounded-lg transition">
-                            <i class="fas fa-star ml-1"></i>
-                            نمرات
-                        </a>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="text-center" style="padding: 2rem;">
+                    <i class="fas fa-chalkboard" style="font-size: 2rem; color: #dee2e6; margin-bottom: 0.5rem;"></i>
+                    <p class="text-sm text-gray">کلاس فعالی ندارید</p>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- جلسات امروز -->
+            {% if today_sessions %}
+            <div class="card mb-4">
+                <div class="flex-between mb-3">
+                    <h3 style="margin: 0; font-size: 0.9rem; font-weight: 500;"><i class="fas fa-calendar-day" style="color: #4a6cf7;"></i> جلسات امروز</h3>
+                </div>
+                {% for session in today_sessions %}
+                <div class="hover-row" style="padding: 0.75rem 0; border-top: 1px solid #e9ecef;">
+                    <div class="flex-between">
+                        <div class="flex">
+                            <div class="icon-bg" style="width: 2rem; height: 2rem;">
+                                <i class="fas fa-clock" style="color: #4a6cf7; font-size: 0.8rem;"></i>
+                            </div>
+                            <div>
+                                <strong style="font-size: 0.85rem;">{{ session.class_obj.name }}</strong>
+                                <div class="text-xs text-gray">{{ session.title }}</div>
+                                <div class="text-xs text-gray"><i class="fas fa-map-marker-alt"></i> {{ session.location or 'مکان مشخص نشده' }}</div>
+                            </div>
+                        </div>
+                        <div style="text-align: left;">
+                            <div class="fw-500">{{ session.start_time.strftime('%H:%M') if session.start_time else '--:--' }}</div>
+                            <a href="{{ url_for('professor_attendance', class_id=session.class_id, session_id=session.id) }}" class="btn-link">ثبت حضور</a>
+                        </div>
                     </div>
                 </div>
                 {% endfor %}
-            </div>
-            {% else %}
-            <div class="p-8 text-center">
-                <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                    <i class="fas fa-chalkboard text-gray-400 text-xl"></i>
-                </div>
-                <p class="text-gray-600 text-sm mb-2">کلاس فعالی ندارید</p>
-                <p class="text-xs text-gray-500">برای ایجاد کلاس جدید با مدیر سیستم تماس بگیرید</p>
             </div>
             {% endif %}
-        </div>
-        
-        <!-- جلسات امروز -->
-        {% if today_sessions %}
-        <div class="bg-gradient-to-r from-blue-600 to-blue-700 rounded-xl shadow-lg overflow-hidden">
-            <div class="px-6 py-4 border-b border-white/20">
-                <h2 class="font-bold text-white">
-                    <i class="fas fa-calendar-day ml-2"></i>
-                    جلسات امروز
-                </h2>
+
+            <!-- نمودار فعالیت -->
+            <div class="card">
+                <h3 style="margin: 0 0 0.75rem 0; font-size: 0.9rem; font-weight: 500;"><i class="fas fa-chart-line" style="color: #4a6cf7;"></i> فعالیت‌های هفتگی</h3>
+                <div style="display: flex; align-items: flex-end; gap: 0.5rem; height: 100px;">
+                    {% for day in weekly_activity %}
+                    <div style="flex: 1; text-align: center;">
+                        <div class="chart-bar" data-value="{{ day.value }}" style="background: #4a6cf7; border-radius: 4px; height: 0px; min-height: 2px; transition: height 0.3s;"></div>
+                        <div class="text-xs text-gray mt-1">{{ day.name }}</div>
+                        <div class="text-xs fw-500">{{ day.value }}</div>
+                    </div>
+                    {% endfor %}
+                </div>
             </div>
-            <div class="divide-y divide-white/10">
-                {% for session in today_sessions %}
-                <div class="p-4 hover:bg-white/10 transition">
-                    <div class="flex items-center justify-between">
-                        <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center">
-                                <i class="fas fa-clock text-white"></i>
-                            </div>
-                            <div>
-                                <h3 class="font-bold text-white">{{ session.class_obj.name }}</h3>
-                                <p class="text-sm text-blue-100">{{ session.title }}</p>
-                                <p class="text-xs text-blue-200 mt-1">
-                                    <i class="fas fa-map-marker-alt ml-1"></i>
-                                    {{ session.location or 'مکان مشخص نشده' }}
-                                </p>
-                            </div>
+        </div>
+
+        <!-- ستون چپ (کوچکتر) -->
+        <div>
+            
+            <!-- امتیاز و رتبه -->
+            <div class="card mb-4">
+                <div class="flex-between mb-2">
+                    <div class="flex">
+                        <div class="icon-bg" style="background: #f0e6ff;">
+                            <i class="fas fa-medal" style="color: #9b59b6;"></i>
                         </div>
-                        <div class="text-left">
-                            <div class="text-white font-bold">{{ session.start_time.strftime('%H:%M') }}</div>
-                            <a href="{{ url_for('professor_attendance', class_id=session.class_id, session_id=session.id) }}" 
-                               class="inline-block mt-2 bg-white text-blue-700 text-xs px-3 py-1 rounded-lg hover:bg-blue-50 transition">
-                                ثبت حضور
-                            </a>
+                        <div>
+                            <div class="text-xs text-gray">امتیاز شما</div>
+                            <div class="fw-600" style="font-size: 1.25rem; color: #9b59b6;">{{ stats.professor_score|default('۱۲۵۰') }}</div>
                         </div>
                     </div>
+                    <div style="text-align: left;">
+                        <div class="text-xs text-gray">رتبه</div>
+                        <div class="fw-600" style="font-size: 1rem; color: #9b59b6;">{{ stats.rank|default('۵') }}</div>
+                        <div class="text-xs text-gray">از {{ stats.total_professors|default('۱۲') }}</div>
+                    </div>
                 </div>
-                {% endfor %}
-            </div>
-        </div>
-        {% endif %}
-    </div>
-    
-    <!-- ستون چپ (۱/۳) -->
-    <div class="space-y-6">
-        <!-- آخرین بازدید -->
-        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
-            <div class="flex items-center gap-3">
-                <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
-                    <i class="fas fa-clock text-purple-600"></i>
-                </div>
-                <div>
-                    <p class="text-xs text-gray-500">آخرین بازدید</p>
-                    <p class="font-bold text-gray-800">{{ stats.last_login|persian_datetime|default('امروز') }}</p>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="scoreProgress" style="width: 0%; background: #9b59b6;"></div>
                 </div>
             </div>
-        </div>
-        
-        <!-- اطلاعات استاد -->
-        <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-            <div class="px-4 py-3 bg-gray-50 border-b border-gray-100">
-                <h3 class="font-bold text-gray-800 text-sm">
-                    <i class="fas fa-id-card text-blue-600 ml-1"></i>
-                    اطلاعات تماس
-                </h3>
-            </div>
-            <div class="p-4 space-y-3 text-sm">
-                <div class="flex items-center gap-2">
-                    <i class="fas fa-envelope text-gray-400 w-5"></i>
-                    <span class="text-gray-600" dir="ltr">{{ current_user.email }}</span>
-                </div>
-                <div class="flex items-center gap-2">
-                    <i class="fas fa-phone text-gray-400 w-5"></i>
-                    <span class="text-gray-600" dir="ltr">{{ current_user.phone }}</span>
-                </div>
-                {% if current_user.office_phone %}
-                <div class="flex items-center gap-2">
-                    <i class="fas fa-phone-office text-gray-400 w-5"></i>
-                    <span class="text-gray-600" dir="ltr">{{ current_user.office_phone }}</span>
-                </div>
-                {% endif %}
-                {% if current_user.office_location %}
-                <div class="flex items-center gap-2">
-                    <i class="fas fa-map-marker-alt text-gray-400 w-5"></i>
-                    <span class="text-gray-600">{{ current_user.office_location }}</span>
-                </div>
-                {% endif %}
+
+            <!-- اطلاعات تماس -->
+            <div class="card mb-4">
+                <h3 style="margin: 0 0 0.75rem 0; font-size: 0.8rem; font-weight: 500;"><i class="fas fa-id-card"></i> اطلاعات تماس</h3>
+                <div class="text-sm" style="margin-bottom: 0.5rem;"><i class="fas fa-envelope text-gray"></i> <span dir="ltr">{{ current_user.email }}</span> <button onclick="copyToClipboard('{{ current_user.email }}')" class="btn-link" style="float: left;">کپی</button></div>
+                <div class="text-sm"><i class="fas fa-phone text-gray"></i> <span dir="ltr">{{ current_user.phone or 'ثبت نشده' }}</span></div>
                 {% if current_user.office_hours %}
-                <div class="flex items-center gap-2">
-                    <i class="fas fa-clock text-gray-400 w-5"></i>
-                    <span class="text-gray-600">{{ current_user.office_hours }}</span>
-                </div>
+                <div class="text-sm mt-2"><i class="fas fa-clock text-gray"></i> {{ current_user.office_hours }}</div>
                 {% endif %}
             </div>
-        </div>
-        
-        <!-- جلسات آینده -->
-        <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-            <div class="px-4 py-3 bg-gray-50 border-b border-gray-100">
-                <h3 class="font-bold text-gray-800 text-sm">
-                    <i class="fas fa-calendar-alt text-green-600 ml-1"></i>
-                    جلسات آینده
-                </h3>
-            </div>
-            <div class="divide-y divide-gray-100">
+
+            <!-- جلسات آینده -->
+            <div class="card mb-4">
+                <div class="flex-between mb-3">
+                    <h3 style="margin: 0; font-size: 0.8rem; font-weight: 500;"><i class="fas fa-calendar-alt" style="color: #20b759;"></i> جلسات آینده</h3>
+                    <a href="{{ url_for('professor_classes') }}" class="btn-link">کلاس‌ها <i class="fas fa-arrow-left"></i></a>
+                </div>
                 {% if upcoming_sessions %}
-                    {% for session in upcoming_sessions %}
-                    <div class="p-3 hover:bg-gray-50 transition">
-                        <div class="flex justify-between items-start">
+                    {% for session in upcoming_sessions[:5] %}
+                    <div class="hover-row" style="padding: 0.5rem 0; border-top: 1px solid #e9ecef;">
+                        <div class="flex-between">
                             <div>
-                                <p class="font-bold text-sm">{{ session.class_obj.name }}</p>
-                                <p class="text-xs text-gray-600 mt-1">{{ session.title }}</p>
-                                <div class="flex items-center gap-2 mt-2 text-xs text-gray-500">
-                                    <span><i class="fas fa-calendar ml-1"></i>{{ session.session_date|persian_date }}</span>
-                                    <span><i class="fas fa-clock ml-1"></i>{{ session.start_time.strftime('%H:%M') }}</span>
-                                </div>
+                                <div class="fw-500" style="font-size: 0.8rem;">{{ session.class_obj.name }}</div>
+                                <div class="text-xs text-gray">{{ session.title }}</div>
+                                <div class="text-xs text-gray mt-1"><i class="fas fa-calendar"></i> {{ session.session_date|persian_date }} <i class="fas fa-clock"></i> {{ session.start_time.strftime('%H:%M') if session.start_time else '--:--' }}</div>
                             </div>
-                            <span class="bg-green-100 text-green-700 text-xs px-2 py-1 rounded-full">
-                                {{ (session.session_date - now.date()).days|persian_number }} روز دیگر
-                            </span>
+                            <div>
+                                <span class="badge badge-green">{{ (session.session_date - now.date()).days }} روز</span>
+                                <div class="mt-2"><a href="{{ url_for('professor_class_detail', class_id=session.class_id) }}" class="btn-link">جزئیات کلاس</a></div>
+                            </div>
                         </div>
                     </div>
                     {% endfor %}
                 {% else %}
-                    <div class="p-4 text-center text-gray-500 text-sm">
-                        <i class="fas fa-calendar-times text-2xl mb-2 text-gray-300"></i>
-                        <p>جلسه‌ای برنامه‌ریزی نشده</p>
-                    </div>
+                <div class="text-center text-gray" style="padding: 1rem;">
+                    <i class="fas fa-calendar-check" style="font-size: 1.5rem; opacity: 0.3;"></i>
+                    <div class="text-sm">جلسه‌ای برنامه‌ریزی نشده</div>
+                </div>
                 {% endif %}
             </div>
-        </div>
-        
-        <!-- دسترسی سریع -->
-        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
-            <h3 class="font-bold text-gray-800 text-sm mb-3">
-                <i class="fas fa-bolt text-yellow-600 ml-1"></i>
-                دسترسی سریع
-            </h3>
-            <div class="grid grid-cols-2 gap-2">
-                <a href="{{ url_for('professor_classes') }}" class="p-3 bg-gray-50 rounded-lg hover:bg-blue-50 transition text-center">
-                    <i class="fas fa-book-open text-blue-600 mb-1"></i>
-                    <span class="block text-xs">کلاس‌ها</span>
-                </a>
-                <a href="{{ url_for('professor_circles') }}" class="p-3 bg-gray-50 rounded-lg hover:bg-purple-50 transition text-center">
-                    <i class="fas fa-quran text-purple-600 mb-1"></i>
-                    <span class="block text-xs">حلقه‌ها</span>
-                </a>
-                <a href="{{ url_for('professor_profile') }}" class="p-3 bg-gray-50 rounded-lg hover:bg-green-50 transition text-center">
-                    <i class="fas fa-user text-green-600 mb-1"></i>
-                    <span class="block text-xs">پروفایل</span>
-                </a>
-                <a href="{{ url_for('ai_quran') }}" class="p-3 bg-gray-50 rounded-lg hover:bg-yellow-50 transition text-center">
-                    <i class="fas fa-robot text-yellow-600 mb-1"></i>
-                    <span class="block text-xs">سِراج‌یار</span>
-                </a>
+
+            <!-- تکالیف نیاز به بررسی -->
+            <div class="card mb-4">
+                <h3 style="margin: 0 0 0.75rem 0; font-size: 0.8rem; font-weight: 500;"><i class="fas fa-tasks" style="color: #e67e22;"></i> نیاز به بررسی</h3>
+                {% if pending_assignments %}
+                    {% for assignment in pending_assignments[:3] %}
+                    <div class="hover-row" style="padding: 0.5rem 0; border-top: 1px solid #e9ecef;">
+                        <div class="flex-between">
+                            <div>
+                                <div class="fw-500" style="font-size: 0.8rem;">{{ assignment.title }}</div>
+                                <div class="text-xs text-gray">{{ assignment.class_name }}</div>
+                                <div class="text-xs text-amber mt-1">{{ assignment.pending_count }} عدد نیاز به بررسی</div>
+                            </div>
+                            <span class="text-gray">در حال توسعه</span>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                <div class="text-center text-gray" style="padding: 1rem;">
+                    <i class="fas fa-check-circle" style="color: #20b759;"></i>
+                    <div class="text-sm">همه تکالیف بررسی شده</div>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- دسترسی سریع (با لینک‌های حلقه‌ها) -->
+            <div class="card mb-4">
+                <h3 style="margin: 0 0 0.75rem 0; font-size: 0.8rem; font-weight: 500;"><i class="fas fa-bolt" style="color: #f5a623;"></i> دسترسی سریع</h3>
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem;">
+                    <a href="{{ url_for('professor_classes') }}" class="action-btn" style="text-align: center; padding: 0.5rem; text-decoration: none; color: #495057; font-size: 0.7rem; background: #f8f9fa; border-radius: 8px;">
+                        <i class="fas fa-book-open" style="color: #4a6cf7;"></i><br>کلاس‌ها
+                    </a>
+                    <a href="{{ url_for('professor_circles') }}" class="action-btn" style="text-align: center; padding: 0.5rem; text-decoration: none; color: #495057; font-size: 0.7rem; background: #f8f9fa; border-radius: 8px;">
+                        <i class="fas fa-quran" style="color: #9b59b6;"></i><br>حلقه‌های من
+                    </a>
+                    <a href="{{ url_for('professor_circle_request') }}" class="action-btn" style="text-align: center; padding: 0.5rem; text-decoration: none; color: #495057; font-size: 0.7rem; background: #f8f9fa; border-radius: 8px;">
+                        <i class="fas fa-plus-circle" style="color: #20b759;"></i><br>درخواست حلقه
+                    </a>
+                    <a href="{{ url_for('professor_profile') }}" class="action-btn" style="text-align: center; padding: 0.5rem; text-decoration: none; color: #495057; font-size: 0.7rem; background: #f8f9fa; border-radius: 8px;">
+                        <i class="fas fa-user" style="color: #20b759;"></i><br>پروفایل
+                    </a>
+                    <a href="{{ url_for('ai_quran') }}" class="action-btn" style="text-align: center; padding: 0.5rem; text-decoration: none; color: #495057; font-size: 0.7rem; background: #f8f9fa; border-radius: 8px;">
+                        <i class="fas fa-robot" style="color: #f5a623;"></i><br>سِراج‌یار
+                    </a>
+                    <a href="{{ url_for('admin_reports') }}" class="action-btn" style="text-align: center; padding: 0.5rem; text-decoration: none; color: #495057; font-size: 0.7rem; background: #f8f9fa; border-radius: 8px;">
+                        <i class="fas fa-chart-pie" style="color: #e74c3c;"></i><br>گزارشات
+                    </a>
+                    <a href="{{ url_for('notifications') }}" class="action-btn" style="text-align: center; padding: 0.5rem; text-decoration: none; color: #495057; font-size: 0.7rem; background: #f8f9fa; border-radius: 8px;">
+                        <i class="fas fa-comment-dots" style="color: #1abc9c;"></i><br>پیام‌ها
+                    </a>
+                </div>
+            </div>
+
+            <!-- نقل قول روز -->
+            <div class="quote-box">
+                <i class="fas fa-quote-right" style="color: #ced4da;"></i>
+                <p style="margin: 0.5rem 0 0 0; line-height: 1.5;">{{ daily_quote|default('بهترین شما کسی است که قرآن را بیاموزد و به دیگران بیاموزد.') }}</p>
+                <div class="text-xs text-gray mt-2">حدیث نبوی (ص)</div>
             </div>
         </div>
     </div>
 </div>
 
-<!-- حلقه‌های تلاوت -->
-{% if stats.my_circles > 0 %}
-<div class="mt-6">
-    <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-        <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center">
-            <h2 class="font-bold text-gray-800">
-                <i class="fas fa-quran text-purple-600 ml-2"></i>
-                حلقه‌های تلاوت من
-            </h2>
-            <a href="{{ url_for('professor_circles') }}" class="text-sm text-purple-600 hover:text-purple-800">
-                مدیریت حلقه‌ها
-                <i class="fas fa-arrow-left mr-1"></i>
-            </a>
-        </div>
-        <div class="p-4 text-center text-gray-500">
-            <p class="text-sm">برای مشاهده و مدیریت حلقه‌های تلاوت به بخش مربوطه مراجعه کنید.</p>
-        </div>
-    </div>
-</div>
-{% endif %}
+<script>
+// مقداردهی اولیه نوارهای پیشرفت
+document.addEventListener('DOMContentLoaded', function() {
+    // نمرات ثبت نشده
+    var pendingElem = document.querySelector('.pending-grades-number');
+    var pendingProgress = document.getElementById('pendingGradesProgress');
+    if (pendingElem && pendingProgress) {
+        var pendingVal = parseInt(pendingElem.innerText.replace(/,/g, '')) || 0;
+        var totalAssignments = parseInt('{{ stats.total_assignments|default(1) }}');
+        var percent = totalAssignments > 0 ? (pendingVal / totalAssignments) * 100 : 0;
+        pendingProgress.style.width = percent + '%';
+    }
+    
+    // امتیاز
+    var scoreProgress = document.getElementById('scoreProgress');
+    if (scoreProgress) {
+        var scoreRaw = '{{ stats.professor_score|default("1250") }}';
+        var score = parseInt(scoreRaw.replace(/,/g, '')) || 1250;
+        var percent = (score / 2000) * 100;
+        scoreProgress.style.width = percent + '%';
+    }
+    
+    // پیشرفت کلاس‌ها
+    var classBars = document.querySelectorAll('.class-progress-fill');
+    for (var i = 0; i < classBars.length; i++) {
+        var bar = classBars[i];
+        var width = bar.getAttribute('data-width');
+        if (width) bar.style.width = width + '%';
+    }
+    
+    // نمودار فعالیت
+    var chartBars = document.querySelectorAll('.chart-bar');
+    for (var i = 0; i < chartBars.length; i++) {
+        var bar = chartBars[i];
+        var value = parseInt(bar.getAttribute('data-value')) || 0;
+        bar.style.height = Math.min(value * 3, 80) + 'px';
+    }
+});
+
+// جستجو و فیلتر کلاس‌ها
+var searchInput = document.getElementById('classSearch');
+var filterSelect = document.getElementById('classFilter');
+var classesList = document.getElementById('classesList');
+
+if (searchInput && filterSelect && classesList) {
+    function filterClasses() {
+        var searchTerm = searchInput.value.toLowerCase();
+        var filterValue = filterSelect.value;
+        var items = classesList.querySelectorAll('.class-item');
+        
+        for (var i = 0; i < items.length; i++) {
+            var item = items[i];
+            var name = item.getAttribute('data-name').toLowerCase();
+            var progress = parseInt(item.getAttribute('data-progress'));
+            
+            var matchesSearch = name.indexOf(searchTerm) !== -1;
+            var matchesFilter = true;
+            if (filterValue === 'high') matchesFilter = progress >= 70;
+            else if (filterValue === 'medium') matchesFilter = progress >= 30 && progress < 70;
+            else if (filterValue === 'low') matchesFilter = progress < 30;
+            
+            item.style.display = (matchesSearch && matchesFilter) ? '' : 'none';
+        }
+    }
+    searchInput.addEventListener('input', filterClasses);
+    filterSelect.addEventListener('change', filterClasses);
+}
+
+// کپی
+function copyToClipboard(text) {
+    navigator.clipboard.writeText(text).then(function() {
+        var notif = document.createElement('div');
+        notif.style.cssText = 'position:fixed;bottom:1rem;left:1rem;background:#1a1a2e;color:white;padding:0.5rem 1rem;border-radius:8px;font-size:0.75rem;z-index:9999;';
+        notif.innerHTML = '<i class="fas fa-check"></i> کپی شد';
+        document.body.appendChild(notif);
+        setTimeout(function() { notif.remove(); }, 1500);
+    });
+}
+</script>
 {% endblock %}

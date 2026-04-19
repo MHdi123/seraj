@@ -1,67 +1,57 @@
 <!DOCTYPE html>
 <html lang="fa" dir="rtl">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
-    
-    <!-- عنوان صفحه -->
+
     <title>{% block title %}سِراج - پلتفرم مدیریت فعالیت‌های قرآنی{% endblock %}</title>
-    
+
     <!-- ========== PWA Meta Tags ========== -->
-    <!-- Web App Manifest -->
     <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
-    
-    <!-- Theme Color -->
     <meta name="theme-color" content="#1e3a8a" media="(prefers-color-scheme: light)">
     <meta name="theme-color" content="#0f172a" media="(prefers-color-scheme: dark)">
-    
-    <!-- iOS Specific -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="سِراج">
     <meta name="format-detection" content="telephone=no">
     <meta name="mobile-web-app-capable" content="yes">
-    
-    <!-- Windows -->
     <meta name="msapplication-TileColor" content="#1e3a8a">
     <meta name="msapplication-tap-highlight" content="no">
-    
+
     <!-- ========== iOS Icons ========== -->
     <link rel="apple-touch-icon" href="{{ url_for('static', filename='logo/icon-192x192.png') }}">
     <link rel="apple-touch-icon" sizes="152x152" href="{{ url_for('static', filename='logo/icon-152x152.png') }}">
     <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='logo/icon-192x192.png') }}">
     <link rel="apple-touch-icon" sizes="167x167" href="{{ url_for('static', filename='logo/icon-152x152.png') }}">
-    
+
     <!-- ========== Favicon ========== -->
     <link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='logo/icon-32x32.png') }}">
     <link rel="icon" type="image/png" sizes="16x16" href="{{ url_for('static', filename='logo/icon-16x16.png') }}">
     <link rel="shortcut icon" href="{{ url_for('static', filename='logo/favicon.ico') }}">
-    
+
     <!-- ========== CSS Files ========== -->
-    <!-- Tailwind CSS -->
     <link href="{{ url_for('static', filename='css/tailwind.css') }}" rel="stylesheet">
-    
-    <!-- Font Awesome 6 (با لود بهینه) -->
-    <link rel="preconnect" href="https://cdnjs.cloudflare.com">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" 
-          integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" 
-          crossorigin="anonymous" referrerpolicy="no-referrer">
-    
-    <!-- فونت فارسی (اختیاری) -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    
-    <!-- استایل‌های سفارشی بهبود یافته -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='fonts/css/all.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='fonts/css/fontawesome.min.css') }}">
+
     <style>
-        /* استایل‌های پایه */
+        @font-face {
+            font-family: 'Shabnam';
+            src: url(../static/fonts/Shabnam.woff);
+        }
+
+        * {
+            -webkit-tap-highlight-color: transparent;
+        }
+
         body {
-            font-family: 'Vazirmatn', system-ui, -apple-system, sans-serif;
+            font-family: 'Shabnam', system-ui, -apple-system, sans-serif;
             scroll-behavior: smooth;
             overflow-x: hidden;
         }
-        
-        /* بهبود نمایش در حالت نصب شده */
+
+        /* حالت PWA */
         @media (display-mode: standalone) {
             body {
                 padding-top: env(safe-area-inset-top);
@@ -69,34 +59,32 @@
                 padding-left: env(safe-area-inset-left);
                 padding-right: env(safe-area-inset-right);
             }
-            
             .pwa-header {
                 padding-top: env(safe-area-inset-top);
             }
         }
 
-        /* استایل‌های هدر */
+        /* هدر */
         header {
             width: 100%;
             background-color: #fff;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
         }
 
-        /* منوی وسط‌چین در دسکتاپ */
+        /* منوی وسط دسکتاپ */
         .desktop-nav-center {
             position: absolute;
             left: 50%;
             transform: translateX(-50%);
             display: none;
         }
-
         @media (min-width: 768px) {
             .desktop-nav-center {
                 display: block;
             }
         }
 
-        /* دکمه‌های منو */
+        /* دکمه‌های ناوبری */
         .nav-pill {
             padding: 0.5rem 1.25rem;
             border-radius: 9999px;
@@ -105,17 +93,15 @@
             transition: all 0.2s;
             white-space: nowrap;
         }
-
         .nav-pill:hover {
             background-color: white;
             color: #1e40af;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
         }
-
         .nav-pill.active {
             background-color: white;
             color: #2563eb;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
 
         /* دکمه ثبت‌نام */
@@ -129,31 +115,27 @@
             transition: all 0.2s;
             white-space: nowrap;
         }
-
         .register-btn:hover {
             background: linear-gradient(to left, #1d4ed8, #1e40af);
             transform: translateY(-1px);
             box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.3);
         }
 
-        /* منوی موبایل */
+        /* ناوبری موبایل */
         .mobile-nav {
             display: flex;
             align-items: center;
             gap: 0.5rem;
         }
-
         @media (min-width: 768px) {
             .mobile-nav {
                 display: none;
             }
         }
-
         .mobile-menu-button {
             padding: 0.5rem;
             border-radius: 0.75rem;
         }
-
         .mobile-menu-dropdown {
             position: absolute;
             top: 100%;
@@ -166,13 +148,11 @@
             max-height: 80vh;
             overflow-y: auto;
         }
-
         .mobile-menu-item {
             padding: 0.875rem 1rem;
             border-bottom: 1px solid #f3f4f6;
             transition: background-color 0.2s;
         }
-
         .mobile-menu-item:active {
             background-color: #f3f4f6;
         }
@@ -182,38 +162,34 @@
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
         }
-        
         .fade-in {
             animation: fadeIn 0.3s ease-out;
         }
-        
-        /* اسکرول‌بار سفارشی */
+
+        /* اسکرول بار */
         ::-webkit-scrollbar {
             width: 8px;
             height: 8px;
         }
-        
         ::-webkit-scrollbar-track {
             background: #f1f1f1;
             border-radius: 10px;
         }
-        
         ::-webkit-scrollbar-thumb {
             background: #888;
             border-radius: 10px;
         }
-        
         ::-webkit-scrollbar-thumb:hover {
             background: #555;
         }
-        
+
         /* حالت آفلاین */
         body.offline .online-only {
             opacity: 0.5;
             pointer-events: none;
         }
-        
-        /* بهبود لودینگ */
+
+        /* اسپینر لودینگ */
         .loading-spinner {
             border: 3px solid #f3f3f3;
             border-top: 3px solid #1e3a8a;
@@ -222,7 +198,6 @@
             height: 40px;
             animation: spin 1s linear infinite;
         }
-
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
@@ -249,18 +224,15 @@
             z-index: 1000;
             border: 2px solid rgba(255, 255, 255, 0.2);
         }
-
         .back-to-top.show {
             opacity: 1;
             visibility: visible;
         }
-
         .back-to-top:hover {
             transform: translateY(-5px);
             background: linear-gradient(135deg, #1e40af, #1e3a8a);
             box-shadow: 0 6px 20px rgba(30, 58, 138, 0.4);
         }
-
         @media (max-width: 640px) {
             .back-to-top {
                 bottom: 15px;
@@ -270,7 +242,7 @@
             }
         }
 
-        /* پیشخوان قرآنی */
+        /* داشبورد قرآن */
         .quran-dashboard {
             background: linear-gradient(135deg, #f8fafc, #f1f5f9);
             border: 1px solid #e2e8f0;
@@ -278,24 +250,20 @@
             padding: 16px;
             margin-bottom: 24px;
         }
-
         .progress-ring {
             transform: rotate(-90deg);
             width: 60px;
             height: 60px;
         }
-
         .progress-ring circle {
             transition: stroke-dashoffset 0.35s;
             transform: rotate(-90deg);
             transform-origin: 50% 50%;
         }
-
         @media (max-width: 768px) {
             .quran-dashboard {
                 padding: 12px;
             }
-            
             .progress-ring {
                 width: 50px;
                 height: 50px;
@@ -311,39 +279,27 @@
             margin: 16px 0;
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
         }
-
         .hadith-card:hover {
             transform: translateY(-2px);
             box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
         }
 
-        @media (max-width: 640px) {
-            .hadith-card {
-                padding: 12px;
-            }
-        }
-
-        /* فوتر ریسپانسیو */
+        /* فوتر */
         .footer-grid {
             display: grid;
             grid-template-columns: 1fr;
             gap: 2rem;
         }
-
         @media (min-width: 768px) {
             .footer-grid {
                 grid-template-columns: repeat(4, 1fr);
             }
-        }
-
-        .footer-section {
-            text-align: center;
-        }
-
-        @media (min-width: 768px) {
             .footer-section {
                 text-align: right;
             }
+        }
+        .footer-section {
+            text-align: center;
         }
 
         /* کانتینر ریسپانسیو */
@@ -354,772 +310,699 @@
             margin-left: auto;
             margin-right: auto;
         }
+        @media (min-width: 640px) { .container { max-width: 640px; } }
+        @media (min-width: 768px) { .container { max-width: 768px; } }
+        @media (min-width: 1024px) { .container { max-width: 1024px; } }
+        @media (min-width: 1280px) { .container { max-width: 1280px; } }
 
-        @media (min-width: 640px) {
-            .container {
-                max-width: 640px;
-            }
-        }
-
-        @media (min-width: 768px) {
-            .container {
-                max-width: 768px;
-            }
-        }
-
-        @media (min-width: 1024px) {
-            .container {
-                max-width: 1024px;
-            }
-        }
-
-        @media (min-width: 1280px) {
-            .container {
-                max-width: 1280px;
-            }
-        }
-
-        /* بهبود تاچ اهداف در موبایل */
+        /* بهبود تاچ در موبایل */
         @media (max-width: 768px) {
-            button, 
-            a,
-            .clickable {
+            button, a, .clickable {
                 min-height: 44px;
                 min-width: 44px;
             }
-
-            input, 
-            select, 
-            textarea {
+            input, select, textarea {
                 font-size: 16px !important;
             }
         }
 
-        /* رفع مشکل نمایش در آیفون */
+        /* پشتیبانی از iOS */
         @supports (-webkit-touch-callout: none) {
             .min-h-screen {
                 min-height: -webkit-fill-available;
             }
         }
+
+        /* ناوبری پایین موبایل */
+        @media (max-width: 768px) {
+            .bottom-nav {
+                display: flex;
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                background: rgba(255, 255, 255, 0.95);
+                backdrop-filter: blur(10px);
+                border-top: 0.5px solid rgba(0, 0, 0, 0.05);
+                padding: 0.5rem 0.75rem;
+                justify-content: space-around;
+                align-items: center;
+                z-index: 50;
+                box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.03);
+            }
+            .bottom-nav-item {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                gap: 0.2rem;
+                font-size: 0.7rem;
+                font-weight: 500;
+                color: #94a3b8;
+                transition: all 0.2s ease;
+                text-decoration: none;
+                padding: 0.4rem 0.6rem;
+                border-radius: 2rem;
+                background: transparent;
+            }
+            .bottom-nav-item i {
+                font-size: 1.3rem;
+                margin-bottom: 0.1rem;
+            }
+            .bottom-nav-item span {
+                font-size: 0.65rem;
+                font-weight: 500;
+            }
+            .bottom-nav-item.active {
+                color: #3b82f6;
+                background: rgba(59, 130, 246, 0.08);
+            }
+            .bottom-nav-item:active {
+                transform: scale(0.96);
+                background: rgba(0, 0, 0, 0.04);
+            }
+            body {
+                padding-bottom: 4rem;
+            }
+        }
+        @media (min-width: 769px) {
+            .bottom-nav {
+                display: none;
+            }
+            body {
+                padding-bottom: 0;
+            }
+        }
+
+        /* کلاس‌های کمکی line-clamp */
+        .line-clamp-1 {
+            display: -webkit-box;
+            -webkit-line-clamp: 1;
+            line-clamp: 1;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        .line-clamp-2 {
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        .line-clamp-3 {
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
     </style>
-    
+
     {% block head %}{% endblock %}
 </head>
 
-<body class="bg-gray-50 min-h-screen flex flex-col" data-user-logged-in="{% if current_user.is_authenticated %}true{% else %}false{% endif %}">
+<body class="bg-gray-50 min-h-screen flex flex-col"
+    data-user-logged-in="{% if current_user.is_authenticated %}true{% else %}false{% endif %}">
 
-{# تنظیم متغیرهای Jinja2 برای استفاده در جاوااسکریپت #}
-{% set index_url = url_for('index') %}
-{% set register_choice_url = url_for('register_choice') if endpoint_exists('register_choice') else url_for('register') %}
-{% set install_pwa_url = url_for('install_pwa') if endpoint_exists('install_pwa') else '#' %}
+    {# تنظیم متغیرهای Jinja2 #}
+    {% set index_url = url_for('index') %}
+    {% set register_choice_url = url_for('register_choice') if endpoint_exists('register_choice') else url_for('register') %}
+    {% set install_pwa_url = url_for('install_pwa') if endpoint_exists('install_pwa') else '#' %}
 
-<!-- ========== ذخیره مقادیر در data attributes ========== -->
-<div id="app-config" 
-     data-index-url="{{ index_url }}"
-     data-install-url="{{ install_pwa_url }}"
-     data-register-url="{{ register_choice_url }}"
-     style="display: none;"></div>
+    <div id="app-config" data-index-url="{{ index_url }}" data-install-url="{{ install_pwa_url }}"
+        data-register-url="{{ register_choice_url }}" style="display: none;"></div>
 
-<!-- ========== PWA Install Prompt ========== -->
-{% if not request.endpoint == 'install_pwa' %}
-<div id="pwaInstallPrompt" class="fixed bottom-4 left-4 right-4 md:left-auto md:right-4 md:w-96 bg-white rounded-xl shadow-2xl border border-blue-100 z-50 hidden">
-    <div class="p-4">
-        <div class="flex items-start">
-            <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center ml-4 flex-shrink-0">
-                <img src="{{ url_for('static', filename='logo/icon-96x96.png') }}" 
-                     alt="سِراج" 
-                     class="w-8 h-8"
-                     data-fallback="{{ url_for('static', filename='logo/12.png') }}"
-                     onerror="this.src=this.dataset.fallback">
+    <!-- PWA Install Prompt -->
+    {% if not request.endpoint == 'install_pwa' %}
+    <div id="pwaInstallPrompt"
+        class="fixed bottom-4 left-4 right-4 md:left-auto md:right-4 md:w-96 bg-white rounded-xl shadow-2xl border border-blue-100 z-50 hidden">
+        <div class="p-4">
+            <div class="flex items-start">
+                <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center ml-4 flex-shrink-0">
+                    <img src="{{ url_for('static', filename='logo/icon-96x96.png') }}" alt="سِراج" class="w-8 h-8"
+                        data-fallback="{{ url_for('static', filename='logo/12.png') }}"
+                        onerror="this.src=this.dataset.fallback">
+                </div>
+                <div class="flex-grow">
+                    <h3 class="font-bold text-lg">نصب برنامه سِراج</h3>
+                    <p class="text-sm text-gray-600">نصب روی دستگاه برای دسترسی سریع‌تر و آفلاین</p>
+                </div>
+                <button onclick="dismissPwaPrompt()" class="text-gray-400 hover:text-gray-600 p-2">
+                    <i class="fas fa-times"></i>
+                </button>
             </div>
-            <div class="flex-grow">
-                <h3 class="font-bold text-lg">نصب برنامه سِراج</h3>
-                <p class="text-sm text-gray-600">نصب روی دستگاه برای دسترسی سریع‌تر و آفلاین</p>
+            <div class="mt-4 flex gap-2">
+                <button id="installPwaBtn"
+                    class="flex-1 bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors">
+                    <i class="fas fa-download ml-2"></i> نصب
+                </button>
+                <button onclick="dismissPwaPrompt()"
+                    class="flex-1 bg-gray-100 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors">
+                    بعداً
+                </button>
             </div>
-            <button onclick="dismissPwaPrompt()" class="text-gray-400 hover:text-gray-600 p-2">
+            {% if install_pwa_url != '#' %}
+            <a href="{{ install_pwa_url }}" class="block mt-2 text-xs text-center text-blue-600 hover:underline">راهنمای نصب</a>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Offline Notification -->
+    <div id="offlineNotification"
+        class="fixed top-4 left-4 right-4 md:left-auto md:right-4 md:w-96 bg-yellow-500 text-white rounded-lg shadow-lg z-50 hidden">
+        <div class="p-4 flex items-center">
+            <i class="fas fa-exclamation-triangle ml-3"></i>
+            <span class="flex-grow">شما آفلاین هستید. برخی امکانات محدود شده‌اند.</span>
+            <button onclick="this.parentElement.parentElement.remove()" class="mr-3 text-white hover:text-yellow-100 p-2">
                 <i class="fas fa-times"></i>
             </button>
         </div>
-        
-        <div class="mt-4 flex gap-2">
-            <button id="installPwaBtn" class="flex-1 bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors">
-                <i class="fas fa-download ml-2"></i>
-                نصب
-            </button>
-            <button onclick="dismissPwaPrompt()" class="flex-1 bg-gray-100 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors">
-                بعداً
-            </button>
-        </div>
-        
-        {% if install_pwa_url != '#' %}
-        <a href="{{ install_pwa_url }}" class="block mt-2 text-xs text-center text-blue-600 hover:underline">
-            راهنمای نصب
-        </a>
-        {% endif %}
     </div>
-</div>
-{% endif %}
 
-<!-- ========== Offline Notification ========== -->
-<div id="offlineNotification" class="fixed top-4 left-4 right-4 md:left-auto md:right-4 md:w-96 bg-yellow-500 text-white rounded-lg shadow-lg z-50 hidden">
-    <div class="p-4 flex items-center">
-        <i class="fas fa-exclamation-triangle ml-3"></i>
-        <span class="flex-grow">شما آفلاین هستید. برخی امکانات محدود شده‌اند.</span>
-        <button onclick="this.parentElement.parentElement.remove()" class="mr-3 text-white hover:text-yellow-100 p-2">
-            <i class="fas fa-times"></i>
-        </button>
-    </div>
-</div>
-
-<!-- ========== Update Notification ========== -->
-<div id="updateNotification" class="fixed bottom-4 left-4 right-4 md:left-auto md:right-4 md:w-96 bg-blue-600 text-white rounded-lg shadow-lg z-50 hidden">
-    <div class="p-4">
-        <div class="flex items-center">
-            <i class="fas fa-sync-alt ml-3 animate-spin"></i>
-            <span class="flex-grow">نسخه جدیدی منتشر شده است.</span>
-        </div>
-        <div class="mt-3 flex gap-2">
-            <button onclick="updateApp()" class="flex-1 bg-white text-blue-600 px-3 py-2 rounded-lg hover:bg-blue-50 transition text-sm">
-                بروزرسانی
-            </button>
-            <button onclick="document.getElementById('updateNotification').remove()" class="flex-1 bg-blue-700 text-white px-3 py-2 rounded-lg hover:bg-blue-800 transition text-sm">
-                بعداً
-            </button>
+    <!-- Update Notification -->
+    <div id="updateNotification"
+        class="fixed bottom-4 left-4 right-4 md:left-auto md:right-4 md:w-96 bg-blue-600 text-white rounded-lg shadow-lg z-50 hidden">
+        <div class="p-4">
+            <div class="flex items-center">
+                <i class="fas fa-sync-alt ml-3 animate-spin"></i>
+                <span class="flex-grow">نسخه جدیدی منتشر شده است.</span>
+            </div>
+            <div class="mt-3 flex gap-2">
+                <button onclick="updateApp()"
+                    class="flex-1 bg-white text-blue-600 px-3 py-2 rounded-lg hover:bg-blue-50 transition text-sm">
+                    بروزرسانی
+                </button>
+                <button onclick="document.getElementById('updateNotification').remove()"
+                    class="flex-1 bg-blue-700 text-white px-3 py-2 rounded-lg hover:bg-blue-800 transition text-sm">
+                    بعداً
+                </button>
+            </div>
         </div>
     </div>
-</div>
 
-<!-- ========== Header با منوی وسط‌چین ========== -->
-<header class="sticky top-0 z-50 bg-white border-b border-gray-200 shadow-sm" x-data="{ 
-    mobileMenuOpen: false, 
-    userDropdownOpen: false, 
-    searchOpen: false,
-    isMobile: window.innerWidth < 768
-}" x-init="window.addEventListener('resize', () => isMobile = window.innerWidth < 768)">
-    
-    <nav class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex items-center justify-between h-16">
+    <!-- ========== Header ========== -->
+    <header class="sticky top-0 z-50 bg-white border-b border-gray-200 shadow-sm" x-data="{ 
+        mobileMenuOpen: false, 
+        userDropdownOpen: false, 
+        searchOpen: false,
+        isMobile: window.innerWidth < 768
+    }" x-init="window.addEventListener('resize', () => isMobile = window.innerWidth < 768)">
 
-            <!-- لوگو و دکمه بازگشت - سمت راست -->
-            <div class="flex items-center gap-2 flex-shrink-0">
-                <!-- دکمه بازگشت به صفحه اصلی (فقط در صفحات داخلی) -->
-                {% if request.endpoint != 'index' %}
-                <a href="{{ url_for('index') }}" 
-                   class="flex items-center justify-center w-10 h-10 ml-1 rounded-xl bg-gray-100 hover:bg-blue-50 text-gray-600 hover:text-blue-600 transition-all duration-200 group"
-                   title="بازگشت به صفحه اصلی"
-                   aria-label="بازگشت به صفحه اصلی">
-                    <i class="fas fa-arrow-right text-lg group-hover:-translate-x-0.5 transition-transform duration-200"></i>
-                </a>
-                {% endif %}
+        <nav class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
 
-                <!-- لوگو -->
-                <a href="{{ url_for('index') }}" class="flex items-center gap-3 group">
+                <!-- لوگو و دکمه بازگشت -->
+                <div class="flex items-center gap-2 flex-shrink-0">
+                    {% if request.endpoint != 'index' %}
+                    <a href="{{ url_for('index') }}"
+                        class="flex items-center justify-center w-10 h-10 ml-1 rounded-xl bg-gray-100 hover:bg-blue-50 text-gray-600 hover:text-blue-600 transition-all duration-200 group"
+                        title="بازگشت به صفحه اصلی">
+                        <i class="fas fa-arrow-right text-lg group-hover:-translate-x-0.5 transition-transform"></i>
+                    </a>
+                    {% endif %}
+                    <a href="{{ url_for('index') }}" class="flex items-center gap-3 group">
+                        <div class="relative w-10 h-10 rounded-full overflow-hidden shadow-sm border border-gray-200 group-hover:scale-105 transition-transform">
+                            <img src="{{ url_for('static', filename='logo/12.png') }}" alt="سِراج" class="w-full h-full object-cover" loading="lazy">
+                        </div>
+                        <div class="leading-tight">
+                            <h1 class="text-xl font-bold text-gray-900 transition-colors">سِراج</h1>
+                            <p class="hidden md:block text-[10px] text-gray-500 font-medium">سامانه فعالیت‌های قرآنی</p>
+                        </div>
+                    </a>
+                </div>
+
+                <!-- منوی وسط (دسکتاپ) -->
+                <div class="desktop-nav-center hidden md:block">
+                    <div class="flex items-center bg-gray-100 rounded-full px-1.5 py-1.5 gap-0.5 border border-gray-200">
+                        <a href="{{ url_for('events_list') }}"
+                            class="nav-pill {{ 'bg-white text-blue-700 shadow-sm' if request.endpoint == 'events_list' else 'text-gray-600' }}">رویدادها</a>
+                        <a href="{{ url_for('circles_list') }}"
+                            class="nav-pill {{ 'bg-white text-blue-700 shadow-sm' if request.endpoint == 'circles_list' else 'text-gray-600' }}">حلقه‌ها</a>
+                        <a href="{{ url_for('competitions_list') }}"
+                            class="nav-pill {{ 'bg-white text-blue-700 shadow-sm' if request.endpoint == 'competitions_list' else 'text-gray-600' }}">مسابقات</a>    
+                    </div>
+                </div>
+
+                <!-- بخش سمت چپ هدر (دسکتاپ) -->
+                <div class="hidden md:flex items-center gap-2">
                     <div class="relative">
-                        <div class="relative w-10 h-10 rounded-full overflow-hidden shadow-sm border border-gray-200 group-hover:scale-105 transition-transform duration-300">
-                            <img src="{{ url_for('static', filename='logo/12.png') }}" 
-                                 alt="سِراج" 
-                                 class="w-full h-full object-cover"
-                                 loading="lazy">
+                        <button @click="searchOpen = !searchOpen"
+                            class="p-2.5 text-gray-500 hover:text-blue-600 rounded-full transition-all hover:bg-blue-50"
+                            :class="{ 'bg-blue-50 text-blue-600': searchOpen }">
+                            <i class="fas fa-search text-base"></i>
+                        </button>
+                        <div x-show="searchOpen" x-transition @click.away="searchOpen = false"
+                            class="absolute left-0 mt-2 w-64 bg-white rounded-lg shadow-xl border border-gray-200 z-50" style="display: none;">
+                            <form action="{{ url_for('search') }}" method="GET" class="p-2">
+                                <div class="relative">
+                                    <input type="text" name="q" placeholder="جستجو..."
+                                        class="w-full py-2 pr-4 pl-10 text-sm bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                                    <button type="submit" class="absolute left-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-blue-600">
+                                        <i class="fas fa-search text-sm"></i>
+                                    </button>
+                                </div>
+                            </form>
                         </div>
                     </div>
-                    <div class="leading-tight">
-                        <h1 class="text-xl font-bold text-gray-900 group-hover:text-blue-700 transition-colors duration-200 tracking-tight">
-                            سِراج
-                        </h1>
-                        <p class="hidden md:block text-[10px] text-gray-500 font-medium tracking-wide">
-                            سامانه فعالیت‌های قرآنی
-                        </p>
-                    </div>
-                </a>
-            </div>
 
-            <!-- ===== منوی اصلی وسط‌چین (فقط دسکتاپ) ===== -->
-            <div class="desktop-nav-center hidden md:block">
-                <div class="flex items-center bg-gray-100 rounded-full px-1.5 py-1.5 gap-0.5 border border-gray-200">
-                    <a href="{{ url_for('index') }}" 
-                       class="nav-pill {{ 'bg-white text-blue-700 shadow-sm' if request.endpoint == 'index' else 'text-gray-600 hover:text-gray-900 hover:bg-white' }}">
-                        خانه
-                    </a>
-                    <a href="{{ url_for('events_list') }}" 
-                       class="nav-pill {{ 'bg-white text-blue-700 shadow-sm' if request.endpoint == 'events_list' else 'text-gray-600 hover:text-gray-900 hover:bg-white' }}">
-                        رویدادها
-                    </a>
-                    <a href="{{ url_for('circles_list') }}" 
-                       class="nav-pill {{ 'bg-white text-blue-700 shadow-sm' if request.endpoint == 'circles_list' else 'text-gray-600 hover:text-gray-900 hover:bg-white' }}">
-                        حلقه‌ها
-                    </a>
-                </div>
-            </div>
-
-            <!-- بخش سمت چپ هدر (فقط دسکتاپ) -->
-            <div class="hidden md:flex items-center gap-2">
-                <!-- بخش جستجو -->
-                <div class="relative">
-                    <button @click="searchOpen = !searchOpen" 
-                            class="p-2.5 text-gray-500 hover:text-blue-600 rounded-full transition-all duration-200 hover:bg-blue-50"
-                            :class="{ 'bg-blue-50 text-blue-600': searchOpen }"
-                            aria-label="جستجو">
-                        <i class="fas fa-search text-base"></i>
-                    </button>
-
-                    <!-- باکس جستجو -->
-                    <div x-show="searchOpen" 
-                         x-transition:enter="transition ease-out duration-200"
-                         x-transition:enter-start="opacity-0 scale-95"
-                         x-transition:enter-end="opacity-100 scale-100"
-                         x-transition:leave="transition ease-in duration-150"
-                         x-transition:leave-start="opacity-100 scale-100"
-                         x-transition:leave-end="opacity-0 scale-95"
-                         @click.away="searchOpen = false"
-                         class="absolute left-0 mt-2 w-64 bg-white rounded-lg shadow-xl border border-gray-200 z-50"
-                         style="display: none;">
-                        
-                        <form action="{{ url_for('search') }}" method="GET" class="p-2">
-                            <div class="relative">
-                                <input type="text" 
-                                       name="q" 
-                                       placeholder="جستجو..." 
-                                       class="w-full py-2 pr-4 pl-10 text-sm bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                       x-ref="searchInput">
-                                <button type="submit" 
-                                        class="absolute left-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-blue-600">
-                                    <i class="fas fa-search text-sm"></i>
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-
-                {% if current_user.is_authenticated %}
-                    <!-- دکمه سِراج‌یار -->
-                    <a href="{{ url_for('ai_quran') }}" 
-                       class="p-2.5 text-gray-500 hover:text-blue-600 rounded-full transition-all duration-200 hover:bg-blue-50"
-                       title="سِراج‌یار"
-                       aria-label="سِراج‌یار">
+                    {% if current_user.is_authenticated %}
+                    <a href="{{ url_for('ai_quran') }}"
+                        class="p-2.5 text-gray-500 hover:text-blue-600 rounded-full hover:bg-blue-50" title="سِراج‌یار">
                         <i class="fas fa-robot text-base"></i>
                     </a>
-
-                    <!-- منوی کاربری -->
                     <div class="relative">
-                        <button @click="userDropdownOpen = !userDropdownOpen" 
-                                class="flex items-center gap-2 pl-3 pr-1.5 py-1.5 rounded-full border border-gray-300 hover:border-blue-300 hover:bg-blue-50 transition-all duration-200 bg-white shadow-sm"
-                                aria-label="منوی کاربری">
+                        <button @click="userDropdownOpen = !userDropdownOpen"
+                            class="flex items-center gap-2 pl-3 pr-1.5 py-1.5 rounded-full border border-gray-300 hover:border-blue-300 hover:bg-blue-50 bg-white shadow-sm">
                             <div class="w-7 h-7 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center text-white shadow-sm">
                                 <i class="fas fa-user text-xs"></i>
                             </div>
                             <span class="text-sm font-semibold text-gray-700 max-w-[90px] truncate">
                                 {{ current_user.full_name or current_user.username }}
                             </span>
-                            <i class="fas fa-chevron-down text-[10px] text-gray-500 transition-transform duration-200" :class="{'rotate-180': userDropdownOpen}"></i>
+                            <i class="fas fa-chevron-down text-[10px] text-gray-500 transition-transform" :class="{'rotate-180': userDropdownOpen}"></i>
                         </button>
-
-                        <!-- منوی کشویی -->
-                        <div x-show="userDropdownOpen"
-                             x-transition:enter="transition ease-out duration-200"
-                             x-transition:enter-start="opacity-0 scale-95 translate-y-1"
-                             x-transition:enter-end="opacity-100 scale-100 translate-y-0"
-                             x-transition:leave="transition ease-in duration-150"
-                             x-transition:leave-start="opacity-100 scale-100 translate-y-0"
-                             x-transition:leave-end="opacity-0 scale-95 translate-y-1"
-                             @click.away="userDropdownOpen = false"
-                             class="absolute left-0 mt-2 w-60 bg-white rounded-2xl shadow-xl border border-gray-100 py-2 overflow-hidden z-50"
-                             style="display: none;">
-                            
+                        <div x-show="userDropdownOpen" x-transition @click.away="userDropdownOpen = false"
+                            class="absolute left-0 mt-2 w-60 bg-white rounded-2xl shadow-xl border border-gray-100 py-2 overflow-hidden z-50" style="display: none;">
                             <div class="px-4 py-3 bg-gradient-to-br from-blue-50 to-indigo-50 border-b border-gray-200">
-                                <p class="text-[10px] text-blue-500 font-medium uppercase tracking-wider mb-0.5">خوش آمدید</p>
+                                <p class="text-[10px] text-blue-500 font-medium uppercase">خوش آمدید</p>
                                 <p class="text-sm font-bold text-gray-800 truncate">{{ current_user.full_name }}</p>
                             </div>
-
                             <div class="p-2">
                                 {% if current_user.role and current_user.role.value == 'admin' %}
                                 <a href="{{ url_for('admin_dashboard') }}" class="flex items-center gap-3 px-3 py-2 text-sm text-gray-600 rounded-xl hover:bg-blue-50 hover:text-blue-700">
-                                    <i class="fas fa-tachometer-alt w-5"></i>
-                                    مدیریت سیستم
+                                    <i class="fas fa-tachometer-alt w-5"></i> مدیریت سیستم
                                 </a>
                                 {% else %}
                                 <a href="{{ url_for('dashboard') }}" class="flex items-center gap-3 px-3 py-2 text-sm text-gray-600 rounded-xl hover:bg-blue-50 hover:text-blue-700">
-                                    <i class="fas fa-th-large w-5"></i>
-                                    داشبورد
+                                    <i class="fas fa-th-large w-5"></i> داشبورد
                                 </a>
                                 {% endif %}
-                                
                                 <a href="{{ url_for('profile') }}" class="flex items-center gap-3 px-3 py-2 text-sm text-gray-600 rounded-xl hover:bg-blue-50 hover:text-blue-700">
-                                    <i class="fas fa-user-circle w-5"></i>
-                                    ویرایش پروفایل
+                                    <i class="fas fa-user-circle w-5"></i> ویرایش پروفایل
                                 </a>
-                                
                                 <a href="{{ url_for('notifications') }}" class="flex items-center justify-between px-3 py-2 text-sm text-gray-600 rounded-xl hover:bg-blue-50 hover:text-blue-700">
-                                    <div class="flex items-center gap-3">
-                                        <i class="fas fa-bell w-5"></i>
-                                        اعلان‌ها
-                                    </div>
+                                    <div class="flex items-center gap-3"><i class="fas fa-bell w-5"></i> اعلان‌ها</div>
                                     {% set unread_count = current_user.notifications|selectattr('is_read','equalto',False)|list|length %}
                                     {% if unread_count > 0 %}
-                                        <span class="bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">
-                                            {{ unread_count }}
-                                        </span>
+                                    <span class="bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">{{ unread_count }}</span>
                                     {% endif %}
                                 </a>
                             </div>
-
                             <div class="border-t border-gray-200 mx-3 my-1"></div>
-
                             <div class="px-2 pb-1">
                                 <a href="{{ url_for('logout') }}" class="flex items-center gap-3 px-3 py-2 text-sm text-red-500 rounded-xl hover:bg-red-50">
-                                    <i class="fas fa-sign-out-alt w-5"></i>
-                                    خروج از حساب
+                                    <i class="fas fa-sign-out-alt w-5"></i> خروج از حساب
                                 </a>
                             </div>
                         </div>
                     </div>
-
-                {% else %}
-                    <!-- دکمه‌های ورود/ثبت‌نام -->
+                    {% else %}
                     <div class="flex items-center gap-2">
-                        <a href="{{ url_for('login') }}" class="text-sm font-medium text-gray-600 hover:text-blue-700 px-4 py-2 rounded-full hover:bg-blue-50 transition-all duration-200">
-                            ورود
-                        </a>
-                        <a href="{{ register_choice_url }}" class="register-btn">
-                            ثبت‌نام
-                        </a>
+                        <a href="{{ url_for('login') }}" class="text-sm font-medium text-gray-600 hover:text-blue-700 px-4 py-2 rounded-full hover:bg-blue-50">ورود</a>
+                        <a href="{{ register_choice_url }}" class="register-btn">ثبت‌نام</a>
                     </div>
-                {% endif %}
-            </div>
-
-            <!-- بخش موبایل -->
-            <div class="mobile-nav md:hidden">
-                <!-- دکمه جستجو -->
-                <button @click="searchOpen = !searchOpen" 
-                        class="p-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-full transition-all duration-200"
-                        aria-label="جستجو">
-                    <i class="fas fa-search text-lg"></i>
-                </button>
-
-                {% if current_user.is_authenticated %}
-                <!-- اعلان‌ها -->
-                <a href="{{ url_for('notifications') }}" class="relative p-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-full transition-all duration-200" aria-label="اعلان‌ها">
-                    <i class="fas fa-bell text-lg"></i>
-                    {% set unread_count = current_user.notifications|selectattr('is_read','equalto',False)|list|length %}
-                    {% if unread_count > 0 %}
-                        <span class="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border-2 border-white animate-pulse"></span>
                     {% endif %}
-                </a>
-                {% endif %}
+                </div>
 
-                <!-- دکمه منو -->
-                <button @click="mobileMenuOpen = !mobileMenuOpen" 
-                        class="p-2 rounded-xl text-gray-600 hover:bg-gray-100 transition-all duration-200 focus:outline-none mobile-menu-button"
-                        aria-label="منو">
-                    <i class="fas text-lg transition-all duration-200" :class="mobileMenuOpen ? 'fa-times' : 'fa-bars'"></i>
-                </button>
+                <!-- بخش موبایل -->
+                <div class="mobile-nav md:hidden">
+                    <button @click="searchOpen = !searchOpen"
+                        class="p-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-full transition-all">
+                        <i class="fas fa-search text-lg"></i>
+                    </button>
+                    {% if current_user.is_authenticated %}
+                    <a href="{{ url_for('notifications') }}" class="relative p-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-full">
+                        <i class="fas fa-bell text-lg"></i>
+                        {% set unread_count = current_user.notifications|selectattr('is_read','equalto',False)|list|length %}
+                        {% if unread_count > 0 %}
+                        <span class="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border-2 border-white animate-pulse"></span>
+                        {% endif %}
+                    </a>
+                    {% endif %}
+                    <button @click="mobileMenuOpen = !mobileMenuOpen"
+                        class="p-2 rounded-xl text-gray-600 hover:bg-gray-100 transition-all focus:outline-none mobile-menu-button">
+                        <i class="fas text-lg transition-all" :class="mobileMenuOpen ? 'fa-times' : 'fa-bars'"></i>
+                    </button>
+                </div>
             </div>
-        </div>
 
-        <!-- باکس جستجوی موبایل -->
-        <div x-show="searchOpen" 
-             x-transition:enter="transition ease-out duration-200"
-             x-transition:enter-start="opacity-0 -translate-y-2"
-             x-transition:enter-end="opacity-100 translate-y-0"
-             x-transition:leave="transition ease-in duration-150"
-             x-transition:leave-start="opacity-100 translate-y-0"
-             x-transition:leave-end="opacity-0 -translate-y-2"
-             class="md:hidden py-3 border-t border-gray-200"
-             style="display: none;">
-            
-            <form action="{{ url_for('search') }}" method="GET" class="relative">
-                <input type="text" 
-                       name="q" 
-                       placeholder="جستجو در رویدادها، حلقه‌ها..." 
-                       class="w-full py-3 pr-12 pl-4 text-sm bg-white border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                       x-ref="mobileSearchInput">
-                <i class="fas fa-search absolute right-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
-                <button type="submit" 
-                        class="absolute left-2 top-1/2 -translate-y-1/2 bg-blue-600 text-white px-4 py-1.5 rounded-lg text-sm font-medium hover:bg-blue-700">
-                    برو
-                </button>
-            </form>
-        </div>
+            <!-- باکس جستجوی موبایل -->
+            <div x-show="searchOpen" x-transition class="md:hidden py-3 border-t border-gray-200" style="display: none;">
+                <form action="{{ url_for('search') }}" method="GET" class="relative">
+                    <input type="text" name="q" placeholder="جستجو در رویدادها، حلقه‌ها..."
+                        class="w-full py-3 pr-12 pl-4 text-sm bg-white border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500">
+                    <i class="fas fa-search absolute right-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                    <button type="submit" class="absolute left-2 top-1/2 -translate-y-1/2 bg-blue-600 text-white px-4 py-1.5 rounded-lg text-sm font-medium hover:bg-blue-700">برو</button>
+                </form>
+            </div>
 
-        <!-- منوی موبایل -->
-        <div x-show="mobileMenuOpen" 
-             x-transition:enter="transition ease-out duration-200"
-             x-transition:enter-start="opacity-0 -translate-y-2"
-             x-transition:enter-end="opacity-100 translate-y-0"
-             x-transition:leave="transition ease-in duration-150"
-             x-transition:leave-start="opacity-100 translate-y-0"
-             x-transition:leave-end="opacity-0 -translate-y-2"
-             class="md:hidden mobile-menu-dropdown"
-             style="display: none;">
-            
-            <div class="py-2">
-                <a href="{{ url_for('index') }}" class="mobile-menu-item flex items-center gap-3 {{ 'bg-blue-50 text-blue-700' if request.endpoint == 'index' else 'text-gray-600' }}">
-                    <i class="fas fa-home w-5"></i>
-                    خانه
-                </a>
-                <a href="{{ url_for('events_list') }}" class="mobile-menu-item flex items-center gap-3 {{ 'bg-blue-50 text-blue-700' if request.endpoint == 'events_list' else 'text-gray-600' }}">
-                    <i class="fas fa-calendar-alt w-5"></i>
-                    رویدادها
-                </a>
-                <a href="{{ url_for('circles_list') }}" class="mobile-menu-item flex items-center gap-3 {{ 'bg-blue-50 text-blue-700' if request.endpoint == 'circles_list' else 'text-gray-600' }}">
-                    <i class="fas fa-users w-5"></i>
-                    حلقه‌های تلاوت
-                </a>
-
-                {% if current_user.is_authenticated %}
+            <!-- منوی موبایل (کشویی) -->
+            <div x-show="mobileMenuOpen" x-transition class="md:hidden mobile-menu-dropdown" style="display: none;">
+                <div class="py-2">
+                    <a href="{{ url_for('index') }}" class="mobile-menu-item flex items-center gap-3 {{ 'bg-blue-50 text-blue-700' if request.endpoint == 'index' else 'text-gray-600' }}">
+                        <i class="fas fa-home w-5"></i> خانه
+                    </a>
+                    <a href="{{ url_for('events_list') }}" class="mobile-menu-item flex items-center gap-3 {{ 'bg-blue-50 text-blue-700' if request.endpoint == 'events_list' else 'text-gray-600' }}">
+                        <i class="fas fa-calendar-alt w-5"></i> رویدادها
+                    </a>
+                    <a href="{{ url_for('circles_list') }}" class="mobile-menu-item flex items-center gap-3 {{ 'bg-blue-50 text-blue-700' if request.endpoint == 'circles_list' else 'text-gray-600' }}">
+                        <i class="fas fa-users w-5"></i> حلقه‌های تلاوت
+                    </a>
+                    <a href="{{ url_for('competitions_list') }}" class="mobile-menu-item flex items-center gap-3 {{ 'bg-blue-50 text-blue-700' if request.endpoint == 'competitions_list' else 'text-gray-600' }}">
+                        <i class="fas fa-trophy w-5"></i> مسابقات
+                    </a>
+                    {% if current_user.is_authenticated %}
                     <div class="border-t border-gray-200 my-2"></div>
-                    
                     <a href="{{ url_for('dashboard') }}" class="mobile-menu-item flex items-center gap-3 text-gray-600">
-                        <i class="fas fa-th-large w-5"></i>
-                        داشبورد
+                        <i class="fas fa-th-large w-5"></i> داشبورد
                     </a>
                     <a href="{{ url_for('ai_quran') }}" class="mobile-menu-item flex items-center gap-3 text-gray-600">
-                        <i class="fas fa-robot w-5"></i>
-                        سِراج‌یار
+                        <i class="fas fa-robot w-5"></i> سِراج‌یار
                     </a>
                     <a href="{{ url_for('profile') }}" class="mobile-menu-item flex items-center gap-3 text-gray-600">
-                        <i class="fas fa-user-circle w-5"></i>
-                        پروفایل من
+                        <i class="fas fa-user-circle w-5"></i> پروفایل من
                     </a>
-                    
                     <div class="border-t border-gray-200 my-2"></div>
-                    
                     <a href="{{ url_for('logout') }}" class="mobile-menu-item flex items-center gap-3 text-red-500">
-                        <i class="fas fa-sign-out-alt w-5"></i>
-                        خروج
+                        <i class="fas fa-sign-out-alt w-5"></i> خروج
                     </a>
-                {% else %}
+                    {% else %}
                     <div class="grid grid-cols-2 gap-3 p-4">
-                        <a href="{{ url_for('login') }}" class="text-center py-3 rounded-xl border border-gray-300 text-gray-700 font-medium hover:bg-gray-100">
-                            ورود
-                        </a>
-                        <a href="{{ register_choice_url }}" class="text-center py-3 rounded-xl bg-gradient-to-l from-blue-600 to-blue-500 text-white font-bold hover:from-blue-700 hover:to-blue-600">
-                            ثبت‌نام
-                        </a>
+                        <a href="{{ url_for('login') }}" class="text-center py-3 rounded-xl border border-gray-300 text-gray-700 font-medium hover:bg-gray-100">ورود</a>
+                        <a href="{{ register_choice_url }}" class="text-center py-3 rounded-xl bg-gradient-to-l from-blue-600 to-blue-500 text-white font-bold hover:from-blue-700 hover:to-blue-600">ثبت‌نام</a>
                     </div>
-                {% endif %}
+                    {% endif %}
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    <div class="container mx-auto px-4 mt-4">
+        {% for category, message in messages %}
+        <div class="alert p-4 mb-4 rounded-lg fade-in 
+            {% if category == 'success' %}bg-green-100 text-green-700
+            {% elif category == 'error' %}bg-red-100 text-red-700
+            {% elif category == 'warning' %}bg-yellow-100 text-yellow-700
+            {% else %}bg-blue-100 text-blue-700{% endif %}">
+            <div class="flex items-center">
+                {% if category == 'success' %}<i class="fas fa-check-circle ml-3 text-green-500"></i>
+                {% elif category == 'error' %}<i class="fas fa-exclamation-circle ml-3 text-red-500"></i>
+                {% elif category == 'warning' %}<i class="fas fa-exclamation-triangle ml-3 text-yellow-500"></i>
+                {% else %}<i class="fas fa-info-circle ml-3 text-blue-500"></i>{% endif %}
+                <span>{{ message }}</span>
             </div>
         </div>
-    </nav>
-</header>
-
-<!-- ========== Flash Messages ========== -->
-{% with messages = get_flashed_messages(with_categories=true) %}
-    {% if messages %}
-        <div class="container mx-auto px-4 mt-4">
-            {% for category, message in messages %}
-                <div class="alert p-4 mb-4 rounded-lg fade-in 
-                    {% if category == 'success' %}bg-green-100 text-green-700
-                    {% elif category == 'error' %}bg-red-100 text-red-700
-                    {% elif category == 'warning' %}bg-yellow-100 text-yellow-700
-                    {% else %}bg-blue-100 text-blue-700{% endif %}">
-                    <div class="flex items-center">
-                        {% if category == 'success' %}
-                            <i class="fas fa-check-circle ml-3 text-green-500"></i>
-                        {% elif category == 'error' %}
-                            <i class="fas fa-exclamation-circle ml-3 text-red-500"></i>
-                        {% elif category == 'warning' %}
-                            <i class="fas fa-exclamation-triangle ml-3 text-yellow-500"></i>
-                        {% else %}
-                            <i class="fas fa-info-circle ml-3 text-blue-500"></i>
-                        {% endif %}
-                        <span>{{ message }}</span>
-                    </div>
-                </div>
-            {% endfor %}
-        </div>
+        {% endfor %}
+    </div>
     {% endif %}
-{% endwith %}
+    {% endwith %}
 
-<!-- ========== Main Content ========== -->
-<main class="flex-grow container mx-auto px-4 py-6">
-    {% block content %}{% endblock %}
-</main>
+    <!-- Main Content -->
+    <main class="flex-grow container mx-auto px-4 py-6">
+        {% block content %}{% endblock %}
+    </main>
 
-<!-- ========== دکمه بازگشت به بالا ========== -->
-<button id="backToTop" class="back-to-top" aria-label="بازگشت به بالا">
-    <i class="fas fa-arrow-up"></i>
-</button>
+    <!-- ========== Bottom Navigation (موبایل) ========== -->
+    <div class="bottom-nav">
+        {% if current_user.is_authenticated %}
+            <!-- لینک‌های کاربر وارد شده -->
+            <a href="{{ url_for('index') }}" class="bottom-nav-item {% if request.endpoint == 'index' %}active{% endif %}">
+                <i class="fas fa-home"></i>
+                <span>خانه</span>
+            </a>
+            <a href="{{ url_for('competitions_list') }}" class="bottom-nav-item {% if request.endpoint == 'competitions_list' %}active{% endif %}">
+                <i class="fas fa-trophy"></i>
+                <span>مسابقات</span>
+            </a>
+            <a href="{{ url_for('ai_quran') }}" class="bottom-nav-item {% if request.endpoint == 'ai_quran' %}active{% endif %}">
+                <i class="fas fa-robot"></i>
+                <span>سراج یار</span>
+            </a>
+            <a href="{{ url_for('events_list') }}" class="bottom-nav-item {% if request.endpoint == 'events_list' %}active{% endif %}">
+                <i class="fas fa-calendar-alt"></i>
+                <span>رویدادها</span>
+            </a>
+            <a href="{{ url_for('dashboard') }}" class="bottom-nav-item {% if request.endpoint == 'dashboard' %}active{% endif %}">
+                <i class="fas fa-tachometer-alt"></i>
+                <span>داشبورد</span>
+            </a>
+        {% else %}
+            <a href="{{ url_for('index') }}" class="bottom-nav-item {% if request.endpoint == 'index' %}active{% endif %}">
+                <i class="fas fa-home"></i>
+                <span>خانه</span>
+            </a>
+            <a href="{{ url_for('competitions_list') }}" class="bottom-nav-item {% if request.endpoint == 'competitions_list' %}active{% endif %}">
+                <i class="fas fa-trophy"></i>
+                <span>مسابقات</span>
+            </a>
+            <a href="{{ url_for('events_list') }}" class="bottom-nav-item {% if request.endpoint == 'events_list' %}active{% endif %}">
+                <i class="fas fa-calendar-alt"></i>
+                <span>رویدادها</span>
+            </a>
+            <a href="{{ url_for('index') }}" class="bottom-nav-item {% if request.endpoint == 'index' %}active{% endif %}">
+                <img src="{{ url_for('static', filename='logo/12.png') }}" alt="لوگو" style="width: 24px; height: 24px;">
+                <span>سِراج</span>
+            </a>
+            <a href="{{ register_choice_url }}" class="bottom-nav-item {% if request.endpoint == 'register_choice' %}active{% endif %}">
+                <i class="fas fa-user-plus"></i>
+                <span>ثبت‌نام</span>
+            </a>
+            <a href="{{ url_for('about') }}" class="bottom-nav-item {% if request.endpoint == 'about' %}active{% endif %}">
+                <i class="fas fa-info-circle"></i>
+                <span>درباره</span>
+            </a>
+        {% endif %}
+    </div>
 
-<!-- Firebase SDK -->
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-messaging-compat.js"></script>
 
-<script>
-    // تنظیمات Firebase
-    const firebaseConfig = {
-        apiKey: "AIzaSyCu9ruK0nzFXl7cj2U81pu2Ku-SiCk9iOw",
-        authDomain: "seraj-app.firebaseapp.com",
-        projectId: "seraj-app",
-        storageBucket: "seraj-app.firebasestorage.app",
-        messagingSenderId: "651768016947",
-        appId: "1:651768016947:web:68632e505ad4c1c7bd3346",
-        measurementId: "G-KN3B5SW162"
-    };
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-messaging-compat.js"></script>
 
-    // Initialize Firebase
-    firebase.initializeApp(firebaseConfig);
-    const messaging = firebase.messaging();
-
-    // گرفتن توکن کاربر
-    messaging.getToken({ vapidKey: "BISxnpPZtEVallaB4HF2VQHeuT3dz_YvL8KNnsghIyr50fuV5-dJffIvppl-8oPZOqipUPczPctFiNvuY8HTHKQ" })
-        .then((currentToken) => {
-            if (currentToken) {
-                console.log("FCM Token:", currentToken);
-                fetch("/save-token", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ token: currentToken })
-                });
-            } else {
-                console.log('Permission denied or token not available.');
-            }
-        }).catch((err) => {
-            console.error('Error getting token:', err);
-        });
-
-    // متغیرهای سراسری
-    let deferredPrompt;
-    let isOnline = navigator.onLine;
-    
-    // دریافت مقادیر از data attributes
-    const configElement = document.getElementById('app-config');
-    const SERAJ_CONFIG = {
-        indexUrl: configElement?.dataset.indexUrl || '/',
-        installPwaUrl: configElement?.dataset.installUrl || '#',
-        registerUrl: configElement?.dataset.registerUrl || '/auth/register'
-    };
-
-    // ========== توابع کمکی ==========
-
-    // دکمه بازگشت
-    function goBack() {
-        if (document.referrer && document.referrer !== '') {
-            history.back();
-        } else {
-            window.location.href = SERAJ_CONFIG.indexUrl;
-        }
-    }
-
-    // بروزرسانی وضعیت آنلاین
-    function updateOnlineStatus() {
-        isOnline = navigator.onLine;
-        const offlineNotification = document.getElementById('offlineNotification');
-
-        if (isOnline) {
-            document.body.classList.remove('offline');
-            if (offlineNotification) offlineNotification.classList.add('hidden');
-        } else {
-            document.body.classList.add('offline');
-            if (offlineNotification) offlineNotification.classList.remove('hidden');
-        }
-    }
-
-    // نمایش نوتیفیکیشن به‌روزرسانی
-    function showUpdateNotification() {
-        const updateNotif = document.getElementById('updateNotification');
-        if (updateNotif) updateNotif.classList.remove('hidden');
-    }
-
-    // بروزرسانی برنامه
-    window.updateApp = function() {
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.ready.then(registration => {
-                if (registration.waiting) {
-                    registration.waiting.postMessage('skipWaiting');
-                }
-            });
-        }
-        window.location.reload();
-    };
-
-    // مخفی کردن بنر نصب
-    window.dismissPwaPrompt = function() {
-        const prompt = document.getElementById('pwaInstallPrompt');
-        if (prompt) {
-            prompt.remove();
-            localStorage.setItem('pwa-install-dismissed', 'true');
-        }
-    };
-
-    // ========== دکمه بازگشت به بالا ==========
-    function initBackToTop() {
-        const backToTopBtn = document.getElementById('backToTop');
-        
-        if (!backToTopBtn) return;
-
-        window.addEventListener('scroll', () => {
-            if (window.scrollY > 300) {
-                backToTopBtn.classList.add('show');
-            } else {
-                backToTopBtn.classList.remove('show');
-            }
-        });
-
-        backToTopBtn.addEventListener('click', () => {
-            window.scrollTo({
-                top: 0,
-                behavior: 'smooth'
-            });
-        });
-    }
-
-    // ذخیره پیشرفت مطالعه قرآن
-    function saveQuranProgress(surah, ayah) {
-        const progress = {
-            surah: surah,
-            ayah: ayah,
-            lastRead: new Date().toISOString()
+    <script>
+        // تنظیمات Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyCu9ruK0nzFXl7cj2U81pu2Ku-SiCk9iOw",
+            authDomain: "seraj-app.firebaseapp.com",
+            projectId: "seraj-app",
+            storageBucket: "seraj-app.firebasestorage.app",
+            messagingSenderId: "651768016947",
+            appId: "1:651768016947:web:68632e505ad4c1c7bd3346",
+            measurementId: "G-KN3B5SW162"
         };
-        localStorage.setItem('quranProgress', JSON.stringify(progress));
-    }
+        firebase.initializeApp(firebaseConfig);
+        const messaging = firebase.messaging();
 
-    // دریافت آخرین پیشرفت مطالعه
-    function getLastQuranProgress() {
-        const saved = localStorage.getItem('quranProgress');
-        if (saved) {
-            try {
-                return JSON.parse(saved);
-            } catch (e) {
-                return null;
+        messaging.getToken({ vapidKey: "BISxnpPZtEVallaB4HF2VQHeuT3dz_YvL8KNnsghIyr50fuV5-dJffIvppl-8oPZOqipUPczPctFiNvuY8HTHKQ" })
+            .then((currentToken) => {
+                if (currentToken) {
+                    console.log("FCM Token:", currentToken);
+                    fetch("/save-token", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ token: currentToken })
+                    });
+                } else {
+                    console.log('Permission denied or token not available.');
+                }
+            }).catch((err) => {
+                console.error('Error getting token:', err);
+            });
+
+        let deferredPrompt;
+        let isOnline = navigator.onLine;
+        const configElement = document.getElementById('app-config');
+        const SERAJ_CONFIG = {
+            indexUrl: configElement?.dataset.indexUrl || '/',
+            installPwaUrl: configElement?.dataset.installUrl || '#',
+            registerUrl: configElement?.dataset.registerUrl || '/auth/register'
+        };
+
+        function goBack() {
+            if (document.referrer && document.referrer !== '') {
+                history.back();
+            } else {
+                window.location.href = SERAJ_CONFIG.indexUrl;
             }
         }
-        return null;
-    }
 
-    // نمایش پیشرفت در داشبورد
-    function updateQuranProgressDisplay() {
-        const isLoggedIn = document.body.dataset.userLoggedIn === 'true';
-        if (!isLoggedIn) return;
-
-        const progress = getLastQuranProgress();
-        if (progress && progress.surah) {
-            console.log('آخرین مطالعه:', progress);
-        }
-    }
-
-    // ========== Event Listeners ==========
-
-    document.addEventListener('DOMContentLoaded', function() {
-        // Auto-dismiss alerts after 5 seconds
-        setTimeout(() => {
-            const alerts = document.querySelectorAll('.alert');
-            alerts.forEach(alert => {
-                alert.style.transition = 'opacity 0.5s';
-                alert.style.opacity = '0';
-                setTimeout(() => alert.remove(), 500);
-            });
-        }, 5000);
-
-        // PWA Install Prompt
-        if (!window.matchMedia('(display-mode: standalone)').matches &&
-            !localStorage.getItem('pwa-install-dismissed')) {
-
-            setTimeout(() => {
-                document.getElementById('pwaInstallPrompt')?.classList.remove('hidden');
-            }, 10000);
-        }
-
-        // PWA Install Button
-        document.getElementById('installPwaBtn')?.addEventListener('click', async () => {
-            if (deferredPrompt) {
-                deferredPrompt.prompt();
-                const { outcome } = await deferredPrompt.userChoice;
-                if (outcome === 'accepted') {
-                    document.getElementById('pwaInstallPrompt')?.remove();
-                }
-                deferredPrompt = null;
+        function updateOnlineStatus() {
+            isOnline = navigator.onLine;
+            const offlineNotification = document.getElementById('offlineNotification');
+            if (isOnline) {
+                document.body.classList.remove('offline');
+                if (offlineNotification) offlineNotification.classList.add('hidden');
             } else {
-                if (SERAJ_CONFIG.installPwaUrl && SERAJ_CONFIG.installPwaUrl !== '#') {
-                    window.location.href = SERAJ_CONFIG.installPwaUrl;
+                document.body.classList.add('offline');
+                if (offlineNotification) offlineNotification.classList.remove('hidden');
+            }
+        }
+
+        function showUpdateNotification() {
+            const updateNotif = document.getElementById('updateNotification');
+            if (updateNotif) updateNotif.classList.remove('hidden');
+        }
+
+        window.updateApp = function () {
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.ready.then(registration => {
+                    if (registration.waiting) {
+                        registration.waiting.postMessage('skipWaiting');
+                    }
+                });
+            }
+            window.location.reload();
+        };
+
+        window.dismissPwaPrompt = function () {
+            const prompt = document.getElementById('pwaInstallPrompt');
+            if (prompt) {
+                prompt.remove();
+                localStorage.setItem('pwa-install-dismissed', 'true');
+            }
+        };
+
+        function initBackToTop() {
+            const backToTopBtn = document.getElementById('backToTop');
+            if (!backToTopBtn) return;
+            window.addEventListener('scroll', () => {
+                if (window.scrollY > 300) {
+                    backToTopBtn.classList.add('show');
+                } else {
+                    backToTopBtn.classList.remove('show');
                 }
+            });
+            backToTopBtn.addEventListener('click', () => {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            });
+        }
+
+        function saveQuranProgress(surah, ayah) {
+            const progress = { surah: surah, ayah: ayah, lastRead: new Date().toISOString() };
+            localStorage.setItem('quranProgress', JSON.stringify(progress));
+        }
+
+        function getLastQuranProgress() {
+            const saved = localStorage.getItem('quranProgress');
+            if (saved) {
+                try { return JSON.parse(saved); } catch (e) { return null; }
+            }
+            return null;
+        }
+
+        function updateQuranProgressDisplay() {
+            const isLoggedIn = document.body.dataset.userLoggedIn === 'true';
+            if (!isLoggedIn) return;
+            const progress = getLastQuranProgress();
+            if (progress && progress.surah) {
+                console.log('آخرین مطالعه:', progress);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            setTimeout(() => {
+                const alerts = document.querySelectorAll('.alert');
+                alerts.forEach(alert => {
+                    alert.style.transition = 'opacity 0.5s';
+                    alert.style.opacity = '0';
+                    setTimeout(() => alert.remove(), 500);
+                });
+            }, 5000);
+
+            if (!window.matchMedia('(display-mode: standalone)').matches &&
+                !localStorage.getItem('pwa-install-dismissed')) {
+                setTimeout(() => {
+                    document.getElementById('pwaInstallPrompt')?.classList.remove('hidden');
+                }, 10000);
+            }
+
+            document.getElementById('installPwaBtn')?.addEventListener('click', async () => {
+                if (deferredPrompt) {
+                    deferredPrompt.prompt();
+                    const { outcome } = await deferredPrompt.userChoice;
+                    if (outcome === 'accepted') {
+                        document.getElementById('pwaInstallPrompt')?.remove();
+                    }
+                    deferredPrompt = null;
+                } else {
+                    if (SERAJ_CONFIG.installPwaUrl && SERAJ_CONFIG.installPwaUrl !== '#') {
+                        window.location.href = SERAJ_CONFIG.installPwaUrl;
+                    }
+                }
+            });
+
+            initBackToTop();
+            updateQuranProgressDisplay();
+
+            document.addEventListener('touchstart', (e) => {
+                if (e.touches.length > 1) e.preventDefault();
+            }, { passive: false });
+        });
+
+        window.addEventListener('online', updateOnlineStatus);
+        window.addEventListener('offline', updateOnlineStatus);
+        updateOnlineStatus();
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            if (!localStorage.getItem('pwa-install-dismissed') &&
+                !window.matchMedia('(display-mode: standalone)').matches) {
+                document.getElementById('pwaInstallPrompt')?.classList.remove('hidden');
             }
         });
 
-        // مقداردهی اولیه امکانات جدید
-        initBackToTop();
-        updateQuranProgressDisplay();
+        window.addEventListener('appinstalled', () => {
+            console.log('✅ برنامه با موفقیت نصب شد');
+            document.getElementById('pwaInstallPrompt')?.remove();
+            localStorage.removeItem('pwa-install-dismissed');
+        });
 
-        // جلوگیری از زوم خودکار در iOS
-        document.addEventListener('touchstart', (e) => {
-            if (e.touches.length > 1) {
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function () {
+                navigator.serviceWorker.register('/static/js/firebase-messaging-sw.js')
+                    .then(function (registration) {
+                        console.log('✅ Service Worker ثبت شد با scope:', registration.scope);
+                        registration.addEventListener('updatefound', function () {
+                            const newWorker = registration.installing;
+                            newWorker.addEventListener('statechange', function () {
+                                if (newWorker.state === 'installed') {
+                                    if (navigator.serviceWorker.controller) {
+                                        showUpdateNotification();
+                                    }
+                                }
+                            });
+                        });
+                    })
+                    .catch(function (error) {
+                        console.log('❌ خطا در ثبت Service Worker:', error);
+                    });
+                navigator.serviceWorker.addEventListener('controllerchange', () => {
+                    window.location.reload();
+                });
+            });
+        }
+
+        document.addEventListener('alpine:init', () => {
+            console.log('Alpine.js loaded');
+        });
+
+        document.addEventListener('touchend', (e) => {
+            const now = Date.now();
+            const DOUBLE_TAP_DELAY = 300;
+            if (now - (window.lastTouchEnd || 0) < DOUBLE_TAP_DELAY) {
                 e.preventDefault();
             }
-        }, { passive: false });
-    });
-
-    // Online/Offline events
-    window.addEventListener('online', updateOnlineStatus);
-    window.addEventListener('offline', updateOnlineStatus);
-    updateOnlineStatus();
-
-    // PWA Install Prompt Event
-    window.addEventListener('beforeinstallprompt', (e) => {
-        e.preventDefault();
-        deferredPrompt = e;
-
-        if (!localStorage.getItem('pwa-install-dismissed') &&
-            !window.matchMedia('(display-mode: standalone)').matches) {
-            document.getElementById('pwaInstallPrompt')?.classList.remove('hidden');
-        }
-    });
-
-    // PWA App Installed Event
-    window.addEventListener('appinstalled', () => {
-        console.log('✅ برنامه با موفقیت نصب شد');
-        document.getElementById('pwaInstallPrompt')?.remove();
-        localStorage.removeItem('pwa-install-dismissed');
-    });
-
-    // ========== Service Worker Registration ==========
-
-    if ('serviceWorker' in navigator) {
-        window.addEventListener('load', function() {
-            navigator.serviceWorker.register('/static/js/firebase-messaging-sw.js')
-                .then(function(registration) {
-                    console.log('✅ Service Worker ثبت شد با scope:', registration.scope);
-
-                    registration.addEventListener('updatefound', function() {
-                        const newWorker = registration.installing;
-                        console.log('🔄 نسخه جدید Service Worker در حال نصب...');
-                        newWorker.addEventListener('statechange', function() {
-                            if (newWorker.state === 'installed') {
-                                if (navigator.serviceWorker.controller) {
-                                    console.log('🔄 نسخه جدید آماده است');
-                                    showUpdateNotification();
-                                }
-                            }
-                        });
-                    });
-                })
-                .catch(function(error) {
-                    console.log('❌ خطا در ثبت Service Worker:', error);
-                });
-
-            navigator.serviceWorker.addEventListener('controllerchange', () => {
-                window.location.reload();
-            });
+            window.lastTouchEnd = now;
         });
-    }
+    </script>
 
-    // Alpine.js init
-    document.addEventListener('alpine:init', () => {
-        console.log('Alpine.js loaded');
-    });
+    <script defer src="{{ url_for('static', filename='js/alpinejs/dist/cdn.min.js') }}"></script>
 
-    // Prevent zoom on double-tap in iOS
-    document.addEventListener('touchend', (e) => {
-        const now = Date.now();
-        const DOUBLE_TAP_DELAY = 300;
-        if (now - (window.lastTouchEnd || 0) < DOUBLE_TAP_DELAY) {
-            e.preventDefault();
-        }
-        window.lastTouchEnd = now;
-    });
-</script>
-
-<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-
-{% block scripts %}{% endblock %}
-
+    {% block scripts %}{% endblock %}
 </body>
+
 </html>

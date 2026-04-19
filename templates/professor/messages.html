@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block title %}پیام‌ها{% endblock %}
+
+{% block content %}
+<div style="max-width: 1000px; margin: 0 auto; padding: 1rem;">
+    <div style="background: white; border-radius: 12px; border: 1px solid #e9ecef; padding: 1.5rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+            <h2 style="margin: 0; font-size: 1.25rem;">
+                <i class="fas fa-comment-dots" style="color: #4a6cf7;"></i> پیام‌ها
+            </h2>
+            <a href="{{ url_for('professor_dashboard') }}" style="background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 8px; padding: 0.35rem 0.75rem; font-size: 0.75rem; color: #495057; text-decoration: none;">
+                <i class="fas fa-arrow-right"></i> بازگشت
+            </a>
+        </div>
+        
+        <div style="text-align: center; padding: 3rem;">
+            <i class="fas fa-envelope-open-text" style="font-size: 3rem; color: #dee2e6; margin-bottom: 1rem;"></i>
+            <p style="color: #6c757d;">بخش پیام‌ها به زودی فعال خواهد شد.</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

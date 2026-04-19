@@ -4,6 +4,7 @@ class Config:
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'seraj-quran-university-secret-key-2024'
     SQLALCHEMY_DATABASE_URI = 'sqlite:///seraj.db'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+    UPLOAD_FOLDER = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'uploads')
     
     # تنظیمات آپلود
     UPLOAD_FOLDER = 'static/uploads'

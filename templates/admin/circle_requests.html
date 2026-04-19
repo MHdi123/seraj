@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+
+{% block title %}مدیریت درخواست‌های حلقه{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto py-6 px-4">
+    <h2 class="text-xl font-bold mb-4">درخواست‌های حلقه تلاوت</h2>
+
+    {% if circles %}
+        {% for circle in circles %}
+        <div class="bg-white rounded-lg shadow p-4 mb-3" data-id="{{ circle.id }}">
+            <div class="flex justify-between items-start">
+                <div>
+                    <h3 class="font-semibold">{{ circle.name }}</h3>
+                    <p class="text-gray-600 text-sm">{{ circle.description[:80] }}</p>
+                    <div class="text-xs text-gray-500 mt-1">
+                        استاد: {{ circle.creator.full_name }} | 
+                        ظرفیت: {{ circle.capacity or '∞' }} | 
+                        تاریخ: {{ circle.created_at|persian_date }}
+                    </div>
+                </div>
+                <div class="flex gap-2">
+                    <button class="approve-btn bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-sm">تأیید</button>
+                    <button class="reject-btn bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm">رد</button>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+        <div class="bg-gray-50 text-center py-8 rounded">هیچ درخواستی وجود ندارد.</div>
+    {% endif %}
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.approve-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const card = this.closest('[data-id]');
+            const circleId = card.getAttribute('data-id');
+            approveCircle(circleId);
+        });
+    });
+    document.querySelectorAll('.reject-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const card = this.closest('[data-id]');
+            const circleId = card.getAttribute('data-id');
+            rejectCircle(circleId);
+        });
+    });
+});
+
+function approveCircle(circleId) {
+    fetch(`/admin/circle-request/${circleId}/approve`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+    })
+    .then(res => {
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return res.json();
+    })
+    .then(data => {
+        if (data.success) {
+            alert('تأیید شد');
+            location.reload();
+        } else {
+            alert('خطا: ' + (data.message || 'مشخص نشده'));
+        }
+    })
+    .catch(err => {
+        console.error('Fetch error:', err);
+        alert('خطا در ارتباط با سرور. لطفاً کنسول را بررسی کنید.');
+    });
+}
+
+function rejectCircle(circleId) {
+    let reason = prompt('دلیل رد:');
+    if (reason === null) return;
+    fetch(`/admin/circle-request/${circleId}/reject`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ reason: reason })
+    })
+    .then(res => {
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return res.json();
+    })
+    .then(data => {
+        if (data.success) {
+            alert('رد شد');
+            location.reload();
+        } else {
+            alert('خطا: ' + (data.message || 'مشخص نشده'));
+        }
+    })
+    .catch(err => {
+        console.error('Fetch error:', err);
+        alert('خطا در ارتباط با سرور.');
+    });
+}
+</script>
+{% endblock %}

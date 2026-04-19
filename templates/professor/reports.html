@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block title %}گزارشات استاد{% endblock %}
+
+{% block content %}
+<div style="max-width: 1200px; margin: 0 auto; padding: 1rem;">
+    <div style="background: white; border-radius: 12px; border: 1px solid #e9ecef; padding: 1.5rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+            <h2 style="margin: 0; font-size: 1.25rem;">
+                <i class="fas fa-chart-pie" style="color: #4a6cf7;"></i> گزارشات عملکرد
+            </h2>
+            <a href="{{ url_for('professor_dashboard') }}" style="background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 8px; padding: 0.35rem 0.75rem; font-size: 0.75rem; color: #495057; text-decoration: none;">
+                <i class="fas fa-arrow-right"></i> بازگشت
+            </a>
+        </div>
+        
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
+            <div style="background: #f8f9fa; border-radius: 10px; padding: 1rem; text-align: center;">
+                <div style="font-size: 1.75rem; font-weight: 600; color: #4a6cf7;">{{ stats.total_classes|default('۰') }}</div>
+                <div style="font-size: 0.75rem; color: #6c757d;">کلاس‌های فعال</div>
+            </div>
+            <div style="background: #f8f9fa; border-radius: 10px; padding: 1rem; text-align: center;">
+                <div style="font-size: 1.75rem; font-weight: 600; color: #20b759;">{{ stats.total_students|default('۰') }}</div>
+                <div style="font-size: 0.75rem; color: #6c757d;">کل دانشجویان</div>
+            </div>
+            <div style="background: #f8f9fa; border-radius: 10px; padding: 1rem; text-align: center;">
+                <div style="font-size: 1.75rem; font-weight: 600; color: #9b59b6;">{{ stats.total_sessions|default('۰') }}</div>
+                <div style="font-size: 0.75rem; color: #6c757d;">جلسات برگزار شده</div>
+            </div>
+            <div style="background: #f8f9fa; border-radius: 10px; padding: 1rem; text-align: center;">
+                <div style="font-size: 1.75rem; font-weight: 600; color: #f5a623;">{{ stats.avg_attendance|default('۰') }}%</div>
+                <div style="font-size: 0.75rem; color: #6c757d;">میانگین حضور</div>
+            </div>
+        </div>
+        
+        <div style="text-align: center; padding: 2rem; background: #f8f9fa; border-radius: 10px;">
+            <i class="fas fa-chart-line" style="font-size: 3rem; color: #dee2e6; margin-bottom: 1rem;"></i>
+            <p style="color: #6c757d;">گزارشات تفصیلی به زودی اضافه خواهد شد.</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

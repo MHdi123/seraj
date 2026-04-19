@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block title %}آماده‌سازی جلسه{% endblock %}
+
+{% block content %}
+<div style="max-width: 800px; margin: 0 auto; padding: 1rem;">
+    <div style="background: white; border-radius: 12px; border: 1px solid #e9ecef; padding: 1.5rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+            <h2 style="margin: 0; font-size: 1.25rem;">
+                <i class="fas fa-chalkboard" style="color: #4a6cf7;"></i> آماده‌سازی جلسه
+            </h2>
+            <a href="{{ url_for('professor_dashboard') }}" style="background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 8px; padding: 0.35rem 0.75rem; font-size: 0.75rem; color: #495057; text-decoration: none;">
+                <i class="fas fa-arrow-right"></i> بازگشت
+            </a>
+        </div>
+        
+        <div style="background: #f8f9fa; border-radius: 10px; padding: 1rem; margin-bottom: 1.5rem;">
+            <h3 style="margin: 0 0 0.5rem 0; font-size: 1rem;">{{ class_obj.name }}</h3>
+            <p style="margin: 0; color: #6c757d; font-size: 0.85rem;">
+                <i class="fas fa-calendar"></i> {{ session.session_date|persian_date }} - 
+                <i class="fas fa-clock"></i> {{ session.start_time.strftime('%H:%M') }}
+            </p>
+        </div>
+        
+        <div style="margin-bottom: 1.5rem;">
+            <h4 style="margin: 0 0 0.5rem 0; font-size: 0.9rem;">جزئیات جلسه</h4>
+            <p style="color: #495057; font-size: 0.85rem;">{{ session.description or 'توضیحاتی ثبت نشده است.' }}</p>
+        </div>
+        
+        <div style="margin-bottom: 1.5rem;">
+            <h4 style="margin: 0 0 0.5rem 0; font-size: 0.9rem;">فایل‌های جلسه</h4>
+            {% if files %}
+                <ul style="list-style: none; padding: 0;">
+                    {% for file in files %}
+                    <li style="padding: 0.5rem 0; border-bottom: 1px solid #e9ecef;">
+                        <i class="fas fa-file-pdf" style="color: #e74c3c;"></i> {{ file.title }}
+                        <span style="float: left; font-size: 0.7rem; color: #6c757d;">{{ file.uploaded_at.strftime('%Y/%m/%d') }}</span>
+                    </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p style="color: #6c757d; font-size: 0.85rem;">هیچ فایلی آپلود نشده است.</p>
+            {% endif %}
+        </div>
+        
+        <div style="border-top: 1px solid #e9ecef; padding-top: 1rem;">
+            <a href="{{ url_for('professor_attendance', class_id=class_obj.id, session_id=session.id) }}" 
+               style="background: #4a6cf7; color: white; border: none; border-radius: 8px; padding: 0.5rem 1rem; font-size: 0.85rem; text-decoration: none; display: inline-block;">
+                <i class="fas fa-check-circle"></i> ثبت حضور و غیاب
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

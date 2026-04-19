@@ -1,0 +1,21 @@
+<h2>افزودن بنر جدید</h2>
+
+<form method="POST" enctype="multipart/form-data">
+
+    <label>عنوان</label>
+    <input name="title" class="form-control" required>
+
+    <label>توضیحات</label>
+    <textarea name="description" class="form-control"></textarea>
+
+    <label>لینک بنر</label>
+    <input name="link_url" class="form-control">
+
+    <label>ترتیب نمایش</label>
+    <input type="number" name="order" class="form-control" value="0">
+
+    <label>تصویر بنر</label>
+    <input type="file" name="image" accept="image/*" class="form-control" required>
+
+    <button class="btn btn-success mt-3">ثبت</button>
+</form>

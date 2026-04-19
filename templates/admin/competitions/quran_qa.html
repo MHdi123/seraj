@@ -1,0 +1,245 @@
+{% extends "base.html" %}
+{% block title %}مدیریت پرسش و پاسخ قرآنی{% endblock %}
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 py-8">
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-2xl font-bold">مدیریت پرسش و پاسخ قرآنی</h1>
+        <button type="button" onclick="showAddModal()" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition">+ افزودن جدید</button>
+    </div>
+    
+    <div class="bg-white rounded-xl shadow overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+                <tr>
+                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">سوال</th>
+                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">دسته</th>
+                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">اولویت</th>
+                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">وضعیت</th>
+                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">عملیات</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for qa in qa_list %}
+                <tr class="border-t border-gray-100 hover:bg-gray-50 transition">
+                    <td class="px-6 py-4">
+                        <div class="text-sm font-medium text-gray-900">{{ qa.question[:50] }}{% if qa.question|length > 50 %}...{% endif %}</div>
+                    </td>
+                    <td class="px-6 py-4 text-sm text-gray-500">{{ qa.category or '---' }}</td>
+                    <td class="px-6 py-4 text-sm text-gray-500">{{ qa.priority }}</td>
+                    <td class="px-6 py-4">
+                        {% if qa.is_active %}
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">فعال</span>
+                        {% else %}
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">غیرفعال</span>
+                        {% endif %}
+                     </td>
+                    <td class="px-6 py-4 text-sm font-medium space-x-3">
+                        <button type="button" class="edit-qa text-blue-600 hover:text-blue-900" data-id="{{ qa.id }}">ویرایش</button>
+                        <button type="button" class="delete-qa text-red-600 hover:text-red-900" data-id="{{ qa.id }}">حذف</button>
+                     </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- مودال افزودن/ویرایش -->
+<div id="qaModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50" style="display: none;">
+    <div class="bg-white rounded-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+        <div class="p-6">
+            <div class="flex justify-between items-center mb-4">
+                <h2 id="modalTitle" class="text-xl font-bold">افزودن پرسش و پاسخ جدید</h2>
+                <button type="button" onclick="closeModal()" class="text-gray-400 hover:text-gray-600">&times;</button>
+            </div>
+            <form id="qaForm">
+                <input type="hidden" id="qa_id" name="qa_id">
+                
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">سوال <span class="text-red-500">*</span></label>
+                    <input type="text" id="question" name="question" required class="w-full border border-gray-300 rounded-lg p-2 focus:ring-blue-500 focus:border-blue-500">
+                </div>
+                
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">کلمات کلیدی <span class="text-gray-400 text-xs">(با کاما جدا کنید)</span></label>
+                    <input type="text" id="keywords" name="keywords" class="w-full border border-gray-300 rounded-lg p-2 focus:ring-blue-500 focus:border-blue-500">
+                    <p class="text-xs text-gray-400 mt-1">مثال: توحید,خدا,یکتا</p>
+                </div>
+                
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">پاسخ <span class="text-red-500">*</span></label>
+                    <textarea id="answer" name="answer" rows="6" required class="w-full border border-gray-300 rounded-lg p-2 focus:ring-blue-500 focus:border-blue-500"></textarea>
+                </div>
+                
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">آیات مرتبط <span class="text-gray-400 text-xs">(JSON)</span></label>
+                    <textarea id="related_verses" name="related_verses" rows="3" class="w-full border border-gray-300 rounded-lg p-2 font-mono text-sm"></textarea>
+                    <p class="text-xs text-gray-400 mt-1">مثال: [{"text":"آیه","translation":"ترجمه","surah":"سوره","ayah":1}]</p>
+                </div>
+                
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">دسته‌بندی</label>
+                        <input type="text" id="category" name="category" class="w-full border border-gray-300 rounded-lg p-2 focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">اولویت</label>
+                        <input type="number" id="priority" name="priority" value="0" class="w-full border border-gray-300 rounded-lg p-2 focus:ring-blue-500 focus:border-blue-500">
+                        <p class="text-xs text-gray-400 mt-1">عدد بزرگتر = اولویت بالاتر</p>
+                    </div>
+                </div>
+                
+                <div class="flex justify-end gap-3 pt-4 border-t border-gray-200">
+                    <button type="button" onclick="closeModal()" class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded-lg transition">انصراف</button>
+                    <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition">ذخیره</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    // نمایش مودال افزودن
+    function showAddModal() {
+        document.getElementById('modalTitle').innerText = 'افزودن پرسش و پاسخ جدید';
+        document.getElementById('qaForm').reset();
+        document.getElementById('qa_id').value = '';
+        var modal = document.getElementById('qaModal');
+        modal.style.display = 'flex';
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+    }
+    
+    // بستن مودال
+    function closeModal() {
+        var modal = document.getElementById('qaModal');
+        modal.style.display = 'none';
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+    }
+    
+    // ویرایش آیتم
+    function editQA(id) {
+        fetch('/admin/quran-qa/' + id + '/get')
+            .then(function(response) {
+                return response.json();
+            })
+            .then(function(data) {
+                if (data.success) {
+                    document.getElementById('modalTitle').innerText = 'ویرایش پرسش و پاسخ';
+                    document.getElementById('qa_id').value = data.qa.id;
+                    document.getElementById('question').value = data.qa.question;
+                    document.getElementById('keywords').value = data.qa.keywords || '';
+                    document.getElementById('answer').value = data.qa.answer;
+                    document.getElementById('related_verses').value = data.qa.related_verses || '';
+                    document.getElementById('category').value = data.qa.category || '';
+                    document.getElementById('priority').value = data.qa.priority || 0;
+                    
+                    var modal = document.getElementById('qaModal');
+                    modal.style.display = 'flex';
+                    modal.classList.remove('hidden');
+                    modal.classList.add('flex');
+                } else {
+                    alert('خطا در دریافت اطلاعات');
+                }
+            })
+            .catch(function(error) {
+                console.error(error);
+                alert('خطا در ارتباط با سرور');
+            });
+    }
+    
+    // حذف آیتم
+    function deleteQA(id) {
+        if (confirm('آیا از حذف این آیتم مطمئن هستید؟')) {
+            fetch('/admin/quran-qa/' + id + '/delete', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(function(response) {
+                return response.json();
+            })
+            .then(function(data) {
+                if (data.success) {
+                    location.reload();
+                } else {
+                    alert(data.message || 'خطا در حذف');
+                }
+            })
+            .catch(function(error) {
+                console.error(error);
+                alert('خطا در ارتباط با سرور');
+            });
+        }
+    }
+    
+    // ارسال فرم
+    document.getElementById('qaForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        var id = document.getElementById('qa_id').value;
+        var url = id ? '/admin/quran-qa/' + id + '/edit' : '/admin/quran-qa/add';
+        
+        var formData = {
+            question: document.getElementById('question').value,
+            keywords: document.getElementById('keywords').value,
+            answer: document.getElementById('answer').value,
+            related_verses: document.getElementById('related_verses').value,
+            category: document.getElementById('category').value,
+            priority: parseInt(document.getElementById('priority').value) || 0
+        };
+        
+        fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(formData)
+        })
+        .then(function(response) {
+            return response.json();
+        })
+        .then(function(data) {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert(data.message || 'خطا در ذخیره');
+            }
+        })
+        .catch(function(error) {
+            console.error(error);
+            alert('خطا در ارتباط با سرور');
+        });
+    });
+    
+    // رویدادهای دکمه‌های ویرایش و حذف
+    var editButtons = document.querySelectorAll('.edit-qa');
+    for (var i = 0; i < editButtons.length; i++) {
+        editButtons[i].addEventListener('click', function() {
+            var id = this.getAttribute('data-id');
+            editQA(id);
+        });
+    }
+    
+    var deleteButtons = document.querySelectorAll('.delete-qa');
+    for (var i = 0; i < deleteButtons.length; i++) {
+        deleteButtons[i].addEventListener('click', function() {
+            var id = this.getAttribute('data-id');
+            deleteQA(id);
+        });
+    }
+    
+    // بستن مودال با کلیک روی background
+    var modal = document.getElementById('qaModal');
+    if (modal) {
+        modal.addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeModal();
+            }
+        });
+    }
+</script>
+{% endblock %}

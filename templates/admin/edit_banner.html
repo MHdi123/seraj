@@ -1,0 +1,29 @@
+<h2>ویرایش بنر</h2>
+
+<form method="POST" enctype="multipart/form-data">
+
+    <label>عنوان</label>
+    <input name="title" class="form-control" value="{{ banner.title }}" required>
+
+    <label>توضیحات</label>
+    <textarea name="description" class="form-control">{{ banner.description }}</textarea>
+
+    <label>لینک بنر</label>
+    <input name="link_url" class="form-control" value="{{ banner.link_url }}">
+
+    <label>ترتیب نمایش</label>
+    <input type="number" name="order" class="form-control" value="{{ banner.order }}">
+
+    <label>فعال باشد؟</label>
+    <input type="checkbox" name="is_active" {% if banner.is_active %}checked{% endif %}>
+
+    <br><br>
+
+    <label>عکس فعلی:</label><br>
+    <img src="{{ banner.image_url }}" width="200"><br><br>
+
+    <label>عکس جدید (اختیاری):</label>
+    <input type="file" name="image" accept="image/*" class="form-control">
+
+    <button class="btn btn-primary mt-3">ذخیره</button>
+</form>

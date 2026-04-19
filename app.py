@@ -17,6 +17,7 @@ def create_app():
     # =================== ساخت پوشه‌های مورد نیاز ===================
     os.makedirs(app.config.get('UPLOAD_FOLDER', 'uploads'), exist_ok=True)
     os.makedirs('static/fonts', exist_ok=True)
+    os.makedirs('static/uploads/banners', exist_ok=True)
     os.makedirs('templates/auth', exist_ok=True)
     os.makedirs('templates/participant', exist_ok=True)
     os.makedirs('templates/admin', exist_ok=True)

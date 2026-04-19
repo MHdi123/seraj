@@ -240,6 +240,10 @@
                             <div class="relative">
                                 <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
                                     <i class="fas fa-building text-gray-400"></i>
+                                </div>
+                                <input type="text" id="faculty" name="faculty" class="form-input pr-10" 
+                                       placeholder="مثال: دانشکده مهندسی کامپیوتر" required>
+                            </div>
                         </div>
                         
                         <!-- استان -->
@@ -345,11 +349,11 @@
                                 رمز عبور <span class="text-red-500">*</span>
                             </label>
                             <div class="relative">
-                                <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                                    <i class="fas fa-lock text-gray-400"></i>
-                                </div>
-                                <input type="password" id="password" name="password" class="form-input pr-10" 
+                                <input type="password" id="password" name="password" class="form-input pl-10" 
                                        placeholder="حداقل ۶ کاراکتر" minlength="6" required>
+                                <button type="button" class="toggle-password absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400 hover:text-gray-600 focus:outline-none" data-target="password">
+                                    <i class="fas fa-eye-slash"></i>
+                                </button>
                             </div>
                             <p class="text-xs text-gray-500 mt-1">حداقل ۶ کاراکتر، شامل حروف و اعداد</p>
                         </div>
@@ -360,11 +364,11 @@
                                 تأیید رمز عبور <span class="text-red-500">*</span>
                             </label>
                             <div class="relative">
-                                <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                                    <i class="fas fa-lock text-gray-400"></i>
-                                </div>
-                                <input type="password" id="confirm_password" name="confirm_password" class="form-input pr-10" 
+                                <input type="password" id="confirm_password" name="confirm_password" class="form-input pl-10" 
                                        placeholder="تکرار رمز عبور" minlength="6" required>
+                                <button type="button" class="toggle-password absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400 hover:text-gray-600 focus:outline-none" data-target="confirm_password">
+                                    <i class="fas fa-eye-slash"></i>
+                                </button>
                             </div>
                             <p id="password-error" class="text-xs text-red-500 mt-1 hidden">رمز عبور و تکرار آن مطابقت ندارند</p>
                         </div>
@@ -411,6 +415,25 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    // ================ نمایش/مخفی کردن رمز عبور ================
+    const toggleButtons = document.querySelectorAll('.toggle-password');
+    toggleButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const targetId = this.getAttribute('data-target');
+            const input = document.getElementById(targetId);
+            const icon = this.querySelector('i');
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            } else {
+                input.type = 'password';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            }
+        });
+    });
+    
     // ================ اعتبارسنجی رمز عبور ================
     const password = document.getElementById('password');
     const confirmPassword = document.getElementById('confirm_password');
@@ -435,8 +458,6 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // ================ اعتبارسنجی فرم ================
     const form = document.getElementById('registerForm');
-    const submitBtn = document.getElementById('submitBtn');
-    
     form.addEventListener('submit', function(e) {
         if (!validatePassword()) {
             e.preventDefault();
@@ -482,7 +503,7 @@ document.addEventListener('DOMContentLoaded', function() {
     display: block;
     width: 100%;
     padding: 0.625rem 1rem;
-    padding-right: 2.5rem;
+    padding-left: 2.5rem; /* تغییر از right به left برای جا دادن آیکون چشم در سمت چپ */
     font-size: 0.875rem;
     line-height: 1.25rem;
     color: #111827;

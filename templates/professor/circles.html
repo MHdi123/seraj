@@ -66,6 +66,16 @@
     </div>
 </div>
 
+<!-- دکمه‌های اقدام سریع -->
+<div class="flex gap-2 mb-4">
+    <a href="{{ url_for('professor_circle_request') }}" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg text-sm transition flex items-center gap-2">
+        <i class="fas fa-plus"></i> درخواست حلقه جدید
+    </a>
+    <a href="{{ url_for('professor_circle_requests') }}" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg text-sm transition flex items-center gap-2">
+        <i class="fas fa-list"></i> درخواست‌های من
+    </a>
+</div>
+
 <!-- لیست حلقه‌ها -->
 {% if circles.items %}
 <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
@@ -120,7 +130,7 @@
                     <i class="fas fa-info-circle ml-1"></i>
                     جزئیات
                 </a>
-                <a href="{{ url_for('professor_circle_attendance', circle_id=circle.id) }}" 
+                <a href="{{ url_for('professor_circle_attendance', circle_id=circle.id, session_id=circle.sessions.first().id if circle.sessions.first() else 0) }}" 
                    class="flex-1 text-center bg-green-100 hover:bg-green-200 text-green-700 text-sm py-2 rounded-lg transition">
                     <i class="fas fa-check-circle ml-1"></i>
                     حضور و غیاب
@@ -172,7 +182,14 @@
     </div>
     <h3 class="text-lg font-bold text-gray-700 mb-2">حلقه‌ای یافت نشد</h3>
     <p class="text-sm text-gray-600 mb-4">شما هنوز حلقه تلاوتی ایجاد نکرده‌اید</p>
-    <p class="text-xs text-gray-500">برای ایجاد حلقه جدید با مدیر سیستم تماس بگیرید</p>
+    <div class="flex justify-center gap-3">
+        <a href="{{ url_for('professor_circle_request') }}" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg text-sm transition flex items-center gap-2">
+            <i class="fas fa-plus"></i> درخواست حلقه جدید
+        </a>
+        <a href="{{ url_for('professor_circle_requests') }}" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg text-sm transition flex items-center gap-2">
+            <i class="fas fa-list"></i> درخواست‌های من
+        </a>
+    </div>
 </div>
 {% endif %}
 {% endblock %}
