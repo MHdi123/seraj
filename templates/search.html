@@ -3,9 +3,9 @@
 {% block title %}جستجو - سِراج{% endblock %}
 
 {% block content %}
-<div class="max-w-7xl mx-auto">
+<div class="max-w-7xl mx-auto px-4 sm:px-6">
     
-    <!-- تعریف دیکشنری برای نمایش نوع رویداد به فارسی -->
+    <!-- تعریف دیکشنری برای نمایش نوع به فارسی -->
     {% set event_types = {
         'workshop': 'کارگاه',
         'competition': 'مسابقه',
@@ -20,12 +20,12 @@
             {% if query %}
                 نتایج جستجو برای: "<span class="font-bold text-blue-600">{{ query }}</span>"
             {% else %}
-                رویدادهای مورد نظر خود را جستجو کنید
+                رویدادها، مسابقات و حلقه‌های مورد نظر خود را جستجو کنید
             {% endif %}
         </p>
     </div>
     
-    <!-- فرم جستجو (ریسپانسیو) -->
+    <!-- فرم جستجو -->
     <div class="card p-4 sm:p-6 mb-6 sm:mb-8">
         <form method="GET" action="{{ url_for('search') }}" class="space-y-3">
             <div class="flex flex-col sm:flex-row gap-2">
@@ -41,7 +41,7 @@
                 </button>
             </div>
             
-            <!-- فیلترهای پیشرفته (قابل گسترش) -->
+            <!-- فیلترها -->
             <div class="flex flex-wrap gap-2 mt-3">
                 <select name="type" class="px-3 py-2 border border-gray-200 rounded-lg text-xs sm:text-sm">
                     <option value="">همه انواع</option>
@@ -60,160 +60,155 @@
         </form>
     </div>
     
-    {% if query %}
-        <!-- نتایج جستجو -->
-        <div class="space-y-6">
-            {% if results.events and results.events.items %}
-                
-                <!-- تعداد نتایج -->
-                <div class="bg-blue-50 p-3 rounded-lg text-sm">
-                    <i class="fas fa-info-circle text-blue-600 ml-2"></i>
-                    {{ results.total|persian_number }} نتیجه برای "{{ query }}" یافت شد.
-                </div>
-                
-                <!-- گرید نتایج -->
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
-                    {% for event in results.events.items %}
-                        <div class="card hover:shadow-xl transition-all hover:-translate-y-1">
-                            <div class="p-4">
-                                <div class="flex justify-between items-start mb-3">
-                                    <span class="badge badge-{{ event.event_type.value }} text-xs">
-                                        {{ event_types.get(event.event_type.value, event.event_type.value) }}
-                                    </span>
-                                    {% if event.is_full() %}
-                                        <span class="bg-red-100 text-red-800 text-2xs px-2 py-1 rounded-full">تکمیل</span>
-                                    {% endif %}
-                                </div>
-                                
-                                <h3 class="font-bold text-sm sm:text-base mb-2 line-clamp-2">{{ event.title }}</h3>
-                                
-                                <p class="text-xs sm:text-sm text-gray-600 mb-3 line-clamp-2">
-                                    {{ event.description|truncate(80) }}
-                                </p>
-                                
-                                <div class="space-y-1 text-xs text-gray-600 mb-3">
-                                    <div class="flex items-center">
-                                        <i class="fas fa-calendar ml-2 text-blue-500 w-4"></i>
-                                        <span>{{ event.start_date|persian_date }}</span>
-                                    </div>
-                                    {% if event.location %}
-                                    <div class="flex items-center">
-                                        <i class="fas fa-map-marker-alt ml-2 text-blue-500 w-4"></i>
-                                        <span class="truncate">{{ event.location }}</span>
-                                    </div>
-                                    {% endif %}
-                                </div>
-                                
-                                <div class="flex justify-between items-center pt-2 border-t border-gray-100">
-                                    <span class="text-xs text-gray-500">
-                                        <i class="fas fa-users ml-1"></i>
-                                        {{ event.current_participants }}/{{ event.capacity|default('∞') }}
-                                    </span>
-                                    <a href="{{ url_for('event_detail', event_id=event.id) }}" 
-                                       class="text-blue-600 hover:text-blue-800 text-xs font-medium">
-                                        جزئیات
-                                        <i class="fas fa-chevron-left mr-1"></i>
-                                    </a>
-                                </div>
+    {% if query and results and results.results_list %}
+        <!-- تعداد نتایج -->
+        <div class="bg-blue-50 p-3 rounded-lg text-sm mb-4">
+            <i class="fas fa-info-circle text-blue-600 ml-2"></i>
+            {{ results.total|persian_number }} نتیجه برای "{{ query }}" یافت شد.
+        </div>
+        
+        <!-- گرید نتایج ترکیبی -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+            {% for item in results.results_list %}
+                {% if item.type == 'event' %}
+                    {% set event = item.data %}
+                    <div class="card hover:shadow-xl transition-all hover:-translate-y-1">
+                        <div class="p-4">
+                            <div class="flex justify-between items-start mb-3">
+                                <span class="badge badge-{{ event.event_type.value }} text-xs">
+                                    {{ event_types.get(event.event_type.value, event.event_type.value) }}
+                                </span>
+                                {% if event.is_full() %}
+                                    <span class="bg-red-100 text-red-800 text-2xs px-2 py-1 rounded-full">تکمیل</span>
+                                {% endif %}
+                            </div>
+                            <h3 class="font-bold text-sm sm:text-base mb-2 line-clamp-2">{{ event.title }}</h3>
+                            <p class="text-xs sm:text-sm text-gray-600 mb-3 line-clamp-2">{{ event.description|truncate(80) }}</p>
+                            <div class="space-y-1 text-xs text-gray-600 mb-3">
+                                <div class="flex items-center"><i class="fas fa-calendar ml-2 text-blue-500 w-4"></i><span>{{ event.start_date|persian_date }}</span></div>
+                                {% if event.location %}<div class="flex items-center"><i class="fas fa-map-marker-alt ml-2 text-blue-500 w-4"></i><span class="truncate">{{ event.location }}</span></div>{% endif %}
+                            </div>
+                            <div class="flex justify-between items-center pt-2 border-t border-gray-100">
+                                <span class="text-xs text-gray-500"><i class="fas fa-users ml-1"></i>{{ event.current_participants }}/{{ event.capacity|default('∞') }}</span>
+                                <a href="{{ url_for('event_detail', event_id=event.id) }}" class="text-blue-600 hover:text-blue-800 text-xs font-medium">جزئیات <i class="fas fa-chevron-left mr-1"></i></a>
                             </div>
                         </div>
-                    {% endfor %}
-                </div>
-                
-                <!-- صفحه‌بندی (ریسپانسیو) -->
-                {% if results.events.pages > 1 %}
-                    <div class="flex justify-center mt-6">
-                        <div class="flex gap-1 sm:gap-2 flex-wrap">
-                            {% if results.events.has_prev %}
-                                <a href="{{ url_for('search', q=query, page=results.events.prev_num, type=request.args.get('type'), sort=request.args.get('sort')) }}" 
-                                   class="px-3 sm:px-4 py-2 border border-gray-300 rounded-lg text-xs sm:text-sm text-gray-700 hover:bg-gray-50">
-                                    قبلی
-                                </a>
-                            {% endif %}
-                            
-                            {% for page_num in results.events.iter_pages(left_edge=1, right_edge=1, left_current=1, right_current=2) %}
-                                {% if page_num %}
-                                    {% if page_num == results.events.page %}
-                                        <span class="px-3 sm:px-4 py-2 bg-blue-600 text-white rounded-lg text-xs sm:text-sm">
-                                            {{ page_num|persian_number }}
-                                        </span>
-                                    {% else %}
-                                        <a href="{{ url_for('search', q=query, page=page_num, type=request.args.get('type'), sort=request.args.get('sort')) }}" 
-                                           class="px-3 sm:px-4 py-2 border border-gray-300 rounded-lg text-xs sm:text-sm text-gray-700 hover:bg-gray-50">
-                                            {{ page_num|persian_number }}
-                                        </a>
-                                    {% endif %}
-                                {% else %}
-                                    <span class="px-3 sm:px-4 py-2 text-gray-400">...</span>
-                                {% endif %}
-                            {% endfor %}
-                            
-                            {% if results.events.has_next %}
-                                <a href="{{ url_for('search', q=query, page=results.events.next_num, type=request.args.get('type'), sort=request.args.get('sort')) }}" 
-                                   class="px-3 sm:px-4 py-2 border border-gray-300 rounded-lg text-xs sm:text-sm text-gray-700 hover:bg-gray-50">
-                                    بعدی
-                                </a>
-                            {% endif %}
+                    </div>
+                    
+                {% elif item.type == 'competition' %}
+                    {% set comp = item.data %}
+                    <div class="card hover:shadow-xl transition-all hover:-translate-y-1">
+                        <div class="p-4">
+                            <div class="flex justify-between items-start mb-3">
+                                <span class="badge badge-competition text-xs bg-purple-100 text-purple-700">مسابقه</span>
+                                {% if comp.is_full() %}<span class="bg-red-100 text-red-800 text-2xs px-2 py-1 rounded-full">تکمیل</span>{% endif %}
+                            </div>
+                            <h3 class="font-bold text-sm sm:text-base mb-2 line-clamp-2">{{ comp.title }}</h3>
+                            <p class="text-xs sm:text-sm text-gray-600 mb-3 line-clamp-2">{{ comp.description|truncate(80) }}</p>
+                            <div class="space-y-1 text-xs text-gray-600 mb-3">
+                                <div class="flex items-center"><i class="fas fa-calendar ml-2 text-purple-500 w-4"></i><span>{{ comp.start_date|persian_date }}</span></div>
+                                <div class="flex items-center"><i class="fas fa-users ml-2 text-purple-500 w-4"></i><span>{{ comp.current_participants }}/{{ comp.max_participants|default('∞') }}</span></div>
+                            </div>
+                            <div class="flex justify-between items-center pt-2 border-t border-gray-100">
+                                <span class="text-xs text-gray-500"><i class="fas fa-clock ml-1"></i> مهلت: {{ comp.registration_deadline|persian_date }}</span>
+                                <a href="{{ url_for('competition_detail', comp_id=comp.id) }}" class="text-purple-600 hover:text-purple-800 text-xs font-medium">جزئیات <i class="fas fa-chevron-left mr-1"></i></a>
+                            </div>
+                        </div>
+                    </div>
+                    
+                {% elif item.type == 'circle' %}
+                    {% set circle = item.data %}
+                    <div class="card hover:shadow-xl transition-all hover:-translate-y-1">
+                        <div class="p-4">
+                            <div class="flex justify-between items-start mb-3">
+                                <span class="badge badge-halaqah text-xs bg-emerald-100 text-emerald-700">حلقه تلاوت</span>
+                                {% if circle.is_full() %}<span class="bg-red-100 text-red-800 text-2xs px-2 py-1 rounded-full">تکمیل</span>{% endif %}
+                            </div>
+                            <h3 class="font-bold text-sm sm:text-base mb-2 line-clamp-2">{{ circle.name }}</h3>
+                            <p class="text-xs text-gray-500 mb-1">استاد: {{ circle.teacher_name }}</p>
+                            <p class="text-xs sm:text-sm text-gray-600 mb-3 line-clamp-2">{{ circle.description|truncate(80) if circle.description else 'حلقه تلاوت قرآن کریم' }}</p>
+                            <div class="space-y-1 text-xs text-gray-600 mb-3">
+                                {% if circle.days_of_week %}<div class="flex items-center"><i class="fas fa-calendar-week ml-2 text-emerald-500 w-4"></i><span>{{ circle.days_of_week }}</span></div>{% endif %}
+                                <div class="flex items-center"><i class="fas fa-users ml-2 text-emerald-500 w-4"></i><span>{{ circle.current_members }}/{{ circle.capacity|default('∞') }} عضو</span></div>
+                            </div>
+                            <div class="flex justify-between items-center pt-2 border-t border-gray-100">
+                                <span class="text-xs text-gray-500">{% if circle.is_online %}<i class="fas fa-wifi ml-1"></i> آنلاین{% else %}<i class="fas fa-map-marker-alt ml-1"></i> {{ circle.location or 'حضوری' }}{% endif %}</span>
+                                <a href="{{ url_for('circle_detail', circle_id=circle.id) }}" class="text-emerald-600 hover:text-emerald-800 text-xs font-medium">جزئیات <i class="fas fa-chevron-left mr-1"></i></a>
+                            </div>
                         </div>
                     </div>
                 {% endif %}
-                
-            {% else %}
-                <!-- نتیجه‌ای یافت نشد -->
-                <div class="card p-8 sm:p-12 text-center">
-                    <div class="w-16 h-16 sm:w-20 sm:h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <i class="fas fa-search text-gray-400 text-2xl sm:text-3xl"></i>
-                    </div>
-                    <h3 class="text-base sm:text-lg font-bold text-gray-700 mb-2">نتیجه‌ای یافت نشد</h3>
-                    <p class="text-sm sm:text-base text-gray-600 mb-4">
-                        هیچ رویدادی با عبارت "{{ query }}" یافت نشد.
-                    </p>
-                    
-                    <div class="bg-gray-50 p-4 rounded-lg max-w-md mx-auto">
-                        <p class="text-xs font-medium text-gray-700 mb-2">پیشنهادات:</p>
-                        <ul class="text-xs text-gray-600 space-y-1 list-disc list-inside">
-                            <li>از کلمات کلیدی عمومی‌تر استفاده کنید</li>
-                            <li>املای کلمات را بررسی کنید</li>
-                            <li>فیلترهای جستجو را کاهش دهید</li>
-                            <li>کلمات کلیدی مرتبط: قرآن، مسابقه، کارگاه، حلقه</li>
-                        </ul>
-                    </div>
-                    
-                    <div class="mt-6">
-                        <a href="{{ url_for('events_list') }}" class="btn btn-primary text-sm">
-                            <i class="fas fa-calendar-alt ml-2"></i>
-                            مشاهده همه رویدادها
-                        </a>
-                    </div>
-                </div>
-            {% endif %}
+            {% endfor %}
         </div>
+        
+        <!-- صفحه‌بندی -->
+        {% if results.pages > 1 %}
+            <div class="flex justify-center mt-6">
+                <div class="flex gap-1 sm:gap-2 flex-wrap">
+                    {% if results.has_prev %}
+                        <a href="{{ url_for('search', q=query, page=results.prev_num, type=request.args.get('type'), sort=request.args.get('sort')) }}" 
+                           class="px-3 sm:px-4 py-2 border border-gray-300 rounded-lg text-xs sm:text-sm text-gray-700 hover:bg-gray-50">قبلی</a>
+                    {% endif %}
+                    
+                    {% for page_num in range(1, results.pages + 1) %}
+                        {% if page_num == results.page %}
+                            <span class="px-3 sm:px-4 py-2 bg-blue-600 text-white rounded-lg text-xs sm:text-sm">{{ page_num|persian_number }}</span>
+                        {% elif page_num <= 5 or page_num > results.pages - 3 %}
+                            <a href="{{ url_for('search', q=query, page=page_num, type=request.args.get('type'), sort=request.args.get('sort')) }}" 
+                               class="px-3 sm:px-4 py-2 border border-gray-300 rounded-lg text-xs sm:text-sm text-gray-700 hover:bg-gray-50">{{ page_num|persian_number }}</a>
+                        {% elif page_num == 6 or page_num == results.pages - 4 %}
+                            <span class="px-3 sm:px-4 py-2 text-gray-400">...</span>
+                        {% endif %}
+                    {% endfor %}
+                    
+                    {% if results.has_next %}
+                        <a href="{{ url_for('search', q=query, page=results.next_num, type=request.args.get('type'), sort=request.args.get('sort')) }}" 
+                           class="px-3 sm:px-4 py-2 border border-gray-300 rounded-lg text-xs sm:text-sm text-gray-700 hover:bg-gray-50">بعدی</a>
+                    {% endif %}
+                </div>
+            </div>
+        {% endif %}
+        
+    {% elif query and results and results.total == 0 %}
+        <!-- نتیجه‌ای یافت نشد -->
+        <div class="card p-8 sm:p-12 text-center">
+            <div class="w-16 h-16 sm:w-20 sm:h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i class="fas fa-search text-gray-400 text-2xl sm:text-3xl"></i>
+            </div>
+            <h3 class="text-base sm:text-lg font-bold text-gray-700 mb-2">نتیجه‌ای یافت نشد</h3>
+            <p class="text-sm sm:text-base text-gray-600 mb-4">هیچ موردی با عبارت "{{ query }}" یافت نشد.</p>
+            <div class="bg-gray-50 p-4 rounded-lg max-w-md mx-auto">
+                <p class="text-xs font-medium text-gray-700 mb-2">پیشنهادات:</p>
+                <ul class="text-xs text-gray-600 space-y-1 list-disc list-inside">
+                    <li>از کلمات کلیدی عمومی‌تر استفاده کنید</li>
+                    <li>املای کلمات را بررسی کنید</li>
+                    <li>فیلترهای جستجو را کاهش دهید</li>
+                    <li>کلمات کلیدی مرتبط: قرآن، مسابقه، کارگاه، حلقه، تلاوت</li>
+                </ul>
+            </div>
+        </div>
+        
     {% else %}
         <!-- صفحه اصلی جستجو (بدون کوئری) -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
-            
-            <!-- کارت جستجو -->
             <div class="card p-6 sm:p-8 text-center">
                 <div class="w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
                     <i class="fas fa-search text-white text-2xl sm:text-3xl"></i>
                 </div>
                 <h3 class="text-base sm:text-lg font-bold mb-2">جستجوی پیشرفته</h3>
-                <p class="text-sm sm:text-base text-gray-600 mb-4">
-                    با استفاده از فیلترهای پیشرفته، رویدادهای مورد نظر خود را سریع‌تر پیدا کنید.
-                </p>
+                <p class="text-sm sm:text-base text-gray-600 mb-4">جستجو در رویدادها، مسابقات و حلقه‌های تلاوت</p>
                 <div class="flex flex-wrap gap-2 justify-center">
                     <span class="text-xs bg-blue-100 text-blue-800 px-3 py-1.5 rounded-full">کارگاه</span>
-                    <span class="text-xs bg-green-100 text-green-800 px-3 py-1.5 rounded-full">مسابقه</span>
-                    <span class="text-xs bg-purple-100 text-purple-800 px-3 py-1.5 rounded-full">حلقه تلاوت</span>
+                    <span class="text-xs bg-purple-100 text-purple-800 px-3 py-1.5 rounded-full">مسابقه</span>
+                    <span class="text-xs bg-emerald-100 text-emerald-800 px-3 py-1.5 rounded-full">حلقه تلاوت</span>
                     <span class="text-xs bg-yellow-100 text-yellow-800 px-3 py-1.5 rounded-full">سخنرانی</span>
                 </div>
             </div>
             
-            <!-- کارت دسته‌بندی -->
             <div class="card p-6 sm:p-8">
                 <h3 class="text-base sm:text-lg font-bold mb-4">دسته‌بندی‌های محبوب</h3>
                 <div class="space-y-3">
-                    <a href="{{ url_for('search') }}?q=مسابقه" class="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-blue-50 transition">
+                    <a href="{{ url_for('search') }}?q=مسابقه" class="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-purple-50 transition">
                         <span class="text-sm">مسابقات قرآنی</span>
                         <i class="fas fa-chevron-left text-gray-400 text-xs"></i>
                     </a>
@@ -221,11 +216,11 @@
                         <span class="text-sm">کارگاه‌های آموزشی</span>
                         <i class="fas fa-chevron-left text-gray-400 text-xs"></i>
                     </a>
-                    <a href="{{ url_for('search') }}?q=حلقه" class="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-blue-50 transition">
+                    <a href="{{ url_for('search') }}?q=حلقه" class="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-emerald-50 transition">
                         <span class="text-sm">حلقه‌های تلاوت</span>
                         <i class="fas fa-chevron-left text-gray-400 text-xs"></i>
                     </a>
-                    <a href="{{ url_for('search') }}?q=سخنرانی" class="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-blue-50 transition">
+                    <a href="{{ url_for('search') }}?q=سخنرانی" class="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-yellow-50 transition">
                         <span class="text-sm">سخنرانی‌های دینی</span>
                         <i class="fas fa-chevron-left text-gray-400 text-xs"></i>
                     </a>
@@ -236,7 +231,7 @@
 </div>
 
 <script>
-// حذف پیام جستجو بعد از 5 ثانیه
+// حذف خودکار پیام جستجو بعد از 5 ثانیه
 setTimeout(() => {
     const infoMsg = document.querySelector('.bg-blue-50.p-3');
     if (infoMsg) {

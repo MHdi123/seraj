@@ -9,7 +9,8 @@
             <h1 class="text-2xl font-bold">مدیریت بنرها</h1>
             <p class="text-gray-600 mt-1">افزودن، ویرایش و حذف بنرهای صفحه اصلی</p>
         </div>
-        <button id="addBannerBtn" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2">
+        <button id="addBannerBtn"
+            class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2">
             <i class="fas fa-plus"></i>
             بنر جدید
         </button>
@@ -20,33 +21,41 @@
         <table class="min-w-full divide-y divide-gray-200">
             <thead class="bg-gray-50">
                 <tr>
-                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">تصویر</th>
-                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">عنوان</th>
-                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">لینک</th>
-                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">ترتیب</th>
-                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">وضعیت</th>
-                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">عملیات</th>
+                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">تصویر
+                    </th>
+                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">عنوان
+                    </th>
+                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">لینک
+                    </th>
+                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">ترتیب
+                    </th>
+                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">وضعیت
+                    </th>
+                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">عملیات
+                    </th>
                 </tr>
             </thead>
             <tbody class="bg-white divide-y divide-gray-200" id="banners-list">
                 {% for banner in banners %}
                 <tr id="banner-row-{{ banner.id }}" data-id="{{ banner.id }}" data-order="{{ banner.order }}">
                     <td class="px-6 py-4 whitespace-nowrap">
-                        <img src="{{ banner.image_url }}" class="w-20 h-12 object-cover rounded" alt="{{ banner.alt_text }}">
+                        <img src="{{ banner.image_url }}" class="w-20 h-12 object-cover rounded"
+                            alt="{{ banner.alt_text }}">
                     </td>
                     <td class="px-6 py-4">{{ banner.title }}</td>
                     <td class="px-6 py-4">
                         <span class="text-sm text-gray-500">{{ banner.link_url or 'ندارد' }}</span>
                     </td>
                     <td class="px-6 py-4">
-                        <input type="number" class="w-16 border rounded px-2 py-1 order-input" value="{{ banner.order }}" data-id="{{ banner.id }}">
+                        <input type="number" class="w-16 border rounded px-2 py-1 order-input"
+                            value="{{ banner.order }}" data-id="{{ banner.id }}">
                     </td>
                     <td class="px-6 py-4">
                         <button class="toggle-btn status-toggle" data-id="{{ banner.id }}">
                             {% if banner.is_active %}
-                                <span class="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800">فعال</span>
+                            <span class="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800">فعال</span>
                             {% else %}
-                                <span class="px-2 py-1 text-xs rounded-full bg-gray-100 text-gray-800">غیرفعال</span>
+                            <span class="px-2 py-1 text-xs rounded-full bg-gray-100 text-gray-800">غیرفعال</span>
                             {% endif %}
                         </button>
                     </td>
@@ -88,15 +97,17 @@
                 <i class="fas fa-times text-xl"></i>
             </button>
         </div>
-        
+
         <form id="bannerForm" enctype="multipart/form-data">
             <input type="hidden" name="banner_id" id="bannerId">
-            
+
             <div class="mb-4">
                 <label class="block text-gray-700 mb-2">عنوان بنر *</label>
-                <input type="text" name="title" id="title" class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                <input type="text" name="title" id="title"
+                    class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    required>
             </div>
-            
+
             <div class="mb-4">
                 <label class="block text-gray-700 mb-2">تصویر بنر</label>
                 <div id="currentImagePreview" class="hidden mb-2">
@@ -105,209 +116,506 @@
                 </div>
                 <input type="file" name="image" id="image" accept="image/*" class="w-full border rounded-lg px-3 py-2">
                 <p class="text-xs text-gray-500 mt-1">یا آدرس تصویر را وارد کنید:</p>
-                <input type="text" name="image_url" id="imageUrl" class="w-full border rounded-lg px-3 py-2 mt-1" placeholder="https://...">
+                <input type="text" name="image_url" id="imageUrl" class="w-full border rounded-lg px-3 py-2 mt-1"
+                    placeholder="https://...">
             </div>
-            
+
             <div class="mb-4">
                 <label class="block text-gray-700 mb-2">لینک هدف (اختیاری)</label>
-                <input type="text" name="link_url" id="linkUrl" class="w-full border rounded-lg px-3 py-2" placeholder="/events">
+                <input type="text" name="link_url" id="linkUrl" class="w-full border rounded-lg px-3 py-2"
+                    placeholder="/events">
             </div>
-            
+
             <div class="mb-4">
                 <label class="block text-gray-700 mb-2">متن جایگزین (alt)</label>
                 <input type="text" name="alt_text" id="altText" class="w-full border rounded-lg px-3 py-2">
             </div>
-            
+
             <div class="mb-4">
                 <label class="block text-gray-700 mb-2">ترتیب نمایش</label>
                 <input type="number" name="order" id="order" class="w-full border rounded-lg px-3 py-2" value="0">
             </div>
-            
+
             <div class="flex gap-3 justify-end">
-                <button type="button" id="cancelModalBtn" class="px-4 py-2 border rounded-lg hover:bg-gray-50">انصراف</button>
-                <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">ذخیره</button>
+                <button type="button" id="cancelModalBtn"
+                    class="px-4 py-2 border rounded-lg hover:bg-gray-50">انصراف</button>
+                <button type="submit"
+                    class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">ذخیره</button>
             </div>
         </form>
     </div>
 </div>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // المان‌ها
-        const addBtn = document.getElementById('addBannerBtn');
-        const saveOrderBtn = document.getElementById('saveOrderBtn');
-        const modal = document.getElementById('bannerModal');
-        const closeModalBtn = document.getElementById('closeModalBtn');
-        const cancelModalBtn = document.getElementById('cancelModalBtn');
-        const bannerForm = document.getElementById('bannerForm');
+    document.addEventListener('DOMContentLoaded', function () {
+        // ========== استایل‌های دیالوگ سفارشی ==========
+        var dialogStyles = document.createElement('style');
+        dialogStyles.textContent = `
+        /* دیالوگ تایید */
+        .custom-confirm-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            animation: fadeIn 0.2s ease;
+        }
+        .custom-confirm-box {
+            background: white;
+            border-radius: 1.5rem;
+            max-width: 380px;
+            width: 90%;
+            margin: 1rem;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            animation: slideUp 0.2s ease;
+            overflow: hidden;
+        }
+        .custom-confirm-header {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            padding: 1.25rem;
+            text-align: center;
+        }
+        .custom-confirm-header i {
+            font-size: 3rem;
+            color: white;
+        }
+        .custom-confirm-body {
+            padding: 1.5rem;
+            text-align: center;
+        }
+        .custom-confirm-body h3 {
+            font-size: 1.25rem;
+            font-weight: bold;
+            color: #1f2937;
+            margin-bottom: 0.5rem;
+        }
+        .custom-confirm-body p {
+            color: #6b7280;
+            font-size: 0.875rem;
+            line-height: 1.5;
+        }
+        .custom-confirm-footer {
+            padding: 1rem 1.5rem 1.5rem;
+            display: flex;
+            gap: 0.75rem;
+            justify-content: center;
+        }
+        .custom-confirm-btn {
+            padding: 0.625rem 1.5rem;
+            border-radius: 0.75rem;
+            font-weight: 500;
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+        }
+        .custom-confirm-btn-danger {
+            background: #ef4444;
+            color: white;
+        }
+        .custom-confirm-btn-danger:hover {
+            background: #dc2626;
+            transform: scale(0.98);
+        }
+        .custom-confirm-btn-secondary {
+            background: #f3f4f6;
+            color: #4b5563;
+        }
+        .custom-confirm-btn-secondary:hover {
+            background: #e5e7eb;
+        }
+        .custom-confirm-btn-success {
+            background: #10b981;
+            color: white;
+        }
+        .custom-confirm-btn-success:hover {
+            background: #059669;
+            transform: scale(0.98);
+        }
         
-        let editingId = null;
+        /* دیالوگ اطلاع‌رسانی (Toast) */
+        .custom-toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: white;
+            border-radius: 1rem;
+            padding: 0.875rem 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+            z-index: 10000;
+            animation: toastSlideUp 0.3s ease;
+            direction: rtl;
+        }
+        .custom-toast-success {
+            border-right: 4px solid #10b981;
+        }
+        .custom-toast-success i {
+            color: #10b981;
+        }
+        .custom-toast-error {
+            border-right: 4px solid #ef4444;
+        }
+        .custom-toast-error i {
+            color: #ef4444;
+        }
+        .custom-toast-info {
+            border-right: 4px solid #3b82f6;
+        }
+        .custom-toast-info i {
+            color: #3b82f6;
+        }
+        .custom-toast-warning {
+            border-right: 4px solid #f59e0b;
+        }
+        .custom-toast-warning i {
+            color: #f59e0b;
+        }
         
-        // توابع کمکی
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        @keyframes slideUp {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        @keyframes toastSlideUp {
+            from { opacity: 0; transform: translateX(-50%) translateY(20px); }
+            to { opacity: 1; transform: translateX(-50%) translateY(0); }
+        }
+        @keyframes toastFadeOut {
+            from { opacity: 1; }
+            to { opacity: 0; }
+        }
+    `;
+        document.head.appendChild(dialogStyles);
+
+        // ========== تابع نمایش دیالوگ تایید ==========
+        function showConfirmDialog(options) {
+            return new Promise(function (resolve) {
+                var overlay = document.createElement('div');
+                overlay.className = 'custom-confirm-overlay';
+                overlay.innerHTML = `
+                <div class="custom-confirm-box">
+                    <div class="custom-confirm-header">
+                        <i class="fas ${options.icon || 'fa-question-circle'}"></i>
+                    </div>
+                    <div class="custom-confirm-body">
+                        <h3>${options.title || 'تأیید عملیات'}</h3>
+                        <p>${options.message || 'آیا از انجام این عملیات مطمئن هستید؟'}</p>
+                        ${options.warning ? '<p class="warning-text" style="font-size: 0.75rem; color: #9ca3af; margin-top: 0.5rem;">⚠️ ' + options.warning + '</p>' : ''}
+                    </div>
+                    <div class="custom-confirm-footer">
+                        <button class="custom-confirm-btn ${options.successBtn ? 'custom-confirm-btn-success' : 'custom-confirm-btn-danger'} confirm-yes">${options.yesText || 'بله'}</button>
+                        <button class="custom-confirm-btn custom-confirm-btn-secondary confirm-no">${options.noText || 'انصراف'}</button>
+                    </div>
+                </div>
+            `;
+
+                document.body.appendChild(overlay);
+
+                var yesBtn = overlay.querySelector('.confirm-yes');
+                var noBtn = overlay.querySelector('.confirm-no');
+
+                function cleanup() {
+                    if (overlay && overlay.remove) overlay.remove();
+                }
+
+                yesBtn.addEventListener('click', function () {
+                    cleanup();
+                    resolve(true);
+                });
+
+                noBtn.addEventListener('click', function () {
+                    cleanup();
+                    resolve(false);
+                });
+
+                overlay.addEventListener('click', function (e) {
+                    if (e.target === overlay) {
+                        cleanup();
+                        resolve(false);
+                    }
+                });
+            });
+        }
+
+        // ========== تابع نمایش پیام (Toast) ==========
+        function showToast(message, type) {
+            var existingToast = document.querySelector('.custom-toast');
+            if (existingToast) existingToast.remove();
+
+            var icons = {
+                success: 'fa-check-circle',
+                error: 'fa-exclamation-circle',
+                info: 'fa-info-circle',
+                warning: 'fa-exclamation-triangle'
+            };
+
+            var icon = icons[type] || icons.info;
+
+            var toast = document.createElement('div');
+            toast.className = 'custom-toast custom-toast-' + (type || 'info');
+            toast.innerHTML = '<i class="fas ' + icon + '"></i> <span>' + message + '</span>';
+
+            document.body.appendChild(toast);
+
+            setTimeout(function () {
+                toast.style.animation = 'toastFadeOut 0.3s ease forwards';
+                setTimeout(function () {
+                    if (toast && toast.remove) toast.remove();
+                }, 300);
+            }, 3000);
+        }
+
+        // ========== المان‌ها ==========
+        var addBtn = document.getElementById('addBannerBtn');
+        var saveOrderBtn = document.getElementById('saveOrderBtn');
+        var modal = document.getElementById('bannerModal');
+        var closeModalBtn = document.getElementById('closeModalBtn');
+        var cancelModalBtn = document.getElementById('cancelModalBtn');
+        var bannerForm = document.getElementById('bannerForm');
+
+        var editingId = null;
+
         function showModal() {
             modal.classList.remove('hidden');
             modal.style.display = 'flex';
         }
-        
+
         function hideModal() {
             modal.classList.add('hidden');
             modal.style.display = 'none';
         }
-        
+
         function resetForm() {
             bannerForm.reset();
-            document.getElementById('currentImagePreview').classList.add('hidden');
-            document.getElementById('bannerId').value = '';
+            var preview = document.getElementById('currentImagePreview');
+            if (preview) preview.classList.add('hidden');
+            var bannerId = document.getElementById('bannerId');
+            if (bannerId) bannerId.value = '';
             editingId = null;
         }
-        
+
         // نمایش مودال افزودن
-        addBtn.addEventListener('click', function() {
-            resetForm();
-            document.getElementById('modalTitle').innerText = 'افزودن بنر جدید';
-            showModal();
-        });
-        
+        if (addBtn) {
+            addBtn.addEventListener('click', function () {
+                resetForm();
+                var modalTitle = document.getElementById('modalTitle');
+                if (modalTitle) modalTitle.innerText = 'افزودن بنر جدید';
+                showModal();
+            });
+        }
+
         // بستن مودال
-        closeModalBtn.addEventListener('click', hideModal);
-        cancelModalBtn.addEventListener('click', hideModal);
-        
-        // بستن با کلیک خارج از مودال
-        modal.addEventListener('click', function(e) {
-            if (e.target === modal) {
-                hideModal();
-            }
-        });
-        
-        // ویرایش بنر
-        document.querySelectorAll('.edit-btn').forEach(function(btn) {
-            btn.addEventListener('click', async function() {
-                const id = this.dataset.id;
+        if (closeModalBtn) closeModalBtn.addEventListener('click', hideModal);
+        if (cancelModalBtn) cancelModalBtn.addEventListener('click', hideModal);
+
+        if (modal) {
+            modal.addEventListener('click', function (e) {
+                if (e.target === modal) hideModal();
+            });
+        }
+
+        // ویرایش بنر (بدون پیام هشدار)
+        var editBtns = document.querySelectorAll('.edit-btn');
+        for (var i = 0; i < editBtns.length; i++) {
+            editBtns[i].addEventListener('click', async function () {
+                var id = this.dataset.id;
                 editingId = id;
-                
+
                 try {
-                    const response = await fetch('/admin/banners/api/banner/' + id);
-                    const data = await response.json();
-                    
-                    document.getElementById('modalTitle').innerText = 'ویرایش بنر';
-                    document.getElementById('bannerId').value = data.id;
-                    document.getElementById('title').value = data.title;
-                    document.getElementById('linkUrl').value = data.link_url || '';
-                    document.getElementById('altText').value = data.alt_text || '';
-                    document.getElementById('order').value = data.order;
-                    
-                    if (data.image_url) {
-                        document.getElementById('currentImage').src = data.image_url;
-                        document.getElementById('currentImagePreview').classList.remove('hidden');
-                    } else {
-                        document.getElementById('currentImagePreview').classList.add('hidden');
+                    var response = await fetch('/admin/banners/api/banner/' + id);
+                    var data = await response.json();
+
+                    var modalTitle = document.getElementById('modalTitle');
+                    if (modalTitle) modalTitle.innerText = 'ویرایش بنر';
+
+                    var bannerId = document.getElementById('bannerId');
+                    if (bannerId) bannerId.value = data.id;
+
+                    var titleInput = document.getElementById('title');
+                    if (titleInput) titleInput.value = data.title;
+
+                    var linkUrlInput = document.getElementById('linkUrl');
+                    if (linkUrlInput) linkUrlInput.value = data.link_url || '';
+
+                    var altTextInput = document.getElementById('altText');
+                    if (altTextInput) altTextInput.value = data.alt_text || '';
+
+                    var orderInput = document.getElementById('order');
+                    if (orderInput) orderInput.value = data.order;
+
+                    var currentImage = document.getElementById('currentImage');
+                    var currentImagePreview = document.getElementById('currentImagePreview');
+
+                    if (currentImage && data.image_url) {
+                        currentImage.src = data.image_url;
+                        if (currentImagePreview) currentImagePreview.classList.remove('hidden');
+                    } else if (currentImagePreview) {
+                        currentImagePreview.classList.add('hidden');
                     }
-                    
+
                     showModal();
                 } catch (error) {
-                    alert('خطا در دریافت اطلاعات بنر');
+                    showToast('خطا در دریافت اطلاعات بنر', 'error');
                 }
             });
-        });
-        
-        // حذف بنر
-        document.querySelectorAll('.delete-btn').forEach(function(btn) {
-            btn.addEventListener('click', async function() {
-                const id = this.dataset.id;
-                if (!confirm('آیا از حذف این بنر مطمئن هستید؟')) return;
-                
-                try {
-                    const response = await fetch('/admin/banners/delete/' + id, { method: 'POST' });
-                    const result = await response.json();
-                    if (result.success) {
-                        alert(result.message);
-                        location.reload();
-                    } else {
-                        alert(result.message);
-                    }
-                } catch (error) {
-                    alert('خطا در ارتباط با سرور');
-                }
-            });
-        });
-        
-        // تغییر وضعیت فعال/غیرفعال
-        document.querySelectorAll('.toggle-btn').forEach(function(btn) {
-            btn.addEventListener('click', async function() {
-                const id = this.dataset.id;
-                
-                try {
-                    const response = await fetch('/admin/banners/toggle/' + id, { method: 'POST' });
-                    const result = await response.json();
-                    if (result.success) {
-                        location.reload();
-                    } else {
-                        alert(result.message);
-                    }
-                } catch (error) {
-                    alert('خطا در ارتباط با سرور');
-                }
-            });
-        });
-        
-        // ذخیره ترتیب
-        saveOrderBtn.addEventListener('click', async function() {
-            const orders = [];
-            const rows = document.querySelectorAll('#banners-list tr[data-id]');
-            
-            for (let i = 0; i < rows.length; i++) {
-                const row = rows[i];
-                const input = row.querySelector('.order-input');
-                if (input) {
-                    orders.push({
-                        id: parseInt(row.dataset.id),
-                        order: parseInt(input.value)
-                    });
-                }
-            }
-            
-            try {
-                const response = await fetch('/admin/banners/reorder', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ orders: orders })
+        }
+
+        // حذف بنر (با هشدار)
+        var deleteBtns = document.querySelectorAll('.delete-btn');
+        for (var i = 0; i < deleteBtns.length; i++) {
+            deleteBtns[i].addEventListener('click', async function () {
+                var id = this.dataset.id;
+                var title = this.dataset.title || 'این بنر';
+
+                var confirmed = await showConfirmDialog({
+                    title: 'حذف بنر',
+                    message: 'آیا از حذف "' + title + '" مطمئن هستید؟',
+                    warning: 'این عمل غیرقابل بازگشت است',
+                    icon: 'fa-trash-alt',
+                    yesText: 'بله، حذف شود',
+                    noText: 'انصراف'
                 });
-                const result = await response.json();
-                if (result.success) {
-                    alert('ترتیب بنرها ذخیره شد');
-                    location.reload();
-                } else {
-                    alert(result.message);
+
+                if (confirmed) {
+                    try {
+                        var response = await fetch('/admin/banners/delete/' + id, { method: 'POST' });
+                        var result = await response.json();
+                        if (result.success) {
+                            showToast(result.message, 'success');
+                            setTimeout(function () { location.reload(); }, 1000);
+                        } else {
+                            showToast(result.message, 'error');
+                        }
+                    } catch (error) {
+                        showToast('خطا در ارتباط با سرور', 'error');
+                    }
                 }
-            } catch (error) {
-                alert('خطا در ارتباط با سرور');
-            }
-        });
-        
-        // ارسال فرم
-        bannerForm.addEventListener('submit', async function(e) {
-            e.preventDefault();
-            const formData = new FormData(this);
-            const bannerId = document.getElementById('bannerId').value;
-            let url = '/admin/banners/add';
-            if (bannerId) {
-                url = '/admin/banners/edit/' + bannerId;
-            }
-            
-            try {
-                const response = await fetch(url, { method: 'POST', body: formData });
-                const result = await response.json();
-                
-                if (result.success) {
-                    alert(result.message);
-                    location.reload();
-                } else {
-                    alert(result.message);
+            });
+        }
+
+        // تغییر وضعیت فعال/غیرفعال (با هشدار ساده)
+        var toggleBtns = document.querySelectorAll('.toggle-btn');
+        for (var i = 0; i < toggleBtns.length; i++) {
+            toggleBtns[i].addEventListener('click', async function () {
+                var id = this.dataset.id;
+                var isActive = this.dataset.active === 'true';
+                var statusText = isActive ? 'غیرفعال' : 'فعال';
+
+                var confirmed = await showConfirmDialog({
+                    title: 'تغییر وضعیت بنر',
+                    message: 'آیا از ' + statusText + ' کردن این بنر مطمئن هستید؟',
+                    warning: '',
+                    icon: 'fa-exchange-alt',
+                    successBtn: true,
+                    yesText: 'بله',
+                    noText: 'انصراف'
+                });
+
+                if (confirmed) {
+                    try {
+                        var response = await fetch('/admin/banners/toggle/' + id, { method: 'POST' });
+                        var result = await response.json();
+                        if (result.success) {
+                            showToast('وضعیت بنر با موفقیت تغییر کرد', 'success');
+                            setTimeout(function () { location.reload(); }, 800);
+                        } else {
+                            showToast(result.message, 'error');
+                        }
+                    } catch (error) {
+                        showToast('خطا در ارتباط با سرور', 'error');
+                    }
                 }
-            } catch (error) {
-                alert('خطا در ارتباط با سرور');
-            }
-        });
+            });
+        }
+
+        // ذخیره ترتیب (بدون هشدار اضافی)
+        if (saveOrderBtn) {
+            saveOrderBtn.addEventListener('click', async function () {
+                var orders = [];
+                var rows = document.querySelectorAll('#banners-list tr[data-id]');
+
+                for (var i = 0; i < rows.length; i++) {
+                    var row = rows[i];
+                    var input = row.querySelector('.order-input');
+                    if (input) {
+                        orders.push({
+                            id: parseInt(row.dataset.id),
+                            order: parseInt(input.value)
+                        });
+                    }
+                }
+
+                try {
+                    var response = await fetch('/admin/banners/reorder', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ orders: orders })
+                    });
+                    var result = await response.json();
+                    if (result.success) {
+                        showToast('ترتیب بنرها ذخیره شد', 'success');
+                        setTimeout(function () { location.reload(); }, 800);
+                    } else {
+                        showToast(result.message, 'error');
+                    }
+                } catch (error) {
+                    showToast('خطا در ارتباط با سرور', 'error');
+                }
+            });
+        }
+
+        // ارسال فرم (ویرایش/افزودن - بدون هشدار غیرقابل بازگشت)
+        if (bannerForm) {
+            bannerForm.addEventListener('submit', async function (e) {
+                e.preventDefault();
+
+                var bannerId = document.getElementById('bannerId').value;
+                var isEdit = bannerId !== '';
+                var actionText = isEdit ? 'ویرایش' : 'افزودن';
+
+                var confirmed = await showConfirmDialog({
+                    title: actionText + ' بنر',
+                    message: 'آیا از ' + actionText + ' این بنر مطمئن هستید؟',
+                    warning: '',
+                    icon: 'fa-save',
+                    successBtn: true,
+                    yesText: 'بله',
+                    noText: 'انصراف'
+                });
+
+                if (confirmed) {
+                    var formData = new FormData(this);
+                    var url = bannerId ? '/admin/banners/edit/' + bannerId : '/admin/banners/add';
+
+                    try {
+                        var response = await fetch(url, { method: 'POST', body: formData });
+                        var result = await response.json();
+
+                        if (result.success) {
+                            showToast(result.message, 'success');
+                            setTimeout(function () { location.reload(); }, 1000);
+                        } else {
+                            showToast(result.message, 'error');
+                        }
+                    } catch (error) {
+                        showToast('خطا در ارتباط با سرور', 'error');
+                    }
+                }
+            });
+        }
     });
 </script>
 
@@ -315,18 +623,23 @@
     #bannerModal {
         display: none;
     }
+
     #bannerModal.flex {
         display: flex;
     }
+
     .status-toggle {
         cursor: pointer;
         background: none;
         border: none;
     }
+
     .order-input {
         text-align: center;
     }
-    .edit-btn, .delete-btn {
+
+    .edit-btn,
+    .delete-btn {
         background: none;
         border: none;
         cursor: pointer;

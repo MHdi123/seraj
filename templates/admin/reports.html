@@ -14,25 +14,25 @@
     <div class="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8">
         <div class="card">
             <div class="card-body text-center">
-                <div class="text-3xl font-bold text-blue-600 mb-2" id="totalParticipants">0</div>
+                <div class="text-3xl font-bold text-blue-600 mb-2" id="totalParticipants">{{ total_participants|default(0)|persian_number }}</div>
                 <p class="text-gray-600">کل شرکت‌کنندگان</p>
             </div>
         </div>
         <div class="card">
             <div class="card-body text-center">
-                <div class="text-3xl font-bold text-green-600 mb-2" id="totalEvents">0</div>
+                <div class="text-3xl font-bold text-green-600 mb-2" id="totalEvents">{{ total_events|default(0)|persian_number }}</div>
                 <p class="text-gray-600">رویدادهای برگزار شده</p>
             </div>
         </div>
         <div class="card">
             <div class="card-body text-center">
-                <div class="text-3xl font-bold text-purple-600 mb-2" id="dailyRegistrations">0</div>
+                <div class="text-3xl font-bold text-purple-600 mb-2" id="dailyRegistrations">{{ daily_registrations_total|default(0)|persian_number }}</div>
                 <p class="text-gray-600">ثبت‌نام در ۳۰ روز</p>
             </div>
         </div>
         <div class="card">
             <div class="card-body text-center">
-                <div class="text-3xl font-bold text-yellow-600 mb-2" id="avgParticipants">0</div>
+                <div class="text-3xl font-bold text-yellow-600 mb-2" id="avgParticipants">{{ avg_participants|default(0)|persian_number }}</div>
                 <p class="text-gray-600">میانگین شرکت‌کنندگان</p>
             </div>
         </div>
@@ -49,7 +49,7 @@
                     {% if event_participation %}
                     <div class="space-y-4" id="eventList">
                         {% for item in event_participation %}
-                        <div class="border border-gray-200 rounded-lg p-4 event-item" data-participants="{{ item.participants }}">
+                        <div class="border border-gray-200 rounded-lg p-4 event-item" data-participants="{{ item.participants }}" data-max-participants="0">
                             <div class="flex justify-between items-center mb-2">
                                 <h3 class="font-medium text-gray-800">{{ item.title }}</h3>
                                 <span class="badge badge-{{ item.event_type_value }}">
@@ -63,10 +63,10 @@
                             <div class="flex items-center justify-between">
                                 <div class="text-sm text-gray-600">
                                     <i class="fas fa-users ml-2"></i>
-                                    <span class="participant-count">{{ item.participants }}</span> نفر
+                                    <span class="participant-count">{{ item.participants|persian_number }}</span> نفر
                                 </div>
                                 <div class="w-32 bg-gray-200 rounded-full h-2">
-                                    <div class="bg-blue-600 h-2 rounded-full progress-bar"></div>
+                                    <div class="bg-blue-600 h-2 rounded-full progress-bar" id="progress-bar-{{ loop.index0 }}"></div>
                                 </div>
                             </div>
                             <div class="mt-2 text-xs text-gray-500">
@@ -98,10 +98,10 @@
                         <div class="flex items-center justify-between day-item" data-count="{{ day.count }}">
                             <div class="text-sm text-gray-600">{{ day.date }}</div>
                             <div class="flex items-center">
-                                <div class="w-24 bg-gray-200 rounded-full h-2 ml-3">
-                                    <div class="bg-green-600 h-2 rounded-full day-progress-bar"></div>
+                                <div class="w-32 bg-gray-200 rounded-full h-2 ml-3">
+                                    <div class="bg-green-600 h-2 rounded-full day-progress-bar" id="day-progress-{{ loop.index0 }}"></div>
                                 </div>
-                                <span class="text-sm font-medium day-count">{{ day.count }} ثبت‌نام</span>
+                                <span class="text-sm font-medium day-count">{{ day.count|persian_number }} ثبت‌نام</span>
                             </div>
                         </div>
                         {% endfor %}
@@ -125,16 +125,15 @@
             </div>
             <div class="card-body">
                 {% if university_stats %}
-                {% set max_university = university_stats|map(attribute='count')|max %}
                 <div class="space-y-3" id="universityList">
                     {% for uni in university_stats %}
                     <div class="flex items-center justify-between university-item" data-count="{{ uni.count }}">
-                        <div class="text-sm font-medium text-gray-700">{{ uni.university }}</div>
+                        <div class="text-sm font-medium text-gray-700">{{ uni.university or 'نامشخص' }}</div>
                         <div class="flex items-center">
-                            <div class="w-24 bg-gray-200 rounded-full h-2 ml-3">
-                                <div class="bg-purple-600 h-2 rounded-full university-progress-bar"></div>
+                            <div class="w-32 bg-gray-200 rounded-full h-2 ml-3">
+                                <div class="bg-purple-600 h-2 rounded-full university-progress-bar" id="uni-progress-{{ loop.index0 }}"></div>
                             </div>
-                            <span class="text-sm font-medium">{{ uni.count }} کاربر</span>
+                            <span class="text-sm font-medium">{{ uni.count|persian_number }} کاربر</span>
                         </div>
                     </div>
                     {% endfor %}
@@ -157,13 +156,13 @@
             </div>
             <div class="card-body">
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <button class="btn btn-secondary" onclick="exportToPDF()">
+                    <button class="btn btn-secondary" onclick="exportReport('pdf')">
                         <i class="fas fa-file-pdf ml-2"></i> خروجی PDF
                     </button>
-                    <button class="btn btn-secondary" onclick="exportToExcel()">
+                    <button class="btn btn-secondary" onclick="exportReport('excel')">
                         <i class="fas fa-file-excel ml-2"></i> خروجی Excel
                     </button>
-                    <button class="btn btn-secondary" onclick="exportToCSV()">
+                    <button class="btn btn-secondary" onclick="exportReport('csv')">
                         <i class="fas fa-file-csv ml-2"></i> خروجی CSV
                     </button>
                     <button class="btn btn-primary" onclick="window.print()">
@@ -175,79 +174,258 @@
     </div>
 </div>
 
+<style>
+    .progress-bar, .day-progress-bar, .university-progress-bar {
+        transition: width 0.5s ease-in-out;
+        width: 0%;
+    }
+    .badge {
+        display: inline-block;
+        padding: 0.25rem 0.75rem;
+        font-size: 0.75rem;
+        font-weight: 600;
+        border-radius: 9999px;
+    }
+    .badge-workshop { background-color: #dbeafe; color: #1e40af; }
+    .badge-competition { background-color: #dcfce7; color: #166534; }
+    .badge-halaqah { background-color: #f3e8ff; color: #6b21a8; }
+    .badge-lecture { background-color: #fef9c3; color: #854d0e; }
+    .badge-other { background-color: #f1f5f9; color: #334155; }
+    
+    @media print {
+        .btn, .card-header a, footer, header, .no-print { 
+            display: none !important; 
+        }
+        body, .card, .container {
+            background: white !important;
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+    }
+    
+    @keyframes dialogPop {
+        0% { transform: scale(0.95); opacity: 0; }
+        100% { transform: scale(1); opacity: 1; }
+    }
+    
+    @keyframes toastAnim {
+        0% { opacity: 0; transform: translate(-50%, 20px); }
+        20% { opacity: 1; transform: translate(-50%, 0); }
+        80% { opacity: 1; transform: translate(-50%, 0); }
+        100% { opacity: 0; transform: translate(-50%, -20px); }
+    }
+</style>
+
 <script>
+// ================== دیالوگ و توست ==================
+function showConfirmDialog(options) {
+    const existingDialog = document.querySelector('.custom-confirm-dialog');
+    if (existingDialog) existingDialog.remove();
+
+    const dialog = document.createElement('div');
+    dialog.className = 'custom-confirm-dialog fixed inset-0 bg-black/50 flex items-center justify-center z-[10000]';
+    
+    const colors = {
+        danger: { bg: 'bg-red-500', hover: 'hover:bg-red-600', icon: 'fa-exclamation-triangle text-red-500' },
+        warning: { bg: 'bg-amber-500', hover: 'hover:bg-amber-600', icon: 'fa-exclamation-triangle text-amber-500' },
+        success: { bg: 'bg-emerald-500', hover: 'hover:bg-emerald-600', icon: 'fa-check-circle text-emerald-500' },
+        info: { bg: 'bg-blue-500', hover: 'hover:bg-blue-600', icon: 'fa-info-circle text-blue-500' }
+    };
+    
+    const color = colors[options.type || 'info'];
+    
+    dialog.innerHTML = `
+        <div class="bg-white rounded-2xl p-6 max-w-sm mx-4 shadow-2xl transform transition-all scale-95" style="animation: dialogPop 0.2s ease forwards;">
+            <div class="text-center">
+                <div class="w-14 h-14 rounded-full bg-gray-100 flex items-center justify-center mx-auto mb-4">
+                    <i class="fas ${color.icon} text-2xl"></i>
+                </div>
+                <h3 class="text-lg font-bold text-gray-800 mb-2">${options.title || 'تأیید'}</h3>
+                <p class="text-gray-500 text-sm mb-6">${options.message || 'آیا مطمئن هستید؟'}</p>
+                <div class="flex gap-3">
+                    <button class="cancel-btn flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-2.5 rounded-xl transition-all">
+                        ${options.cancelText || 'انصراف'}
+                    </button>
+                    <button class="confirm-btn flex-1 ${color.bg} ${color.hover} text-white font-medium py-2.5 rounded-xl transition-all">
+                        ${options.confirmText || 'تأیید'}
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+
+    document.body.appendChild(dialog);
+
+    const confirmBtn = dialog.querySelector('.confirm-btn');
+    const cancelBtn = dialog.querySelector('.cancel-btn');
+
+    confirmBtn.addEventListener('click', () => {
+        dialog.remove();
+        if (options.onConfirm) options.onConfirm();
+    });
+
+    cancelBtn.addEventListener('click', () => {
+        dialog.remove();
+        if (options.onCancel) options.onCancel();
+    });
+
+    dialog.addEventListener('click', (e) => {
+        if (e.target === dialog) {
+            dialog.remove();
+            if (options.onCancel) options.onCancel();
+        }
+    });
+}
+
+function showToast(message, type = 'success') {
+    const existingToast = document.querySelector('.custom-toast');
+    if (existingToast) existingToast.remove();
+
+    const colors = {
+        success: 'bg-emerald-500',
+        error: 'bg-red-500',
+        info: 'bg-blue-500',
+        warning: 'bg-amber-500'
+    };
+
+    const icons = {
+        success: 'fa-check-circle',
+        error: 'fa-exclamation-circle',
+        info: 'fa-info-circle',
+        warning: 'fa-exclamation-triangle'
+    };
+
+    const toast = document.createElement('div');
+    toast.className = `custom-toast fixed bottom-24 left-1/2 transform -translate-x-1/2 ${colors[type]} text-white px-5 py-3 rounded-xl shadow-lg z-[10000] flex items-center gap-2`;
+    toast.style.animation = 'toastAnim 2.5s ease forwards';
+    toast.innerHTML = `<i class="fas ${icons[type]}"></i> <span>${message}</span>`;
+
+    document.body.appendChild(toast);
+
+    setTimeout(() => {
+        if (toast) toast.remove();
+    }, 2500);
+}
+
+// ================== تابع خروجی گزارش ==================
+function exportReport(type) {
+    let title = '';
+    let message = '';
+    let confirmText = '';
+    
+    if (type === 'pdf') {
+        title = 'خروجی PDF';
+        message = 'آیا از دریافت خروجی PDF گزارش مطمئن هستید؟';
+        confirmText = 'بله، دریافت شود';
+    } else if (type === 'excel') {
+        title = 'خروجی Excel';
+        message = 'آیا از دریافت خروجی Excel گزارش مطمئن هستید؟';
+        confirmText = 'بله، دریافت شود';
+    } else if (type === 'csv') {
+        title = 'خروجی CSV';
+        message = 'آیا از دریافت خروجی CSV گزارش مطمئن هستید؟';
+        confirmText = 'بله، دریافت شود';
+    }
+    
+    showConfirmDialog({
+        title: title,
+        message: message,
+        type: 'info',
+        confirmText: confirmText,
+        cancelText: 'انصراف',
+        onConfirm: function() {
+            showToast('در حال آماده‌سازی گزارش...', 'info');
+            
+            fetch(`/admin/reports/export/${type}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showToast(`گزارش با موفقیت دریافت شد`, 'success');
+                    if (data.download_url) {
+                        window.location.href = data.download_url;
+                    }
+                } else {
+                    showToast(data.message || `خطا در دریافت خروجی`, 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showToast('خطا در ارتباط با سرور', 'error');
+            });
+        }
+    });
+}
+
 // ================== محاسبه و ست کردن نوار پیشرفت ==================
 document.addEventListener('DOMContentLoaded', function() {
-    // Event bars
+    // Event bars - محاسبه حداکثر و تنظیم عرض
     const eventItems = document.querySelectorAll('.event-item');
-    let totalParticipants = 0;
     let maxParticipants = 0;
+    let totalParticipants = 0;
+    
     eventItems.forEach(item => {
         const count = parseInt(item.dataset.participants || 0);
         totalParticipants += count;
         if(count > maxParticipants) maxParticipants = count;
     });
-    eventItems.forEach(item => {
-        const bar = item.querySelector('.progress-bar');
+    
+    eventItems.forEach((item, index) => {
+        const bar = document.getElementById(`progress-bar-${index}`);
         const count = parseInt(item.dataset.participants || 0);
-        if(bar && maxParticipants>0) bar.style.width = Math.round(count/maxParticipants*100) + '%';
+        if(bar && maxParticipants > 0) {
+            const percent = Math.round(count / maxParticipants * 100);
+            bar.style.width = percent + '%';
+        }
     });
-    document.getElementById('totalParticipants').textContent = totalParticipants;
-    document.getElementById('totalEvents').textContent = eventItems.length;
-    document.getElementById('avgParticipants').textContent = eventItems.length>0 ? Math.round(totalParticipants/eventItems.length) : 0;
-
+    
+    document.getElementById('totalParticipants').textContent = totalParticipants.toLocaleString('fa-IR');
+    document.getElementById('totalEvents').textContent = eventItems.length.toLocaleString('fa-IR');
+    document.getElementById('avgParticipants').textContent = (eventItems.length > 0 ? Math.round(totalParticipants / eventItems.length) : 0).toLocaleString('fa-IR');
+    
     // Daily bars
     const dayItems = document.querySelectorAll('.day-item');
     let totalDaily = 0;
     let maxDaily = 0;
+    
     dayItems.forEach(item => {
         const count = parseInt(item.dataset.count || 0);
         totalDaily += count;
-        if(count>maxDaily) maxDaily=count;
+        if(count > maxDaily) maxDaily = count;
     });
-    dayItems.forEach(item => {
-        const bar = item.querySelector('.day-progress-bar');
+    
+    dayItems.forEach((item, index) => {
+        const bar = document.getElementById(`day-progress-${index}`);
         const count = parseInt(item.dataset.count || 0);
-        if(bar && maxDaily>0) bar.style.width = Math.round(count/maxDaily*100) + '%';
+        if(bar && maxDaily > 0) {
+            const percent = Math.round(count / maxDaily * 100);
+            bar.style.width = percent + '%';
+        }
     });
-    document.getElementById('dailyRegistrations').textContent = totalDaily;
-
+    
+    document.getElementById('dailyRegistrations').textContent = totalDaily.toLocaleString('fa-IR');
+    
     // University bars
     const uniItems = document.querySelectorAll('.university-item');
-    let maxUni = Math.max(...Array.from(uniItems).map(u=>parseInt(u.dataset.count || 0)));
-    uniItems.forEach(item=>{
-        const bar = item.querySelector('.university-progress-bar');
+    let maxUni = 0;
+    
+    uniItems.forEach(item => {
         const count = parseInt(item.dataset.count || 0);
-        if(bar && maxUni>0) bar.style.width = Math.round(count/maxUni*100) + '%';
+        if(count > maxUni) maxUni = count;
+    });
+    
+    uniItems.forEach((item, index) => {
+        const bar = document.getElementById(`uni-progress-${index}`);
+        const count = parseInt(item.dataset.count || 0);
+        if(bar && maxUni > 0) {
+            const percent = Math.round(count / maxUni * 100);
+            bar.style.width = percent + '%';
+        }
     });
 });
-
-// ================== خروجی‌ها ==================
-function exportToPDF(){ alert('📄 قابلیت خروجی PDF به زودی اضافه می‌شود.'); }
-function exportToExcel(){ alert('📊 قابلیت خروجی Excel به زودی اضافه می‌شود.'); }
-function exportToCSV(){ alert('📑 قابلیت خروجی CSV به زودی اضافه می‌شود.'); }
 </script>
-
-<style>
-.progress-bar, .day-progress-bar, .university-progress-bar {
-    transition: width 0.5s ease-in-out;
-    width: 0;
-}
-.badge {
-    display: inline-block;
-    padding: 0.25rem 0.75rem;
-    font-size: 0.75rem;
-    font-weight: 600;
-    border-radius: 9999px;
-}
-.badge-workshop { background-color: #dbeafe; color: #1e40af; }
-.badge-competition { background-color: #dcfce7; color: #166534; }
-.badge-halaqah { background-color: #f3e8ff; color: #6b21a8; }
-.badge-lecture { background-color: #fef9c3; color: #854d0e; }
-.badge-other { background-color: #f1f5f9; color: #334155; }
-
-@media print {
-    .btn, .card-header a, footer, header, .no-print { display: none !important; }
-}
-</style>
 {% endblock %}

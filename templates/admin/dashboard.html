@@ -522,23 +522,147 @@
 </div>
 
 <script>
+    // تابع نمایش دیالوگ حذف
     function deleteEvent(btn) {
         const eventId = btn.dataset.eventId;
-        if (!confirm('آیا از حذف این رویداد مطمئن هستید؟')) return;
-        fetch('/admin/event/delete/' + eventId, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' }
-        })
-            .then(r => r.json())
-            .then(data => {
-                if (data.success) {
-                    alert('رویداد با موفقیت حذف شد');
-                    location.reload();
-                } else {
-                    alert(data.message || 'خطا در حذف رویداد');
-                }
-            })
-            .catch(() => alert('خطا در ارتباط با سرور'));
+        
+        // نمایش دیالوگ سفارشی
+        showConfirmDialog({
+            title: 'حذف رویداد',
+            message: 'آیا از حذف این رویداد مطمئن هستید؟',
+            type: 'danger',
+            confirmText: 'بله، حذف شود',
+            cancelText: 'انصراف',
+            onConfirm: function() {
+                // درخواست حذف به سرور
+                fetch('/admin/event/delete/' + eventId, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                })
+                .then(r => r.json())
+                .then(data => {
+                    if (data.success) {
+                        showToast('رویداد با موفقیت حذف شد', 'success');
+                        setTimeout(() => location.reload(), 1500);
+                    } else {
+                        showToast(data.message || 'خطا در حذف رویداد', 'error');
+                    }
+                })
+                .catch(() => showToast('خطا در ارتباط با سرور', 'error'));
+            }
+        });
+    }
+
+    // دیالوگ تایید سفارشی
+    function showConfirmDialog(options) {
+        // حذف دیالوگ قبلی اگر وجود داشت
+        const existingDialog = document.querySelector('.custom-confirm-dialog');
+        if (existingDialog) existingDialog.remove();
+
+        const dialog = document.createElement('div');
+        dialog.className = 'custom-confirm-dialog fixed inset-0 bg-black/50 flex items-center justify-center z-[10000]';
+        
+        // رنگ‌ها بر اساس نوع
+        const colors = {
+            danger: { bg: 'bg-red-500', hover: 'hover:bg-red-600', icon: 'fa-exclamation-triangle text-red-500' },
+            warning: { bg: 'bg-amber-500', hover: 'hover:bg-amber-600', icon: 'fa-exclamation-triangle text-amber-500' },
+            success: { bg: 'bg-emerald-500', hover: 'hover:bg-emerald-600', icon: 'fa-check-circle text-emerald-500' },
+            info: { bg: 'bg-blue-500', hover: 'hover:bg-blue-600', icon: 'fa-info-circle text-blue-500' }
+        };
+        
+        const color = colors[options.type || 'warning'];
+        
+        dialog.innerHTML = `
+            <div class="bg-white rounded-2xl p-6 max-w-sm mx-4 shadow-2xl transform transition-all scale-95" style="animation: dialogPop 0.2s ease forwards;">
+                <div class="text-center">
+                    <div class="w-14 h-14 rounded-full bg-gray-100 flex items-center justify-center mx-auto mb-4">
+                        <i class="fas ${color.icon} text-2xl"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-gray-800 mb-2">${options.title || 'تأیید'}</h3>
+                    <p class="text-gray-500 text-sm mb-6">${options.message || 'آیا مطمئن هستید؟'}</p>
+                    <div class="flex gap-3">
+                        <button class="confirm-btn flex-1 ${color.bg} ${color.hover} text-white font-medium py-2.5 rounded-xl transition-all">
+                            ${options.confirmText || 'تأیید'}
+                        </button>
+                        <button class="cancel-btn flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-2.5 rounded-xl transition-all">
+                            ${options.cancelText || 'انصراف'}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        document.body.appendChild(dialog);
+
+        const confirmBtn = dialog.querySelector('.confirm-btn');
+        const cancelBtn = dialog.querySelector('.cancel-btn');
+
+        confirmBtn.addEventListener('click', () => {
+            dialog.remove();
+            if (options.onConfirm) options.onConfirm();
+        });
+
+        cancelBtn.addEventListener('click', () => {
+            dialog.remove();
+            if (options.onCancel) options.onCancel();
+        });
+
+        dialog.addEventListener('click', (e) => {
+            if (e.target === dialog) {
+                dialog.remove();
+                if (options.onCancel) options.onCancel();
+            }
+        });
+    }
+
+    // تابع نمایش نوتیفیکیشن (توست)
+    function showToast(message, type = 'success') {
+        const existingToast = document.querySelector('.custom-toast');
+        if (existingToast) existingToast.remove();
+
+        const colors = {
+            success: 'bg-emerald-500',
+            error: 'bg-red-500',
+            info: 'bg-blue-500',
+            warning: 'bg-amber-500'
+        };
+
+        const icons = {
+            success: 'fa-check-circle',
+            error: 'fa-exclamation-circle',
+            info: 'fa-info-circle',
+            warning: 'fa-exclamation-triangle'
+        };
+
+        const toast = document.createElement('div');
+        toast.className = `custom-toast fixed bottom-24 left-1/2 transform -translate-x-1/2 ${colors[type]} text-white px-5 py-3 rounded-xl shadow-lg z-[10000] flex items-center gap-2`;
+        toast.style.animation = 'toastAnim 2.5s ease forwards';
+        toast.innerHTML = `<i class="fas ${icons[type]}"></i> <span>${message}</span>`;
+
+        document.body.appendChild(toast);
+
+        setTimeout(() => {
+            if (toast) toast.remove();
+        }, 2500);
+    }
+
+    // اضافه کردن استایل‌های انیمیشن (اگر قبلاً اضافه نشده باشد)
+    if (!document.querySelector('#dialog-styles')) {
+        const style = document.createElement('style');
+        style.id = 'dialog-styles';
+        style.textContent = `
+            @keyframes dialogPop {
+                0% { transform: scale(0.95); opacity: 0; }
+                100% { transform: scale(1); opacity: 1; }
+            }
+            @keyframes toastAnim {
+                0% { opacity: 0; transform: translate(-50%, 20px); }
+                20% { opacity: 1; transform: translate(-50%, 0); }
+                80% { opacity: 1; transform: translate(-50%, 0); }
+                100% { opacity: 0; transform: translate(-50%, -20px); }
+            }
+        `;
+        document.head.appendChild(style);
     }
 </script>
 

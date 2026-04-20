@@ -1,103 +1,80 @@
 {% extends "base.html" %}
 
-{% block title %}پیشنهاد آیات قرآنی - سِراج{% endblock %}
+{% block title %}پیشنهاد آیات قرآنی | سِراج{% endblock %}
 
 {% block content %}
-<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-    <div class="mb-8 text-center">
-        <h1 class="text-2xl sm:text-3xl font-bold mb-2 bg-gradient-to-l from-emerald-600 to-teal-600 bg-clip-text text-transparent">
-            پیشنهاد آیات قرآنی
-        </h1>
-        <p class="text-gray-600 text-sm sm:text-base">آیات مناسب برای حال و هوای شما</p>
-    </div>
-    
-    <div class="bg-white rounded-2xl shadow-xl overflow-hidden mb-8">
-        <div class="p-4 sm:p-6">
-            <form method="POST" action="{{ url_for('ai_suggest') }}">
-                <div class="mb-6">
-                    <label class="block text-sm font-medium text-gray-700 mb-3">حال و هوای شما:</label>
-                    <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
-                        <button type="button" onclick="setMood('امید')" 
-                            class="group p-4 bg-gradient-to-br from-yellow-50 to-amber-50 border-2 border-yellow-200 rounded-xl text-center hover:from-yellow-100 hover:to-amber-100 transition-all transform hover:scale-105">
-                            <i class="fas fa-sun text-yellow-600 text-2xl mb-2 group-hover:scale-110 transition-transform"></i>
-                            <div class="font-medium text-gray-700">امید و نشاط</div>
-                        </button>
-                        
-                        <button type="button" onclick="setMood('آرامش')" 
-                            class="group p-4 bg-gradient-to-br from-blue-50 to-cyan-50 border-2 border-blue-200 rounded-xl text-center hover:from-blue-100 hover:to-cyan-100 transition-all transform hover:scale-105">
-                            <i class="fas fa-peace text-blue-600 text-2xl mb-2 group-hover:scale-110 transition-transform"></i>
-                            <div class="font-medium text-gray-700">آرامش</div>
-                        </button>
-                        
-                        <button type="button" onclick="setMood('توکل')" 
-                            class="group p-4 bg-gradient-to-br from-green-50 to-emerald-50 border-2 border-green-200 rounded-xl text-center hover:from-green-100 hover:to-emerald-100 transition-all transform hover:scale-105">
-                            <i class="fas fa-hands-praying text-green-600 text-2xl mb-2 group-hover:scale-110 transition-transform"></i>
-                            <div class="font-medium text-gray-700">توکل</div>
-                        </button>
-                    </div>
-                    <input type="hidden" id="mood" name="mood" value="general">
-                </div>
-                
-                <button type="submit" 
-                    class="w-full bg-gradient-to-l from-emerald-600 to-teal-600 text-white font-semibold py-3 px-6 rounded-xl hover:from-emerald-700 hover:to-teal-700 transition-all transform hover:scale-[1.02]">
-                    <i class="fas fa-star ml-2"></i>
-                    دریافت آیات پیشنهادی
-                </button>
-            </form>
-        </div>
-    </div>
-    
-    {% if verses %}
-        <div class="bg-white rounded-2xl shadow-xl overflow-hidden">
-            <div class="border-b border-gray-100 p-4 sm:p-6">
-                <h2 class="text-xl font-bold text-gray-800">
-                    <i class="fas fa-quran ml-2 text-emerald-600"></i>
-                    آیات پیشنهادی
-                </h2>
+<div class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-8 md:py-12">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6">
+        <!-- هدر -->
+        <div class="text-center mb-10">
+            <div class="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-amber-500 to-orange-500 rounded-2xl shadow-lg mb-4">
+                <i class="fas fa-lightbulb text-white text-2xl"></i>
             </div>
-            
-            <div class="p-4 sm:p-6">
-                <div class="space-y-6">
-                    {% for verse in verses %}
-                        <div class="border border-gray-200 rounded-xl p-4 sm:p-6 hover:shadow-lg transition-all">
-                            <div class="text-center mb-4">
-                                <p class="text-xl sm:text-2xl font-arabic mb-3">{{ verse.text }}</p>
-                                <p class="text-sm sm:text-base text-gray-600">{{ verse.translation }}</p>
-                            </div>
-                            <div class="text-xs sm:text-sm text-gray-400 text-center">
-                                <i class="fas fa-book"></i> سوره {{ verse.surah }}، آیه {{ verse.ayah }}
-                            </div>
-                        </div>
-                    {% endfor %}
+            <h1 class="text-2xl md:text-3xl font-bold text-gray-800">پیشنهاد آیات قرآنی</h1>
+            <p class="text-gray-500 mt-2">آیات مناسب برای حال و هوای تو</p>
+        </div>
+
+        <!-- کارت‌های انتخاب حال و هوا -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+            <button onclick="selectMood('hope')" class="mood-card group p-5 bg-white rounded-2xl shadow-sm hover:shadow-md transition-all text-center border-2 border-transparent hover:border-amber-400" data-mood="hope">
+                <i class="fas fa-sun text-amber-500 text-3xl mb-3 group-hover:scale-110 transition"></i>
+                <h3 class="font-bold text-gray-800">امید و نشاط</h3>
+                <p class="text-xs text-gray-400 mt-1">آیات امیدبخش</p>
+            </button>
+            <button onclick="selectMood('peace')" class="mood-card group p-5 bg-white rounded-2xl shadow-sm hover:shadow-md transition-all text-center border-2 border-transparent hover:border-blue-400" data-mood="peace">
+                <i class="fas fa-peace text-blue-500 text-3xl mb-3 group-hover:scale-110 transition"></i>
+                <h3 class="font-bold text-gray-800">آرامش</h3>
+                <p class="text-xs text-gray-400 mt-1">آیات آرامش‌بخش</p>
+            </button>
+            <button onclick="selectMood('trust')" class="mood-card group p-5 bg-white rounded-2xl shadow-sm hover:shadow-md transition-all text-center border-2 border-transparent hover:border-green-400" data-mood="trust">
+                <i class="fas fa-hands-praying text-green-500 text-3xl mb-3 group-hover:scale-110 transition"></i>
+                <h3 class="font-bold text-gray-800">توکل</h3>
+                <p class="text-xs text-gray-400 mt-1">آیات توکل</p>
+            </button>
+        </div>
+
+        <form id="moodForm" method="POST" action="{{ url_for('ai_suggest') }}">
+            <input type="hidden" id="moodInput" name="mood" value="">
+        </form>
+
+        <!-- نتایج -->
+        {% if verses %}
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+            <div class="px-6 py-4 bg-gradient-to-r from-emerald-50 to-teal-50 border-b border-gray-100">
+                <h2 class="font-bold text-gray-800"><i class="fas fa-quran ml-2 text-emerald-600"></i> آیات پیشنهادی</h2>
+            </div>
+            <div class="divide-y divide-gray-100">
+                {% for verse in verses %}
+                <div class="p-5 hover:bg-gray-50 transition">
+                    <p class="font-arabic text-xl text-center text-emerald-800 mb-3">{{ verse.text }}</p>
+                    <p class="text-gray-600 text-sm text-center">{{ verse.translation }}</p>
+                    <p class="text-xs text-gray-400 text-center mt-3">
+                        <i class="fas fa-book ml-1"></i> سوره {{ verse.surah }}، آیه {{ verse.ayah }}
+                    </p>
                 </div>
+                {% endfor %}
             </div>
         </div>
-    {% endif %}
+        {% endif %}
+    </div>
 </div>
 
 <script>
-function setMood(mood) {
-    document.getElementById('mood').value = mood;
-    // افکت بصری
-    const buttons = document.querySelectorAll('.grid button');
-    buttons.forEach(btn => {
-        btn.style.opacity = '0.7';
-        btn.style.transform = 'scale(0.98)';
-    });
-    event.currentTarget.style.opacity = '1';
-    event.currentTarget.style.transform = 'scale(1.05)';
-}
+    function selectMood(mood) {
+        const moodMap = {
+            'hope': 'امید',
+            'peace': 'آرامش',
+            'trust': 'توکل'
+        };
+        document.getElementById('moodInput').value = moodMap[mood];
+        document.getElementById('moodForm').submit();
+    }
 </script>
 
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&display=swap');
-    .font-arabic {
-        font-family: 'Amiri', serif;
-    }
-    @media (max-width: 640px) {
-        .font-arabic {
-            font-size: 1.1rem;
-        }
-    }
+    .font-arabic { font-family: 'Amiri', serif; }
+    .mood-card { transition: all 0.2s ease; }
+    .mood-card:active { transform: scale(0.98); }
 </style>
 {% endblock %}

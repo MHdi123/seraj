@@ -3,242 +3,368 @@
 {% block title %}مدیریت کاربران - سِراج{% endblock %}
 
 {% block content %}
-<div class="max-w-7xl mx-auto">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 py-6 md:py-8">
     <!-- Header -->
-    <div class="mb-8 flex justify-between items-center">
+    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6 md:mb-8">
         <div>
-            <h1 class="text-3xl font-bold mb-2">مدیریت کاربران</h1>
-            <p class="text-gray-600">مشاهده و مدیریت کاربران سیستم سِراج</p>
+            <h1 class="text-2xl md:text-3xl font-bold text-gray-800">مدیریت کاربران</h1>
+            <p class="text-sm text-gray-500 mt-1">مدیریت و مشاهده کاربران سیستم</p>
         </div>
-        <span class="bg-blue-100 text-blue-800 px-4 py-2 rounded-full text-sm font-medium">
-            <i class="fas fa-users ml-2"></i>
-            تعداد کل: {{ users|length }} کاربر
-        </span>
+        <div class="bg-gray-100 px-4 py-2 rounded-xl text-center">
+            <i class="fas fa-users text-gray-500 ml-2"></i>
+            <span class="text-gray-700 font-semibold">{{ users|length }}</span>
+            <span class="text-gray-500 text-sm"> کاربر</span>
+        </div>
     </div>
     
     <!-- Filters -->
-    <div class="card mb-6">
-        <div class="card-body">
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">جستجوی کاربر</label>
-                    <input type="text" id="searchUser" placeholder="نام کاربری، ایمیل، نام..." 
-                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">فیلتر نقش</label>
-                    <select id="roleFilter" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                        <option value="all">همه نقش‌ها</option>
-                        <option value="admin">مدیر</option>
-                        <option value="manager">مسئول</option>
-                        <option value="participant">دانشجو</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">فیلتر وضعیت</label>
-                    <select id="statusFilter" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                        <option value="all">همه وضعیت‌ها</option>
-                        <option value="active">فعال</option>
-                        <option value="inactive">غیرفعال</option>
-                    </select>
-                </div>
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4 md:p-5 mb-6">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div>
+                <label class="block text-xs font-medium text-gray-500 mb-1">جستجو</label>
+                <input type="text" id="searchUser" placeholder="نام، ایمیل یا نام کاربری..." 
+                       class="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition outline-none">
+            </div>
+            <div>
+                <label class="block text-xs font-medium text-gray-500 mb-1">نقش</label>
+                <select id="roleFilter" class="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition outline-none bg-white">
+                    <option value="all">همه نقش‌ها</option>
+                    <option value="admin">مدیر</option>
+                    <option value="manager">مسئول</option>
+                    <option value="participant">دانشجو</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-xs font-medium text-gray-500 mb-1">وضعیت</label>
+                <select id="statusFilter" class="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition outline-none bg-white">
+                    <option value="all">همه وضعیت‌ها</option>
+                    <option value="active">فعال</option>
+                    <option value="inactive">غیرفعال</option>
+                </select>
             </div>
         </div>
     </div>
     
     <!-- Users Table -->
-    <div class="card">
-        <div class="card-body">
-            {% if users %}
-                <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-gray-200">
-                        <thead class="bg-gray-50">
-                            <tr>
-                                <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">کاربر</th>
-                                <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">اطلاعات تماس</th>
-                                <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">دانشگاه</th>
-                                <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">نقش</th>
-                                <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">وضعیت</th>
-                                <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">عضویت</th>
-                                <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">عملیات</th>
-                            </tr>
-                        </thead>
-                        <tbody class="bg-white divide-y divide-gray-200">
-                            {% for user in users %}
-                                <tr class="hover:bg-gray-50">
-                                    <td class="px-4 py-4 whitespace-nowrap">
-                                        <div class="flex items-center">
-                                            <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center ml-3">
-                                                <i class="fas fa-user text-blue-600"></i>
-                                            </div>
-                                            <div>
-                                                <div class="font-medium text-gray-900">{{ user.full_name }}</div>
-                                                <div class="text-sm text-gray-500">@{{ user.username }}</div>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td class="px-4 py-4 whitespace-nowrap">
-                                        <div class="text-sm text-gray-900">{{ user.email }}</div>
-                                        <div class="text-xs text-gray-500">{{ user.phone if user.phone else 'بدون شماره' }}</div>
-                                    </td>
-                                    <td class="px-4 py-4 whitespace-nowrap">
-                                        <div class="text-sm text-gray-900">{{ user.university if user.university else 'نامشخص' }}</div>
-                                        <div class="text-xs text-gray-500">{{ user.faculty if user.faculty else '' }}</div>
-                                    </td>
-                                    <td class="px-4 py-4 whitespace-nowrap">
-                                        <span class="px-2 py-1 text-xs rounded-full 
-                                            {% if user.role.value == 'admin' %}
-                                                bg-purple-100 text-purple-800
-                                            {% elif user.role.value == 'manager' %}
-                                                bg-blue-100 text-blue-800
-                                            {% else %}
-                                                bg-green-100 text-green-800
-                                            {% endif %}">
-                                            {% if user.role.value == 'admin' %}
-                                                <i class="fas fa-crown ml-1"></i> مدیر
-                                            {% elif user.role.value == 'manager' %}
-                                                <i class="fas fa-user-tie ml-1"></i> مسئول
-                                            {% else %}
-                                                <i class="fas fa-user-graduate ml-1"></i> دانشجو
-                                            {% endif %}
-                                        </span>
-                                    </td>
-                                    <td class="px-4 py-4 whitespace-nowrap">
-                                        <span class="px-2 py-1 text-xs rounded-full 
-                                            {% if user.is_active %}
-                                                bg-green-100 text-green-800
-                                            {% else %}
-                                                bg-red-100 text-red-800
-                                            {% endif %}">
-                                            <i class="fas fa-circle ml-1 text-2xs"></i>
-                                            {{ 'فعال' if user.is_active else 'غیرفعال' }}
-                                        </span>
-                                    </td>
-                                    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
-                                        {{ user.created_at.strftime('%Y/%m/%d') }}
-                                    </td>
-                                    <td class="px-4 py-4 whitespace-nowrap text-sm font-medium">
-                                        <div class="flex space-x-2 space-x-reverse">
-                                            {% if user.id != current_user.id %}
-                                                <!-- استفاده از لینک مستقیم به جای onclick -->
-                                                <a href="/admin/user/toggle/{{ user.id }}" 
-                                                   class="px-3 py-1 {% if user.is_active %}bg-red-100 text-red-700 hover:bg-red-200{% else %}bg-green-100 text-green-700 hover:bg-green-200{% endif %} rounded-lg text-xs transition-colors"
-                                                    onclick="return confirm(this.dataset.msg);"
-                                                    data-msg="آیا از {{ 'غیرفعال' if user.is_active else 'فعال' }} کردن این کاربر مطمئن هستید؟"
-                                                    <i class="fas fa-{{ 'ban' if user.is_active else 'check' }} ml-1"></i>
-                                                    {{ 'غیرفعال' if user.is_active else 'فعال' }}
-                                                </a>
-                                            {% else %}
-                                                <span class="px-3 py-1 bg-gray-100 text-gray-500 rounded-lg text-xs">
-                                                    <i class="fas fa-user-shield ml-1"></i>
-                                                    خودتان
-                                                </span>
-                                            {% endif %}
-                                        </div>
-                                    </td>
-                                </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            {% else %}
-                <div class="text-center py-12">
-                    <div class="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <i class="fas fa-users-slash text-gray-400 text-3xl"></i>
-                    </div>
-                    <h3 class="text-xl font-bold text-gray-700 mb-2">هیچ کاربری وجود ندارد</h3>
-                    <p class="text-gray-600">هنوز کاربری ثبت‌نام نکرده است.</p>
-                </div>
-            {% endif %}
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full">
+                <thead>
+                    <tr class="bg-gray-50 border-b border-gray-100">
+                        <th class="px-4 py-3 text-right text-xs font-medium text-gray-500">کاربر</th>
+                        <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 hidden sm:table-cell">تماس</th>
+                        <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 hidden md:table-cell">دانشگاه</th>
+                        <th class="px-4 py-3 text-right text-xs font-medium text-gray-500">نقش</th>
+                        <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 hidden lg:table-cell">عضویت</th>
+                        <th class="px-4 py-3 text-right text-xs font-medium text-gray-500">عملیات</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-100">
+                    {% for user in users %}
+                    <tr class="hover:bg-gray-50 transition user-row">
+                        <td class="px-4 py-3">
+                            <div class="flex items-center gap-3">
+                                <div class="w-9 h-9 rounded-full bg-gradient-to-br from-blue-100 to-blue-200 flex items-center justify-center flex-shrink-0">
+                                    <i class="fas fa-user text-blue-600 text-sm"></i>
+                                </div>
+                                <div>
+                                    <div class="font-medium text-gray-800 text-sm">{{ user.full_name }}</div>
+                                    <div class="text-xs text-gray-400">@{{ user.username }}</div>
+                                </div>
+                            </div>
+                            <div class="text-xs text-gray-400 mt-1 sm:hidden">{{ user.email }}</div>
+                        </td>
+                        <td class="px-4 py-3 hidden sm:table-cell">
+                            <div class="text-sm text-gray-700">{{ user.email }}</div>
+                            <div class="text-xs text-gray-400">{{ user.phone if user.phone else '—' }}</div>
+                        </td>
+                        <td class="px-4 py-3 hidden md:table-cell">
+                            <div class="text-sm text-gray-700">{{ user.university if user.university else '—' }}</div>
+                            <div class="text-xs text-gray-400">{{ user.faculty if user.faculty else '' }}</div>
+                        </td>
+                        <td class="px-4 py-3">
+                            {% if user.role.value == 'admin' %}
+                                <span class="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-medium bg-purple-50 text-purple-700">
+                                    <i class="fas fa-crown text-xs"></i> مدیر
+                                </span>
+                            {% elif user.role.value == 'manager' %}
+                                <span class="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-medium bg-blue-50 text-blue-700">
+                                    <i class="fas fa-user-tie text-xs"></i> مسئول
+                                </span>
+                            {% else %}
+                                <span class="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-medium bg-emerald-50 text-emerald-700">
+                                    <i class="fas fa-user-graduate text-xs"></i> دانشجو
+                                </span>
+                            {% endif %}
+                        </td>
+                        <td class="px-4 py-3 hidden lg:table-cell">
+                            <span class="text-xs text-gray-500">{{ user.created_at.strftime('%Y/%m/%d') }}</span>
+                        </td>
+                        <td class="px-4 py-3">
+                            {% if user.id != current_user.id %}
+                                <a href="/admin/user/toggle/{{ user.id }}" 
+                                   class="toggle-user inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium transition-all
+                                   {% if user.is_active %}bg-red-50 text-red-600 hover:bg-red-100{% else %}bg-emerald-50 text-emerald-600 hover:bg-emerald-100{% endif %}"
+                                   data-confirm="آیا از غیرفعال کردن این کاربر مطمئن هستید؟">
+                                    <i class="fas fa-{% if user.is_active %}ban{% else %}check-circle{% endif %} text-xs"></i>
+                                    {{ 'غیرفعال' if user.is_active else 'فعال' }}
+                                </a>
+                            {% else %}
+                                <span class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium bg-gray-100 text-gray-500">
+                                    <i class="fas fa-user-shield text-xs"></i> خودتان
+                                </span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
+        
+        {% if not users %}
+        <div class="text-center py-12">
+            <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                <i class="fas fa-users-slash text-gray-400 text-2xl"></i>
+            </div>
+            <p class="text-gray-500 text-sm">هیچ کاربری یافت نشد</p>
+        </div>
+        {% endif %}
     </div>
 </div>
 
 <script>
-// فیلتر کردن کاربران - بدون هیچ Jinja2 درون جاوااسکریپت
+// دیالوگ تایید سفارشی
+function showConfirmDialog(options) {
+    // حذف دیالوگ قبلی اگر وجود داشت
+    const existingDialog = document.querySelector('.custom-confirm-dialog');
+    if (existingDialog) existingDialog.remove();
+
+    const dialog = document.createElement('div');
+    dialog.className = 'custom-confirm-dialog fixed inset-0 bg-black/50 flex items-center justify-center z-[10000]';
+    
+    // رنگ‌ها بر اساس نوع
+    const colors = {
+        danger: { bg: 'bg-red-500', hover: 'hover:bg-red-600', icon: 'fa-exclamation-triangle text-red-500' },
+        warning: { bg: 'bg-amber-500', hover: 'hover:bg-amber-600', icon: 'fa-exclamation-triangle text-amber-500' },
+        success: { bg: 'bg-emerald-500', hover: 'hover:bg-emerald-600', icon: 'fa-check-circle text-emerald-500' },
+        info: { bg: 'bg-blue-500', hover: 'hover:bg-blue-600', icon: 'fa-info-circle text-blue-500' }
+    };
+    
+    const color = colors[options.type || 'warning'];
+    
+    dialog.innerHTML = `
+        <div class="bg-white rounded-2xl p-6 max-w-sm mx-4 shadow-2xl transform transition-all scale-95" style="animation: dialogPop 0.2s ease forwards;">
+            <div class="text-center">
+                <div class="w-14 h-14 rounded-full bg-gray-100 flex items-center justify-center mx-auto mb-4">
+                    <i class="fas ${color.icon} text-2xl"></i>
+                </div>
+                <h3 class="text-lg font-bold text-gray-800 mb-2">${options.title || 'تأیید'}</h3>
+                <p class="text-gray-500 text-sm mb-6">${options.message || 'آیا مطمئن هستید؟'}</p>
+                <div class="flex gap-3">
+                    <button class="confirm-btn flex-1 ${color.bg} ${color.hover} text-white font-medium py-2.5 rounded-xl transition-all">
+                        ${options.confirmText || 'تأیید'}
+                    </button>
+                    <button class="cancel-btn flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-2.5 rounded-xl transition-all">
+                        ${options.cancelText || 'انصراف'}
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+
+    document.body.appendChild(dialog);
+
+    const confirmBtn = dialog.querySelector('.confirm-btn');
+    const cancelBtn = dialog.querySelector('.cancel-btn');
+
+    confirmBtn.addEventListener('click', () => {
+        dialog.remove();
+        if (options.onConfirm) options.onConfirm();
+    });
+
+    cancelBtn.addEventListener('click', () => {
+        dialog.remove();
+        if (options.onCancel) options.onCancel();
+    });
+
+    dialog.addEventListener('click', (e) => {
+        if (e.target === dialog) {
+            dialog.remove();
+            if (options.onCancel) options.onCancel();
+        }
+    });
+}
+
+// تابع نمایش نوتیفیکیشن (توست)
+function showToast(message, type = 'success') {
+    const existingToast = document.querySelector('.custom-toast');
+    if (existingToast) existingToast.remove();
+
+    const colors = {
+        success: 'bg-emerald-500',
+        error: 'bg-red-500',
+        info: 'bg-blue-500',
+        warning: 'bg-amber-500'
+    };
+
+    const icons = {
+        success: 'fa-check-circle',
+        error: 'fa-exclamation-circle',
+        info: 'fa-info-circle',
+        warning: 'fa-exclamation-triangle'
+    };
+
+    const toast = document.createElement('div');
+    toast.className = `custom-toast fixed bottom-24 left-1/2 transform -translate-x-1/2 ${colors[type]} text-white px-5 py-3 rounded-xl shadow-lg z-[10000] flex items-center gap-2`;
+    toast.style.animation = 'toastAnim 2.5s ease forwards';
+    toast.innerHTML = `<i class="fas ${icons[type]}"></i> <span>${message}</span>`;
+
+    document.body.appendChild(toast);
+
+    setTimeout(() => {
+        if (toast) toast.remove();
+    }, 2500);
+}
+
+// تابع تغییر وضعیت کاربر
+function toggleUserStatus(userId, isActive, btnElement) {
+    const actionText = isActive ? 'غیرفعال' : 'فعال';
+    const actionTextFa = isActive ? 'غیرفعال کردن' : 'فعال کردن';
+    
+    showConfirmDialog({
+        title: `${actionTextFa} کاربر`,
+        message: `آیا از ${actionTextFa} این کاربر مطمئن هستید؟`,
+        type: isActive ? 'danger' : 'success',
+        confirmText: ` ${actionTextFa}`,
+        cancelText: 'انصراف',
+        onConfirm: function() {
+            fetch(`/admin/user/toggle/${userId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showToast(`کاربر با موفقیت ${actionText} شد`, 'success');
+                    setTimeout(() => location.reload(), 1500);
+                } else {
+                    showToast(data.message || `خطا در ${actionTextFa} کاربر`, 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showToast('خطا در ارتباط با سرور', 'error');
+            });
+        }
+    });
+}
+
+// اضافه کردن استایل‌های انیمیشن (اگر قبلاً اضافه نشده باشد)
+if (!document.querySelector('#dialog-styles')) {
+    const style = document.createElement('style');
+    style.id = 'dialog-styles';
+    style.textContent = `
+        @keyframes dialogPop {
+            0% { transform: scale(0.95); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        @keyframes toastAnim {
+            0% { opacity: 0; transform: translate(-50%, 20px); }
+            20% { opacity: 1; transform: translate(-50%, 0); }
+            80% { opacity: 1; transform: translate(-50%, 0); }
+            100% { opacity: 0; transform: translate(-50%, -20px); }
+        }
+    `;
+    document.head.appendChild(style);
+}
+
 document.addEventListener('DOMContentLoaded', function() {
-    const searchInput = document.getElementById('searchUser');
-    const roleFilter = document.getElementById('roleFilter');
-    const statusFilter = document.getElementById('statusFilter');
+    var searchInput = document.getElementById('searchUser');
+    var roleFilter = document.getElementById('roleFilter');
+    var statusFilter = document.getElementById('statusFilter');
     
     if (searchInput && roleFilter && statusFilter) {
         function filterUsers() {
-            const searchTerm = searchInput.value.toLowerCase();
-            const roleValue = roleFilter.value;
-            const statusValue = statusFilter.value;
+            var searchTerm = searchInput.value.toLowerCase().trim();
+            var roleValue = roleFilter.value;
+            var statusValue = statusFilter.value;
             
-            const rows = document.querySelectorAll('tbody tr');
+            var rows = document.querySelectorAll('.user-row');
             
-            rows.forEach(row => {
-                const username = row.querySelector('td:first-child .text-gray-500')?.textContent?.toLowerCase() || '';
-                const email = row.querySelector('td:nth-child(2) .text-gray-900')?.textContent?.toLowerCase() || '';
-                const fullname = row.querySelector('td:first-child .font-medium')?.textContent?.toLowerCase() || '';
+            for (var i = 0; i < rows.length; i++) {
+                var row = rows[i];
+                var fullname = '';
+                var username = '';
+                var email = '';
+                var mobileEmail = '';
                 
-                // نقش
-                const roleSpan = row.querySelector('td:nth-child(4) span');
-                const role = roleSpan?.textContent?.includes('مدیر') ? 'admin' : 
-                            roleSpan?.textContent?.includes('مسئول') ? 'manager' : 'participant';
+                var nameElem = row.querySelector('.font-medium');
+                if (nameElem) fullname = nameElem.textContent.toLowerCase();
                 
-                // وضعیت
-                const statusSpan = row.querySelector('td:nth-child(5) span');
-                const status = statusSpan?.textContent?.includes('فعال') ? 'active' : 'inactive';
+                var userElem = row.querySelector('.text-gray-400');
+                if (userElem) username = userElem.textContent.toLowerCase();
                 
-                let show = true;
+                var emailElem = row.querySelector('td:nth-child(2) .text-gray-700');
+                if (emailElem) email = emailElem.textContent.toLowerCase();
                 
-                // جستجو
-                if (searchTerm) {
-                    show = username.includes(searchTerm) || 
-                           email.includes(searchTerm) || 
-                           fullname.includes(searchTerm);
+                var mobileElem = row.querySelector('td:first-child .text-gray-400');
+                if (mobileElem) mobileEmail = mobileElem.textContent.toLowerCase();
+                
+                var roleSpan = row.querySelector('td:nth-child(4) span');
+                var role = 'participant';
+                if (roleSpan) {
+                    var roleText = roleSpan.textContent;
+                    if (roleText.indexOf('مدیر') !== -1) role = 'admin';
+                    else if (roleText.indexOf('مسئول') !== -1) role = 'manager';
                 }
                 
-                // فیلتر نقش
+                var actionBtn = row.querySelector('td:last-child a');
+                var status = 'active';
+                if (actionBtn) {
+                    var btnText = actionBtn.textContent;
+                    if (btnText.indexOf('غیرفعال') !== -1) status = 'active';
+                    else if (btnText.indexOf('فعال') !== -1) status = 'inactive';
+                } else if (row.querySelector('td:last-child span')) {
+                    status = 'self';
+                }
+                
+                var show = true;
+                if (searchTerm) {
+                    show = fullname.indexOf(searchTerm) !== -1 || 
+                           username.indexOf(searchTerm) !== -1 || 
+                           email.indexOf(searchTerm) !== -1 ||
+                           mobileEmail.indexOf(searchTerm) !== -1;
+                }
+                
                 if (show && roleValue !== 'all') {
                     show = role === roleValue;
                 }
                 
-                // فیلتر وضعیت
-                if (show && statusValue !== 'all') {
+                if (show && statusValue !== 'all' && status !== 'self') {
                     show = status === statusValue;
                 }
                 
                 row.style.display = show ? '' : 'none';
-            });
+            }
         }
         
         searchInput.addEventListener('input', filterUsers);
         roleFilter.addEventListener('change', filterUsers);
         statusFilter.addEventListener('change', filterUsers);
     }
+    
+    // تبدیل لینک‌های تغییر وضعیت به رویدادهای سفارشی
+    var toggleLinks = document.querySelectorAll('.toggle-user');
+    for (var i = 0; i < toggleLinks.length; i++) {
+        toggleLinks[i].addEventListener('click', function(e) {
+            e.preventDefault();
+            var userId = this.getAttribute('href').split('/').pop();
+            var isActive = this.textContent.includes('غیرفعال');
+            toggleUserStatus(userId, isActive, this);
+        });
+    }
 });
 </script>
-
-<style>
-.text-2xs {
-    font-size: 0.65rem;
-}
-
-/* ریسپانسیو */
-@media (max-width: 768px) {
-    .px-4.py-4 {
-        padding: 0.5rem;
-    }
-    
-    .flex.space-x-2 {
-        flex-direction: column;
-        gap: 0.5rem;
-    }
-    
-    .flex.space-x-2 a,
-    .flex.space-x-2 span {
-        width: 100%;
-        margin: 0 !important;
-        text-align: center;
-    }
-    
-    .overflow-x-auto {
-        overflow-x: auto;
-    }
-}
-</style>
 {% endblock %}

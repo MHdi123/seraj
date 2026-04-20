@@ -97,34 +97,194 @@
 </div>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        var deleteButtons = document.querySelectorAll('.delete-btn');
-        deleteButtons.forEach(function(btn) {
-            btn.addEventListener('click', function() {
-                var id = this.getAttribute('data-id');
-                if (confirm('آیا از حذف این مسابقه مطمئن هستید؟')) {
-                    fetch('/admin/competition/' + id + '/delete', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        }
-                    })
-                    .then(function(response) {
-                        return response.json();
-                    })
-                    .then(function(data) {
-                        if (data.success) {
-                            location.reload();
-                        } else {
-                            alert('خطا در حذف مسابقه: ' + (data.message || 'خطای ناشناخته'));
-                        }
-                    })
-                    .catch(function() {
-                        alert('خطا در ارتباط با سرور');
-                    });
+document.addEventListener('DOMContentLoaded', function() {
+    var deleteButtons = document.querySelectorAll('.delete-btn');
+    
+    // استایل‌های دیالوگ سفارشی
+    var dialogStyles = document.createElement('style');
+    dialogStyles.textContent = `
+        .custom-confirm-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            animation: fadeIn 0.2s ease;
+        }
+        .custom-confirm-box {
+            background: white;
+            border-radius: 1.5rem;
+            max-width: 380px;
+            width: 90%;
+            margin: 1rem;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            animation: slideUp 0.2s ease;
+            overflow: hidden;
+        }
+        .custom-confirm-header {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            padding: 1.25rem;
+            text-align: center;
+        }
+        .custom-confirm-header i {
+            font-size: 3rem;
+            color: white;
+        }
+        .custom-confirm-body {
+            padding: 1.5rem;
+            text-align: center;
+        }
+        .custom-confirm-body h3 {
+            font-size: 1.25rem;
+            font-weight: bold;
+            color: #1f2937;
+            margin-bottom: 0.5rem;
+        }
+        .custom-confirm-body p {
+            color: #6b7280;
+            font-size: 0.875rem;
+            line-height: 1.5;
+        }
+        .custom-confirm-footer {
+            padding: 1rem 1.5rem 1.5rem;
+            display: flex;
+            gap: 0.75rem;
+            justify-content: center;
+        }
+        .custom-confirm-btn {
+            padding: 0.625rem 1.5rem;
+            border-radius: 0.75rem;
+            font-weight: 500;
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+        }
+        .custom-confirm-btn-danger {
+            background: #ef4444;
+            color: white;
+        }
+        .custom-confirm-btn-danger:hover {
+            background: #dc2626;
+            transform: scale(0.98);
+        }
+        .custom-confirm-btn-secondary {
+            background: #f3f4f6;
+            color: #4b5563;
+        }
+        .custom-confirm-btn-secondary:hover {
+            background: #e5e7eb;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        @keyframes slideUp {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+    `;
+    document.head.appendChild(dialogStyles);
+    
+    // تابع نمایش دیالوگ سفارشی
+    function showConfirmDialog(options) {
+        return new Promise(function(resolve) {
+            var overlay = document.createElement('div');
+            overlay.className = 'custom-confirm-overlay';
+            overlay.innerHTML = `
+                <div class="custom-confirm-box">
+                    <div class="custom-confirm-header">
+                        <i class="fas fa-trash-alt"></i>
+                    </div>
+                    <div class="custom-confirm-body">
+                        <h3>${options.title || 'حذف مسابقه'}</h3>
+                        <p>${options.message || 'آیا از حذف این مسابقه مطمئن هستید؟'}</p>
+                        <p style="font-size: 0.75rem; color: #9ca3af; margin-top: 0.5rem;">⚠️ این عمل غیرقابل بازگشت است</p>
+                    </div>
+                    <div class="custom-confirm-footer">
+                        <button class="custom-confirm-btn custom-confirm-btn-danger confirm-yes">بله، حذف شود</button>
+                        <button class="custom-confirm-btn custom-confirm-btn-secondary confirm-no">انصراف</button>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(overlay);
+            
+            var yesBtn = overlay.querySelector('.confirm-yes');
+            var noBtn = overlay.querySelector('.confirm-no');
+            
+            function cleanup() {
+                overlay.remove();
+            }
+            
+            yesBtn.addEventListener('click', function() {
+                cleanup();
+                resolve(true);
+            });
+            
+            noBtn.addEventListener('click', function() {
+                cleanup();
+                resolve(false);
+            });
+            
+            overlay.addEventListener('click', function(e) {
+                if (e.target === overlay) {
+                    cleanup();
+                    resolve(false);
                 }
             });
         });
+    }
+    
+    // استفاده از دیالوگ سفارشی برای دکمه‌های حذف
+    deleteButtons.forEach(function(btn) {
+        btn.addEventListener('click', async function() {
+            var id = this.getAttribute('data-id');
+            var title = this.getAttribute('data-title') || 'این مسابقه';
+            
+            var confirmed = await showConfirmDialog({
+                title: 'حذف مسابقه',
+                message: 'آیا از حذف "' + title + '" مطمئن هستید؟'
+            });
+            
+            if (confirmed) {
+                // نمایش لودینگ روی دکمه
+                var originalHtml = btn.innerHTML;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+                btn.disabled = true;
+                
+                fetch('/admin/competition/' + id + '/delete', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                })
+                .then(function(response) {
+                    return response.json();
+                })
+                .then(function(data) {
+                    if (data.success) {
+                        location.reload();
+                    } else {
+                        alert('خطا در حذف مسابقه: ' + (data.message || 'خطای ناشناخته'));
+                        btn.innerHTML = originalHtml;
+                        btn.disabled = false;
+                    }
+                })
+                .catch(function() {
+                    alert('خطا در ارتباط با سرور');
+                    btn.innerHTML = originalHtml;
+                    btn.disabled = false;
+                });
+            }
+        });
     });
+});
 </script>
 {% endblock %}

@@ -1,11 +1,12 @@
-# routes.py
 from flask import render_template, request, redirect, url_for, flash, jsonify, send_file, render_template_string
 from flask_login import login_user, logout_user, login_required, current_user
 from models import User
 from extensions import db
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
+from sqlalchemy import func, or_, and_, desc
 from datetime import datetime, timedelta, date
+import math  
 import os
 import secrets
 import uuid
@@ -41,12 +42,14 @@ from models import (
     QuranVerse,
     UserRole,
     Banner,
-    # اضافه کردن مدل‌های مسابقات
     Competition,
     CompetitionCategory,
     CompetitionRegistration,
     CompetitionRound,
     JudgeScore,
+    QuranQA,  # اضافه شد
+    QuranSuggestion,  # اضافه شد
+    UserQuranChat  # اضافه شد
 )
 import jdatetime
 from decorators import admin_required, staff_required, verified_required
@@ -165,8 +168,8 @@ def init_routes(app):
                     'verse_number': '',
                     'is_hadith': True
                 }
-            
-                # ============================================
+    
+    # ============================================
     # توابع هوش مصنوعی قرآنی
     # ============================================
     
@@ -174,11 +177,8 @@ def init_routes(app):
         """پیدا کردن بهترین پاسخ برای سوال کاربر از دیتابیس"""
         from sqlalchemy import or_
         
-        # نرمال کردن سوال
         question_clean = question.strip().lower()
         
-        # جستجو در جدول QuranQA
-        # 1. جستجوی دقیق
         exact_match = QuranQA.query.filter(
             QuranQA.is_active == True,
             QuranQA.question == question_clean
@@ -187,7 +187,6 @@ def init_routes(app):
         if exact_match:
             return exact_match
         
-        # 2. جستجو با contains
         contains_match = QuranQA.query.filter(
             QuranQA.is_active == True,
             or_(
@@ -199,7 +198,6 @@ def init_routes(app):
         if contains_match:
             return contains_match
         
-        # 3. جستجو بر اساس کلمات کلیدی (تجزیه سوال)
         keywords = question_clean.split()
         for keyword in keywords:
             if len(keyword) > 2:
@@ -249,7 +247,6 @@ def init_routes(app):
         
         answer_text = qa_obj.answer
         
-        # اضافه کردن منبع در انتها
         answer_text += "\n\n📚 **منبع:** پاسخ بر اساس قرآن کریم و تفاسیر معتبر"
         
         related_verses = []
@@ -274,7 +271,6 @@ def init_routes(app):
             "related_verses": related_verses,
             "suggestions": suggestions
         }
-
     
     # ============================================
     # توابع کمکی
@@ -285,19 +281,15 @@ def init_routes(app):
         if not file or file.filename == '':
             return None
         
-        # ایجاد نام یکتا
         ext = file.filename.rsplit('.', 1)[1].lower() if '.' in file.filename else 'jpg'
         filename = f"{uuid.uuid4().hex}.{ext}"
         
-        # ایجاد پوشه
         upload_path = os.path.join(app.config['UPLOAD_FOLDER'], subfolder)
         os.makedirs(upload_path, exist_ok=True)
         
-        # ذخیره فایل
         file_path = os.path.join(upload_path, filename)
         file.save(file_path)
         
-        # برگرداندن مسیر نسبی
         return os.path.join(subfolder, filename)
     
     def create_notification(user_id, title, message):
@@ -318,11 +310,9 @@ def init_routes(app):
         if rank_value is None:
             return None
         
-        # اگر خودش enum است
         if hasattr(rank_value, 'value'):
             return rank_value
         
-        # اگر رشته است
         rank_str = str(rank_value)
         
         mapping = {
@@ -338,6 +328,18 @@ def init_routes(app):
         }
         
         return mapping.get(rank_str, 'OTHER')
+    
+    def update_leaderboard(competition_id):
+        """به‌روزرسانی لیدربورد مسابقه"""
+        registrations = CompetitionRegistration.query.filter_by(competition_id=competition_id).all()
+        for reg in registrations:
+            total_score = db.session.query(db.func.sum(JudgeScore.score)).filter_by(registration_id=reg.id).scalar() or 0
+            reg.final_score = total_score
+        db.session.commit()
+        sorted_regs = CompetitionRegistration.query.filter_by(competition_id=competition_id).order_by(CompetitionRegistration.final_score.desc()).all()
+        for idx, reg in enumerate(sorted_regs, 1):
+            reg.rank = idx
+        db.session.commit()
     
     # ============================================
     # ========== مسیر install_pwa ==========
@@ -356,7 +358,6 @@ def init_routes(app):
     def index():
         """صفحه اصلی"""
         try:
-            # دریافت رویدادهای فعال
             upcoming_events = Event.query.filter(
                 Event.start_date >= datetime.utcnow(),
                 Event.is_active == True
@@ -364,20 +365,15 @@ def init_routes(app):
         except:
             upcoming_events = []
         
-        # دریافت بنرهای فعال
         try:
             banners = Banner.query.filter_by(is_active=True).order_by(Banner.order).all()
         except:
             banners = []
         
-        # دریافت آیه روز
         daily_verse = get_daily_verse()
-        
-        # دریافت تاریخ شمسی
         current_date = get_persian_date()
         
         try:
-            # آمار
             active_students = User.query.filter_by(is_active=True, role=UserRole.STUDENT).count()
             events_count = Event.query.count()
             competitions_count = Event.query.filter_by(event_type=EventType.COMPETITION).count()
@@ -388,7 +384,6 @@ def init_routes(app):
             competitions_count = 0
             workshops_count = 0
         
-        # دریافت مسابقات پیش‌رو
         upcoming_competitions = []
         try:
             upcoming_competitions = Competition.query.filter(
@@ -398,17 +393,27 @@ def init_routes(app):
         except:
             pass
         
+        upcoming_circles = []
+        try:
+            upcoming_circles = QuranCircle.query.filter(
+                QuranCircle.is_active == True
+            ).order_by(QuranCircle.created_at.desc()).limit(6).all()
+        except Exception as e:
+            print(f"خطا در دریافت حلقه‌ها: {e}")
+            upcoming_circles = []
+        
         return render_template('index.html', 
-                             events=upcoming_events,
-                             banners=banners,
-                             daily_verse=daily_verse,
-                             current_date=current_date,
-                             active_students=active_students,
-                             events_count=events_count,
-                             competitions_count=competitions_count,
-                             workshops_count=workshops_count,
-                             competitions=upcoming_competitions,
-                             current_user=current_user)
+                     events=upcoming_events,
+                     banners=banners,
+                     daily_verse=daily_verse,
+                     current_date=current_date,
+                     active_students=active_students,
+                     events_count=events_count,
+                     competitions_count=competitions_count,
+                     workshops_count=workshops_count,
+                     competitions=upcoming_competitions,  
+                     circles=upcoming_circles,
+                     current_user=current_user)
     
     @app.route('/events')
     def events_list():
@@ -453,7 +458,6 @@ def init_routes(app):
             flash('رویداد مورد نظر یافت نشد.', 'error')
             return redirect(url_for('events_list'))
         
-        # بررسی ثبت‌نام کاربر
         is_registered = False
         if current_user.is_authenticated:
             try:
@@ -472,58 +476,112 @@ def init_routes(app):
     
     @app.route('/search')
     def search():
-        """صفحه جستجوی پیشرفته"""
-        q = request.args.get('q', '')
+        query = request.args.get('q', '').strip()
+        event_type = request.args.get('type', '')
+        sort_by = request.args.get('sort', 'newest')
         page = request.args.get('page', 1, type=int)
+        per_page = 12
         
-        results = {
-            'events': [],
-            'total': 0
-        }
+        all_results = []
         
-        if q:
-            try:
-                # جستجو در رویدادها
-                events_query = Event.query.filter(
-                    Event.is_active == True,
-                    (Event.title.contains(q)) | 
-                    (Event.description.contains(q)) |
-                    (Event.location.contains(q))
-                ).order_by(Event.start_date)
-                
-                results['events'] = events_query.paginate(page=page, per_page=10, error_out=False)
-                results['total'] = results['events'].total
-            except:
-                results = {
-                    'events': [],
-                    'total': 0
-                }
-        
-        return render_template('search.html', 
-                             query=q, 
-                             results=results,
-                             current_user=current_user)
-    
-    @app.route('/about')
-    def about():
-        """صفحه درباره ما"""
-        return render_template('about.html', current_user=current_user)
-    
-    @app.route('/contact', methods=['GET', 'POST'])
-    def contact():
-        """صفحه تماس با ما"""
-        if request.method == 'POST':
-            name = request.form.get('name')
-            email = request.form.get('email')
-            subject = request.form.get('subject')
-            message = request.form.get('message')
+        if query:
+            # جستجو در رویدادها
+            events_query = Event.query.filter(Event.is_active == True)
+            events_query = events_query.filter(
+                or_(
+                    Event.title.ilike(f'%{query}%'),
+                    Event.description.ilike(f'%{query}%'),
+                    Event.location.ilike(f'%{query}%')
+                )
+            )
+            if event_type and event_type in ['workshop', 'competition', 'halaqah', 'lecture']:
+                events_query = events_query.filter(Event.event_type == event_type)
             
-            # اینجا می‌توانید ایمیل ارسال کنید
-            flash('پیام شما با موفقیت ارسال شد. به زودی پاسخ داده خواهد شد.', 'success')
-            return redirect(url_for('contact'))
+            if sort_by == 'newest':
+                events_query = events_query.order_by(Event.start_date.desc())
+            elif sort_by == 'oldest':
+                events_query = events_query.order_by(Event.start_date.asc())
+            elif sort_by == 'popular':
+                events_query = events_query.order_by(Event.current_participants.desc())
+            
+            for event in events_query.all():
+                all_results.append({
+                    'type': 'event',
+                    'data': event,
+                    'date': event.start_date,
+                    'popularity': event.current_participants
+                })
+            
+            # جستجو در مسابقات
+            competitions_query = Competition.query.filter(Competition.is_active == True)
+            competitions_query = competitions_query.filter(
+                or_(
+                    Competition.title.ilike(f'%{query}%'),
+                    Competition.description.ilike(f'%{query}%')
+                )
+            )
+            for comp in competitions_query.all():
+                all_results.append({
+                    'type': 'competition',
+                    'data': comp,
+                    'date': comp.start_date,
+                    'popularity': comp.current_participants
+                })
+            
+            # جستجو در حلقه‌های تلاوت
+            circles_query = QuranCircle.query.filter(QuranCircle.is_active == True)
+            circles_query = circles_query.filter(
+                or_(
+                    QuranCircle.name.ilike(f'%{query}%'),
+                    QuranCircle.description.ilike(f'%{query}%'),
+                    QuranCircle.teacher_name.ilike(f'%{query}%')
+                )
+            )
+            for circle in circles_query.all():
+                all_results.append({
+                    'type': 'circle',
+                    'data': circle,
+                    'date': circle.created_at,
+                    'popularity': circle.current_members
+                })
+            
+            # مرتب‌سازی بر اساس محبوبیت
+            if sort_by == 'popular':
+                all_results.sort(key=lambda x: x['popularity'], reverse=True)
+            elif sort_by == 'newest':
+                all_results.sort(key=lambda x: x['date'], reverse=True)
+            elif sort_by == 'oldest':
+                all_results.sort(key=lambda x: x['date'])
+            
+            # صفحه‌بندی
+            total = len(all_results)
+            total_pages = (total + per_page - 1) // per_page
+            start = (page - 1) * per_page
+            end = start + per_page
+            paginated_results = all_results[start:end]
+            
+            results = {
+                'results_list': paginated_results,
+                'total': total,
+                'page': page,
+                'per_page': per_page,
+                'pages': total_pages,
+                'has_prev': page > 1,
+                'has_next': page < total_pages,
+                'prev_num': page - 1,
+                'next_num': page + 1
+            }
+            
+            return render_template('search.html', 
+                                 query=query,
+                                 results=results,
+                                 event_type=event_type,
+                                 sort_by=sort_by)
         
-        return render_template('contact.html', current_user=current_user)
+        return render_template('search.html', query='', results=None)
+
     
+
     # ============================================
     # مسیرهای احراز هویت
     # ============================================
@@ -550,14 +608,7 @@ def init_routes(app):
             email = request.form.get('email')
             password = request.form.get('password')
             confirm_password = request.form.get('confirm_password')
-            first_name = request.form.get('first_name')
-            last_name = request.form.get('last_name')
-            student_id = request.form.get('student_id')
-            university = request.form.get('university')
-            faculty = request.form.get('faculty')
-            phone = request.form.get('phone')
             
-            # اعتبارسنجی
             errors = []
             
             if not username or len(username) < 3:
@@ -583,27 +634,25 @@ def init_routes(app):
                     flash(error, 'error')
                 return redirect(url_for('register'))
             
-            # ایجاد کاربر جدید
             user = User(
                 username=username,
                 email=email,
                 first_name=request.form.get('first_name', ''),
                 last_name=request.form.get('last_name', ''),
-                student_id=student_id,
-                university=university,
-                faculty=faculty,
-                phone=phone,
+                student_id=request.form.get('student_id'),
+                university=request.form.get('university'),
+                faculty=request.form.get('faculty'),
+                phone=request.form.get('phone'),
                 role=UserRole.STUDENT,
                 user_type='student',
                 is_active=True,
-                is_verified=True  # دانشجوها خودکار تأیید می‌شوند
+                is_verified=True
             )
             user.set_password(password)
             
             db.session.add(user)
             db.session.commit()
             
-            # ایجاد اعلان خوش‌آمدگویی
             create_notification(
                 user.id,
                 'به سِراج خوش آمدید!',
@@ -615,70 +664,38 @@ def init_routes(app):
         
         return render_template('auth/register.html')
     
-    # ============================================
-    # ========== مسیر لاگین ==========
-    # ============================================
-    
-    @app.route('/auth/login', methods=['GET', 'POST'])
+    @app.route('/login', methods=['GET', 'POST'])
     def login():
-        """ورود کاربر - اصلاح شده برای هدایت صحیح اساتید"""
+        """صفحه ورود کاربر"""
         if current_user.is_authenticated:
-            # اگر کاربر لاگین است، بر اساس نوع کاربر هدایت شود
-            if current_user.is_admin():
-                return redirect(url_for('admin_dashboard'))
-            elif current_user.is_professor():  # اولویت با استاد
-                if not current_user.is_verified:
-                    return redirect(url_for('not_approved'))
-                return redirect(url_for('professor_dashboard'))
-            elif current_user.is_staff():  # بعد کارمند
-                if not current_user.is_verified:
-                    return redirect(url_for('not_approved'))
-                return redirect(url_for('staff_dashboard'))
-            else:
-                return redirect(url_for('dashboard'))
+            return redirect(url_for('index'))
         
         if request.method == 'POST':
-            username = request.form.get('username')
-            password = request.form.get('password')
-            remember = request.form.get('remember') == 'on'
+            username = request.form.get('username', '').strip()
+            password = request.form.get('password', '')
             
-            user = User.query.filter_by(username=username).first()
+            if not username or not password:
+                flash('لطفاً نام کاربری/ایمیل و رمز عبور را وارد کنید.', 'danger')
+                return render_template('auth/login.html')
             
-            if user and user.check_password(password):
-                if user.is_active:
-                    login_user(user, remember=remember)
-                    
-                    # به‌روزرسانی آخرین ورود
-                    user.last_login = datetime.utcnow()
-                    user.last_seen = datetime.utcnow()
-                    db.session.commit()
-                    
-                    # بررسی تأیید برای استاد و کارمند
-                    if user.user_type in ['professor', 'staff'] and not user.is_verified:
-                        flash('⚠️ حساب کاربری شما در انتظار تأیید است.', 'warning')
-                        return redirect(url_for('not_approved'))
-                    
-                    flash(f'خوش آمدید {user.full_name}!', 'success')
-                    
-                    # ریدایرکت بر اساس نوع کاربر
-                    if user.is_admin():
-                        return redirect(url_for('admin_dashboard'))
-                    elif user.is_professor():
-                        return redirect(url_for('professor_dashboard'))
-                    elif user.is_staff():
-                        return redirect(url_for('staff_dashboard'))
-                    else:
-                        return redirect(url_for('dashboard'))
-                else:
-                    flash('⚠️ حساب کاربری شما غیرفعال شده است. با پشتیبانی تماس بگیرید.', 'error')
+            from sqlalchemy import func
+            user = User.query.filter(
+                (func.lower(User.email) == username.lower()) | 
+                (func.lower(User.username) == username.lower())
+            ).first()
+            
+            if user and check_password_hash(user.password_hash, password):
+                login_user(user)
+                flash(f'خوش آمدید {user.first_name} {user.last_name}', 'success')
+                
+                next_page = request.args.get('next')
+                if next_page:
+                    return redirect(next_page)
+                return redirect(url_for('index'))
             else:
-                flash('نام کاربری یا رمز عبور نادرست است.', 'error')
+                flash('نام کاربری/ایمیل یا رمز عبور نادرست است.', 'danger')
         
         return render_template('auth/login.html')
-    
-    # ============================================
-    # ========== مسیر not_approved ==========
-    # ============================================
     
     @app.route('/not-approved')
     def not_approved():
@@ -686,7 +703,6 @@ def init_routes(app):
         if not current_user.is_authenticated:
             return redirect(url_for('login'))
         
-        # اگر کاربر تأیید شده یا دانشجو است، به داشبورد برود
         if current_user.is_verified or current_user.user_type == 'student':
             if current_user.is_admin():
                 return redirect(url_for('admin_dashboard'))
@@ -707,85 +723,72 @@ def init_routes(app):
         flash('با موفقیت خارج شدید.', 'info')
         return redirect(url_for('index'))
     
-    @app.route('/auth/forgot-password', methods=['GET', 'POST'])
+    @app.route('/forgot-password', methods=['GET', 'POST'])
     def forgot_password():
-        """فراموشی رمز عبور"""
+        """صفحه فراموشی رمز عبور"""
+        if current_user.is_authenticated:
+            return redirect(url_for('index'))
+        
         if request.method == 'POST':
-            email = request.form.get('email')
-            user = User.query.filter_by(email=email).first()
+            identifier = request.form.get('email', '').strip().lower()
+            
+            if not identifier:
+                flash('لطفاً ایمیل یا نام کاربری خود را وارد کنید.', 'danger')
+                return render_template('auth/forgot_password.html')
+            
+            from sqlalchemy import func
+            user = User.query.filter(
+                (func.lower(User.email) == identifier) | 
+                (func.lower(User.username) == identifier)
+            ).first()
             
             if user:
-                # ایجاد توکن
-                token = secrets.token_urlsafe(32)
-                expires_at = datetime.utcnow() + timedelta(hours=24)
+                temp_password = "1234567"
                 
-                reset_token = PasswordResetToken(
-                    user_id=user.id,
-                    token=token,
-                    expires_at=expires_at
-                )
-                
-                db.session.add(reset_token)
+                # استفاده از password_hash به جای password
+                user.password_hash = generate_password_hash(temp_password)
                 db.session.commit()
                 
-                # ایجاد اعلان
-                create_notification(
-                    user.id,
-                    'بازنشانی رمز عبور',
-                    f'لینک بازنشانی رمز عبور برای شما ایجاد شد. این لینک تا ۲۴ ساعت معتبر است.'
-                )
+                flash(f'✅ رمز عبور موقت شما: {temp_password}', 'success')
+                flash('⚠️ لطفاً پس از ورود، رمز عبور خود را تغییر دهید.', 'info')
                 
-                flash('لینک بازنشانی رمز عبور به ایمیل شما ارسال شد.', 'success')
+                return redirect(url_for('login'))
             else:
-                flash('ایمیل وارد شده در سیستم یافت نشد.', 'error')
-            
-            return redirect(url_for('login'))
+                flash('❌ کاربری با این ایمیل یا نام کاربری یافت نشد.', 'danger')
         
         return render_template('auth/forgot_password.html')
     
-    @app.route('/auth/reset-password/<token>', methods=['GET', 'POST'])
-    def reset_password(token):
-        """بازنشانی رمز عبور"""
-        reset_token = PasswordResetToken.query.filter_by(
-            token=token, 
-            used=False
-        ).first()
-        
-        if not reset_token or reset_token.expires_at < datetime.utcnow():
-            flash('لینک بازنشانی رمز عبور نامعتبر یا منقضی شده است.', 'error')
-            return redirect(url_for('forgot_password'))
-        
+    @app.route('/reset-password', methods=['GET', 'POST'])
+    @login_required
+    def reset_password():
+        """تغییر رمز عبور توسط کاربر وارد شده"""
         if request.method == 'POST':
-            password = request.form.get('password')
+            current_password = request.form.get('current_password')
+            new_password = request.form.get('new_password')
             confirm_password = request.form.get('confirm_password')
             
-            if password != confirm_password:
-                flash('رمز عبور و تأیید آن مطابقت ندارند.', 'error')
-                return redirect(url_for('reset_password', token=token))
+            # بررسی رمز فعلی
+            if not check_password_hash(current_user.password_hash, current_password):
+                flash('رمز عبور فعلی اشتباه است.', 'danger')
+                return render_template('auth/reset_password.html')
             
-            if len(password) < 6:
-                flash('رمز عبور باید حداقل ۶ کاراکتر باشد.', 'error')
-                return redirect(url_for('reset_password', token=token))
+            # بررسی رمز جدید
+            if len(new_password) < 6:
+                flash('رمز عبور جدید باید حداقل ۶ کاراکتر باشد.', 'danger')
+                return render_template('auth/reset_password.html')
             
-            # به‌روزرسانی رمز عبور
-            user = reset_token.user
-            user.set_password(password)
+            if new_password != confirm_password:
+                flash('رمز عبور جدید و تکرار آن مطابقت ندارند.', 'danger')
+                return render_template('auth/reset_password.html')
             
-            # غیرفعال کردن توکن
-            reset_token.used = True
-            
+            # تغییر رمز
+            current_user.password_hash = generate_password_hash(new_password)
             db.session.commit()
             
-            create_notification(
-                user.id,
-                'تغییر رمز عبور',
-                'رمز عبور شما با موفقیت تغییر یافت.'
-            )
-            
-            flash('رمز عبور شما با موفقیت تغییر یافت. لطفاً وارد شوید.', 'success')
-            return redirect(url_for('login'))
+            flash('رمز عبور شما با موفقیت تغییر کرد.', 'success')
+            return redirect(url_for('profile'))
         
-        return render_template('auth/reset_password.html', token=token)
+        return render_template('auth/reset_password.html')
     
     # ============================================
     # ========== مسیرهای کاربر عادی ==========
@@ -3570,22 +3573,23 @@ def init_routes(app):
     @login_required
     @verified_required
     def ai_history():
-        """تاریخچه پرسش‌ها"""
-        page = request.args.get('page', 1, type=int)
-        
-        try:
-            questions = AIQuestion.query.filter_by(
-                user_id=current_user.id
-            ).order_by(AIQuestion.created_at.desc()).paginate(
-                page=page, per_page=10, error_out=False
-            )
-        except:
-            questions = []
-        
-        return render_template('ai/history.html',
-                             questions=questions,
-                             ai_enabled=AI_ENABLED,
-                             current_user=current_user)
+          """تاریخچه پرسش‌ها"""
+          page = request.args.get('page', 1, type=int)
+    
+          try:
+              # استفاده از UserQuranChat به جای AIQuestion
+              questions = UserQuranChat.query.filter_by(
+                  user_id=current_user.id
+              ).order_by(UserQuranChat.created_at.desc()).paginate(
+                  page=page, per_page=10, error_out=False
+              )
+          except:
+              questions = []
+          
+          return render_template('ai/history.html',
+                               questions=questions,
+                               ai_enabled=AI_ENABLED,
+                                     current_user=current_user)
     
     @app.route('/ai/ask', methods=['POST'])
     @login_required
@@ -3729,51 +3733,51 @@ def init_routes(app):
                              text=text,
                              ai_enabled=AI_ENABLED,
                              current_user=current_user)
+
+    @app.route('/ai/suggest', methods=['GET', 'POST'])
+    @login_required
+    @verified_required
+    def ai_suggest():
+        """پیشنهاد آیات بر اساس حال و هوا"""
+        verses = []
+        mood = "general"
     
-        @app.route('/ai/suggest', methods=['GET', 'POST'])
-        @login_required
-        @verified_required
-        def ai_suggest():
-            """پیشنهاد آیات بر اساس حال و هوا"""
-            verses = []
-            mood = "general"
+        if request.method == 'POST':
+            mood = request.form.get('mood', 'general')
         
-            if request.method == 'POST':
-               mood = request.form.get('mood', 'general')
-            
-            # نقشه mood به فارسی
-            mood_map = {
-                'امید': 'امید',
-                'آرامش': 'آرامش',
-                'توکل': 'توکل'
-            }
-            
-            mood_key = mood_map.get(mood, 'general')
-            
-            # دریافت از دیتابیس
-            if mood_key != 'general':
-                verses = get_suggestions_by_mood(mood_key)
-            
-            # اگر آیات کافی نبود، از جدول QuranVerse استفاده کن
-            if not verses or len(verses) < 3:
-                try:
-                    random_verses = QuranVerse.query.order_by(func.random()).limit(5).all()
-                    for v in random_verses:
-                        verses.append({
-                            'text': v.verse_arabic if hasattr(v, 'verse_arabic') else '',
-                            'translation': v.verse_persian if hasattr(v, 'verse_persian') else v.translation if hasattr(v, 'translation') else '',
-                            'surah': v.surah_name if hasattr(v, 'surah_name') else '',
-                            'ayah': v.verse_number if hasattr(v, 'verse_number') else ''
-                        })
-                except:
-                    pass
+        # نقشه mood به فارسی
+        mood_map = {
+            'امید': 'امید',
+            'آرامش': 'آرامش',
+            'توکل': 'توکل'
+        }
+        
+        mood_key = mood_map.get(mood, 'general')
+        
+        # دریافت از دیتابیس
+        if mood_key != 'general':
+            verses = get_suggestions_by_mood(mood_key)
+        
+        # اگر آیات کافی نبود، از جدول QuranVerse استفاده کن
+        if not verses or len(verses) < 3:
+            try:
+                random_verses = QuranVerse.query.order_by(func.random()).limit(5).all()
+                for v in random_verses:
+                    verses.append({
+                        'text': v.verse_arabic if hasattr(v, 'verse_arabic') else '',
+                        'translation': v.verse_persian if hasattr(v, 'verse_persian') else v.translation if hasattr(v, 'translation') else '',
+                        'surah': v.surah_name if hasattr(v, 'surah_name') else '',
+                        'ayah': v.verse_number if hasattr(v, 'verse_number') else ''
+                    })
+            except:
+                pass
         
         return render_template('ai/suggest.html',
                              verses=verses,
                              mood=mood,
                              ai_enabled=AI_ENABLED,
                              current_user=current_user)
-    
+
     @app.route('/ai/ask_api', methods=['POST'])
     @login_required
     @verified_required
@@ -3814,7 +3818,6 @@ def init_routes(app):
             }
         
         return jsonify(answer)
-    
     # ============================================
     # API های عمومی
     # ============================================
@@ -4812,7 +4815,7 @@ def init_routes(app):
         leaderboard = CompetitionRegistration.query.filter_by(competition_id=comp_id)\
             .order_by(CompetitionRegistration.final_score.desc()).all()
         return render_template('competitions/leaderboard.html', competition=competition, leaderboard=leaderboard, current_user=current_user)
-
+        
     # ============================================
     # بخش مدیریت مسابقات (فقط ادمین)
     # ============================================
