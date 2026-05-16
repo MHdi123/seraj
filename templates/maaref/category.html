@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+
+{% block title %}{{ category.name }} - معارف اسلامی | سِراج{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-3 sm:px-4 py-4 sm:py-6 md:py-8">
+    
+    <!-- ========== هدر دسته‌بندی ========== -->
+    <div class="mb-6 sm:mb-8 text-right">
+        <div class="flex items-center gap-2 text-sm text-gray-500 mb-2">
+            <a href="{{ url_for('maaref_index') }}" class="hover:text-emerald-600 transition">معارف اسلامی</a>
+            <i class="fas fa-chevron-left text-xs"></i>
+            <span class="text-emerald-600">{{ category.name }}</span>
+        </div>
+        
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div>
+                <h1 class="text-xl sm:text-2xl md:text-3xl font-bold" style="color: #059669;">
+                    {{ category.name }}
+                </h1>
+                {% if category.description %}
+                <p class="text-gray-500 text-xs sm:text-sm mt-1">{{ category.description }}</p>
+                {% endif %}
+            </div>
+            <div class="inline-flex items-center gap-2 bg-emerald-50 px-3 py-1.5 rounded-full self-start sm:self-auto">
+                <i class="fas fa-book-open text-emerald-400 text-xs"></i>
+                <span class="text-xs text-emerald-600 whitespace-nowrap">{{ articles|length }} مطلب</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========== لیست مقالات ========== -->
+    {% if articles %}
+    <div class="space-y-3 sm:space-y-4">
+        {% for article in articles %}
+        <a href="{{ url_for('maaref_detail', article_id=article.id) }}" class="block group">
+            <div class="p-3 sm:p-4 rounded-xl bg-white hover:shadow-md transition-all duration-200">
+                <div class="flex flex-wrap gap-2 mb-2">
+                    <span class="px-2 py-0.5 rounded-full text-xs" style="background-color: #ecfdf5; color: #059669;">
+                        {{ {'beginner': 'مقدماتی', 'intermediate': 'متوسط', 'advanced': 'پیشرفته'}[article.level] or article.level }}
+                    </span>
+                    {% if article.is_featured %}
+                    <span class="px-2 py-0.5 rounded-full bg-amber-100 text-amber-600 text-xs">
+                        <i class="fas fa-star text-xs ml-1"></i> ویژه
+                    </span>
+                    {% endif %}
+                </div>
+                <h2 class="text-sm sm:text-base md:text-lg font-semibold line-clamp-2 group-hover:text-emerald-600 transition" style="color: #1f2937;">{{ article.title }}</h2>
+                <p class="text-xs sm:text-sm text-gray-500 line-clamp-2 mt-1">{{ article.excerpt or article.content|striptags|truncate(100) }}</p>
+                <div class="flex items-center gap-2 mt-2 text-xs text-gray-400">
+                    <span><i class="fas fa-eye ml-1"></i> {{ article.view_count }} بازدید</span>
+                    <span>•</span>
+                    <span><i class="fas fa-calendar-alt ml-1"></i> {{ article.created_at|persian_date if article.created_at else '۱۴۰۴' }}</span>
+                </div>
+            </div>
+        </a>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="text-center py-12 bg-gray-50 rounded-xl">
+        <div class="inline-flex items-center justify-center w-16 h-16 rounded-full mb-4" style="background-color: #ecfdf5;">
+            <i class="fas fa-folder-open text-2xl" style="color: #059669;"></i>
+        </div>
+        <p class="text-gray-500 text-sm">هیچ مطلبی در این دسته‌بندی یافت نشد</p>
+        <a href="{{ url_for('maaref_index') }}" class="inline-block mt-4 text-emerald-600 text-sm hover:underline">
+            <i class="fas fa-arrow-right ml-1"></i> بازگشت به صفحه اصلی
+        </a>
+    </div>
+    {% endif %}
+</div>
+
+<style>
+.line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+.line-clamp-1 {
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+</style>
+{% endblock %}

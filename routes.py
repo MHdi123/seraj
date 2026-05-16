@@ -6,6 +6,10 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 from sqlalchemy import func, or_, and_, desc
 from datetime import datetime, timedelta, date
+from models import Ahkam
+from forms import AhkamForm
+from datetime import datetime
+from flask import flash, redirect, url_for, request
 import math  
 import os
 import secrets
@@ -22,6 +26,10 @@ from models import (
     SessionAttendance,
     AcademicRank,
     Class,
+    SerajCategory,
+    SerajQA,
+    SerajSuggestion,
+    SerajChat,
     ClassEnrollment,
     CourseSession,
     Attendance,
@@ -47,9 +55,11 @@ from models import (
     CompetitionRegistration,
     CompetitionRound,
     JudgeScore,
-    QuranQA,  # اضافه شد
-    QuranSuggestion,  # اضافه شد
-    UserQuranChat  # اضافه شد
+    QuranQA,  
+    QuranSuggestion,  
+    UserQuranChat,
+    NahjCategory,    
+    NahjContent   
 )
 import jdatetime
 from decorators import admin_required, staff_required, verified_required
@@ -69,7 +79,1070 @@ except ImportError:
     print("⚠️ هوش مصنوعی قرآنی در دسترس نیست. از حالت ساده استفاده می‌شود.")
 
 def init_routes(app):
+# ============================================
+# ========== سِراج‌یار (هوش مصنوعی دینی) ==========
+# ============================================
+
+    def normalize_text(text):
+        """نرمال‌سازی متن برای جستجو"""
+        if not text:
+            return ""
+        import re
+        text = text.strip().lower()
+        text = re.sub(r'[\u064B-\u065F\u0670]', '', text)
+        text = re.sub(r'[^\w\s\u0600-\u06FF]', '', text)
+        return text
+
+    def find_best_answer(question):
+        """پیدا کردن بهترین پاسخ برای سوال کاربر"""
+        from models import SerajQA
+        
+        question_norm = normalize_text(question)
+        
+        exact_match = SerajQA.query.filter(
+            SerajQA.is_active == True,
+            SerajQA.question == question
+        ).first()
+        
+        if exact_match:
+            exact_match.view_count += 1
+            db.session.commit()
+            return exact_match
+        
+        all_qa = SerajQA.query.filter_by(is_active=True).all()
+        
+        best_match = None
+        best_score = 0
+        
+        for qa in all_qa:
+            score = 0
+            if normalize_text(qa.question) == question_norm:
+                score += 100
+            
+            if qa.keywords:
+                keywords = qa.keywords.split(',')
+                for kw in keywords:
+                    if kw.strip() in question_norm:
+                        score += 20
+            
+            if question_norm in normalize_text(qa.question):
+                score += 10
+            
+            score += qa.priority
+            
+            if score > best_score:
+                best_score = score
+                best_match = qa
+        
+        if best_match and best_score > 5:
+            best_match.view_count += 1
+            db.session.commit()
+            return best_match
+        
+        return None
+
+    def save_seraj_chat(user_id, question, answer, category_id=None, qa_id=None):
+        """ذخیره تاریخچه چت"""
+        from models import SerajChat
+        try:
+            chat = SerajChat(
+                user_id=user_id,
+                question=question,
+                answer=answer,
+                category_id=category_id,
+                related_qa_id=qa_id
+            )
+            db.session.add(chat)
+            db.session.commit()
+        except Exception as e:
+            print(f"خطا در ذخیره چت: {e}")
+
+    def get_seraj_suggestions(category_id=None, limit=8):
+        """دریافت سوالات پیشنهادی"""
+        from models import SerajSuggestion
+        query = SerajSuggestion.query.filter_by(is_active=True)
+        if category_id:
+            query = query.filter_by(category_id=category_id)
+        return query.order_by(SerajSuggestion.order).limit(limit).all()
     
+        # ============================================
+    # APIهای مدیریت گفتگوهای سِراج‌یار در دیتابیس
+    # ============================================
+    
+    @app.route('/api/seraj/conversations', methods=['GET'])
+    @login_required
+    def api_get_conversations():
+        """دریافت لیست گفتگوهای کاربر از دیتابیس"""
+        try:
+            limit = request.args.get('limit', 20, type=int)
+            offset = request.args.get('offset', 0, type=int)
+            
+            conversations = get_user_conversations(current_user.id, limit, offset)
+            
+            return jsonify({
+                'success': True,
+                'conversations': conversations
+            })
+            
+        except Exception as e:
+            print(f"خطا در دریافت گفتگوها: {e}")
+            import traceback
+            traceback.print_exc()
+            return jsonify({'success': False, 'error': str(e)}), 500
+    
+    
+    @app.route('/api/seraj/conversations', methods=['POST'])
+    @login_required
+    def api_create_conversation():
+        """ایجاد گفتگوی جدید در دیتابیس"""
+        try:
+            data = request.get_json()
+            title = data.get('title', 'گفتگوی جدید')
+            first_question = data.get('first_question', '')
+            
+            conv_id = create_seraj_conversation(
+                user_id=current_user.id,
+                title=title,
+                first_question=first_question
+            )
+            
+            return jsonify({
+                'success': True,
+                'conversation_id': conv_id,
+                'message': 'گفتگو با موفقیت ایجاد شد'
+            })
+            
+        except Exception as e:
+            db.session.rollback()
+            print(f"خطا در ایجاد گفتگو: {e}")
+            import traceback
+            traceback.print_exc()
+            return jsonify({'success': False, 'error': str(e)}), 500
+    
+    
+    @app.route('/api/seraj/conversations/<int:conv_id>', methods=['GET'])
+    @login_required
+    def api_get_conversation(conv_id):
+        """دریافت پیام‌های یک گفتگو"""
+        try:
+            conv_data = get_conversation_messages(conv_id, current_user.id)
+            
+            if not conv_data:
+                return jsonify({'success': False, 'error': 'گفتگو یافت نشد'}), 404
+            
+            return jsonify({
+                'success': True,
+                'conversation': conv_data['conversation'],
+                'messages': conv_data['messages']
+            })
+            
+        except Exception as e:
+            print(f"خطا در دریافت گفتگو: {e}")
+            import traceback
+            traceback.print_exc()
+            return jsonify({'success': False, 'error': str(e)}), 500
+    
+    
+    @app.route('/api/seraj/conversations/<int:conv_id>/messages', methods=['POST'])
+    @login_required
+    def api_add_message(conv_id):
+        """اضافه کردن پیام به گفتگوی موجود"""
+        try:
+            data = request.get_json()
+            message_type = data.get('message_type')
+            content = data.get('content')
+            related_verses = data.get('related_verses', [])
+            suggestions = data.get('suggestions', [])
+            
+            if not message_type or not content:
+                return jsonify({'success': False, 'error': 'نوع پیام و محتوا الزامی است'}), 400
+            
+            # بررسی وجود گفتگو و دسترسی کاربر
+            from models import SerajConversation
+            conv = SerajConversation.query.filter_by(
+                id=conv_id,
+                user_id=current_user.id,
+                is_active=True
+            ).first()
+            
+            if not conv:
+                return jsonify({'success': False, 'error': 'گفتگو یافت نشد'}), 404
+            
+            add_message_to_conversation(
+                conversation_id=conv_id,
+                message_type=message_type,
+                content=content,
+                related_verses=related_verses,
+                suggestions=suggestions
+            )
+            
+            # اگر پیام کاربر است و این اولین پیام گفتگوست، عنوان را به‌روزرسانی کن
+            if message_type == 'user':
+                messages_count = conv.messages.count()
+                if messages_count == 1:  # فقط همین پیام وجود دارد
+                    new_title = content[:50] + ('...' if len(content) > 50 else '')
+                    update_conversation_title(conv_id, new_title)
+            
+            return jsonify({
+                'success': True,
+                'message': 'پیام با موفقیت ذخیره شد'
+            })
+            
+        except Exception as e:
+            db.session.rollback()
+            print(f"خطا در افزودن پیام: {e}")
+            import traceback
+            traceback.print_exc()
+            return jsonify({'success': False, 'error': str(e)}), 500
+    
+    
+    @app.route('/api/seraj/conversations/<int:conv_id>', methods=['DELETE'])
+    @login_required
+    def api_delete_conversation(conv_id):
+        """حذف یک گفتگو"""
+        try:
+            if delete_conversation(conv_id, current_user.id):
+                return jsonify({'success': True, 'message': 'گفتگو با موفقیت حذف شد'})
+            else:
+                return jsonify({'success': False, 'error': 'گفتگو یافت نشد'}), 404
+                
+        except Exception as e:
+            db.session.rollback()
+            print(f"خطا در حذف گفتگو: {e}")
+            return jsonify({'success': False, 'error': str(e)}), 500
+    
+    
+    @app.route('/api/seraj/conversations/clear-all', methods=['DELETE'])
+    @login_required
+    def api_clear_all_conversations():
+        """پاک کردن تمام گفتگوهای کاربر"""
+        try:
+            count = delete_all_user_conversations(current_user.id)
+            return jsonify({
+                'success': True,
+                'message': f'{count} گفتگو با موفقیت حذف شد'
+            })
+            
+        except Exception as e:
+            db.session.rollback()
+            print(f"خطا در پاک کردن گفتگوها: {e}")
+            return jsonify({'success': False, 'error': str(e)}), 500
+    
+        # ============================================
+    # توابع مدیریت گفتگوهای سِراج‌یار در دیتابیس
+    # ============================================
+
+    def create_seraj_conversation(user_id, title, first_question, first_answer=None, related_verses=None, suggestions=None):
+        """ایجاد یک گفتگوی جدید در دیتابیس"""
+        from models import SerajConversation, SerajMessage
+        from datetime import datetime
+        
+        conversation = SerajConversation(
+            user_id=user_id,
+            title=title[:200],
+            created_at=datetime.utcnow(),
+            updated_at=datetime.utcnow()
+        )
+        db.session.add(conversation)
+        db.session.flush()  # برای گرفتن id
+        
+        # ذخیره پیام کاربر
+        user_message = SerajMessage(
+            conversation_id=conversation.id,
+            message_type='user',
+            content=first_question
+        )
+        db.session.add(user_message)
+        
+        # ذخیره پاسخ AI (اگر وجود داشته باشد)
+        if first_answer:
+            import json
+            ai_message = SerajMessage(
+                conversation_id=conversation.id,
+                message_type='ai',
+                content=first_answer,
+                related_verses=json.dumps(related_verses) if related_verses else None,
+                suggestions=json.dumps(suggestions) if suggestions else None
+            )
+            db.session.add(ai_message)
+        
+        db.session.commit()
+        return conversation.id
+
+
+    def add_message_to_conversation(conversation_id, message_type, content, related_verses=None, suggestions=None):
+        """اضافه کردن پیام جدید به گفتگوی موجود"""
+        from models import SerajMessage
+        
+        import json
+        message = SerajMessage(
+            conversation_id=conversation_id,
+            message_type=message_type,
+            content=content,
+            related_verses=json.dumps(related_verses) if related_verses else None,
+            suggestions=json.dumps(suggestions) if suggestions else None
+        )
+        db.session.add(message)
+        
+        # به‌روزرسانی زمان آخرین تغییر گفتگو
+        from models import SerajConversation
+        conversation = SerajConversation.query.get(conversation_id)
+        if conversation:
+            conversation.updated_at = datetime.utcnow()
+        
+        db.session.commit()
+        return message.id
+
+
+    def get_user_conversations(user_id, limit=20, offset=0):
+        """دریافت لیست گفتگوهای کاربر از دیتابیس"""
+        from models import SerajConversation
+        
+        conversations = SerajConversation.query.filter_by(
+            user_id=user_id,
+            is_active=True
+        ).order_by(SerajConversation.updated_at.desc()).offset(offset).limit(limit).all()
+        
+        result = []
+        for conv in conversations:
+            # تعداد پیام‌های هر گفتگو
+            message_count = conv.messages.count()
+            result.append({
+                'id': conv.id,
+                'title': conv.title,
+                'created_at': conv.created_at.isoformat(),
+                'updated_at': conv.updated_at.isoformat(),
+                'message_count': message_count
+            })
+        
+        return result
+
+
+    def get_conversation_messages(conversation_id, user_id):
+        """دریافت پیام‌های یک گفتگو با بررسی دسترسی کاربر"""
+        from models import SerajConversation, SerajMessage
+        import json
+        
+        conversation = SerajConversation.query.filter_by(
+            id=conversation_id,
+            user_id=user_id,
+            is_active=True
+        ).first()
+        
+        if not conversation:
+            return None
+        
+        messages = SerajMessage.query.filter_by(
+            conversation_id=conversation_id
+        ).order_by(SerajMessage.created_at).all()
+        
+        result = []
+        for msg in messages:
+            result.append({
+                'id': msg.id,
+                'type': msg.message_type,
+                'content': msg.content,
+                'related_verses': json.loads(msg.related_verses) if msg.related_verses else [],
+                'suggestions': json.loads(msg.suggestions) if msg.suggestions else [],
+                'created_at': msg.created_at.isoformat()
+            })
+        
+        return {
+            'conversation': {
+                'id': conversation.id,
+                'title': conversation.title,
+                'created_at': conversation.created_at.isoformat(),
+                'updated_at': conversation.updated_at.isoformat()
+            },
+            'messages': result
+        }
+
+
+    def delete_conversation(conversation_id, user_id):
+        """حذف یک گفتگو (غیرفعال کردن آن)"""
+        from models import SerajConversation
+        
+        conversation = SerajConversation.query.filter_by(
+            id=conversation_id,
+            user_id=user_id
+        ).first()
+        
+        if conversation:
+            conversation.is_active = False
+            db.session.commit()
+            return True
+        return False
+
+
+    def delete_all_user_conversations(user_id):
+        """حذف تمام گفتگوهای یک کاربر"""
+        from models import SerajConversation
+        
+        conversations = SerajConversation.query.filter_by(
+            user_id=user_id,
+            is_active=True
+        ).all()
+        
+        for conv in conversations:
+            conv.is_active = False
+        
+        db.session.commit()
+        return len(conversations)
+
+
+    def update_conversation_title(conversation_id, new_title):
+        """به‌روزرسانی عنوان گفتگو"""
+        from models import SerajConversation
+        
+        conversation = SerajConversation.query.get(conversation_id)
+        if conversation:
+            conversation.title = new_title[:200]
+            db.session.commit()
+            return True
+        return False
+
+
+    
+# ========== صفحه اصلی سِراج‌یار ==========
+    @app.route('/seraj-yari')
+    @login_required
+    def seraj_yari():
+        """صفحه اصلی سِراج‌یار"""
+        from collections import defaultdict
+        
+        # دریافت دسته‌بندی‌ها
+        categories = SerajCategory.query.filter_by(is_active=True).order_by(SerajCategory.order).all()
+        
+        # دریافت همه سوالات پیشنهادی
+        all_suggestions = SerajSuggestion.query.filter_by(is_active=True)\
+            .options(db.joinedload(SerajSuggestion.category))\
+            .order_by(SerajSuggestion.order).all()
+        
+        # گروه‌بندی بر اساس دسته
+        suggestions_by_category = defaultdict(list)
+        for sug in all_suggestions:
+            cat_name = sug.category.name if sug.category else 'متفرقه'
+            suggestions_by_category[cat_name].append({
+                'id': sug.id,
+                'question': sug.question,
+                'category': sug.category,
+                'icon': get_category_icon(cat_name)
+            })
+        
+        # سوالات برتر برای نمایش پیش‌فرض (12 سوال اول)
+        top_suggestions = all_suggestions[:12]
+        
+        # تعداد کل سوالات
+        all_suggestions_count = len(all_suggestions)
+        
+        # گفتگوهای اخیر
+        recent_questions = SerajChat.query.filter_by(user_id=current_user.id)\
+            .order_by(SerajChat.created_at.desc()).limit(10).all()
+        
+        initial_question = request.args.get('question', '')
+        
+        return render_template('seraj_yari/index.html',
+                            categories=categories,
+                            suggestions_by_category=dict(suggestions_by_category),
+                            top_suggestions=top_suggestions,
+                            all_suggestions_count=all_suggestions_count,
+                            recent_questions=recent_questions,
+                            initial_question=initial_question)
+
+    def get_category_icon(category_name):
+        """دریافت آیکون بر اساس نام دسته"""
+        icons = {
+            'اعتقادات': '🕋',
+            'اخلاقیات': '💝',
+            'عبادات': '🕌',
+            'قصص و معجزات': '📖',
+            'احکام و فقه': '⚖️',
+            'علوم قرآنی': '📚',
+            'سوره‌های مهم': '⭐',
+            'ادعیه و زیارات': '🤲',
+            'تاریخ اسلام': '📜',
+            'خانواده و اجتماع': '👨‍👩‍👧'
+        }
+        return icons.get(category_name, '📖')
+
+    @app.route('/seraj-yari/ask', methods=['POST'])
+    @login_required
+    def seraj_yari_ask():
+        """دریافت سوال و برگرداندن پاسخ با ذخیره در دیتابیس"""
+        print("\n" + "="*60)
+        print("🎯 درخواست جدید به seraj-yari/ask")
+        print("="*60)
+        
+        try:
+            data = request.get_json()
+            print(f"📦 داده دریافت شده: {data}")
+            
+            if not data:
+                return jsonify({'success': False, 'error': 'داده ارسال نشده است'}), 400
+            
+            question = data.get('question', '').strip()
+            conversation_id = data.get('conversation_id')
+            
+            if not question:
+                return jsonify({'success': False, 'error': 'سوال وارد نشده است'}), 400
+            
+            # ========== مرحله 1: جستجو در SerajQA (اولویت اول) ==========
+            from sqlalchemy import or_
+            
+            qa = SerajQA.query.filter(
+                SerajQA.is_active == True,
+                or_(
+                    SerajQA.question.ilike(f'%{question}%'),
+                    SerajQA.question.ilike(f'{question}%'),
+                    SerajQA.question.ilike(f'%{question}')
+                )
+            ).first()
+            
+            if not qa:
+                # جستجو بر اساس کلمات کلیدی
+                keywords = question.split()
+                for keyword in keywords:
+                    if len(keyword) > 2:
+                        qa = SerajQA.query.filter(
+                            SerajQA.is_active == True,
+                            SerajQA.keywords.ilike(f'%{keyword}%')
+                        ).first()
+                        if qa:
+                            break
+            
+            if qa:
+                answer = qa.answer_full if qa.answer_full else qa.answer
+                print(f"✅ پاسخ از دیتابیس SerajQA پیدا شد (ID: {qa.id}, سوال: {qa.question})")
+                
+                qa.view_count = (qa.view_count or 0) + 1
+                db.session.commit()
+                
+                related_verses = []
+                suggestions = []
+                if qa.category_id:
+                    suggestions = SerajSuggestion.query.filter_by(
+                        category_id=qa.category_id,
+                        is_active=True
+                    ).limit(5).all()
+                    suggestions = [s.question for s in suggestions] if suggestions else [
+                        "توحید در قرآن چیست؟",
+                        "آیه الکرسی چیست؟",
+                        "اهمیت نماز در قرآن چیست؟"
+                    ]
+                else:
+                    suggestions = [
+                        "توحید در قرآن چیست؟",
+                        "آیه الکرسی چیست؟",
+                        "اهمیت نماز در قرآن چیست؟"
+                    ]
+            
+            else:
+                # ========== مرحله 2: بررسی سوال قرآنی (سوره‌ها و آیات) ==========
+                from services.quran_answer_service import QuranAnswerService
+                
+                quran_answer = QuranAnswerService.check_for_quran_question(question)
+                
+                if quran_answer and quran_answer['type'] in ['verse', 'surah_info']:
+                    answer = quran_answer['answer']
+                    related_verses = []
+                    
+                    if quran_answer['type'] == 'verse' and quran_answer['data']:
+                        verse = quran_answer['data']
+                        related_verses = [{
+                            'surah': verse.surah_name,
+                            'verse': verse.verse_number,
+                            'text': verse.verse_persian
+                        }]
+                    
+                    suggestions = [
+                        "تفسیر این آیه چیست؟",
+                        "آیات مشابه در قرآن",
+                        "شأن نزول این آیه",
+                        "مفهوم این آیه در زندگی",
+                        "سوره‌های دیگر قرآن"
+                    ]
+                    
+                    print(f"✅ پاسخ از سرویس قرآن یافت شد")
+                    
+                else:
+                    # ========== مرحله 3: پاسخ پیش‌فرض ==========
+                    answer = f"""❓ **سوال شما:** {question}
+
+    📚 **پاسخ:** 
+    در حال حاضر جواب این سوال را نمی‌دانم. لطفاً سوال دیگری بپرسید.
+
+    💡 **سوالات پیشنهادی:**
+    • آیه الکرسی چیست؟
+    • توحید در قرآن چیست؟
+    • اهمیت نماز در قرآن چیست؟
+    • سوره یس چند آیه دارد؟
+    • تفسیر سوره حمد چیست؟
+
+    🙏 از صبر شما سپاسگزارم."""
+                    related_verses = []
+                    suggestions = [
+                        "آیه الکرسی چیست؟",
+                        "توحید در قرآن چیست؟",
+                        "اهمیت نماز در قرآن چیست؟",
+                        "سوره یس چند آیه دارد؟",
+                        "تفسیر سوره حمد"
+                    ]
+                    print(f"⚠️ پاسخ پیش‌فرض استفاده شد")
+            
+            # ========== ذخیره در دیتابیس (گفتگوها) ==========
+            from models import SerajConversation
+            
+            if conversation_id:
+                conv = SerajConversation.query.filter_by(
+                    id=conversation_id,
+                    user_id=current_user.id,
+                    is_active=True
+                ).first()
+                
+                if conv:
+                    add_message_to_conversation(
+                        conversation_id=conversation_id,
+                        message_type='user',
+                        content=question
+                    )
+                    add_message_to_conversation(
+                        conversation_id=conversation_id,
+                        message_type='ai',
+                        content=answer,
+                        related_verses=related_verses,
+                        suggestions=suggestions
+                    )
+                    if conv.messages.count() <= 2:
+                        new_title = question[:50] + ('...' if len(question) > 50 else '')
+                        update_conversation_title(conversation_id, new_title)
+                    chat_id = conversation_id
+                else:
+                    chat_id = create_seraj_conversation(
+                        user_id=current_user.id,
+                        title=question[:50] + ('...' if len(question) > 50 else ''),
+                        first_question=question,
+                        first_answer=answer,
+                        related_verses=related_verses,
+                        suggestions=suggestions
+                    )
+            else:
+                chat_id = create_seraj_conversation(
+                    user_id=current_user.id,
+                    title=question[:50] + ('...' if len(question) > 50 else ''),
+                    first_question=question,
+                    first_answer=answer,
+                    related_verses=related_verses,
+                    suggestions=suggestions
+                )
+            
+            print(f"✅ چت با موفقیت ذخیره شد! (ID: {chat_id})")
+            print("="*60 + "\n")
+            
+            return jsonify({
+                'success': True,
+                'answer': answer,
+                'chat_id': chat_id,
+                'related_verses': related_verses,
+                'suggestions': suggestions
+            })
+            
+        except Exception as e:
+            print(f"❌ خطا: {str(e)}")
+            import traceback
+            traceback.print_exc()
+            return jsonify({'success': False, 'error': str(e)}), 500
+    # ========== دریافت بازخورد ==========
+    @app.route('/seraj-yari/feedback', methods=['POST'])
+    def seraj_yari_feedback():
+        """ثبت بازخورد کاربر"""
+        data = request.get_json() if request.is_json else request.form
+        chat_id = data.get('chat_id')
+        was_helpful = data.get('was_helpful') == 'true' or data.get('was_helpful') == True
+        qa_id = data.get('qa_id')
+        
+        if chat_id:
+            chat = SerajChat.query.get(chat_id)
+            if chat:
+                chat.was_helpful = was_helpful
+                db.session.commit()
+        
+        if qa_id:
+            qa = SerajQA.query.get(qa_id)
+            if qa:
+                if was_helpful:
+                    qa.priority = (qa.priority or 0) + 1
+                db.session.commit()
+        
+        if request.is_json:
+            return jsonify({'success': True})
+        return redirect(url_for('seraj_yari'))
+    
+
+    
+    # ========== صفحه دسته‌بندی ==========
+    @app.route('/seraj-yari/category/<slug>')
+    def seraj_yari_category(slug):
+        """نمایش سوالات یک دسته‌بندی"""
+        category = SerajCategory.query.filter_by(slug=slug, is_active=True).first_or_404()
+        questions = SerajQA.query.filter_by(category_id=category.id, is_active=True).order_by(SerajQA.priority.desc()).all()
+        
+        other_categories = SerajCategory.query.filter(
+            SerajCategory.is_active == True,
+            SerajCategory.id != category.id
+        ).limit(8).all()
+        
+        return render_template('seraj_yari/category.html',
+                             category=category,
+                             questions=questions,
+                             other_categories=other_categories)
+    
+    # ========== صفحه جزئیات سوال ==========
+    @app.route('/seraj-yari/question/<int:qa_id>')
+    def seraj_yari_question_detail(qa_id):
+        """نمایش جزئیات یک سوال"""
+        qa = SerajQA.query.get_or_404(qa_id)
+        
+        # افزایش بازدید
+        qa.view_count = (qa.view_count or 0) + 1
+        db.session.commit()
+        
+        # سوالات مشابه
+        similar = SerajQA.query.filter(
+            SerajQA.category_id == qa.category_id,
+            SerajQA.id != qa.id,
+            SerajQA.is_active == True
+        ).limit(5).all()
+        
+        return render_template('seraj_yari/question_detail.html',
+                             qa=qa,
+                             similar=similar)
+    
+
+    @app.route('/api/seraj/history')
+    @login_required
+    def api_seraj_history():
+        """دریافت تاریخچه چت‌های کاربر جاری"""
+        try:
+            limit = request.args.get('limit', 20, type=int)
+            
+            chats = SerajChat.query.filter_by(user_id=current_user.id)\
+                .order_by(SerajChat.created_at.desc())\
+                .limit(limit).all()
+            
+            history = []
+            for chat in chats:
+                history.append({
+                    'id': chat.id,
+                    'question': chat.question[:50] + ('...' if len(chat.question) > 50 else ''),
+                    'full_question': chat.question,
+                    'answer': chat.answer[:200] if chat.answer else '',
+                    'created_at': chat.created_at.isoformat() if chat.created_at else None,
+                    'category_id': chat.category_id  # فقط ID دسته را برگردان
+                    # خط category_name را حذف کردیم
+                })
+            
+            return jsonify({'success': True, 'history': history})
+            
+        except Exception as e:
+            import traceback
+            print("خطا در دریافت تاریخچه:", e)
+            traceback.print_exc()
+            return jsonify({'success': False, 'error': str(e)}), 500
+        
+    @app.route('/api/seraj/simple-history')
+    @login_required
+    def api_seraj_simple_history():
+        """نسخه ساده شده API"""
+        try:
+            chats = SerajChat.query.filter_by(user_id=current_user.id)\
+                .order_by(SerajChat.created_at.desc())\
+                .limit(20).all()
+            
+            result = []
+            for chat in chats:
+                result.append({
+                    'id': chat.id,
+                    'question': chat.question[:50]
+                })
+            
+            return jsonify({'success': True, 'data': result})
+        except Exception as e:
+            return jsonify({'success': False, 'error': str(e)}), 500
+            
+    @app.route('/api/seraj/debug')
+    @login_required
+    def api_seraj_debug():
+        """API دیباگ برای پیدا کردن مشکل"""
+        try:
+            from models import SerajChat
+            import traceback
+            
+            # تست 1: بررسی وجود جدول
+            total_count = SerajChat.query.count()
+            
+            # تست 2: دریافت چت‌های کاربر
+            user_chats = SerajChat.query.filter_by(user_id=current_user.id).limit(5).all()
+            user_chats_data = []
+            for chat in user_chats:
+                user_chats_data.append({
+                    'id': chat.id,
+                    'question': chat.question[:50]
+                })
+            
+            return jsonify({
+                'success': True,
+                'total_chats': total_count,
+                'user_id': current_user.id,
+                'user_chats_count': len(user_chats),
+                'user_chats': user_chats_data,
+                'user_authenticated': current_user.is_authenticated
+            })
+        except Exception as e:
+            import traceback
+            return jsonify({
+                'success': False,
+                'error': str(e),
+                'traceback': traceback.format_exc()
+            }), 500
+
+    @app.route('/seraj-yari/history')
+    @login_required
+    def seraj_yari_history():
+        """نمایش تاریخچه چت کاربر"""
+        page = request.args.get('page', 1, type=int)
+        
+        # دریافت چت‌های کاربر جاری از دیتابیس
+        chats = SerajChat.query.filter_by(user_id=current_user.id)\
+            .order_by(SerajChat.created_at.desc())\
+            .paginate(page=page, per_page=20, error_out=False)
+        
+        return render_template('seraj_yari/history.html', 
+                            chats=chats,
+                            current_user=current_user)
+    
+# ============================================
+# اضافه کردن به routes.py
+# ============================================
+
+    from searchengine import QuranSearchEngine
+
+    # مقداردهی اولیه موتور جستجو
+    search_engine = QuranSearchEngine(db)
+
+    @app.route('/api/quran/search', methods=['POST'])
+    @login_required
+    def api_quran_search():
+        """API جستجوی هوشمند آیات قرآن"""
+        try:
+            data = request.get_json()
+            query = data.get('query', '').strip()
+            
+            if not query:
+                return jsonify({'success': False, 'error': 'متن جستجو وارد نشده است'}), 400
+            
+            # جستجوی پیشرفته
+            result = search_engine.smart_search(query)
+            
+            # فرمت کردن نتایج
+            verses_data = []
+            for v in result['verses']:
+                verses_data.append({
+                    'id': v['verse'].id,
+                    'surah_name': v['surah_name'],
+                    'verse_number': v['verse_number'],
+                    'arabic_text': v['arabic_text'],
+                    'persian_text': v['persian_text'],
+                    'score': v['score'],
+                    'analysis': {
+                        'key_concepts': v.get('analysis', {}).get_key_concepts_list() if v.get('analysis') else [],
+                        'tafsir': v.get('analysis', {}).tafsir_mukhtasar if v.get('analysis') else None
+                    } if v.get('analysis') else None
+                })
+            
+            # ذخیره لاگ جستجو
+            log = SemanticSearchLog(
+                user_id=current_user.id if current_user.is_authenticated else None,
+                query=query,
+                best_match_verse_id=verses_data[0]['id'] if verses_data else None,
+                match_score=verses_data[0]['score'] if verses_data else 0,
+                match_method='hybrid'
+            )
+            db.session.add(log)
+            db.session.commit()
+            
+            return jsonify({
+                'success': True,
+                'verses': verses_data,
+                'analysis': result['analysis'],
+                'suggestions': result['suggestions']
+            })
+            
+        except Exception as e:
+            print(f"خطا در جستجو: {e}")
+            import traceback
+            traceback.print_exc()
+            return jsonify({'success': False, 'error': str(e)}), 500
+
+
+    @app.route('/api/quran/analysis/<int:verse_id>')
+    @login_required
+    def api_quran_verse_analysis(verse_id):
+        """دریافت تحلیل تخصصی یک آیه"""
+        try:
+            analysis = search_engine.get_verse_analysis(verse_id)
+            
+            if not analysis:
+                return jsonify({'success': False, 'error': 'آیه مورد نظر یافت نشد'}), 404
+            
+            # افزایش بازدید
+            analysis.view_count += 1
+            db.session.commit()
+            
+            return jsonify({
+                'success': True,
+                'analysis': {
+                    'id': analysis.id,
+                    'surah_name': analysis.surah_name,
+                    'verse_number': analysis.verse_number,
+                    'verse_arabic': analysis.verse_arabic,
+                    'verse_persian': analysis.verse_persian,
+                    'tafsir_mukhtasar': analysis.tafsir_mukhtasar,
+                    'tafsir_mufassal': analysis.tafsir_mufassal,
+                    'key_concepts': analysis.get_key_concepts_list(),
+                    'thematic_tags': analysis.get_thematic_tags_list(),
+                    'moral_lesson': analysis.moral_lesson,
+                    'historical_context': analysis.historical_context,
+                    'practical_application': analysis.practical_application,
+                    'related_verses': analysis.get_related_verses_list()
+                }
+            })
+            
+        except Exception as e:
+            return jsonify({'success': False, 'error': str(e)}), 500
+
+
+    @app.route('/api/quran/related/<int:verse_id>')
+    def api_quran_related_verses(verse_id):
+        """دریافت آیات مرتبط با یک آیه خاص"""
+        try:
+            verse = QuranVerse.query.get_or_404(verse_id)
+            analysis = search_engine.get_verse_analysis(verse_id)
+            
+            # جستجوی آیات مشابه بر اساس مفاهیم کلیدی
+            if analysis and analysis.key_concepts:
+                keywords = analysis.get_key_concepts_list()
+                query = ' '.join(keywords[:3])
+                related = search_engine.search_verses(query, limit=6)
+                
+                # حذف آیه اصلی از نتایج
+                related = [v for v in related if v['verse'].id != verse_id]
+            else:
+                related = []
+            
+            return jsonify({
+                'success': True,
+                'verse': {
+                    'id': verse.id,
+                    'surah_name': verse.surah_name,
+                    'verse_number': verse.verse_number,
+                    'text': verse.verse_persian or verse.translation
+                },
+                'related_verses': [{
+                    'id': v['verse'].id,
+                    'surah_name': v['surah_name'],
+                    'verse_number': v['verse_number'],
+                    'text': v['persian_text']
+                } for v in related[:5]]
+            })
+            
+        except Exception as e:
+            return jsonify({'success': False, 'error': str(e)}), 500
+
+    @app.route('/api/seraj/chat/<int:chat_id>')
+    @login_required
+    def api_seraj_chat_detail(chat_id):
+        """دریافت جزئیات یک چت خاص"""
+        try:
+            chat = SerajChat.query.get_or_404(chat_id)
+            
+            # بررسی مالکیت - بسیار مهم
+            if chat.user_id != current_user.id and not current_user.is_admin():
+                return jsonify({'success': False, 'error': 'دسترسی غیرمجاز'}), 403
+            
+            return jsonify({
+                'success': True,
+                'chat': {
+                    'id': chat.id,
+                    'question': chat.question,
+                    'answer': chat.answer,
+                    'created_at': chat.created_at.isoformat(),
+                    'category_id': chat.category_id
+                }
+            })
+            
+        except Exception as e:
+            print(f"خطا در دریافت چت: {e}")
+            return jsonify({'success': False, 'error': str(e)}), 500
+
+    @app.route('/api/seraj/history/clear', methods=['POST'])
+    @login_required
+    def api_seraj_clear_history():
+        """پاک کردن تاریخچه چت کاربر"""
+        try:
+            SerajChat.query.filter_by(user_id=current_user.id).delete()
+            db.session.commit()
+            return jsonify({'success': True, 'message': 'تاریخچه با موفقیت پاک شد'})
+        except Exception as e:
+            db.session.rollback()
+            return jsonify({'success': False, 'error': str(e)}), 500
+    # ========== مسیر هوش مصنوعی قرآنی ==========
+    @app.route('/ai/quran', methods=['GET', 'POST'])
+    def ai_quran():
+        """صفحه اصلی هوش مصنوعی قرآنی"""
+        categories = SerajCategory.query.filter_by(is_active=True).order_by(SerajCategory.order).all()
+        suggestions = SerajSuggestion.query.filter_by(is_active=True).order_by(SerajSuggestion.order).limit(8).all()
+        
+        stats = {
+            'total_qa': SerajQA.query.filter_by(is_active=True).count(),
+            'categories_count': len(categories)
+        }
+        
+        if request.method == 'POST':
+            question = request.form.get('question', '').strip()
+            if question:
+                # جستجو در دیتابیس
+                qa = SerajQA.query.filter(
+                    SerajQA.question.ilike(f'%{question}%'),
+                    SerajQA.is_active == True
+                ).first()
+                
+                if qa:
+                    answer = {
+                        'success': True,
+                        'answer': qa.answer_full if qa.answer_full else qa.answer,
+                        'related_verses': []
+                    }
+                else:
+                    answer = {
+                        'success': True,
+                        'answer': f'سوال "{question}" را از من پرسیدید.\n\nمتأسفم، پاسخ دقیقی برای این سوال ندارم. لطفاً سوال دیگری بپرسید.',
+                        'related_verses': []
+                    }
+                
+                return render_template('seraj_yari/index.html', 
+                                     answer=answer,
+                                     question=question,
+                                     categories=categories,
+                                     suggestions=suggestions,
+                                     stats=stats)
+        
+        # GET request
+        return render_template('seraj_yari/index.html',
+                             categories=categories,
+                             suggestions=suggestions,
+                             stats=stats)
+
+
     # ============================================
     # تابع بررسی وجود endpoint
     # ============================================
@@ -83,7 +1156,420 @@ def init_routes(app):
             except:
                 return False
         return dict(endpoint_exists=endpoint_exists)
+
+                # ============================================
+        # ========== سیستم پشتیبانی (تیکت) ==========
+        # ============================================
+        
+        @app.route('/support/tickets')
+        @login_required
+        @verified_required
+        def support_tickets():
+            """لیست تیکت‌های کاربر جاری"""
+            page = request.args.get('page', 1, type=int)
+            status = request.args.get('status', 'all')
+            
+            query = SupportTicket.query.filter_by(user_id=current_user.id)
+            
+            if status != 'all':
+                query = query.filter_by(status=status)
+            
+            tickets = query.order_by(SupportTicket.created_at.desc()).paginate(page=page, per_page=10, error_out=False)
+            
+            return render_template('support/tickets.html', tickets=tickets, status=status, current_user=current_user)
+        
+    @app.route('/support/ticket/<int:ticket_id>')
+    @login_required
+    def support_ticket_detail(ticket_id):
+        """جزئیات یک تیکت برای کاربر عادی"""
+        from models import SupportTicket, SupportReply
+        
+        ticket = SupportTicket.query.get_or_404(ticket_id)
+        
+        # فقط مالک تیکت می‌تواند ببیند
+        if ticket.user_id != current_user.id:
+            flash('⛔ دسترسی غیرمجاز', 'error')
+            return redirect('/support/tickets')
+        
+        replies = SupportReply.query.filter_by(ticket_id=ticket_id).order_by(SupportReply.created_at).all()
+        
+        # استفاده از قالب کاربر عادی
+        return render_template('support/ticket_detail.html', 
+                            ticket=ticket, 
+                            replies=replies, 
+                            current_user=current_user)
+        
+        @app.route('/support/ticket/create', methods=['GET', 'POST'])
+        @login_required
+        @verified_required
+        def support_create_ticket():
+            """ایجاد تیکت جدید"""
+            if request.method == 'POST':
+                subject = request.form.get('subject')
+                message = request.form.get('message')
+                category = request.form.get('category', 'general')
+                priority = request.form.get('priority', 'medium')
+                
+                if not subject or not message:
+                    flash('لطفاً عنوان و متن پیام را وارد کنید.', 'error')
+                    return redirect(url_for('support_create_ticket'))
+                
+                ticket = SupportTicket(
+                    user_id=current_user.id,
+                    subject=subject,
+                    message=message,
+                    category=category,
+                    priority=priority,
+                    status='open'
+                )
+                db.session.add(ticket)
+                db.session.commit()
+                
+                # اعلان به ادمین‌ها
+                admins = User.query.filter_by(role=UserRole.ADMIN).all()
+                for admin in admins:
+                    create_notification(
+                        admin.id,
+                        'تیکت پشتیبانی جدید',
+                        f'کاربر {current_user.full_name} یک تیکت جدید با عنوان "{subject}" ثبت کرد.'
+                    )
+                
+                flash('✅ تیکت شما با موفقیت ثبت شد. به زودی پاسخ داده می‌شود.', 'success')
+                return redirect(url_for('support_ticket_detail', ticket_id=ticket.id))
+            
+            return render_template('support/create_ticket.html', current_user=current_user)
+        
+    @app.route('/support/ticket/<int:ticket_id>/reply', methods=['POST'])
+    @login_required
+    def support_reply_ticket(ticket_id):
+        """پاسخ به تیکت (کاربر یا پشتیبان)"""
+        from models import SupportTicket, SupportReply, UserRole
+        
+        ticket = SupportTicket.query.get_or_404(ticket_id)
+        
+        # بررسی دسترسی
+        is_owner = ticket.user_id == current_user.id
+        is_staff = current_user.is_manager() or current_user.is_staff() or current_user.is_admin()
+        
+        if not is_owner and not is_staff:
+            flash('⛔ دسترسی غیرمجاز', 'error')
+            return redirect(url_for('support_tickets'))
+        
+        # اگر تیکت بسته است، اجازه پاسخ نده
+        if ticket.status == 'closed':
+            flash('❌ این تیکت بسته شده است و نمی‌توان به آن پاسخ داد.', 'error')
+            return redirect(url_for('support_ticket_detail', ticket_id=ticket_id))
+        
+        message = request.form.get('message')
+        if not message:
+            flash('لطفاً متن پاسخ را وارد کنید.', 'error')
+            return redirect(url_for('support_ticket_detail', ticket_id=ticket_id))
+        
+        reply = SupportReply(
+            ticket_id=ticket_id,
+            sender_id=current_user.id,
+            message=message,
+            is_staff=is_staff
+        )
+        db.session.add(reply)
+        
+        # به‌روزرسانی زمان تیکت
+        ticket.updated_at = datetime.utcnow()
+        
+        # اگر پاسخ توسط پشتیبان است، وضعیت تیکت را به in_progress تغییر بده
+        if is_staff and ticket.status == 'open':
+            ticket.status = 'in_progress'
+        
+        db.session.commit()
+        
+        # ارسال اعلان به طرف مقابل
+        if is_staff:
+            # اعلان به کاربر
+            create_notification(
+                ticket.user_id,
+                f'پاسخ جدید به تیکت #{ticket.id}',
+                f'به تیکت شما با عنوان "{ticket.subject}" پاسخ داده شد.'
+            )
+        else:
+            # اعلان به پشتیبان‌ها
+            staffs = User.query.filter(
+                (User.role == UserRole.ADMIN) | (User.user_type == 'staff')
+            ).all()
+            for staff in staffs:
+                create_notification(
+                    staff.id,
+                    f'پاسخ جدید در تیکت #{ticket.id}',
+                    f'کاربر {current_user.full_name} به تیکت "{ticket.subject}" پاسخ داد.'
+                )
+        
+        flash('✅ پاسخ شما با موفقیت ثبت شد.', 'success')
+        
+        # برگشت به صفحه قبلی
+        referrer = request.referrer
+        if referrer:
+            return redirect(referrer)
+        return redirect(url_for('support_ticket_detail', ticket_id=ticket_id))
+
+        
+    @app.route('/support/ticket/<int:ticket_id>/close', methods=['POST'])
+    @login_required
+    def support_close_ticket(ticket_id):
+        """بستن تیکت"""
+        from models import SupportTicket
+        
+        ticket = SupportTicket.query.get_or_404(ticket_id)
+        
+        # فقط مالک تیکت یا ادمین/پشتیبان می‌توانند ببندند
+        if ticket.user_id != current_user.id and not current_user.is_manager() and not current_user.is_staff() and not current_user.is_admin():
+            flash('⛔ دسترسی غیرمجاز', 'error')
+            return redirect(url_for('support_tickets'))
+        
+        ticket.status = 'closed'
+        db.session.commit()
+        
+        flash('✅ تیکت با موفقیت بسته شد.', 'success')
+        
+        # برگشت به صفحه قبلی
+        referrer = request.referrer
+        if referrer:
+            return redirect(referrer)
+        return redirect(url_for('support_tickets'))
+        
+    @app.route('/support/ticket/<int:ticket_id>/reopen', methods=['POST'])
+    @login_required
+    def support_reopen_ticket(ticket_id):
+        """بازگشایی تیکت بسته شده توسط کاربر"""
+        from models import SupportTicket, UserRole
+        
+        ticket = SupportTicket.query.get_or_404(ticket_id)
+        
+        # فقط مالک تیکت می‌تواند بازگشایی کند
+        if ticket.user_id != current_user.id:
+            flash('⛔ دسترسی غیرمجاز', 'error')
+            return redirect('/support/tickets')  # تغییر به آدرس مستقیم
+        
+        if ticket.status != 'closed':
+            flash('❌ فقط تیکت‌های بسته شده قابل بازگشایی هستند.', 'error')
+            return redirect('/support/ticket/' + str(ticket_id))  # آدرس مستقیم
+        
+        ticket.status = 'open'
+        db.session.commit()
+        
+        # اعلان به پشتیبان‌ها
+        try:
+            staffs = User.query.filter(
+                (User.role == UserRole.ADMIN) | (User.user_type == 'staff')
+            ).all()
+            for staff in staffs:
+                create_notification(
+                    staff.id,
+                    f'بازگشایی تیکت #{ticket.id}',
+                    f'کاربر {current_user.full_name} تیکت "{ticket.subject}" را مجدداً باز کرد.'
+                )
+        except:
+            pass
+        
+        flash('✅ تیکت با موفقیت بازگشایی شد.', 'success')
+        return redirect('/support/ticket/' + str(ticket_id))  # آدرس مستقیم
+        
+        # ========== پنل مدیریت تیکت‌ها برای ادمین و کارمندان ==========
+        
+        @app.route('/staff/support/tickets')
+        @login_required
+        def staff_support_tickets():
+            """پنل مدیریت تیکت‌ها برای پشتیبانان"""
+            if not current_user.is_manager() and not current_user.is_staff():
+                flash('⛔ دسترسی غیرمجاز', 'error')
+                return redirect(url_for('dashboard'))
+            
+            page = request.args.get('page', 1, type=int)
+            status = request.args.get('status', 'all')
+            priority = request.args.get('priority', 'all')
+            
+            query = SupportTicket.query
+            
+            if status != 'all':
+                query = query.filter_by(status=status)
+            
+            if priority != 'all':
+                query = query.filter_by(priority=priority)
+            
+            tickets = query.order_by(
+                # اولویت بالا اول، سپس تاریخ
+                case(
+                    (SupportTicket.priority == 'high', 1),
+                    (SupportTicket.priority == 'medium', 2),
+                    (SupportTicket.priority == 'low', 3),
+                    else_=4
+                ),
+                SupportTicket.updated_at.desc()
+            ).paginate(page=page, per_page=15, error_out=False)
+            
+            # آمار
+            stats = {
+                'open': SupportTicket.query.filter_by(status='open').count(),
+                'in_progress': SupportTicket.query.filter_by(status='in_progress').count(),
+                'closed': SupportTicket.query.filter_by(status='closed').count(),
+                'high_priority': SupportTicket.query.filter_by(priority='high', status='open').count()
+            }
+            
+            return render_template('staff/support_tickets.html', tickets=tickets, stats=stats, status=status, priority=priority, current_user=current_user)
+        
+        @app.route('/staff/support/ticket/<int:ticket_id>')
+        @login_required
+        def staff_support_ticket_detail(ticket_id):
+            """جزئیات تیکت برای پشتیبان"""
+            if not current_user.is_manager() and not current_user.is_staff():
+                flash('⛔ دسترسی غیرمجاز', 'error')
+                return redirect(url_for('dashboard'))
+            
+            ticket = SupportTicket.query.get_or_404(ticket_id)
+            replies = SupportReply.query.filter_by(ticket_id=ticket_id).order_by(SupportReply.created_at).all()
+            
+            # کاربرانی که می‌توانند به عنوان مسئول تیکت تعیین شوند
+            available_staff = User.query.filter(
+                (User.role == UserRole.ADMIN) | (User.user_type == 'staff')
+            ).all()
+            
+            return render_template('staff/support_ticket_detail.html', ticket=ticket, replies=replies, available_staff=available_staff, current_user=current_user)
+        
+        @app.route('/staff/support/ticket/<int:ticket_id>/assign', methods=['POST'])
+        @login_required
+        def staff_assign_ticket(ticket_id):
+            """اختصاص تیکت به یک پشتیبان"""
+            if not current_user.is_manager() and not current_user.is_staff():
+                return jsonify({'success': False, 'message': 'دسترسی غیرمجاز'}), 403
+            
+            data = request.get_json()
+            assigned_to = data.get('assigned_to')
+            
+            ticket = SupportTicket.query.get_or_404(ticket_id)
+            ticket.assigned_to = assigned_to
+            ticket.status = 'in_progress'
+            db.session.commit()
+            
+            # اعلان به پشتیبان اختصاص داده شده
+            if assigned_to:
+                assignee = User.query.get(assigned_to)
+                if assignee:
+                    create_notification(
+                        assignee.id,
+                        f'اختصاص تیکت #{ticket.id}',
+                        f'تیکت "{ticket.subject}" به شما اختصاص داده شد.'
+                    )
+            
+            return jsonify({'success': True})
+         # ============================================
+    # API های پنل پشتیبانی (Support Panel API)
+    # ============================================
     
+    @app.route('/api/support/my-tickets')
+    @login_required
+    def api_my_tickets():
+        """API دریافت تیکت‌های کاربر جاری برای پنل شناور"""
+        try:
+            from models import SupportTicket, SupportReply
+            
+            tickets = SupportTicket.query.filter_by(user_id=current_user.id)\
+                .order_by(SupportTicket.created_at.desc()).limit(10).all()
+            
+            tickets_data = []
+            for ticket in tickets:
+                replies_count = SupportReply.query.filter_by(ticket_id=ticket.id).count()
+                
+                # دریافت آخرین پاسخ از طرف پشتیبان
+                last_staff_reply = SupportReply.query.filter(
+                    SupportReply.ticket_id == ticket.id,
+                    SupportReply.is_staff == True
+                ).order_by(SupportReply.created_at.desc()).first()
+                
+                last_staff_reply_at = last_staff_reply.created_at.isoformat() if last_staff_reply else None
+                
+                tickets_data.append({
+                    'id': ticket.id,
+                    'subject': ticket.subject,
+                    'status': ticket.status,
+                    'priority': ticket.priority,
+                    'created_at': ticket.created_at.strftime('%Y/%m/%d'),
+                    'replies_count': replies_count,
+                    'last_staff_reply_at': last_staff_reply_at
+                })
+            
+            return jsonify({'success': True, 'tickets': tickets_data})
+            
+        except Exception as e:
+            print(f"خطا در دریافت تیکت‌ها: {e}")
+            import traceback
+            traceback.print_exc()
+            return jsonify({'success': True, 'tickets': [], 'error': str(e)})
+    
+    @app.route('/api/support/create-ticket', methods=['POST'])
+    @login_required
+    def api_create_ticket():
+        """API ایجاد تیکت جدید از پنل شناور"""
+        try:
+            from models import SupportTicket, UserRole
+            
+            data = request.get_json()
+            if not data:
+                return jsonify({'success': False, 'error': 'داده ارسال نشده است'})
+            
+            subject = data.get('subject', '').strip()
+            message = data.get('message', '').strip()
+            category = data.get('category', 'general')
+            priority = data.get('priority', 'medium')
+            
+            if not subject or not message:
+                return jsonify({'success': False, 'error': 'عنوان و متن تیکت الزامی است'})
+            
+            ticket = SupportTicket(
+                user_id=current_user.id,
+                subject=subject,
+                message=message,
+                category=category,
+                priority=priority,
+                status='open'
+            )
+            db.session.add(ticket)
+            db.session.commit()
+            
+            # اعلان به ادمین‌ها
+            try:
+                admins = User.query.filter_by(role=UserRole.ADMIN).all()
+                for admin in admins:
+                    create_notification(
+                        admin.id,
+                        'تیکت پشتیبانی جدید',
+                        f'کاربر {current_user.full_name} یک تیکت جدید با عنوان "{subject}" ثبت کرد.'
+                    )
+            except:
+                pass
+            
+            return jsonify({'success': True, 'ticket_id': ticket.id, 'message': 'تیکت با موفقیت ثبت شد'})
+            
+        except Exception as e:
+            print(f"خطا در ایجاد تیکت: {e}")
+            import traceback
+            traceback.print_exc()
+            return jsonify({'success': False, 'error': str(e)})
+    @app.route('/api/support/mark-as-read', methods=['POST'])
+    @login_required
+    def api_mark_tickets_as_read():
+        """علامت‌گذاری تیکت‌ها به عنوان مشاهده شده"""
+        try:
+            from models import SupportTicket, SupportReply
+            
+            # دریافت تیکت‌های کاربر
+            tickets = SupportTicket.query.filter_by(user_id=current_user.id).all()
+            
+            # در اینجا می‌توانید یک جدول جداگانه برای track کردن آخرین مشاهده کاربر ایجاد کنید
+            # یا به سادگی کاری نکنید و فقط شمارنده سمت کلاینت ریست شود
+            
+            return jsonify({'success': True})
+            
+        except Exception as e:
+            return jsonify({'success': False, 'error': str(e)})        
+
     # ============================================
     # توابع کمکی آیه روز و حدیث
     # ============================================
@@ -414,6 +1900,7 @@ def init_routes(app):
                      competitions=upcoming_competitions,  
                      circles=upcoming_circles,
                      current_user=current_user)
+                     
     
     @app.route('/events')
     def events_list():
@@ -469,10 +1956,37 @@ def init_routes(app):
             except:
                 is_registered = False
         
+        # ========== اضافه کردن این بخش ==========
+        # محاسبه باز بودن ثبت‌نام بر اساس تاریخ شمسی
+        import jdatetime
+        from datetime import datetime
+        
+        # تاریخ امروز شمسی
+        today_jalali = jdatetime.date.today()
+        
+        # تبدیل تاریخ رویداد به شمسی
+        if isinstance(event.start_date, datetime):
+            event_jalali = jdatetime.date.fromgregorian(date=event.start_date.date())
+        else:
+            event_jalali = jdatetime.date.fromgregorian(date=event.start_date)
+        
+        # اگر تاریخ رویداد > امروز باشد، ثبت‌نام باز است
+        # (فقط رویدادهای بعد از امروز قابل ثبت‌نام هستند)
+        is_registration_open = event_jalali > today_jalali
+        
+        # برای دیباگ (در ترمینال چاپ می‌شود)
+        print(f"=== Event: {event.title} ===")
+        print(f"Today Jalali: {today_jalali}")
+        print(f"Event Jalali: {event_jalali}")
+        print(f"Is Registration Open: {is_registration_open}")
+        print(f"========================")
+        # ======================================
+        
         return render_template('events/detail.html',
-                             event=event,
-                             is_registered=is_registered,
-                             current_user=current_user)
+                            event=event,
+                            is_registered=is_registered,
+                            is_registration_open=is_registration_open,  # اضافه شده
+                            current_user=current_user)
     
     @app.route('/search')
     def search():
@@ -579,9 +2093,404 @@ def init_routes(app):
                                  sort_by=sort_by)
         
         return render_template('search.html', query='', results=None)
+    @app.route('/admin/support/ticket/<int:ticket_id>')
+    @login_required
+    @admin_required
+    def admin_support_ticket_detail(ticket_id):
+        """جزئیات تیکت برای ادمین"""
+        from models import SupportTicket, SupportReply
+        
+        ticket = SupportTicket.query.get_or_404(ticket_id)
+        replies = SupportReply.query.filter_by(ticket_id=ticket_id).order_by(SupportReply.created_at).all()
+        
+        # نکته مهم: استفاده از قالب ادمین
+        return render_template('admin/support/ticket_detail.html', 
+                            ticket=ticket, 
+                            replies=replies, 
+                            current_user=current_user)
+
+    @app.route('/admin/tickets')
+    @login_required
+    @admin_required
+    def admin_all_tickets():
+        """مشاهده همه تیکت‌ها برای ادمین"""
+        from models import SupportTicket
+        
+        page = request.args.get('page', 1, type=int)
+        status = request.args.get('status', 'all')
+        
+        query = SupportTicket.query
+        
+        if status != 'all':
+            query = query.filter_by(status=status)
+        
+        tickets = query.order_by(SupportTicket.created_at.desc()).paginate(page=page, per_page=20, error_out=False)
+        
+        # آمار
+        stats = {
+            'total': SupportTicket.query.count(),
+            'open': SupportTicket.query.filter_by(status='open').count(),
+            'in_progress': SupportTicket.query.filter_by(status='in_progress').count(),
+            'closed': SupportTicket.query.filter_by(status='closed').count(),
+        }
+        
+        return render_template('admin/all_tickets.html', 
+                             tickets=tickets, 
+                             stats=stats, 
+                             current_status=status,
+                             current_user=current_user)    
 
     
+# ============================================
+# مسیرهای احکام شرعی
+# ============================================
 
+    @app.route('/ahkam')
+    def ahkam_list():
+        from models import Ahkam
+        
+        category = request.args.get('category', 'all')
+        
+        if category == 'all':
+            ahkam_list = Ahkam.query.filter_by(is_active=True).order_by(Ahkam.created_at.desc()).all()
+        else:
+            ahkam_list = Ahkam.query.filter_by(category=category, is_active=True).order_by(Ahkam.created_at.desc()).all()
+        
+        categories = Ahkam.query.with_entities(Ahkam.category).distinct().all()
+        return render_template('category/ahkam.html', ahkam_list=ahkam_list, categories=categories, active_category=category)
+
+    @app.route('/ahkam/<int:id>')
+    def ahkam_detail(id):
+        from models import Ahkam
+        
+        ahkam = Ahkam.query.get_or_404(id)
+        ahkam.views += 1
+        db.session.commit()
+        return render_template('category/ahkam_detail.html', ahkam=ahkam)
+
+    @app.route('/admin/ahkam')
+    @login_required
+    @admin_required
+    def admin_ahkam():
+        from models import Ahkam
+        ahkam_list = Ahkam.query.order_by(Ahkam.created_at.desc()).all()
+        return render_template('admin/ahkam_list.html', ahkam_list=ahkam_list)
+    @app.route('/admin/seraj-yari')
+    @login_required
+    @admin_required
+    def admin_seraj_yari():
+        """پنل مدیریت سِراج‌یار برای ادمین"""
+        from models import SerajCategory, SerajQA, SerajSuggestion, SerajChat
+        
+        # آمار
+        total_qa = SerajQA.query.filter_by(is_active=True).count()
+        total_categories = SerajCategory.query.filter_by(is_active=True).count()
+        total_suggestions = SerajSuggestion.query.filter_by(is_active=True).count()
+        total_chats = SerajChat.query.count()
+        
+        # لیست سوالات
+        qa_list = SerajQA.query.order_by(SerajQA.created_at.desc()).limit(20).all()
+        categories = SerajCategory.query.filter_by(is_active=True).order_by(SerajCategory.order).all()
+        
+        return render_template('admin/seraj_yari.html',
+                             total_qa=total_qa,
+                             total_categories=total_categories,
+                             total_suggestions=total_suggestions,
+                             total_chats=total_chats,
+                             qa_list=qa_list,
+                             categories=categories,
+                             current_user=current_user)    
+
+    @app.route('/admin/ahkam/add', methods=['GET', 'POST'])
+    @login_required
+    @admin_required
+    def admin_ahkam_add():
+        from models import Ahkam
+        from forms import AhkamForm
+        
+        form = AhkamForm()
+        if form.validate_on_submit():
+            ahkam = Ahkam(
+                title=form.title.data,
+                category=form.category.data,
+                ruling_type=form.ruling_type.data,
+                short_description=form.short_description.data,
+                full_content=form.full_content.data,
+                source=form.source.data,
+                marja=form.marja.data,
+                is_active=form.is_active.data
+            )
+            db.session.add(ahkam)
+            db.session.commit()
+            flash('حکم با موفقیت اضافه شد!', 'success')
+            return redirect(url_for('admin_ahkam'))
+        return render_template('admin/ahkam_form.html', form=form, title='افزودن حکم جدید')
+
+    @app.route('/admin/ahkam/edit/<int:id>', methods=['GET', 'POST'])
+    @login_required
+    @admin_required
+    def admin_ahkam_edit(id):
+        from models import Ahkam
+        from forms import AhkamForm
+        
+        ahkam = Ahkam.query.get_or_404(id)
+        form = AhkamForm(obj=ahkam)
+        if form.validate_on_submit():
+            ahkam.title = form.title.data
+            ahkam.category = form.category.data
+            ahkam.ruling_type = form.ruling_type.data
+            ahkam.short_description = form.short_description.data
+            ahkam.full_content = form.full_content.data
+            ahkam.source = form.source.data
+            ahkam.marja = form.marja.data
+            ahkam.is_active = form.is_active.data
+            db.session.commit()
+            flash('حکم با موفقیت ویرایش شد!', 'success')
+            return redirect(url_for('admin_ahkam'))
+        return render_template('admin/ahkam_form.html', form=form, title='ویرایش حکم')
+
+
+
+    from flask import redirect, url_for, flash
+
+    @app.route('/admin/ahkam/delete/<int:id>', methods=['GET', 'POST', 'DELETE'])
+    def admin_ahkam_delete(id):
+        ahkam = Ahkam.query.get_or_404(id)
+        db.session.delete(ahkam)
+        db.session.commit()
+        flash('حکم شرعی با موفقیت حذف شد', 'success')
+        return redirect(url_for('admin_ahkam'))
+    
+        # ============================================
+    # ========== مسیرهای نهج‌البلاغه ==========
+    # ============================================
+
+    # ========== صفحات عمومی ==========
+
+    @app.route('/nahj')
+    def nahj_index():
+        """صفحه اصلی نهج‌البلاغه"""
+        try:
+            categories = NahjCategory.query.filter_by(is_active=True).order_by(NahjCategory.order).all()
+            featured_contents = NahjContent.query.filter_by(is_featured=True, is_active=True).limit(6).all()
+        except:
+            categories = []
+            featured_contents = []
+        
+        return render_template('nahj/index.html', 
+                            categories=categories, 
+                            featured_contents=featured_contents,
+                            current_user=current_user)
+
+    @app.route('/nahj/category/<slug>')
+    def nahj_category(slug):
+        """نمایش مطالب یک دسته"""
+        try:
+            category = NahjCategory.query.filter_by(slug=slug, is_active=True).first_or_404()
+            contents = NahjContent.query.filter_by(category_id=category.id, is_active=True).order_by(NahjContent.number).all()
+        except:
+            flash('دسته‌بندی مورد نظر یافت نشد.', 'error')
+            return redirect(url_for('nahj_index'))
+        
+        return render_template('nahj/category.html', 
+                            category=category, 
+                            contents=contents,
+                            current_user=current_user)
+
+    @app.route('/nahj/content/<int:id>')
+    def nahj_content_detail(id):
+        """جزئیات یک مطلب"""
+        try:
+            content = NahjContent.query.filter_by(id=id, is_active=True).first_or_404()
+            content.view_count += 1
+            db.session.commit()
+            
+            # مطالب مرتبط
+            related = NahjContent.query.filter(
+                NahjContent.category_id == content.category_id,
+                NahjContent.id != content.id,
+                NahjContent.is_active == True
+            ).limit(5).all()
+        except:
+            flash('مطلب مورد نظر یافت نشد.', 'error')
+            return redirect(url_for('nahj_index'))
+        
+        return render_template('nahj/content_detail.html', 
+                            content=content, 
+                            related=related,
+                            current_user=current_user)
+
+    # ========== مدیریت دسته‌بندی‌ها (فقط ادمین) ==========
+
+    @app.route('/admin/nahj/categories')
+    @login_required
+    @admin_required
+    def admin_nahj_categories():
+        """مدیریت دسته‌بندی‌های نهج‌البلاغه"""
+        categories = NahjCategory.query.order_by(NahjCategory.order).all()
+        return render_template('admin/nahj/categories.html', 
+                            categories=categories, 
+                            current_user=current_user)
+
+    @app.route('/admin/nahj/category/add', methods=['POST'])
+    @login_required
+    @admin_required
+    def admin_nahj_add_category():
+        """افزودن دسته‌بندی جدید"""
+        data = request.get_json()
+        
+        name = data.get('name')
+        slug = data.get('slug')
+        icon = data.get('icon', 'fa-feather-alt')
+        description = data.get('description')
+        order = data.get('order', 0)
+        
+        if not name or not slug:
+            return jsonify({'success': False, 'message': 'نام و اسلاگ الزامی است'})
+        
+        # بررسی تکراری نبودن slug
+        existing = NahjCategory.query.filter_by(slug=slug).first()
+        if existing:
+            return jsonify({'success': False, 'message': 'این اسلاگ قبلاً استفاده شده است'})
+        
+        category = NahjCategory(
+            name=name,
+            slug=slug,
+            icon=icon,
+            description=description,
+            order=order,
+            is_active=True
+        )
+        db.session.add(category)
+        db.session.commit()
+        
+        return jsonify({'success': True, 'message': 'دسته‌بندی با موفقیت اضافه شد'})
+
+    @app.route('/admin/nahj/category/<int:id>/edit', methods=['POST'])
+    @login_required
+    @admin_required
+    def admin_nahj_edit_category(id):
+        """ویرایش دسته‌بندی"""
+        category = NahjCategory.query.get_or_404(id)
+        data = request.get_json()
+        
+        category.name = data.get('name', category.name)
+        category.slug = data.get('slug', category.slug)
+        category.icon = data.get('icon', category.icon)
+        category.description = data.get('description', category.description)
+        category.order = data.get('order', category.order)
+        category.is_active = data.get('is_active', category.is_active)
+        
+        db.session.commit()
+        return jsonify({'success': True, 'message': 'دسته‌بندی با موفقیت ویرایش شد'})
+
+    @app.route('/admin/nahj/category/<int:id>/delete', methods=['POST'])
+    @login_required
+    @admin_required
+    def admin_nahj_delete_category(id):
+        """حذف دسته‌بندی"""
+        category = NahjCategory.query.get_or_404(id)
+        db.session.delete(category)
+        db.session.commit()
+        return jsonify({'success': True, 'message': 'دسته‌بندی با موفقیت حذف شد'})
+
+    # ========== مدیریت محتوا (فقط ادمین) ==========
+
+    @app.route('/admin/nahj/contents')
+    @login_required
+    @admin_required
+    def admin_nahj_contents():
+        """مدیریت محتوای نهج‌البلاغه"""
+        category_id = request.args.get('category_id', type=int)
+        query = NahjContent.query
+        
+        if category_id:
+            query = query.filter_by(category_id=category_id)
+        
+        contents = query.order_by(NahjContent.created_at.desc()).all()
+        categories = NahjCategory.query.all()
+        
+        return render_template('admin/nahj/contents.html', 
+                            contents=contents, 
+                            categories=categories,
+                            selected_category=category_id,
+                            current_user=current_user)
+
+    @app.route('/admin/nahj/content/add', methods=['POST'])
+    @login_required
+    @admin_required
+    def admin_nahj_add_content():
+        """افزودن مطلب جدید"""
+        data = request.get_json()
+        
+        content = NahjContent(
+            category_id=data.get('category_id'),
+            title=data.get('title'),
+            number=data.get('number'),
+            arabic_text=data.get('arabic_text', ''),
+            persian_text=data.get('persian_text'),
+            explanation=data.get('explanation', ''),
+            tags=data.get('tags', ''),
+            is_featured=data.get('is_featured', False),
+            is_active=True
+        )
+        db.session.add(content)
+        db.session.commit()
+        
+        return jsonify({'success': True, 'message': 'مطلب با موفقیت اضافه شد', 'id': content.id})
+
+    @app.route('/admin/nahj/content/<int:id>/edit', methods=['POST'])
+    @login_required
+    @admin_required
+    def admin_nahj_edit_content(id):
+        """ویرایش مطلب"""
+        content = NahjContent.query.get_or_404(id)
+        data = request.get_json()
+        
+        content.category_id = data.get('category_id', content.category_id)
+        content.title = data.get('title', content.title)
+        content.number = data.get('number', content.number)
+        content.arabic_text = data.get('arabic_text', content.arabic_text)
+        content.persian_text = data.get('persian_text', content.persian_text)
+        content.explanation = data.get('explanation', content.explanation)
+        content.tags = data.get('tags', content.tags)
+        content.is_featured = data.get('is_featured', content.is_featured)
+        content.is_active = data.get('is_active', content.is_active)
+        
+        db.session.commit()
+        return jsonify({'success': True, 'message': 'مطلب با موفقیت ویرایش شد'})
+
+    @app.route('/admin/nahj/content/<int:id>/delete', methods=['POST'])
+    @login_required
+    @admin_required
+    def admin_nahj_delete_content(id):
+        """حذف مطلب"""
+        content = NahjContent.query.get_or_404(id)
+        db.session.delete(content)
+        db.session.commit()
+        return jsonify({'success': True, 'message': 'مطلب با موفقیت حذف شد'})
+
+    @app.route('/admin/nahj/content/<int:id>/get')
+    @login_required
+    @admin_required
+    def admin_nahj_get_content(id):
+        """دریافت اطلاعات یک مطلب برای ویرایش"""
+        content = NahjContent.query.get_or_404(id)
+        return jsonify({
+            'success': True,
+            'content': {
+                'id': content.id,
+                'category_id': content.category_id,
+                'title': content.title,
+                'number': content.number,
+                'arabic_text': content.arabic_text,
+                'persian_text': content.persian_text,
+                'explanation': content.explanation,
+                'tags': content.tags,
+                'is_featured': content.is_featured,
+                'is_active': content.is_active
+            }
+        })
     # ============================================
     # مسیرهای احراز هویت
     # ============================================
@@ -789,6 +2698,12 @@ def init_routes(app):
             return redirect(url_for('profile'))
         
         return render_template('auth/reset_password.html')
+
+
+    @app.route('/ahkam')
+    def ahkam():
+        return render_template('category/ahkam.html')
+       
     
     # ============================================
     # ========== مسیرهای کاربر عادی ==========
@@ -3161,67 +5076,7 @@ def init_routes(app):
                              university_stats=university_stats,
                              current_user=current_user)
     
-    # ============================================
-    # ========== مسیر هوش مصنوعی برای ادمین ==========
-    # ============================================
-    
-    @app.route('/admin/ai')
-    @login_required
-    @admin_required
-    def admin_ai_dashboard():
-        """داشبورد مدیریت هوش مصنوعی"""
-        try:
-            if AI_ENABLED:
-                try:
-                    stats = get_ai_statistics()
-                    recent_questions = get_recent_qa(limit=20)
-                except:
-                    stats = {
-                        'total_questions': AIQuestion.query.count(),
-                        'unique_users': db.session.query(AIQuestion.user_id).distinct().count(),
-                        'ai_enabled': True
-                    }
-                    recent_questions = AIQuestion.query.order_by(AIQuestion.created_at.desc()).limit(20).all()
-            else:
-                try:
-                    total_questions = AIQuestion.query.count()
-                    quranic_questions = AIQuestion.query.filter_by(is_quranic=True).count()
-                    unique_users = db.session.query(AIQuestion.user_id).distinct().count()
-                    
-                    stats = {
-                        'total_questions': total_questions,
-                        'quranic_questions': quranic_questions,
-                        'unique_users': unique_users,
-                        'total_verses': QuranVerse.query.count(),
-                        'system_status': 'در حال توسعه',
-                        'ai_enabled': False
-                    }
-                    
-                    recent_questions = AIQuestion.query.order_by(
-                        AIQuestion.created_at.desc()
-                    ).limit(20).all()
-                except:
-                    stats = {
-                        'total_questions': 0,
-                        'unique_users': 0,
-                        'ai_enabled': False,
-                        'system_status': 'خطا در اتصال'
-                    }
-                    recent_questions = []
-        except:
-            stats = {
-                'total_questions': 0,
-                'unique_users': 0,
-                'ai_enabled': False,
-                'system_status': 'خطا در سیستم'
-            }
-            recent_questions = []
-        
-        return render_template('admin/ai_dashboard.html',
-                             stats=stats,
-                             recent_questions=recent_questions,
-                             ai_enabled=AI_ENABLED,
-                             current_user=current_user)
+   
       # ============================================
     # ========== مدیریت بنرها (ادمین) ==========
     # ============================================
@@ -3394,430 +5249,12 @@ def init_routes(app):
         db.session.commit()
         create_notification(circle.created_by, '✅ تأیید درخواست حلقه تلاوت', f'درخواست شما برای ایجاد حلقه "{circle.name}" توسط مدیر تأیید شد.')
         return jsonify({'success': True})
-    @app.route('/ai/quran', methods=['GET', 'POST'])
-    @login_required
-    @verified_required
-    def ai_quran():
-        """پرسش و پاسخ قرآنی با استفاده از دیتابیس"""
-        answer = None
-        question = ""
-        recent_questions = []
-        suggested_verses = []
-        
-        # آمار
-        try:
-            stats = {
-                'total_verses': QuranVerse.query.count(),
-                'total_questions': QuranQA.query.count(),
-                'user_questions': UserQuranChat.query.filter_by(user_id=current_user.id).count()
-            }
-        except:
-            stats = {
-                'total_verses': 0,
-                'total_questions': 0,
-                'user_questions': 0
-            }
-        
-        if request.method == 'POST':
-            question = request.form.get('question', '').strip()
-            
-            if question:
-                # جستجو در دیتابیس
-                qa_obj = find_best_answer(question)
-                
-                if qa_obj:
-                    # پاسخ از دیتابیس
-                    answer = format_answer_with_verses(qa_obj)
-                    # ذخیره در تاریخچه
-                    save_user_chat(current_user.id, question, answer['answer'], qa_obj.related_verses)
-                else:
-                    # پاسخ پیش‌فرض برای سوالات بدون پاسخ
-                    answer = {
-                        "success": True,
-                        "answer": f"""📖 **پاسخ به سوال شما:**
-
-**سوال:** {question}
-
-**پاسخ:** 
-سوال خوبی پرسیدید! در حال حاضر پاسخ دقیقی برای این سوال در پایگاه داده من موجود نیست. 
-پیشنهاد می‌کنم:
-
-1. سوال خود را با عبارات ساده‌تر بپرسید
-2. از کلمات کلیدی اصلی موضوع استفاده کنید
-3. به بخش «پیشنهاد آیات» مراجعه کنید
-
-اگر سوال شما تخصصی‌تر است، می‌توانید با پشتیبانی تماس بگیرید.
-
-**آیه پیشنهادی برای مطالعه:**
-«وَمَنْ يَتَّقِ اللَّهَ يَجْعَلْ لَهُ مَخْرَجًا»
-(سوره طلاق، آیه ۲)
-هر کس تقوای الهی پیشه کند، خداوند راه نجاتی برای او قرار می‌دهد.""",
-                        "is_quranic": True,
-                        "suggestions": [
-                            "تفسیر قرآن",
-                            "مفاهیم پایه قرآنی",
-                            "آیات مشابه"
-                        ]
-                    }
-                    # ذخیره در تاریخچه
-                    save_user_chat(current_user.id, question, answer['answer'], None)
-        
-        # دریافت سوالات اخیر کاربر
-        try:
-            recent_chats = UserQuranChat.query.filter_by(
-                user_id=current_user.id
-            ).order_by(UserQuranChat.created_at.desc()).limit(5).all()
-            
-            for chat in recent_chats:
-                recent_questions.append({
-                    'id': chat.id,
-                    'question': chat.question[:50] + '...' if len(chat.question) > 50 else chat.question,
-                    'answer': chat.answer[:100] if chat.answer else '',
-                    'created_at': chat.created_at.strftime('%Y-%m-%d') if chat.created_at else '',
-                    'is_quranic': True
-                })
-        except:
-            recent_questions = []
-        
-        # دریافت آیات تصادفی
-        try:
-            suggested_verses = QuranVerse.query.order_by(func.random()).limit(3).all()
-        except:
-            suggested_verses = []
-        
-        return render_template('ai/quran.html',
-                             answer=answer,
-                             question=question,
-                             recent_questions=recent_questions,
-                             suggested_verses=suggested_verses,
-                             stats=stats,
-                             ai_enabled=AI_ENABLED,
-                             current_user=current_user)
-    @app.route('/admin/quran-qa/<int:qa_id>/get')
-    @login_required
-    @admin_required
-    def admin_get_quran_qa(qa_id):
-        qa = QuranQA.query.get_or_404(qa_id)
-        return jsonify({
-            'success': True,
-            'qa': {
-                'id': qa.id,
-                'question': qa.question,
-                'keywords': qa.keywords,
-                'answer': qa.answer,
-                'related_verses': qa.related_verses,
-                'category': qa.category,
-                'priority': qa.priority
-            }
-        })
-
-    @app.route('/admin/quran-qa/<int:qa_id>/edit', methods=['POST'])
-    @login_required
-    @admin_required
-    def admin_edit_quran_qa(qa_id):
-        qa = QuranQA.query.get_or_404(qa_id)
-        data = request.get_json()
-        
-        qa.question = data.get('question')
-        qa.keywords = data.get('keywords')
-        qa.answer = data.get('answer')
-        qa.related_verses = data.get('related_verses')
-        qa.category = data.get('category')
-        qa.priority = data.get('priority', 0)
-        qa.updated_at = datetime.utcnow()
-        
-        db.session.commit()
-        return jsonify({'success': True, 'message': 'بروزرسانی شد'})
-        @app.route('/admin/quran-qa/add', methods=['POST'])
-        @login_required
-        @admin_required
-        def admin_add_quran_qa():
-            """افزودن پرسش و پاسخ جدید"""
-        data = request.get_json()
-        
-        qa = QuranQA(
-            question=data.get('question'),
-            keywords=data.get('keywords'),
-            answer=data.get('answer'),
-            related_verses=data.get('related_verses'),
-            category=data.get('category'),
-            priority=data.get('priority', 0),
-            is_active=True
-        )
-        db.session.add(qa)
-        db.session.commit()
-        
-        return jsonify({'success': True, 'message': 'پرسش و پاسخ با موفقیت اضافه شد'})
-
-    @app.route('/admin/quran-qa/<int:qa_id>/delete', methods=['POST'])
-    @login_required
-    @admin_required
-    def admin_delete_quran_qa(qa_id):
-        """حذف پرسش و پاسخ"""
-        qa = QuranQA.query.get_or_404(qa_id)
-        db.session.delete(qa)
-        db.session.commit()
-        return jsonify({'success': True, 'message': 'حذف شد'})
-
-    @app.route('/admin/quran-qa/<int:qa_id>/toggle', methods=['POST'])
-    @login_required
-    @admin_required
-    def admin_toggle_quran_qa(qa_id):
-        """فعال/غیرفعال کردن پرسش و پاسخ"""
-        qa = QuranQA.query.get_or_404(qa_id)
-        qa.is_active = not qa.is_active
-        db.session.commit()
-        return jsonify({'success': True, 'is_active': qa.is_active})
-    
-    @app.route('/ai/history')
-    @login_required
-    @verified_required
-    def ai_history():
-          """تاریخچه پرسش‌ها"""
-          page = request.args.get('page', 1, type=int)
-    
-          try:
-              # استفاده از UserQuranChat به جای AIQuestion
-              questions = UserQuranChat.query.filter_by(
-                  user_id=current_user.id
-              ).order_by(UserQuranChat.created_at.desc()).paginate(
-                  page=page, per_page=10, error_out=False
-              )
-          except:
-              questions = []
-          
-          return render_template('ai/history.html',
-                               questions=questions,
-                               ai_enabled=AI_ENABLED,
-                                     current_user=current_user)
-    
-    @app.route('/ai/ask', methods=['POST'])
-    @login_required
-    @verified_required
-    def ask_quran():
-        """پرسش و پاسخ قرآنی (پردازش فرم)"""
-        question = request.form.get('question', '').strip()
-        
-        if not question:
-            flash('لطفاً سوال خود را وارد کنید', 'error')
-            return redirect(url_for('ai_quran'))
-        
-        try:
-            # ذخیره سوال در دیتابیس
-            ai_question = AIQuestion(
-                user_id=current_user.id,
-                question=question
-            )
-            db.session.add(ai_question)
-            db.session.commit()
-            
-            if AI_ENABLED:
-                answer = ask_quran_ai(question, current_user.id)
-                # به‌روزرسانی پاسخ
-                ai_question.answer = answer.get('answer', '')
-                ai_question.is_quranic = answer.get('is_quranic', True)
-                db.session.commit()
-            else:
-                # حالت ساده
-                answer = {
-                    "success": True,
-                    "answer": f"""📖 **پاسخ به سوال شما:**
-
-**سوال:** {question}
-
-**پاسخ:**
-این سیستم هوش مصنوعی قرآنی در حال توسعه است. 
-برای پاسخ دقیق به سوال شما، می‌توانید به تفاسیر معتبر قرآن مراجعه کنید.
-
-**آیه پیشنهادی:**
-«بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ»
-(سوره الفاتحة، آیه ۱)
-
-هر کاری را با نام خداوند بخشنده مهربان شروع کنید.""",
-                    "is_quranic": True,
-                    "related_verses": [
-                        {
-                            "text": "بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ",
-                            "translation": "به نام خداوند بخشنده مهربان",
-                            "surah": "الفاتحة",
-                            "ayah": 1
-                        }
-                    ],
-                    "suggestions": [
-                        "تفسیر آیه‌الکرسی",
-                        "آیات مربوط به توحید",
-                        "فضیلت سوره یس"
-                    ]
-                }
-        except:
-            flash('خطا در پردازش سوال. لطفاً بعداً تلاش کنید.', 'error')
-            return redirect(url_for('ai_quran'))
-        
-        # دریافت سوالات اخیر کاربر با فرمت تاریخ مناسب
-        recent_questions = []
-        try:
-            recent_questions_raw = AIQuestion.query.filter_by(
-                user_id=current_user.id
-            ).order_by(AIQuestion.created_at.desc()).limit(5).all()
-            
-            for q in recent_questions_raw:
-                question_obj = {
-                    'id': q.id,
-                    'question': q.question,
-                    'answer': q.answer,
-                    'created_at': q.created_at.strftime('%Y-%m-%d') if q.created_at else '',
-                    'is_quranic': q.is_quranic
-                }
-                recent_questions.append(question_obj)
-        except:
-            pass
-        
-        suggested_verses = []
-        try:
-            suggested_verses = QuranVerse.query.order_by(func.random()).limit(3).all()
-        except:
-            pass
-        
-        return render_template('ai/quran.html',
-                             answer=answer,
-                             question=question,
-                             recent_questions=recent_questions,
-                             suggested_verses=suggested_verses,
-                             ai_enabled=AI_ENABLED,
-                             current_user=current_user)
-    
-    @app.route('/ai/analyze', methods=['GET', 'POST'])
-    @login_required
-    @verified_required
-    def ai_analyze():
-        """تحلیل محتوای قرآنی"""
-        analysis = None
-        text = ""
-        
-        if request.method == 'POST':
-            text = request.form.get('text', '').strip()
-            
-            if text:
-                if AI_ENABLED:
-                    try:
-                        analysis = analyze_quranic_text(text, current_user.id)
-                    except:
-                        analysis = {
-                            "verses": [
-                                {
-                                    "text": "بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ",
-                                    "translation": "به نام خداوند بخشنده مهربان",
-                                    "surah": "الفاتحة",
-                                    "ayah": 1
-                                }
-                            ],
-                            "keywords": ["خداوند", "بخشنده", "مهربان"],
-                            "sentiment": "positive"
-                        }
-                else:
-                    analysis = {
-                        "verses": [
-                            {
-                                "text": "بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ",
-                                "translation": "به نام خداوند بخشنده مهربان",
-                                "surah": "الفاتحة",
-                                "ayah": 1
-                            }
-                        ],
-                        "keywords": ["خداوند", "بخشنده", "مهربان"],
-                        "sentiment": "positive"
-                    }
-        
-        return render_template('ai/analyze.html',
-                             analysis=analysis,
-                             text=text,
-                             ai_enabled=AI_ENABLED,
-                             current_user=current_user)
-
-    @app.route('/ai/suggest', methods=['GET', 'POST'])
-    @login_required
-    @verified_required
-    def ai_suggest():
-        """پیشنهاد آیات بر اساس حال و هوا"""
-        verses = []
-        mood = "general"
-    
-        if request.method == 'POST':
-            mood = request.form.get('mood', 'general')
-        
-        # نقشه mood به فارسی
-        mood_map = {
-            'امید': 'امید',
-            'آرامش': 'آرامش',
-            'توکل': 'توکل'
-        }
-        
-        mood_key = mood_map.get(mood, 'general')
-        
-        # دریافت از دیتابیس
-        if mood_key != 'general':
-            verses = get_suggestions_by_mood(mood_key)
-        
-        # اگر آیات کافی نبود، از جدول QuranVerse استفاده کن
-        if not verses or len(verses) < 3:
-            try:
-                random_verses = QuranVerse.query.order_by(func.random()).limit(5).all()
-                for v in random_verses:
-                    verses.append({
-                        'text': v.verse_arabic if hasattr(v, 'verse_arabic') else '',
-                        'translation': v.verse_persian if hasattr(v, 'verse_persian') else v.translation if hasattr(v, 'translation') else '',
-                        'surah': v.surah_name if hasattr(v, 'surah_name') else '',
-                        'ayah': v.verse_number if hasattr(v, 'verse_number') else ''
-                    })
-            except:
-                pass
-        
-        return render_template('ai/suggest.html',
-                             verses=verses,
-                             mood=mood,
-                             ai_enabled=AI_ENABLED,
-                             current_user=current_user)
-
-    @app.route('/ai/ask_api', methods=['POST'])
-    @login_required
-    @verified_required
-    def ai_ask_api():
-        """API برای پرسش سوال (استفاده در AJAX)"""
-        data = request.get_json()
-        
-        if not data or 'question' not in data:
-            return jsonify({'error': 'سوال الزامی است'}), 400
-        
-        question = data['question'].strip()
-        
-        try:
-            # ذخیره در دیتابیس
-            ai_question = AIQuestion(
-                user_id=current_user.id,
-                question=question
-            )
-            db.session.add(ai_question)
-            db.session.commit()
-            
-            if AI_ENABLED:
-                answer = ask_quran_ai(question, current_user.id)
-                ai_question.answer = answer.get('answer', '')
-                ai_question.is_quranic = answer.get('is_quranic', True)
-                db.session.commit()
-            else:
-                answer = {
-                    'success': True,
-                    'answer': f'پاسخ به سوال: {question}\n\nسیستم هوش مصنوعی در حال توسعه است.',
-                    'is_quranic': True
-                }
-        except:
-            answer = {
-                'success': False,
-                'answer': 'خطا در پردازش سوال',
-                'is_quranic': True
-            }
-        
-        return jsonify(answer)
+  #  @app.route('/ai/quran')
+   # @login_required
+    #@verified_required
+    #def ai_quran():
+     #   """ریدایرکت به سِراج‌یار جدید"""
+        return redirect(url_for('seraj_yari'))
     # ============================================
     # API های عمومی
     # ============================================
@@ -5160,12 +6597,32 @@ def init_routes(app):
     # ============================================
     # فیلترهای تمپلیت
     # ============================================
-    
+# فیلتر تبدیل تاریخ به شمسی
     @app.template_filter('persian_date')
-    def persian_date_filter(date_str):
-        """فیلتر تاریخ شمسی برای تمپلیت"""
-        return date_str
-    
+    def persian_date_filter(date_obj):
+        """تبدیل تاریخ میلادی به شمسی"""
+        if not date_obj:
+            return ''
+        try:
+            jdate = jdatetime.date.fromgregorian(date=date_obj)
+            persian_months = {
+                1: 'فروردین', 2: 'اردیبهشت', 3: 'خرداد', 4: 'تیر',
+                5: 'مرداد', 6: 'شهریور', 7: 'مهر', 8: 'آبان',
+                9: 'آذر', 10: 'دی', 11: 'بهمن', 12: 'اسفند'
+            }
+            return f"{jdate.day} {persian_months[jdate.month]} {jdate.year}"
+        except:
+            return date_obj.strftime('%Y/%m/%d')
+
+    @app.template_filter('persian_time')
+    def persian_time_filter(date_obj):
+        """فرمت زمان به فارسی"""
+        if not date_obj:
+            return ''
+        try:
+            return date_obj.strftime('%H:%M')
+        except:
+         return ''
     @app.template_filter('format_date')
     def format_date_filter(date_obj):
         """فرمت کردن تاریخ برای نمایش"""
@@ -5175,6 +6632,445 @@ def init_routes(app):
             except:
                 return ''
         return ''
+    
+        # ============================================
+    # ========== مسیرهای صحیفه سجادیه ==========
+    # ============================================
+
+    @app.route('/sahifa')
+    def sahifa_index():
+        """صفحه اصلی صحیفه سجادیه"""
+        from models import SahifaCategory, SahifaPrayer, SahifaMunajat
+        
+        try:
+            categories = SahifaCategory.query.filter_by(is_active=True).order_by(SahifaCategory.order).all()
+            featured_prayers = SahifaPrayer.query.filter_by(is_featured=True, is_active=True).limit(6).all()
+            total_prayers = SahifaPrayer.query.filter_by(is_active=True).count()
+            
+            # آمار دسته‌بندی‌ها
+            categories_stats = []
+            for cat in categories:
+                count = SahifaPrayer.query.filter_by(category_id=cat.id, is_active=True).count()
+                categories_stats.append({
+                    'id': cat.id,
+                    'name': cat.name,
+                    'slug': cat.slug,
+                    'icon': cat.icon,
+                    'count': count
+                })
+        except Exception as e:
+            print(f"خطا در دریافت اطلاعات صحیفه: {e}")
+            categories = []
+            featured_prayers = []
+            total_prayers = 0
+            categories_stats = []
+        
+        return render_template('sahifa/index.html',
+                             categories=categories,
+                             categories_stats=categories_stats,
+                             featured_prayers=featured_prayers,
+                             total_prayers=total_prayers,
+                             current_user=current_user)
+
+
+    @app.route('/sahifa/category/<slug>')
+    def sahifa_category(slug):
+        """نمایش دعاهای یک دسته‌بندی"""
+        from models import SahifaCategory, SahifaPrayer
+        
+        try:
+            category = SahifaCategory.query.filter_by(slug=slug, is_active=True).first_or_404()
+            prayers = SahifaPrayer.query.filter_by(category_id=category.id, is_active=True)\
+                .order_by(SahifaPrayer.number).all()
+        except Exception as e:
+            flash('دسته‌بندی مورد نظر یافت نشد.', 'error')
+            return redirect(url_for('sahifa_index'))
+        
+        return render_template('sahifa/category.html',
+                             category=category,
+                             prayers=prayers,
+                             current_user=current_user)
+
+
+    @app.route('/sahifa/prayer/<int:prayer_id>')
+    def sahifa_detail(prayer_id):
+        """جزئیات یک دعا"""
+        from models import SahifaPrayer, SahifaCategory
+        
+        try:
+            prayer = SahifaPrayer.query.filter_by(id=prayer_id, is_active=True).first_or_404()
+            
+            # افزایش بازدید
+            prayer.view_count += 1
+            db.session.commit()
+            
+            # دعاهای مرتبط (همین دسته)
+            related = SahifaPrayer.query.filter(
+                SahifaPrayer.category_id == prayer.category_id,
+                SahifaPrayer.id != prayer.id,
+                SahifaPrayer.is_active == True
+            ).limit(5).all()
+            
+            # همه دسته‌بندی‌ها برای منو
+            categories = SahifaCategory.query.filter_by(is_active=True).all()
+            
+        except Exception as e:
+            flash('دعای مورد نظر یافت نشد.', 'error')
+            return redirect(url_for('sahifa_index'))
+        
+        return render_template('sahifa/detail.html',
+                             prayer=prayer,
+                             related=related,
+                             categories=categories,
+                             current_user=current_user)
+
+
+    @app.route('/sahifa/munajat')
+    def sahifa_munajat():
+        """نمایش مناجات خمسه عشر"""
+        from models import SahifaMunajat
+        
+        try:
+            munajat_list = SahifaMunajat.query.filter_by(is_active=True)\
+                .order_by(SahifaMunajat.number).all()
+        except Exception as e:
+            print(f"خطا در دریافت مناجات: {e}")
+            munajat_list = []
+        
+        return render_template('sahifa/munajat.html',
+                             munajat_list=munajat_list,
+                             current_user=current_user)
+
+
+    @app.route('/sahifa/munajat/<int:munajat_id>')
+    def sahifa_munajat_detail(munajat_id):
+        """جزئیات یک مناجات"""
+        from models import SahifaMunajat
+        
+        try:
+            munajat = SahifaMunajat.query.filter_by(id=munajat_id, is_active=True).first_or_404()
+            
+            # افزایش بازدید
+            munajat.view_count += 1
+            db.session.commit()
+            
+            # مناجات قبلی و بعدی
+            prev_munajat = SahifaMunajat.query.filter(
+                SahifaMunajat.number < munajat.number,
+                SahifaMunajat.is_active == True
+            ).order_by(SahifaMunajat.number.desc()).first()
+            
+            next_munajat = SahifaMunajat.query.filter(
+                SahifaMunajat.number > munajat.number,
+                SahifaMunajat.is_active == True
+            ).order_by(SahifaMunajat.number).first()
+            
+        except Exception as e:
+            flash('مناجات مورد نظر یافت نشد.', 'error')
+            return redirect(url_for('sahifa_munajat'))
+        
+        return render_template('sahifa/munajat_detail.html',
+                             munajat=munajat,
+                             prev=prev_munajat,
+                             next=next_munajat,
+                             current_user=current_user)
+
+
+        # ============================================
+    # مدیریت صحیفه سجادیه (فقط ادمین)
+    # ============================================
+
+    @app.route('/admin/sahifa/contents')
+    @login_required
+    @admin_required
+    def admin_sahifa_contents():
+        """مدیریت محتوای صحیفه سجادیه"""
+        from models import SahifaPrayer, SahifaCategory
+        
+        category_id = request.args.get('category_id', type=int)
+        query = SahifaPrayer.query
+        
+        if category_id:
+            query = query.filter_by(category_id=category_id)
+        
+        prayers = query.order_by(SahifaPrayer.number).all()
+        categories = SahifaCategory.query.filter_by(is_active=True).all()
+        
+        return render_template('admin/sahifa/contents.html',
+                            prayers=prayers,
+                            categories=categories,
+                            selected_category=category_id,
+                            current_user=current_user)
+
+    @app.route('/api/sahifa/search')
+    def api_sahifa_search():
+        """API جستجو در دعاها"""
+        query = request.args.get('q', '').strip()
+        
+        if not query:
+            return jsonify({'success': False, 'error': 'متن جستجو وارد نشده است'})
+        
+        from models import SahifaPrayer
+        
+        try:
+            prayers = SahifaPrayer.query.filter(
+                SahifaPrayer.is_active == True,
+                (SahifaPrayer.title.ilike(f'%{query}%') |
+                 SahifaPrayer.persian_text.ilike(f'%{query}%') |
+                 SahifaPrayer.keywords.ilike(f'%{query}%'))
+            ).limit(20).all()
+            
+            results = []
+            for p in prayers:
+                results.append({
+                    'id': p.id,
+                    'number': p.number,
+                    'title': p.title,
+                    'excerpt': p.persian_text[:150] + '...' if len(p.persian_text) > 150 else p.persian_text
+                })
+            
+            return jsonify({'success': True, 'results': results, 'count': len(results)})
+            
+        except Exception as e:
+            return jsonify({'success': False, 'error': str(e)}), 500
+
+                # ============================================
+    # ========== مسیرهای معارف اسلامی ==========
+    # ============================================
+
+    @app.route('/maaref')
+    def maaref_index():
+        """صفحه اصلی معارف اسلامی"""
+        from models import MaarefCategory, MaarefArticle
+        
+        try:
+            categories = MaarefCategory.query.filter_by(is_active=True).order_by(MaarefCategory.order).all()
+            featured_articles = MaarefArticle.query.filter_by(is_featured=True, is_active=True).order_by(MaarefArticle.created_at.desc()).limit(6).all()
+            latest_articles = MaarefArticle.query.filter_by(is_active=True).order_by(MaarefArticle.created_at.desc()).limit(10).all()  # ✅ اضافه شد
+        except Exception as e:
+            print(f"خطا در دریافت معارف: {e}")
+            categories = []
+            featured_articles = []
+            latest_articles = []  
+        
+        return render_template('maaref/index.html',
+                            categories=categories,
+                            featured_articles=featured_articles,
+                            latest_articles=latest_articles, 
+                            current_user=current_user)
+
+
+    @app.route('/maaref/category/<slug>')
+    def maaref_category(slug):
+        """نمایش مقالات یک دسته‌بندی"""
+        from models import MaarefCategory, MaarefArticle
+        
+        try:
+            category = MaarefCategory.query.filter_by(slug=slug, is_active=True).first_or_404()
+            articles = MaarefArticle.query.filter_by(category_id=category.id, is_active=True)\
+                .order_by(MaarefArticle.created_at.desc()).all()
+        except Exception as e:
+            flash('دسته‌بندی مورد نظر یافت نشد.', 'error')
+            return redirect(url_for('maaref_index'))
+        
+        return render_template('maaref/category.html',
+                            category=category,
+                            articles=articles,
+                            current_user=current_user)
+
+
+    @app.route('/maaref/<int:article_id>')
+    def maaref_detail(article_id):
+        """جزئیات یک مقاله"""
+        from models import MaarefArticle, MaarefCategory
+        
+        try:
+            article = MaarefArticle.query.filter_by(id=article_id, is_active=True).first_or_404()
+            
+            # افزایش بازدید
+            article.view_count += 1
+            db.session.commit()
+            
+            # مطالب مرتبط
+            related = MaarefArticle.query.filter(
+                MaarefArticle.category_id == article.category_id,
+                MaarefArticle.id != article.id,
+                MaarefArticle.is_active == True
+            ).limit(5).all()
+            
+            # همه دسته‌بندی‌ها برای منو
+            categories = MaarefCategory.query.filter_by(is_active=True).all()
+            
+        except Exception as e:
+            flash('مطلب مورد نظر یافت نشد.', 'error')
+            return redirect(url_for('maaref_index'))
+        
+        return render_template('maaref/detail.html',
+                            article=article,
+                            related=related,
+                            categories=categories,
+                            current_user=current_user)
+
+
+    @app.route('/api/maaref/search')
+    def api_maaref_search():
+        """API جستجو در مقالات معارف اسلامی"""
+        query = request.args.get('q', '').strip()
+        
+        if not query:
+            return jsonify({'success': False, 'error': 'متن جستجو وارد نشده است'})
+        
+        from models import MaarefArticle
+        
+        try:
+            articles = MaarefArticle.query.filter(
+                MaarefArticle.is_active == True,
+                (MaarefArticle.title.ilike(f'%{query}%') |
+                MaarefArticle.content.ilike(f'%{query}%') |
+                MaarefArticle.tags.ilike(f'%{query}%'))
+            ).limit(20).all()
+            
+            results = []
+            for a in articles:
+                results.append({
+                    'id': a.id,
+                    'title': a.title,
+                    'excerpt': a.excerpt[:100] + '...' if len(a.excerpt or '') > 100 else a.excerpt
+                })
+            
+            return jsonify({'success': True, 'results': results, 'count': len(results)})
+            
+        except Exception as e:
+            return jsonify({'success': False, 'error': str(e)}), 500
+
+
+    # دسته‌بندی‌های ثابت (برای لینک‌های سریع)
+    @app.route('/maaref/beliefs')
+    def maaref_beliefs():
+        """عقاید (کلام)"""
+        return redirect(url_for('maaref_category', slug='beliefs'))
+
+
+    @app.route('/maaref/ethics')
+    def maaref_ethics():
+        """اخلاق اسلامی"""
+        return redirect(url_for('maaref_category', slug='ethics'))
+
+
+    @app.route('/maaref/jurisprudence')
+    def maaref_jurisprudence():
+        """احکام (فقه)"""
+        return redirect(url_for('maaref_category', slug='jurisprudence'))
+
+
+
+    @app.route('/admin/sms-test', methods=['GET', 'POST'])
+    @login_required
+    @admin_required
+    def admin_sms_test():
+        """صفحه تست ارسال پیامک با sms.ir"""
+        credit = None
+        credit_status = None
+        
+        if request.method == 'POST':
+            phone = request.form.get('phone')
+            message = request.form.get('message')
+            
+            if not phone or not message:
+                flash('لطفاً شماره تلفن و متن پیام را وارد کنید.', 'error')
+                return redirect(url_for('admin_sms_test'))
+            
+            # ارسال تستی
+            success, response = SMSConfig.send_sms(phone, message)
+            
+            if success:
+                flash(f'✅ پیامک با موفقیت به شماره {phone} ارسال شد.', 'success')
+            else:
+                flash(f'❌ خطا در ارسال: {response}', 'error')
+        
+        # دریافت اعتبار حساب
+        credit_status, credit = SMSConfig.get_credit()
+        
+        return render_template('admin/sms_test.html', 
+                            current_user=current_user,
+                            credit=credit if credit_status else None,
+                            line_number=SMSConfig.LINE_NUMBER)
+
+
+    # ============================================
+    # مدیریت معارف اسلامی (فقط ادمین)
+    # ============================================
+
+    @app.route('/admin/maaref/contents')
+    @login_required
+    @admin_required
+    def admin_maaref_contents():
+        """مدیریت محتوای معارف اسلامی"""
+        from models import MaarefArticle, MaarefCategory
+        
+        category_id = request.args.get('category_id', type=int)
+        query = MaarefArticle.query
+        
+        if category_id:
+            query = query.filter_by(category_id=category_id)
+        
+        articles = query.order_by(MaarefArticle.created_at.desc()).all()
+        categories = MaarefCategory.query.all()
+        
+        return render_template('admin/maaref/contents.html',
+                            articles=articles,
+                            categories=categories,
+                            selected_category=category_id,
+                            current_user=current_user)
+    [{
+	"resource": "/f:/seraj/templates/admin/maaref/index.html",
+	"owner": "_generated_diagnostic_collection_name_#7",
+	"severity": 8,
+	"message": "Property assignment expected.",
+	"source": "javascript",
+	"startLineNumber": 96,
+	"startColumn": 65,
+	"endLineNumber": 96,
+	"endColumn": 66,
+	"modelVersionId": 2,
+	"origin": "extHost1"
+},{
+	"resource": "/f:/seraj/templates/admin/maaref/index.html",
+	"owner": "_generated_diagnostic_collection_name_#7",
+	"severity": 8,
+	"message": "',' expected.",
+	"source": "javascript",
+	"startLineNumber": 96,
+	"startColumn": 74,
+	"endLineNumber": 96,
+	"endColumn": 75,
+	"modelVersionId": 2,
+	"origin": "extHost1"
+},{
+	"resource": "/f:/seraj/templates/admin/maaref/index.html",
+	"owner": "_generated_diagnostic_collection_name_#7",
+	"severity": 8,
+	"message": "',' expected.",
+	"source": "javascript",
+	"startLineNumber": 96,
+	"startColumn": 79,
+	"endLineNumber": 96,
+	"endColumn": 80,
+	"modelVersionId": 2,
+	"origin": "extHost1"
+},{
+	"resource": "/f:/seraj/templates/admin/maaref/index.html",
+	"owner": "_generated_diagnostic_collection_name_#7",
+	"severity": 8,
+	"message": "Argument expression expected.",
+	"source": "javascript",
+	"startLineNumber": 96,
+	"startColumn": 80,
+	"endLineNumber": 96,
+	"endColumn": 81,
+	"modelVersionId": 2,
+	"origin": "extHost1"
+}]
     
     @app.errorhandler(404)
     def page_not_found(e):

@@ -1,0 +1,64 @@
+{% extends "sahifa_base.html" %}
+
+{% block title %}مناجات خمسه عشر - صحیفه سجادیه - سِراج{% endblock %}
+
+{% block content %}
+<div class="sahifa-container container mx-auto px-4 py-4">
+    
+    <!-- هدر مناجات -->
+    <div class="sahifa-header">
+        <div class="text-center">
+            <i class="fas fa-praying-hands fa-2x mb-2" style="color: var(--sahifa-gold-light);"></i>
+            <h1 class="text-center">مناجات خمسه عشر</h1>
+            <p class="subtitle text-center">پانزده مناجات معروف امام سجاد علیه‌السلام</p>
+        </div>
+    </div>
+
+    <!-- معرفی -->
+    <div class="mb-5 p-4 rounded-4" style="background: linear-gradient(135deg, #fff8e7, #fffef8); border: 1px solid var(--sahifa-border);">
+        <div class="text-center">
+            <i class="fas fa-info-circle mb-2" style="color: var(--sahifa-gold);"></i>
+            <p style="color: var(--sahifa-text); line-height: 1.8; max-width: 700px; margin: 0 auto;">
+                مناجات خمسه عشر، مجموعه‌ای از پانزده مناجات امام سجاد علیه‌السلام است که در سحرهای ماه مبارک رمضان 
+                قرائت می‌شود. هر یک از این مناجات‌ها، دریچه‌ای به سوی معرفت الهی و توبه و انابه است.
+            </p>
+        </div>
+    </div>
+
+    <!-- لیست مناجات‌ها -->
+    <div class="row g-4">
+        {% for munajat in munajat_list %}
+        <div class="col-md-6 col-lg-4">
+            <a href="{{ url_for('sahifa_munajat_detail', munajat_id=munajat.id) }}" class="text-decoration-none">
+                <div class="prayer-card">
+                    <div class="card-inner text-center">
+                        <div class="prayer-number d-inline-flex">
+                            <i class="fas fa-pray"></i> مناجات {{ munajat.number }}
+                        </div>
+                        <h3 class="prayer-title mt-2">{{ munajat.title }}</h3>
+                        {% if munajat.title_arabic %}
+                        <div class="prayer-title-arabic">{{ munajat.title_arabic }}</div>
+                        {% endif %}
+                        <div class="prayer-meta justify-content-center mt-3">
+                            <span><i class="fas fa-eye"></i> {{ munajat.view_count }} بازدید</span>
+                        </div>
+                        <div class="mt-3">
+                            <span class="btn-gold btn-sm px-3 py-1 rounded-pill" style="font-size: 0.7rem;">
+                                مطالعه مناجات <i class="fas fa-arrow-left me-1"></i>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+        {% else %}
+        <div class="col-12">
+            <div class="text-center py-5">
+                <i class="fas fa-pray fa-4x mb-3" style="color: var(--sahifa-border);"></i>
+                <p class="text-muted">هیچ مناجاتی یافت نشد</p>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

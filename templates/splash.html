@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>سِراج - بارگذاری</title>
+
+    <style>
+        @font-face {
+            font-family: 'Shabnam';
+            src: url(../static/fonts/Shabnam.woff);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Shabnam', system-ui, -apple-system, sans-serif;
+            background: #ffffff;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Background particles - light version */
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+        }
+
+        .particle {
+            position: absolute;
+            background: rgba(37, 99, 235, 0.08);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+
+        @keyframes floatParticle {
+            0% {
+                transform: translateY(100vh) rotate(0deg);
+                opacity: 0;
+            }
+
+            10% {
+                opacity: 0.3;
+            }
+
+            90% {
+                opacity: 0.3;
+            }
+
+            100% {
+                transform: translateY(-100vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        /* Main loader */
+        .loader-container {
+            position: relative;
+            z-index: 10;
+            text-align: center;
+            padding: 20px;
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Logo */
+        .logo-wrapper {
+            position: relative;
+            width: 140px;
+            height: 140px;
+            margin: 0 auto 30px;
+        }
+
+        @keyframes logoGlow {
+
+            0%,
+            100% {
+                filter: drop-shadow(0 0 8px rgba(37, 99, 235, 0.2));
+            }
+
+            50% {
+                filter: drop-shadow(0 0 20px rgba(37, 99, 235, 0.4));
+            }
+        }
+
+        .logo {
+            width: 100%;
+            height: 100%;
+            border-radius: 30px;
+            object-fit: cover;
+            animation: logoBounce 1.2s ease-in-out infinite, logoGlow 2s ease-in-out infinite;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        @keyframes logoBounce {
+
+            0%,
+            100% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.05);
+            }
+        }
+
+        /* Rings - light version */
+        .ring {
+            position: absolute;
+            top: -10px;
+            left: -10px;
+            right: -10px;
+            bottom: -10px;
+            border-radius: 50%;
+            border: 2px solid rgba(37, 99, 235, 0.15);
+            animation: ringPulse 2s ease-out infinite;
+        }
+
+        .ring:nth-child(2) {
+            animation-delay: 0.5s;
+            border-width: 1px;
+            border-color: rgba(37, 99, 235, 0.1);
+        }
+
+        .ring:nth-child(3) {
+            animation-delay: 1s;
+            border-width: 1px;
+            border-color: rgba(37, 99, 235, 0.08);
+        }
+
+        @keyframes ringPulse {
+            0% {
+                transform: scale(1);
+                opacity: 0.6;
+            }
+
+            100% {
+                transform: scale(1.3);
+                opacity: 0;
+            }
+        }
+
+        /* Title - dark text for light background */
+        .app-title {
+            font-size: 2.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #1e293b 0%, #2563eb 50%, #1d4ed8 100%);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            letter-spacing: -1px;
+            margin-bottom: 8px;
+        }
+
+        .app-subtitle {
+            font-size: 0.75rem;
+            color: #64748b;
+            letter-spacing: 2px;
+            margin-bottom: 30px;
+        }
+
+        /* Spinner - blue tones */
+        .spinner {
+            margin: 30px auto 20px;
+            width: 60px;
+            height: 60px;
+            position: relative;
+        }
+
+        .spinner-dot {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            animation: spinnerRotate 1.5s linear infinite;
+        }
+
+        .spinner-dot::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 50%;
+            width: 8px;
+            height: 8px;
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            border-radius: 50%;
+            transform: translateX(-50%);
+            box-shadow: 0 0 8px rgba(37, 99, 235, 0.3);
+        }
+
+        .spinner-dot:nth-child(1) {
+            animation-duration: 1s;
+        }
+
+        .spinner-dot:nth-child(2) {
+            animation-duration: 1.2s;
+            transform: rotate(120deg);
+        }
+
+        .spinner-dot:nth-child(3) {
+            animation-duration: 1.4s;
+            transform: rotate(240deg);
+        }
+
+        @keyframes spinnerRotate {
+            from {
+                transform: rotate(0deg);
+            }
+
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Status - dark text */
+        .status-text {
+            color: #334155;
+            font-size: 0.85rem;
+            margin-top: 20px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background: #10b981;
+            border-radius: 50%;
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 0.3;
+                transform: scale(0.8);
+            }
+
+            50% {
+                opacity: 1;
+                transform: scale(1.2);
+            }
+        }
+
+        /* Progress bar - light version */
+        .progress-bar-container {
+            width: 250px;
+            max-width: 80%;
+            margin: 25px auto 0;
+            height: 4px;
+            background: #e2e8f0;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #2563eb, #60a5fa, #2563eb);
+            border-radius: 10px;
+            transition: width 0.3s ease;
+            background-size: 200% 100%;
+            animation: progressShine 1.5s linear infinite;
+        }
+
+        @keyframes progressShine {
+            0% {
+                background-position: 0% 50%;
+            }
+
+            100% {
+                background-position: 200% 50%;
+            }
+        }
+
+        .progress-percent {
+            color: #2563eb;
+            font-size: 0.7rem;
+            margin-top: 8px;
+            font-weight: 600;
+        }
+
+        /* Quote - light version */
+        .quote-container {
+            position: fixed;
+            bottom: 30px;
+            left: 0;
+            right: 0;
+            text-align: center;
+            padding: 15px;
+            z-index: 10;
+        }
+
+        .quote-text {
+            font-size: 0.7rem;
+            color: #94a3b8;
+            max-width: 80%;
+            margin: 0 auto;
+            line-height: 1.8;
+        }
+
+        /* Version */
+        .version {
+            position: fixed;
+            bottom: 10px;
+            right: 15px;
+            font-size: 0.6rem;
+            color: #cbd5e1;
+            z-index: 10;
+        }
+
+        /* Exit animation */
+        .loader-exit {
+            animation: fadeOut 0.4s ease-out forwards;
+        }
+
+        @keyframes fadeOut {
+            from {
+                opacity: 1;
+                visibility: visible;
+            }
+
+            to {
+                opacity: 0;
+                visibility: hidden;
+            }
+        }
+
+        /* Responsive */
+        @media (max-width: 640px) {
+            .logo-wrapper {
+                width: 100px;
+                height: 100px;
+            }
+
+            .app-title {
+                font-size: 1.8rem;
+            }
+
+            .spinner {
+                width: 45px;
+                height: 45px;
+            }
+
+            .quote-text {
+                font-size: 0.6rem;
+            }
+        }
+
+        /* PWA mode */
+        @media (display-mode: standalone) {
+            body {
+                padding-top: env(safe-area-inset-top);
+                padding-bottom: env(safe-area-inset-bottom);
+            }
+
+            .quote-container {
+                bottom: max(30px, env(safe-area-inset-bottom));
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="particles" id="particles"></div>
+
+    <div class="loader-container" id="loaderContainer">
+        <div class="logo-wrapper">
+            <div class="ring"></div>
+            <div class="ring"></div>
+            <div class="ring"></div>
+            <img src="{{ url_for('static', filename='logo/icon-192x192.png') }}" alt="سِراج" class="logo"
+                onerror="this.src = this.src.replace('icon-192x192', '12')">
+        </div>
+
+        <h1 class="app-title">سِراج</h1>
+        <p class="app-subtitle">پلتفرم مدیریت فعالیت‌های قرآنی</p>
+
+        <div class="spinner">
+            <div class="spinner-dot"></div>
+            <div class="spinner-dot"></div>
+            <div class="spinner-dot"></div>
+        </div>
+
+        <div class="status-text">
+            <span class="status-dot"></span>
+            <span id="statusMessage">در حال آماده‌سازی</span>
+        </div>
+
+        <div class="progress-bar-container">
+            <div class="progress-bar" id="progressBar"></div>
+        </div>
+        <div class="progress-percent" id="progressPercent">0%</div>
+    </div>
+
+    <div class="quote-container">
+        <div class="quote-text" id="quoteText">
+            "خَيْرُكُمْ مَنْ تَعَلَّمَ الْقُرْآنَ وَعَلَّمَهُ"
+            <br>
+            <span style="font-size: 0.55rem; opacity: 0.7;">بهترین شما کسی است که قرآن را یاد بگیرد و بیاموزد</span>
+        </div>
+    </div>
+
+    <div class="version" id="version">نسخه 2.0.0</div>
+
+    <script>
+        (function () {
+            var messages = [
+                'در حال آماده‌سازی',
+                'بارگذاری منابع',
+                'اتصال به سرور',
+                'همگام‌سازی اطلاعات',
+                'آماده‌سازی پنل کاربری',
+                'تقریباً آماده',
+                'خوش آمدید'
+            ];
+
+            var quotesList = [
+                { text: 'خَيْرُكُمْ مَنْ تَعَلَّمَ الْقُرْآنَ وَعَلَّمَهُ', meaning: 'بهترین شما کسی است که قرآن را یاد بگیرد و بیاموزد' },
+                { text: 'اقْرَءُوا الْقُرْآنَ فَإِنَّهُ يَأْتِي يَوْمَ الْقِيَامَةِ شَفِيعًا لِأَصْحَابِهِ', meaning: 'قرآن را بخوانید که روز قیامت شفیع شماست' },
+                { text: 'الْقُرْآنُ شَافِعٌ مُشَفَّعٌ', meaning: 'قرآن شفیعی است که شفاعتش پذیرفته می‌شود' },
+                { text: 'مَثَلُ الَّذِي يَقْرَأُ الْقُرْآنَ كَمَثَلِ الْأُتْرُجَّةِ', meaning: 'مثل کسی که قرآن می‌خواند، مثل ترنج است که بوی خوش دارد' }
+            ];
+
+            var statusEl = document.getElementById('statusMessage');
+            var progressBarEl = document.getElementById('progressBar');
+            var progressPercentEl = document.getElementById('progressPercent');
+            var quoteEl = document.getElementById('quoteText');
+            var loaderContainer = document.getElementById('loaderContainer');
+
+            var currentProgress = 0;
+            var quoteIndex = 0;
+            var progressInterval = null;
+            var quoteInterval = null;
+            var startTime = Date.now();
+            var minLoadTime = 1500;
+
+            function createParticles() {
+                var container = document.getElementById('particles');
+                var count = window.innerWidth < 768 ? 30 : 60;
+
+                for (var i = 0; i < count; i++) {
+                    var particle = document.createElement('div');
+                    particle.className = 'particle';
+
+                    var size = 2 + (Math.random() * 4);
+                    var left = Math.random() * 100;
+                    var duration = 8 + (Math.random() * 10);
+                    var delay = Math.random() * 5;
+
+                    particle.style.width = size + 'px';
+                    particle.style.height = size + 'px';
+                    particle.style.left = left + '%';
+                    particle.style.animation = 'floatParticle ' + duration + 's linear infinite';
+                    particle.style.animationDelay = delay + 's';
+                    particle.style.opacity = 0.05 + (Math.random() * 0.15);
+
+                    container.appendChild(particle);
+                }
+            }
+
+            function updateStatus() {
+                if (currentProgress < 30) {
+                    statusEl.textContent = messages[0];
+                } else if (currentProgress < 50) {
+                    statusEl.textContent = messages[1];
+                } else if (currentProgress < 70) {
+                    statusEl.textContent = messages[2];
+                } else if (currentProgress < 85) {
+                    statusEl.textContent = messages[3];
+                } else if (currentProgress < 95) {
+                    statusEl.textContent = messages[4];
+                } else {
+                    statusEl.textContent = messages[5];
+                }
+            }
+
+            function updateProgress() {
+                if (currentProgress < 99) {
+                    var increment = 2 + (Math.random() * 8);
+                    currentProgress = currentProgress + increment;
+                    if (currentProgress > 99) {
+                        currentProgress = 99;
+                    }
+
+                    progressBarEl.style.width = currentProgress + '%';
+                    progressPercentEl.textContent = Math.floor(currentProgress) + '%';
+                    updateStatus();
+                }
+            }
+
+            function rotateQuote() {
+                quoteIndex = quoteIndex + 1;
+                if (quoteIndex >= quotesList.length) {
+                    quoteIndex = 0;
+                }
+                var q = quotesList[quoteIndex];
+                quoteEl.innerHTML = '"' + q.text + '"<br><span style="font-size: 0.55rem; opacity: 0.7;">' + q.meaning + '</span>';
+            }
+
+            function completeLoading() {
+                if (progressInterval) clearInterval(progressInterval);
+                if (quoteInterval) clearInterval(quoteInterval);
+
+                currentProgress = 100;
+                progressBarEl.style.width = '100%';
+                progressPercentEl.textContent = '100%';
+                statusEl.textContent = 'خوش آمدید';
+
+                loaderContainer.classList.add('loader-exit');
+
+                setTimeout(function () {
+                    window.location.href = '/';
+                }, 400);
+            }
+
+            function checkReady() {
+                var elapsed = Date.now() - startTime;
+                if (elapsed < minLoadTime) {
+                    setTimeout(completeLoading, minLoadTime - elapsed);
+                } else {
+                    completeLoading();
+                }
+            }
+
+            function init() {
+                createParticles();
+                progressInterval = setInterval(updateProgress, 80);
+                quoteInterval = setInterval(rotateQuote, 3000);
+
+                var firstQuote = quotesList[0];
+                quoteEl.innerHTML = '"' + firstQuote.text + '"<br><span style="font-size: 0.55rem; opacity: 0.7;">' + firstQuote.meaning + '</span>';
+
+                var versionEl = document.getElementById('version');
+                if (versionEl) {
+                    var savedVersion = localStorage.getItem('app_version');
+                    if (savedVersion) {
+                        versionEl.textContent = 'نسخه ' + savedVersion;
+                    }
+                }
+                checkReady();
+            }
+
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', init);
+            } else {
+                init();
+            }
+
+            document.body.style.overflow = 'hidden';
+            window.addEventListener('load', function () {
+                setTimeout(function () {
+                    document.body.style.overflow = '';
+                }, 500);
+            });
+        })();
+    </script>
+
+    <script>
+        window.SERAJ_CONFIG = window.SERAJ_CONFIG || {
+            indexUrl: '/',
+            installPwaUrl: '/install-pwa',
+            registerUrl: '/auth/register/choice'
+        };
+    </script>
+</body>
+
+</html>

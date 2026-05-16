@@ -1,0 +1,1370 @@
+{% extends "base.html" %}
+
+{% block title %}سِراج هوشمند | دستیار قرآنی AI{% endblock %}
+
+{% block head %}
+<style>
+    /* مخفی کردن هدر، فوتر و المان‌های اضافی */
+    body>header,
+    .bottom-nav,
+    .support-fab,
+    .support-panel {
+        display: none !important;
+    }
+
+    /* حذف کامل هدر اصلی سایت */
+    .sticky.top-0,
+    header[class*="sticky"],
+    nav[class*="bg-white"],
+    .fixed.top-0,
+    .relative.z-50 {
+        display: none !important;
+    }
+
+    /* حذف بخش ناوبری دسکتاپ */
+    .desktop-nav-center,
+    .md\:block {
+        display: none !important;
+    }
+
+    /* تنظیمات صفحه چت تمام صفحه */
+    .chatgpt-container {
+        height: 100vh !important;
+        background: #f7f7f8;
+        display: flex;
+        overflow: hidden;
+        margin: 0 !important;
+    }
+
+    body {
+        padding-bottom: 0 !important;
+        margin: 0 !important;
+    }
+
+    main.container {
+        padding: 0 !important;
+        margin: 0 !important;
+        max-width: 100% !important;
+    }
+
+    /* استایل سایدبار */
+    .chatgpt-sidebar {
+        width: 260px;
+        background: #f7f7f8;
+        border-left: 1px solid #e5e5e5;
+        transition: all 0.3s ease;
+        display: flex;
+        flex-direction: column;
+    }
+
+    @media (max-width: 768px) {
+        .chatgpt-sidebar {
+            position: fixed;
+            right: -280px;
+            top: 0;
+            bottom: 0;
+            z-index: 1000;
+            background: white;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .chatgpt-sidebar.active {
+            right: 0;
+        }
+    }
+
+    .chatgpt-main {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        background: #f7f7f8;
+    }
+
+    .chat-header {
+        background: #f7f7f8;
+        border-bottom: 1px solid #e5e5e5;
+        padding: 12px 20px;
+    }
+
+    .messages-area {
+        flex: 1;
+        overflow-y: auto;
+        scroll-behavior: smooth;
+    }
+
+    .messages-container {
+        max-width: 48rem;
+        margin: 0 auto;
+        padding: 2rem 1rem;
+    }
+
+    /* استایل پیام کاربر */
+    .message-user-wrapper {
+        display: flex;
+        justify-content: flex-end;
+        margin-bottom: 1rem;
+    }
+
+    .message-user-content {
+        max-width: 85%;
+    }
+
+    .message-user-bubble {
+        background: #10a37f;
+        color: white;
+        border-radius: 1rem;
+        border-top-left-radius: 0.25rem;
+        padding: 0.75rem 1rem;
+    }
+
+
+    /* استایل پیام AI */
+    .message-ai-wrapper {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.75rem;
+        margin-bottom: 1rem;
+    }
+
+    .message-ai-avatar {
+        width: 2rem;
+        height: 2rem;
+        background: #10a37f;
+        border-radius: 9999px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+    .message-ai-content {
+        max-width: 85%;
+        flex: 1;
+    }
+
+    .message-ai-bubble {
+        background: white;
+        color: #2d2d2d;
+        border-radius: 1rem;
+        border-top-right-radius: 0.25rem;
+        padding: 0.75rem 1rem;
+        border: 1px solid #e5e5e5;
+    }
+
+    .message-ai-time {
+        font-size: 0.65rem;
+        color: #9ca3af;
+        margin-top: 0.25rem;
+        padding-right: 0.5rem;
+    }
+
+    .chat-footer {
+        background: #f7f7f8;
+        border-top: 1px solid #e5e5e5;
+        padding: 1rem;
+    }
+
+    .chat-input-container {
+        max-width: 48rem;
+        margin: 0 auto;
+    }
+
+    .chat-input {
+        background: white;
+        border: 1px solid #e5e5e5;
+        border-radius: 1.75rem;
+        padding: 0.75rem 1.25rem;
+        font-size: 1rem;
+        transition: all 0.2s;
+        resize: none;
+    }
+
+    .chat-input:focus {
+        outline: none;
+        border-color: #10a37f;
+        box-shadow: 0 0 0 2px rgba(16, 163, 127, 0.1);
+    }
+
+    .send-btn {
+        background: #10a37f;
+        color: white;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s;
+    }
+
+    .send-btn:hover {
+        background: #0e8f6e;
+        transform: scale(1.02);
+    }
+
+    .sidebar-item {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.75rem 1rem;
+        margin: 0.25rem 0.5rem;
+        border-radius: 0.5rem;
+        color: #2d2d2d;
+        transition: all 0.2s;
+        cursor: pointer;
+    }
+
+    .sidebar-item:hover {
+        background: #eaeaea;
+    }
+
+    .sidebar-item.active-chat {
+        background: #e9ecef;
+        color: #10a37f;
+    }
+
+    .sidebar-item.active-chat i {
+        color: #10a37f;
+    }
+
+    .new-chat-btn {
+        background: #10a37f;
+        color: white;
+        padding: 0.75rem 1rem;
+        margin: 0.75rem;
+        border-radius: 0.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        transition: all 0.2s;
+        cursor: pointer;
+        border: none;
+        width: calc(100% - 1.5rem);
+    }
+
+    .new-chat-btn:hover {
+        background: #0e8f6e;
+        transform: translateY(-1px);
+    }
+
+    .back-to-seraj-mobile {
+        display: none;
+        background: #f3f4f6;
+        color: #4b5563;
+        padding: 0.6rem;
+        margin: 0.5rem 0.75rem;
+        border-radius: 0.5rem;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        transition: all 0.2s;
+        text-decoration: none;
+        width: 40px;
+        height: 40px;
+    }
+
+    .back-to-seraj-mobile i {
+        font-size: 1rem;
+    }
+
+    .back-to-seraj-mobile:hover {
+        background: #e5e7eb;
+        color: #1f2937;
+    }
+
+    @media (max-width: 768px) {
+        .back-to-seraj-mobile {
+            display: flex !important;
+        }
+    }
+
+    .mic-btn {
+        background: #f3f4f6;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s;
+    }
+
+    .mic-btn:hover {
+        background: #e5e7eb;
+    }
+
+    .mic-btn.recording {
+        background: #ef4444;
+        color: white;
+        animation: pulse 1.5s infinite;
+    }
+
+    .verse-card {
+        background: #fef3c7;
+        border-right: 3px solid #d97706;
+        border-radius: 0.5rem;
+        padding: 0.75rem;
+        margin-top: 0.75rem;
+    }
+
+    .suggestion-item {
+        background: #eaeaea;
+        padding: 0.25rem 0.75rem;
+        border-radius: 1rem;
+        font-size: 0.75rem;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .suggestion-item:hover {
+        background: #d4d4d4;
+    }
+
+    .message-wrapper {
+        animation: slideIn 0.3s ease;
+        margin-bottom: 1rem;
+    }
+
+    @keyframes slideIn {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .typing-indicator {
+        display: flex;
+        gap: 4px;
+        padding: 8px 0;
+    }
+
+    .typing-indicator span {
+        width: 8px;
+        height: 8px;
+        background: #9ca3af;
+        border-radius: 50%;
+        animation: typing 1.4s infinite;
+    }
+
+    .typing-indicator span:nth-child(2) {
+        animation-delay: 0.2s;
+    }
+
+    .typing-indicator span:nth-child(3) {
+        animation-delay: 0.4s;
+    }
+
+    @keyframes typing {
+
+        0%,
+        60%,
+        100% {
+            transform: translateY(0);
+            opacity: 0.4;
+        }
+
+        30% {
+            transform: translateY(-8px);
+            opacity: 1;
+        }
+    }
+
+    @keyframes pulse {
+
+        0%,
+        100% {
+            opacity: 1;
+        }
+
+        50% {
+            opacity: 0.7;
+        }
+    }
+
+    .messages-area::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .messages-area::-webkit-scrollbar-track {
+        background: #f1f1f1;
+    }
+
+    .messages-area::-webkit-scrollbar-thumb {
+        background: #c1c1c1;
+        border-radius: 3px;
+    }
+
+    .clear-history-btn {
+        background: none;
+        border: none;
+        color: #ef4444;
+        font-size: 0.75rem;
+        padding: 0.25rem 0.5rem;
+        cursor: pointer;
+        border-radius: 0.375rem;
+    }
+
+    .clear-history-btn:hover {
+        background: #fee2e2;
+    }
+
+    .sidebar-divider {
+        height: 1px;
+        background: #e5e5e5;
+        margin: 0.5rem 0.75rem;
+    }
+
+    .current-user-badge {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.75rem;
+        margin: 0.5rem;
+        background: white;
+        border-radius: 0.5rem;
+        border: 1px solid #e5e5e5;
+    }
+
+    .user-avatar {
+        width: 40px;
+        height: 40px;
+        background: linear-gradient(135deg, #10a37f, #0e8f6e);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: bold;
+        font-size: 1.1rem;
+    }
+
+    .user-info {
+        flex: 1;
+    }
+
+    .user-name {
+        font-weight: 600;
+        font-size: 0.9rem;
+        color: #2d2d2d;
+    }
+
+    .loading-spinner {
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+        border: 2px solid #f3f3f3;
+        border-top: 2px solid #10a37f;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+        0% {
+            transform: rotate(0deg);
+        }
+
+        100% {
+            transform: rotate(360deg);
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="chatgpt-container" data-initial-question="{{ initial_question|escape if initial_question else '' }}">
+    <!-- سایدبار -->
+    <div class="chatgpt-sidebar" id="sidebar">
+        <div class="p-3 flex-1 flex flex-col">
+            <div class="flex items-center justify-between flex-wrap gap-2">
+                <div class="flex items-center space-x-2 rtl:space-x-reverse">
+                    <a class="back-to-seraj-mobile text-gray-500 hover:text-black transition-colors p-2 rounded-full hover:bg-gray-200 cursor-pointer block md:hidden"
+                        id="closeSidebarBtn" title="بستن سایدبار">
+                        <i class="fas fa-times text-xl"></i>
+                    </a>
+                    <a href="{{ url_for('index') }}"
+                        class="text-gray-500 hover:text-[#10a37f] transition-colors p-2 rounded-full hover:bg-gray-200"
+                        title="بازگشت به صفحه اصلی سایت">
+                        <i class="fas fa-home text-xl"></i>
+                    </a>
+                </div>
+                <div class="current-user-badge w-full md:w-auto">
+                    <div class="user-avatar" id="userAvatar">
+                        {{ current_user.first_name[0] if current_user.first_name else current_user.username[0] }}
+                    </div>
+                    <div class="user-info">
+                        <div class="user-name" id="userName">{{ current_user.full_name or current_user.username }}</div>
+                    </div>
+                </div>
+            </div>
+            <div class="sidebar-divider"></div>
+            <button class="new-chat-btn" id="newChatBtn">
+                <i class="fas fa-plus"></i>
+                <span>گفتگوی جدید</span>
+            </button>
+
+            <div class="mt-4 flex-1 flex flex-col min-h-0">
+                <div class="flex justify-between items-center px-3 py-2 flex-shrink-0">
+                    <div class="text-xs text-gray-500">گفتگوهای اخیر شما</div>
+                    <button id="clearRecentBtn" class="clear-history-btn" title="پاک کردن تاریخچه">
+                        <i class="fas fa-trash-alt text-xs"></i>
+                    </button>
+                </div>
+                <div id="recentQuestionsList" class="flex-1 overflow-y-auto" style="max-height: 300px;">
+                    <div class="text-center py-8 text-gray-400 text-sm">
+                        <i class="fas fa-spinner fa-spin text-2xl mb-2 block"></i>
+                        <p>در حال بارگذاری...</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="border-t border-gray-200 pt-2 mt-2">
+                <a href="{{ url_for('seraj_yari_history') }}" class="sidebar-item">
+                    <i class="fas fa-history"></i>
+                    <span class="text-sm">تاریخچه کامل</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="fixed inset-0 bg-black bg-opacity-50 z-40 hidden" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+    <!-- بخش اصلی چت -->
+    <div class="chatgpt-main">
+        <div class="chat-header flex items-center justify-between">
+            <button class="md:hidden text-gray-600 p-2 rounded-full hover:bg-gray-200 transition-colors"
+                onclick="toggleSidebar()">
+                <i class="fas fa-bars text-xl"></i>
+            </button>
+
+            <div class="flex items-center gap-2 mx-auto md:mx-0">
+                <div class="w-8 h-8 bg-[#10a37f] rounded-full flex items-center justify-center">
+                    <i class="fas fa-robot text-white text-sm"></i>
+                </div>
+                <h1 class="font-semibold text-gray-800">سِراج‌یار</h1>
+                <span class="text-xs text-gray-400">| دستیار قرآنی هوشمند</span>
+            </div>
+
+
+        </div>
+
+        <div class="messages-area" id="messagesArea">
+            <div class="messages-container" id="messagesContainer"></div>
+        </div>
+
+        <div id="typingIndicator" class="messages-container" style="display: none;">
+            <div class="flex items-start gap-3">
+                <div class="w-8 h-8 bg-[#10a37f] rounded-full flex items-center justify-center shrink-0">
+                    <i class="fas fa-robot text-white text-sm"></i>
+                </div>
+                <div class="message-ai-bubble">
+                    <div class="typing-indicator">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="chat-footer">
+            <div class="chat-input-container">
+                <form id="chatForm">
+                    <div class="flex gap-2 items-end">
+                        <textarea id="questionInput" name="question" rows="1" class="chat-input flex-1"
+                            placeholder="سوال خود را بپرسید..."></textarea>
+                        <button type="button" id="micBtn" class="mic-btn shrink-0">
+                            <i class="fas fa-microphone text-gray-600"></i>
+                        </button>
+                        <button type="submit" class="send-btn shrink-0">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </div>
+                    <div class="flex flex-wrap justify-center gap-2 mt-3">
+                        <span class="suggestion-item" data-question="توحید در قرآن چیست؟">🕋 توحید در قرآن</span>
+                        <span class="suggestion-item" data-question="آیه الکرسی چیست؟">📖 آیه الکرسی</span>
+                        <span class="suggestion-item" data-question="اهمیت نماز در قرآن چیست؟">🕌 فلسفه نماز</span>
+                        <span class="suggestion-item" data-question="صبر در قرآن">💪 صبر در قرآن</span>
+                    </div>
+                </form>
+                <div id="recordingStatus" class="text-center mt-2 text-sm text-red-500 hidden">
+                    <i class="fas fa-circle animate-pulse"></i> در حال ضبط...
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // بستن سایدبار با دکمه ضربدر
+    var closeSidebarBtn = document.getElementById('closeSidebarBtn');
+    if (closeSidebarBtn) {
+        closeSidebarBtn.addEventListener('click', function () {
+            toggleSidebar();
+        });
+    }
+    // ============================================
+    // سِراج‌یار - نسخه کامل با زمان هوشمند ایران
+    // ============================================
+
+    var mediaRecorder = null;
+    var audioChunks = [];
+    var isRecording = false;
+    var currentChatId = null;
+    var isLoading = false;
+    var isSyncing = false;
+
+    var currentUserId = '{{ current_user.id }}';
+    var currentUserName = '{{ current_user.full_name or current_user.username }}';
+
+    if (!currentUserId || currentUserId === 'None') {
+        console.error('User not logged in');
+        currentUserId = null;
+    }
+
+    var micBtn = document.getElementById('micBtn');
+    var recordingStatus = document.getElementById('recordingStatus');
+    var questionInput = document.getElementById('questionInput');
+    var messagesContainer = document.getElementById('messagesContainer');
+    var messagesArea = document.getElementById('messagesArea');
+
+    // ============================================
+    // کش موقت برای گفتگوها (بهبود سرعت)
+    // ============================================
+
+    var conversationsCache = {
+        data: null,
+        lastFetch: 0,
+        cacheTime: 30000 // 30 ثانیه کش
+    };
+
+    // ============================================
+    // توابع زمان هوشمند (بدون نیاز به تبدیل منطقه زمانی)
+    // ============================================
+
+    // نسخه قوی‌تر با پشتیبانی از رشته‌های ISO
+    function getSmartTimeDisplay(utcDateString) {
+        if (!utcDateString) return 'نامشخص';
+
+        // پاک کردن کاراکترهای اضافی و تبدیل به عدد
+        var cleanDateStr = utcDateString.replace('Z', '').replace('+00:00', '');
+
+        // ایجاد تاریخ با توجه به منطقه زمانی محلی
+        var utcDate = new Date(cleanDateStr + 'Z'); // اضافه کردن Z برای UTC
+
+        if (isNaN(utcDate.getTime())) {
+            // اگر باز هم مشکل داشت، با روش دیگری امتحان کن
+            utcDate = new Date(utcDateString);
+            if (isNaN(utcDate.getTime())) return 'نامشخص';
+        }
+
+        var now = new Date();
+        var diffSec = Math.floor((now.getTime() - utcDate.getTime()) / 1000);
+        var diffMins = Math.floor(diffSec / 60);
+        var diffHours = Math.floor(diffMins / 60);
+        var diffDays = Math.floor(diffHours / 24);
+
+        // کمتر از 1 دقیقه
+        if (diffSec < 60) {
+            return 'لحظاتی پیش';
+        }
+        // کمتر از 1 ساعت
+        else if (diffMins < 60) {
+            return diffMins + ' دقیقه پیش';
+        }
+        // کمتر از 24 ساعت
+        else if (diffHours < 24) {
+            if (diffHours === 1) return '1 ساعت پیش';
+            return diffHours + ' ساعت پیش';
+        }
+        // کمتر از 7 روز
+        else if (diffDays < 7) {
+            if (diffDays === 1) return 'دیروز';
+            return diffDays + ' روز پیش';
+        }
+        // بیشتر از 7 روز
+        else {
+            var year = utcDate.getFullYear();
+            var month = String(utcDate.getMonth() + 1).padStart(2, '0');
+            var day = String(utcDate.getDate()).padStart(2, '0');
+            return year + '/' + month + '/' + day;
+        }
+    }
+
+    // تابع برای نمایش زمان پیام‌ها در چت
+    function getMessageTimeDisplay(utcDateString) {
+        if (!utcDateString) return '';
+
+        var utcDate = new Date(utcDateString);
+        if (isNaN(utcDate.getTime())) return '';
+
+        var now = new Date();
+        var diffDays = Math.floor((now.getTime() - utcDate.getTime()) / 86400000);
+
+        var hours = String(utcDate.getHours()).padStart(2, '0');
+        var minutes = String(utcDate.getMinutes()).padStart(2, '0');
+        var time = hours + ':' + minutes;
+
+        // اگر امروز هست، فقط ساعت رو نشون بده
+        if (diffDays === 0) {
+            return time;
+        }
+        // اگر دیروز بود
+        else if (diffDays === 1) {
+            return 'دیروز ' + time;
+        }
+        // اگر بیشتر از یک روز بود، تاریخ + ساعت
+        else {
+            var year = utcDate.getFullYear();
+            var month = String(utcDate.getMonth() + 1).padStart(2, '0');
+            var day = String(utcDate.getDate()).padStart(2, '0');
+            return year + '/' + month + '/' + day;
+        }
+    }
+
+    // ============================================
+    // توابع ارتباط با سرور (با کش)
+    // ============================================
+
+    async function loadConversationsFromServer(forceRefresh = false) {
+        if (!currentUserId) return [];
+
+        var now = Date.now();
+
+        // اگر کش معتبر است و forceRefresh نبود، از کش استفاده کن
+        if (!forceRefresh && conversationsCache.data &&
+            (now - conversationsCache.lastFetch) < conversationsCache.cacheTime) {
+            return conversationsCache.data;
+        }
+
+        try {
+            var response = await fetch('/api/seraj/conversations?limit=30&offset=0');
+            var data = await response.json();
+
+            if (data.success) {
+                conversationsCache.data = data.conversations;
+                conversationsCache.lastFetch = now;
+                return data.conversations;
+            }
+        } catch (error) {
+            console.error('Error loading conversations from server:', error);
+        }
+        return [];
+    }
+
+    // تابع برای بروزرسانی اجباری کش
+    async function refreshConversations() {
+        conversationsCache.data = null;
+        return await loadConversationsFromServer(true);
+    }
+
+    async function loadConversationFromServer(conversationId) {
+        if (!currentUserId || !conversationId) return null;
+
+        try {
+            var response = await fetch('/api/seraj/conversations/' + conversationId);
+            var data = await response.json();
+
+            if (data.success) {
+                return data;
+            }
+        } catch (error) {
+            console.error('Error loading conversation from server:', error);
+        }
+        return null;
+    }
+
+    async function deleteConversationFromServer(conversationId) {
+        if (!currentUserId || !conversationId) return false;
+
+        try {
+            var response = await fetch('/api/seraj/conversations/' + conversationId, {
+                method: 'DELETE'
+            });
+            var data = await response.json();
+            if (data.success) {
+                // پاک کردن کش بعد از حذف
+                conversationsCache.data = null;
+                return true;
+            }
+            return false;
+        } catch (error) {
+            console.error('Error deleting conversation from server:', error);
+            return false;
+        }
+    }
+
+    async function clearAllConversationsFromServer() {
+        if (!currentUserId) return false;
+
+        try {
+            var response = await fetch('/api/seraj/conversations/clear-all', {
+                method: 'DELETE'
+            });
+            var data = await response.json();
+            if (data.success) {
+                conversationsCache.data = null;
+                return true;
+            }
+            return false;
+        } catch (error) {
+            console.error('Error clearing conversations from server:', error);
+            return false;
+        }
+    }
+
+    // ============================================
+    // توابع کمکی
+    // ============================================
+
+    function escapeHtml(text) {
+        if (!text) return '';
+        var div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    function formatText(text) {
+        if (!text) return '';
+        var formatted = text.replace(/\n/g, '<br>');
+        formatted = formatted.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+        formatted = formatted.replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" target="_blank" class="text-[#10a37f] hover:underline">$1</a>');
+        return formatted;
+    }
+
+    function scrollToBottom() {
+        if (messagesArea) messagesArea.scrollTop = messagesArea.scrollHeight;
+    }
+
+    function showTyping() {
+        var typing = document.getElementById('typingIndicator');
+        if (typing) {
+            typing.style.display = 'block';
+            scrollToBottom();
+        }
+    }
+
+    function hideTyping() {
+        var typing = document.getElementById('typingIndicator');
+        if (typing) typing.style.display = 'none';
+    }
+
+    // ============================================
+    // توابع نمایش پیام با زمان
+    // ============================================
+
+    function addUserMessage(message, timestamp) {
+        var displayTime = timestamp ? getMessageTimeDisplay(timestamp) : '';
+
+        var messageWrapper = document.createElement('div');
+        messageWrapper.className = 'message-wrapper';
+        messageWrapper.setAttribute('data-timestamp', timestamp || new Date().toISOString());
+        messageWrapper.innerHTML = `
+        <div class="message-user-wrapper">
+            <div class="message-user-content">
+                <div class="message-user-bubble">
+                    ${escapeHtml(message)}
+                </div>
+            </div>
+        </div>
+    `;
+        messagesContainer.appendChild(messageWrapper);
+        scrollToBottom();
+    }
+
+    function addAIMessage(answer, relatedVerses, suggestions, timestamp) {
+        var displayTime = timestamp ? getMessageTimeDisplay(timestamp) : '';
+
+        var answerHtml = formatText(answer);
+
+        if (relatedVerses && relatedVerses.length > 0) {
+            for (var i = 0; i < relatedVerses.length; i++) {
+                var verse = relatedVerses[i];
+                answerHtml += `
+                <div class="verse-card mt-3">
+                    <p class="text-sm text-amber-800 text-center font-medium">${escapeHtml(verse.text || '')}</p>
+                    <p class="text-xs text-amber-700 text-center mt-1">${escapeHtml(verse.translation || '')}</p>
+                    <p class="text-xs text-amber-600 text-center mt-1">${escapeHtml(verse.surah || '')} ${verse.ayah ? '- آیه ' + escapeHtml(verse.ayah) : ''}</p>
+                </div>
+            `;
+            }
+        }
+
+        if (suggestions && suggestions.length > 0) {
+            var suggestionsHtml = '<div class="flex flex-wrap gap-2 mt-3 pt-2 border-t border-gray-200">';
+            for (var j = 0; j < Math.min(suggestions.length, 4); j++) {
+                var s = suggestions[j];
+                suggestionsHtml += `
+                <span class="suggestion-item suggestion-item-inline" data-question="${escapeHtml(s).replace(/"/g, '&quot;')}">
+                    ${escapeHtml(s)}
+                </span>
+            `;
+            }
+            suggestionsHtml += '</div>';
+            answerHtml += suggestionsHtml;
+        }
+
+        var messageWrapper = document.createElement('div');
+        messageWrapper.className = 'message-wrapper';
+        messageWrapper.setAttribute('data-timestamp', timestamp || new Date().toISOString());
+        messageWrapper.innerHTML = `
+        <div class="message-ai-wrapper">
+            <div class="message-ai-avatar">
+                <i class="fas fa-robot text-white text-sm"></i>
+            </div>
+            <div class="message-ai-content">
+                <div class="message-ai-bubble">
+                    ${answerHtml}
+                </div>
+                <div class="message-ai-time">
+                    <i class="fas fa-clock text-xs ml-1"></i>
+                    ${displayTime}
+                </div>
+            </div>
+        </div>
+    `;
+        messagesContainer.appendChild(messageWrapper);
+        scrollToBottom();
+
+        var newSuggestions = messageWrapper.querySelectorAll('.suggestion-item-inline');
+        for (var k = 0; k < newSuggestions.length; k++) {
+            newSuggestions[k].addEventListener('click', function (e) {
+                var q = this.getAttribute('data-question');
+                if (q) setQuestionAndAsk(q);
+            });
+        }
+    }
+
+    function addErrorMessage(error) {
+        var messageWrapper = document.createElement('div');
+        messageWrapper.className = 'message-wrapper';
+        messageWrapper.innerHTML = `
+        <div class="message-ai-wrapper">
+            <div class="message-ai-avatar" style="background: #ef4444;">
+                <i class="fas fa-exclamation-triangle text-white text-sm"></i>
+            </div>
+            <div class="message-ai-content">
+                <div class="message-ai-bubble" style="background: #fef2f2; border-color: #fecaca;">
+                    <div class="text-red-700 text-sm"><strong>❌ خطا:</strong> ${escapeHtml(error)}</div>
+                </div>
+            </div>
+        </div>
+    `;
+        messagesContainer.appendChild(messageWrapper);
+        scrollToBottom();
+    }
+
+    // ============================================
+    // بارگذاری گفتگوها از دیتابیس (با سرعت بیشتر)
+    // ============================================
+
+    async function loadRecentQuestions() {
+        if (!currentUserId) {
+            var recentList = document.getElementById('recentQuestionsList');
+            recentList.innerHTML = `
+            <div class="text-center py-8 text-gray-400 text-sm">
+                <i class="fas fa-exclamation-triangle text-3xl mb-2 block"></i>
+                <p>برای استفاده از تاریخچه وارد شوید</p>
+            </div>
+        `;
+            return;
+        }
+
+        // نمایش حالت بارگذاری سریع
+        var recentList = document.getElementById('recentQuestionsList');
+        recentList.innerHTML = `
+        <div class="text-center py-4 text-gray-400 text-sm">
+            <i class="fas fa-spinner fa-spin text-xl mb-1 block"></i>
+            <p>در حال بارگذاری...</p>
+        </div>
+    `;
+
+        // استفاده از setTimeout برای اینکه UI قفل نشه
+        setTimeout(async function () {
+            var conversations = await loadConversationsFromServer();
+
+            if (conversations && conversations.length > 0) {
+                var html = '';
+                var maxItems = Math.min(conversations.length, 20);
+
+                for (var i = 0; i < maxItems; i++) {
+                    var conv = conversations[i];
+                    var displayQuestion = conv.title || 'گفتگو بدون عنوان';
+                    var activeClass = (currentChatId == conv.id) ? 'active-chat' : '';
+                    var timeDisplay = getSmartTimeDisplay(conv.updated_at);
+
+                    html += `
+                    <div class="sidebar-item recent-question ${activeClass}" data-chat-id="${conv.id}">
+                        <i class="fas fa-comment text-gray-400 text-sm"></i>
+                        <div class="flex flex-col flex-1 min-w-0">
+                            <span class="text-sm truncate">${escapeHtml(displayQuestion)}</span>
+                            <span class="text-xs text-gray-400">${timeDisplay}</span>
+                        </div>
+                        <button class="delete-chat-btn text-gray-400 hover:text-red-500 transition-colors" data-chat-id="${conv.id}" title="حذف گفتگو">
+                            <i class="fas fa-trash-alt text-xs"></i>
+                        </button>
+                    </div>
+                `;
+                }
+
+                if (conversations.length > 20) {
+                    html += `
+                    <div class="text-center py-2">
+                        <a href="/seraj-yari/history" class="text-xs text-[#10a37f] hover:underline">مشاهده همه (${conversations.length})</a>
+                    </div>
+                `;
+                }
+
+                recentList.innerHTML = html;
+
+                document.querySelectorAll('.recent-question').forEach(function (el) {
+                    el.addEventListener('click', function (e) {
+                        if (e.target.closest('.delete-chat-btn')) return;
+                        var chatId = parseInt(this.getAttribute('data-chat-id'));
+                        if (chatId && !isLoading && !isSyncing) {
+                            loadChatById(chatId);
+                            if (window.innerWidth < 768) {
+                                toggleSidebar();
+                            }
+                        }
+                    });
+                });
+
+                document.querySelectorAll('.delete-chat-btn').forEach(function (btn) {
+                    btn.addEventListener('click', async function (e) {
+                        e.stopPropagation();
+                        var chatId = parseInt(this.getAttribute('data-chat-id'));
+                        if (confirm('آیا از حذف این گفتگو اطمینان دارید؟')) {
+                            if (await deleteConversationFromServer(chatId)) {
+                                if (currentChatId == chatId) {
+                                    startNewChat();
+                                }
+                                await loadRecentQuestions();
+                            } else {
+                                alert('خطا در حذف گفتگو');
+                            }
+                        }
+                    });
+                });
+            } else {
+                recentList.innerHTML = `
+                <div class="text-center py-8 text-gray-400 text-sm">
+                    <i class="fas fa-comment-slash text-3xl mb-2 block"></i>
+                    <p>گفتگویی ندارید</p>
+                    <p class="text-xs mt-1">با پرسیدن سوال شروع کنید</p>
+                </div>
+            `;
+            }
+        }, 10);
+    }
+
+    async function loadChatById(chatId) {
+        if (!chatId || isLoading || isSyncing) return false;
+        isSyncing = true;
+
+        try {
+            var convData = await loadConversationFromServer(chatId);
+
+            if (convData && convData.messages) {
+                messagesContainer.innerHTML = '';
+                currentChatId = chatId;
+
+                for (var i = 0; i < convData.messages.length; i++) {
+                    var msg = convData.messages[i];
+                    if (msg.type === 'user') {
+                        addUserMessage(msg.content, msg.created_at);
+                    } else if (msg.type === 'ai') {
+                        addAIMessage(msg.content, msg.related_verses || [], msg.suggestions || [], msg.created_at);
+                    }
+                }
+
+                scrollToBottom();
+
+                document.querySelectorAll('.recent-question').forEach(function (el) {
+                    el.classList.remove('active-chat');
+                    if (parseInt(el.getAttribute('data-chat-id')) == chatId) {
+                        el.classList.add('active-chat');
+                    }
+                });
+
+                return true;
+            }
+            return false;
+        } catch (error) {
+            console.error('Error loading chat:', error);
+            return false;
+        } finally {
+            isSyncing = false;
+        }
+    }
+
+    // ============================================
+    // شروع گفتگوی جدید
+    // ============================================
+
+    function startNewChat() {
+        if (isLoading || isSyncing) return;
+
+        currentChatId = null;
+        messagesContainer.innerHTML = '';
+
+        var welcomeHtml = `
+        <div class="message-wrapper">
+            <div class="message-ai-wrapper">
+                <div class="message-ai-avatar">
+                    <i class="fas fa-robot text-white text-sm"></i>
+                </div>
+                <div class="message-ai-content">
+                    <div class="message-ai-bubble">
+                        <p class="text-lg font-bold mb-2">🍃 السلام علیکم</p>
+                        <p>من <strong>سِراج‌یار</strong> هستم، دستیار هوشمند قرآنی شما.</p>
+                        <p class="mt-2">می‌توانید هر سوالی درباره قرآن، مفاهیم دینی، تفسیر، احکام، اخلاق و... دارید بپرسید.</p>
+                        <div class="flex flex-wrap gap-2 mt-3 pt-2 border-t border-gray-200">
+                            <span class="suggestion-item" data-question="توحید در قرآن چیست؟">📖 توحید در قرآن چیست؟</span>
+                            <span class="suggestion-item" data-question="اهمیت نماز در قرآن چیست؟">🕌 اهمیت نماز در قرآن چیست؟</span>
+                            <span class="suggestion-item" data-question="صبر در قرآن">💪 صبر در قرآن</span>
+                            <span class="suggestion-item" data-question="بهترین آیه برای آرامش قلب چیست؟">😌 آرامش قلب در قرآن</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+        messagesContainer.innerHTML = welcomeHtml;
+        scrollToBottom();
+
+        document.querySelectorAll('.recent-question').forEach(function (el) {
+            el.classList.remove('active-chat');
+        });
+    }
+
+    // ============================================
+    // ارسال سوال
+    // ============================================
+
+    async function sendQuestion(questionText) {
+        var question = questionText;
+        if (!question) question = questionInput.value.trim();
+        if (!question) {
+            alert('لطفاً سوال خود را وارد کنید');
+            return false;
+        }
+
+        if (isLoading || isSyncing) return false;
+        isLoading = true;
+
+        var isNewChat = !currentChatId;
+
+        addUserMessage(question);
+
+        if (questionInput) {
+            questionInput.value = '';
+            questionInput.style.height = 'auto';
+        }
+        showTyping();
+
+        try {
+            var response = await fetch('/seraj-yari/ask', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    question: question,
+                    conversation_id: currentChatId
+                })
+            });
+            var data = await response.json();
+            hideTyping();
+
+            if (data.success) {
+                if (isNewChat && data.chat_id) {
+                    currentChatId = data.chat_id;
+                }
+
+                addAIMessage(data.answer, data.related_verses || [], data.suggestions || []);
+
+                // بروزرسانی کش بعد از ارسال پیام جدید
+                conversationsCache.data = null;
+                await loadRecentQuestions();
+
+                setTimeout(function () {
+                    document.querySelectorAll('.recent-question').forEach(function (el) {
+                        el.classList.remove('active-chat');
+                        if (parseInt(el.getAttribute('data-chat-id')) == currentChatId) {
+                            el.classList.add('active-chat');
+                        }
+                    });
+                }, 100);
+            } else {
+                addErrorMessage(data.error || 'مشکلی پیش آمد');
+            }
+        } catch (error) {
+            hideTyping();
+            console.error('Error:', error);
+            addErrorMessage('خطا در ارتباط با سرور. لطفاً دوباره تلاش کنید.');
+        } finally {
+            isLoading = false;
+        }
+        return false;
+    }
+
+    function setQuestionAndAsk(text) {
+        if (questionInput) questionInput.value = text;
+        sendQuestion(text);
+    }
+
+    // ============================================
+    // پاک کردن تاریخچه
+    // ============================================
+
+    async function clearAllHistory() {
+        if (!confirm('آیا از پاک کردن تمام تاریخچه گفتگوهای خود اطمینان دارید؟ این عمل قابل بازگشت نیست.')) return;
+
+        if (await clearAllConversationsFromServer()) {
+            startNewChat();
+            await loadRecentQuestions();
+            alert('تاریخچه با موفقیت پاک شد');
+        } else {
+            alert('خطا در پاک کردن تاریخچه');
+        }
+    }
+
+    // ============================================
+    // ضبط صدا
+    // ============================================
+
+    async function startRecording() {
+        try {
+            var stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            mediaRecorder = new MediaRecorder(stream);
+            audioChunks = [];
+            mediaRecorder.ondataavailable = function (event) { audioChunks.push(event.data); };
+            mediaRecorder.onstop = async function () {
+                var audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+                var formData = new FormData();
+                formData.append('audio', audioBlob);
+                stream.getTracks().forEach(function (track) { track.stop(); });
+                showTyping();
+                try {
+                    var response = await fetch('/ai/transcribe', { method: 'POST', body: formData });
+                    var data = await response.json();
+                    hideTyping();
+                    if (data.success && data.text) sendQuestion(data.text);
+                    else alert('متوجه نشدم. دوباره امتحان کنید.');
+                } catch (error) {
+                    hideTyping();
+                    console.error('Speech error:', error);
+                    alert('خطا در پردازش صدا.');
+                }
+            };
+            mediaRecorder.start();
+            isRecording = true;
+            micBtn.classList.add('recording');
+            micBtn.innerHTML = '<i class="fas fa-stop text-white"></i>';
+            recordingStatus.classList.remove('hidden');
+        } catch (error) {
+            console.error('Microphone error:', error);
+            alert('دسترسی به میکروفون ممکن نیست.');
+        }
+    }
+
+    function stopRecording() {
+        if (mediaRecorder && isRecording) {
+            mediaRecorder.stop();
+            isRecording = false;
+            micBtn.classList.remove('recording');
+            micBtn.innerHTML = '<i class="fas fa-microphone text-gray-600"></i>';
+            recordingStatus.classList.add('hidden');
+        }
+    }
+
+    function toggleSidebar() {
+        var sidebar = document.getElementById('sidebar');
+        var overlay = document.getElementById('sidebarOverlay');
+        sidebar.classList.toggle('active');
+        overlay.classList.toggle('hidden');
+    }
+
+    // ============================================
+    // Event Listeners
+    // ============================================
+
+    document.getElementById('sidebarOverlay').addEventListener('click', toggleSidebar);
+
+    document.getElementById('newChatBtn').addEventListener('click', function () {
+        startNewChat();
+        if (window.innerWidth < 768) {
+            toggleSidebar();
+        }
+    });
+
+    var clearBtn = document.getElementById('clearRecentBtn');
+    if (clearBtn) {
+        clearBtn.addEventListener('click', function (e) {
+            e.stopPropagation();
+            clearAllHistory();
+        });
+    }
+
+    document.body.addEventListener('click', function (e) {
+        var target = e.target;
+        if (target.classList && target.classList.contains('suggestion-item')) {
+            var question = target.getAttribute('data-question');
+            if (!question) question = target.textContent.trim();
+            if (question) setQuestionAndAsk(question);
+        }
+    });
+
+    if (micBtn) {
+        micBtn.addEventListener('click', function () {
+            if (isRecording) stopRecording();
+            else startRecording();
+        });
+    }
+
+    var chatForm = document.getElementById('chatForm');
+    if (chatForm) {
+        chatForm.addEventListener('submit', function (e) {
+            e.preventDefault();
+            sendQuestion();
+        });
+    }
+
+    if (questionInput) {
+        questionInput.addEventListener('input', function () {
+            this.style.height = 'auto';
+            this.style.height = Math.min(this.scrollHeight, 100) + 'px';
+        });
+
+        questionInput.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendQuestion();
+            }
+        });
+    }
+
+    // ============================================
+    // راه‌اندازی اولیه
+    // ============================================
+
+    window.onload = async function () {
+        await loadRecentQuestions();
+        startNewChat();
+
+        if (questionInput) questionInput.focus();
+
+        var container = document.querySelector('.chatgpt-container');
+        if (container) {
+            var initialQuestion = container.getAttribute('data-initial-question');
+            if (initialQuestion && initialQuestion.length > 0 && initialQuestion !== 'None') {
+                setTimeout(function () { setQuestionAndAsk(initialQuestion); }, 500);
+            }
+        }
+    };
+</script>
+{% endblock %}

@@ -1,0 +1,78 @@
+{% extends "sahifa_base.html" %}
+
+{% block title %}{{ category.name }} - صحیفه سجادیه - سِراج{% endblock %}
+
+{% block content %}
+<div class="sahifa-container container mx-auto px-4 py-4">
+    
+    <!-- هدر دسته‌بندی -->
+    <div class="sahifa-header" style="background: linear-gradient(135deg, var(--sahifa-primary-dark), var(--sahifa-primary));">
+        <div class="d-flex align-items-center gap-3 flex-wrap">
+            <i class="fas {{ category.icon }} fa-2x" style="color: var(--sahifa-gold-light);"></i>
+            <div>
+                <h1 style="margin: 0;">{{ category.name }}</h1>
+                {% if category.description %}
+                <p class="subtitle" style="margin-top: 0.5rem; margin-bottom: 0;">{{ category.description }}</p>
+                {% endif %}
+            </div>
+            <div class="me-auto">
+                <span class="badge bg-white text-dark px-3 py-2 rounded-pill">
+                    <i class="fas fa-book" style="color: var(--sahifa-gold);"></i> {{ prayers|length }} دعا
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <!-- لینک بازگشت به همه دسته‌ها -->
+    <div class="mb-4">
+        <a href="{{ url_for('sahifa_index') }}" class="text-decoration-none" style="color: var(--sahifa-text-light);">
+            <i class="fas fa-arrow-right ms-1"></i> بازگشت به صحیفه سجادیه
+        </a>
+    </div>
+
+    <!-- لیست دعاها -->
+    {% if prayers %}
+    <div class="row g-4">
+        {% for prayer in prayers %}
+        <div class="col-md-6">
+            <a href="{{ url_for('sahifa_detail', prayer_id=prayer.id) }}" class="text-decoration-none">
+                <div class="prayer-card">
+                    <div class="card-inner">
+                        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-2">
+                            <div class="prayer-number">
+                                <i class="fas fa-book-open"></i> دعای {{ prayer.number }}
+                            </div>
+                            {% if prayer.is_featured %}
+                            <span class="badge bg-warning text-dark px-2 py-1 rounded-pill">
+                                <i class="fas fa-star text-warning"></i> برگزیده
+                            </span>
+                            {% endif %}
+                        </div>
+                        <h3 class="prayer-title">{{ prayer.title }}</h3>
+                        {% if prayer.title_arabic %}
+                        <div class="prayer-title-arabic">{{ prayer.title_arabic }}</div>
+                        {% endif %}
+                        <div class="prayer-excerpt">
+                            {{ prayer.persian_text|truncate(120) }}
+                        </div>
+                        <div class="prayer-meta">
+                            <span><i class="fas fa-eye"></i> {{ prayer.view_count }} بازدید</span>
+                            <span><i class="far fa-calendar-alt"></i> {{ prayer.created_at|persian_date if prayer.created_at else '۱۴۰۴' }}</span>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="text-center py-5">
+        <i class="fas fa-book-open fa-4x mb-3" style="color: var(--sahifa-border);"></i>
+        <p class="text-muted">هیچ دعایی در این دسته یافت نشد</p>
+        <a href="{{ url_for('sahifa_index') }}" class="btn-sahifa btn d-inline-flex align-items-center gap-2 mt-3">
+            <i class="fas fa-arrow-right"></i> بازگشت به صفحه اصلی
+        </a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

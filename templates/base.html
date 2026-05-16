@@ -9,20 +9,20 @@
 
     <!-- ========== PWA Meta Tags ========== -->
     <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
-    <meta name="theme-color" content="#1e3a8a" media="(prefers-color-scheme: light)">
-    <meta name="theme-color" content="#0f172a" media="(prefers-color-scheme: dark)">
+    <meta name="theme-color" content="#2563eb" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#1e3a8a" media="(prefers-color-scheme: dark)">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="سِراج">
     <meta name="format-detection" content="telephone=no">
     <meta name="mobile-web-app-capable" content="yes">
-    <meta name="msapplication-TileColor" content="#1e3a8a">
+    <meta name="msapplication-TileColor" content="#2563eb">
     <meta name="msapplication-tap-highlight" content="no">
 
     <!-- ========== iOS Icons ========== -->
     <link rel="apple-touch-icon" href="{{ url_for('static', filename='logo/icon-192x192.png') }}">
     <link rel="apple-touch-icon" sizes="152x152" href="{{ url_for('static', filename='logo/icon-152x152.png') }}">
-    <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='logo/icon-192x192.png') }}">
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='logo/192x192.png') }}">
     <link rel="apple-touch-icon" sizes="167x167" href="{{ url_for('static', filename='logo/icon-152x152.png') }}">
 
     <!-- ========== Favicon ========== -->
@@ -59,7 +59,6 @@
                 padding-left: env(safe-area-inset-left);
                 padding-right: env(safe-area-inset-right);
             }
-
             .pwa-header {
                 padding-top: env(safe-area-inset-top);
             }
@@ -173,7 +172,6 @@
                 opacity: 0;
                 transform: translateY(10px);
             }
-
             to {
                 opacity: 1;
                 transform: translateY(0);
@@ -196,12 +194,12 @@
         }
 
         ::-webkit-scrollbar-thumb {
-            background: #888;
+            background: #cbd5e1;
             border-radius: 10px;
         }
 
         ::-webkit-scrollbar-thumb:hover {
-            background: #555;
+            background: #94a3b8;
         }
 
         /* حالت آفلاین */
@@ -213,7 +211,7 @@
         /* اسپینر لودینگ */
         .loading-spinner {
             border: 3px solid #f3f3f3;
-            border-top: 3px solid #1e3a8a;
+            border-top: 3px solid #2563eb;
             border-radius: 50%;
             width: 40px;
             height: 40px;
@@ -221,13 +219,8 @@
         }
 
         @keyframes spin {
-            0% {
-                transform: rotate(0deg);
-            }
-
-            100% {
-                transform: rotate(360deg);
-            }
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
 
         /* دکمه بازگشت به بالا */
@@ -237,7 +230,7 @@
             right: 20px;
             width: 50px;
             height: 50px;
-            background: linear-gradient(135deg, #1e3a8a, #1e40af);
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
             color: white;
             border-radius: 50%;
             display: flex;
@@ -247,7 +240,7 @@
             opacity: 0;
             visibility: hidden;
             transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(30, 58, 138, 0.3);
+            box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3);
             z-index: 1000;
             border: 2px solid rgba(255, 255, 255, 0.2);
         }
@@ -259,213 +252,423 @@
 
         .back-to-top:hover {
             transform: translateY(-5px);
-            background: linear-gradient(135deg, #1e40af, #1e3a8a);
-            box-shadow: 0 6px 20px rgba(30, 58, 138, 0.4);
+            background: linear-gradient(135deg, #1d4ed8, #1e40af);
+            box-shadow: 0 6px 20px rgba(37, 99, 235, 0.4);
         }
 
         @media (max-width: 640px) {
             .back-to-top {
-                bottom: 15px;
+                bottom: 75px;
                 right: 15px;
                 width: 45px;
                 height: 45px;
             }
         }
 
-        /* داشبورد قرآن */
-        .quran-dashboard {
-            background: linear-gradient(135deg, #f8fafc, #f1f5f9);
-            border: 1px solid #e2e8f0;
-            border-radius: 16px;
-            padding: 16px;
-            margin-bottom: 24px;
+        /* ============================================ */
+        /* استایل‌های پنل پشتیبانی شناور - تم سفید-آبی */
+        /* ============================================ */
+        
+        /* دکمه شناور پشتیبانی */
+        .support-fab {
+            position: fixed;
+            bottom: 85px;
+            left: 20px;
+            width: 56px;
+            height: 56px;
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 1000;
+            border: none;
+            color: white;
         }
 
-        .progress-ring {
-            transform: rotate(-90deg);
-            width: 60px;
-            height: 60px;
+        .support-fab:hover {
+            transform: scale(1.08);
+            box-shadow: 0 6px 20px rgba(37, 99, 235, 0.5);
         }
 
-        .progress-ring circle {
-            transition: stroke-dashoffset 0.35s;
-            transform: rotate(-90deg);
-            transform-origin: 50% 50%;
+        .support-fab:active {
+            transform: scale(0.96);
         }
 
-        @media (max-width: 768px) {
-            .quran-dashboard {
-                padding: 12px;
-            }
-
-            .progress-ring {
-                width: 50px;
-                height: 50px;
-            }
+        .support-fab i {
+            font-size: 24px;
         }
 
-        /* کارت حدیث */
-        .hadith-card {
-            background: linear-gradient(135deg, #ffffff, #f8fafc);
-            border-right: 4px solid #1e3a8a;
-            border-radius: 12px;
-            padding: 16px;
-            margin: 16px 0;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        /* بج اعلان روی دکمه */
+        .support-badge {
+            position: absolute;
+            top: -4px;
+            right: -4px;
+            background: #ef4444;
+            color: white;
+            font-size: 10px;
+            font-weight: 600;
+            min-width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 4px;
+            border: 2px solid white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
 
-        .hadith-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        /* پنل پشتیبانی */
+        .support-panel {
+            position: fixed;
+            bottom: 155px;
+            left: 20px;
+            width: 380px;
+            max-width: calc(100vw - 40px);
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15), 0 8px 24px rgba(0, 0, 0, 0.1);
+            z-index: 1001;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transform-origin: bottom left;
+            overflow: hidden;
+            border: 1px solid rgba(0, 0, 0, 0.06);
         }
 
-        /* فوتر */
-        .footer-grid {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 2rem;
+        .support-panel.hidden {
+            transform: scale(0.9);
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
         }
 
-        @media (min-width: 768px) {
-            .footer-grid {
-                grid-template-columns: repeat(4, 1fr);
-            }
-
-            .footer-section {
-                text-align: right;
-            }
+        .support-panel-header {
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            padding: 16px 20px;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
-        .footer-section {
+        .support-panel-header h3 {
+            font-size: 16px;
+            font-weight: 600;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: white;
+        }
+
+        .support-panel-header h3 i {
+            font-size: 18px;
+        }
+
+        .support-panel-header button {
+            background: rgba(255, 255, 255, 0.15);
+            border: none;
+            color: white;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .support-panel-header button:hover {
+            background: rgba(255, 255, 255, 0.25);
+            transform: rotate(90deg);
+        }
+
+        .support-panel-tabs {
+            display: flex;
+            border-bottom: 1px solid #e2e8f0;
+            background: #f8fafc;
+        }
+
+        .support-tab {
+            flex: 1;
             text-align: center;
+            padding: 12px 16px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: #64748b;
+            border-bottom: 2px solid transparent;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
         }
 
-        /* کانتینر ریسپانسیو */
-        .container {
+        .support-tab i {
+            font-size: 14px;
+        }
+
+        .support-tab:hover {
+            color: #2563eb;
+            background: #eff6ff;
+        }
+
+        .support-tab.active {
+            color: #2563eb;
+            border-bottom-color: #2563eb;
+            background: white;
+        }
+
+        .support-panel-content {
+            max-height: 460px;
+            overflow-y: auto;
+        }
+
+        .support-panel-content::-webkit-scrollbar {
+            width: 5px;
+        }
+
+        .support-panel-content::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+
+        .support-panel-content::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 10px;
+        }
+
+        .ticket-list {
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .ticket-item {
+            background: #f8fafc;
+            border-radius: 14px;
+            padding: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 1px solid #e2e8f0;
+        }
+
+        .ticket-item:hover {
+            background: #eff6ff;
+            transform: translateX(-3px);
+            border-color: #bfdbfe;
+        }
+
+        .ticket-status {
+            font-size: 10px;
+            padding: 3px 10px;
+            border-radius: 20px;
+            display: inline-block;
+            font-weight: 500;
+        }
+
+        .status-open { background: #dbeafe; color: #2563eb; }
+        .status-in_progress { background: #e0e7ff; color: #4338ca; }
+        .status-closed { background: #f1f5f9; color: #64748b; }
+
+        .priority-high { border-right: 3px solid #ef4444; }
+        .priority-medium { border-right: 3px solid #f59e0b; }
+        .priority-low { border-right: 3px solid #10b981; }
+
+        .new-ticket-form {
+            padding: 16px;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 500;
+            color: #334155;
+            margin-bottom: 6px;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
             width: 100%;
-            padding-left: 1rem;
-            padding-right: 1rem;
-            margin-left: auto;
-            margin-right: auto;
+            padding: 10px 14px;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 13px;
+            font-family: inherit;
+            transition: all 0.2s;
+            background: white;
         }
 
-        @media (min-width: 640px) {
-            .container {
-                max-width: 640px;
-            }
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
         }
 
-        @media (min-width: 768px) {
-            .container {
-                max-width: 768px;
-            }
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
         }
 
-        @media (min-width: 1024px) {
-            .container {
-                max-width: 1024px;
-            }
+        .btn-submit {
+            width: 100%;
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 40px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
         }
 
-        @media (min-width: 1280px) {
-            .container {
-                max-width: 1280px;
-            }
+        .btn-submit:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
         }
 
-        /* بهبود تاچ در موبایل */
-        @media (max-width: 768px) {
-
-            button,
-            a,
-            .clickable {
-                min-height: 44px;
-                min-width: 44px;
-            }
-
-            input,
-            select,
-            textarea {
-                font-size: 16px !important;
-            }
+        .loading-spinner-small {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid #e2e8f0;
+            border-top: 2px solid #2563eb;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
         }
 
-        /* پشتیبانی از iOS */
-        @supports (-webkit-touch-callout: none) {
-            .min-h-screen {
-                min-height: -webkit-fill-available;
-            }
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #94a3b8;
         }
 
-        /* ناوبری پایین موبایل */
-        @media (max-width: 768px) {
-            .bottom-nav {
-                display: flex;
-                position: fixed;
-                bottom: 0;
-                left: 0;
-                right: 0;
-                background: rgba(255, 255, 255, 0.95);
-                backdrop-filter: blur(10px);
-                border-top: 0.5px solid rgba(0, 0, 0, 0.05);
-                padding: 0.5rem 0.75rem;
-                justify-content: space-around;
-                align-items: center;
-                z-index: 50;
-                box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.03);
-            }
+        .empty-state i {
+            font-size: 48px;
+            margin-bottom: 12px;
+            opacity: 0.5;
+        }
 
-            .bottom-nav-item {
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                gap: 0.2rem;
-                font-size: 0.7rem;
-                font-weight: 500;
-                color: #94a3b8;
-                transition: all 0.2s ease;
-                text-decoration: none;
-                padding: 0.4rem 0.6rem;
-                border-radius: 2rem;
-                background: transparent;
-            }
+        .empty-state p {
+            font-size: 13px;
+            margin-bottom: 12px;
+        }
 
-            .bottom-nav-item i {
-                font-size: 1.3rem;
-                margin-bottom: 0.1rem;
-            }
+        .empty-state button {
+            background: transparent;
+            border: none;
+            color: #2563eb;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+        }
 
-            .bottom-nav-item span {
-                font-size: 0.65rem;
-                font-weight: 500;
+        @media (max-width: 640px) {
+            .support-fab {
+                bottom: 75px;
+                left: 15px;
+                width: 48px;
+                height: 48px;
             }
-
-            .bottom-nav-item.active {
-                color: #3b82f6;
-                background: rgba(59, 130, 246, 0.08);
+            .support-fab i {
+                font-size: 20px;
             }
-
-            .bottom-nav-item:active {
-                transform: scale(0.96);
-                background: rgba(0, 0, 0, 0.04);
+            .support-panel {
+                bottom: 135px;
+                left: 15px;
+                right: 15px;
+                width: auto;
+                max-width: none;
             }
-
-            body {
-                padding-bottom: 4rem;
+            .support-panel-content {
+                max-height: 420px;
+            }
+            .support-tab {
+                padding: 10px 12px;
+                font-size: 12px;
+            }
+            .ticket-item {
+                padding: 12px;
             }
         }
 
         @media (min-width: 769px) {
-            .bottom-nav {
-                display: none;
+            .support-fab {
+                bottom: 25px;
             }
-
-            body {
-                padding-bottom: 0;
+            .support-panel {
+                bottom: 95px;
             }
         }
 
-        /* کلاس‌های کمکی line-clamp */
+        /* حالت دارک مود */
+        @media (prefers-color-scheme: dark) {
+            .support-panel {
+                background: #1e293b;
+                border-color: #334155;
+            }
+            .support-panel-header {
+                background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            }
+            .support-panel-tabs {
+                background: #0f172a;
+                border-bottom-color: #334155;
+            }
+            .support-tab {
+                color: #94a3b8;
+            }
+            .support-tab:hover {
+                background: #1e293b;
+                color: #60a5fa;
+            }
+            .support-tab.active {
+                background: #1e293b;
+                color: #60a5fa;
+                border-bottom-color: #60a5fa;
+            }
+            .ticket-item {
+                background: #0f172a;
+                border-color: #334155;
+            }
+            .ticket-item:hover {
+                background: #1e293b;
+            }
+            .ticket-item .font-medium {
+                color: #e2e8f0;
+            }
+            .form-group label {
+                color: #cbd5e1;
+            }
+            .form-group input,
+            .form-group select,
+            .form-group textarea {
+                background: #0f172a;
+                border-color: #334155;
+                color: #e2e8f0;
+            }
+            .empty-state {
+                color: #64748b;
+            }
+        }
+
         .line-clamp-1 {
             display: -webkit-box;
             -webkit-line-clamp: 1;
@@ -489,6 +692,172 @@
             -webkit-box-orient: vertical;
             overflow: hidden;
         }
+
+        /* ========== ناوبری پایین موبایل ========== */
+        @media (max-width: 768px) {
+            .bottom-nav {
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                background: #ffffff;
+                border-top: 0.5px solid rgba(0, 0, 0, 0.06);
+                padding: 8px 12px;
+                padding-bottom: max(8px, env(safe-area-inset-bottom));
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                z-index: 50;
+                box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.03);
+            }
+
+            .bottom-nav-item {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                gap: 3px;
+                text-decoration: none;
+                transition: all 0.2s ease;
+                padding: 6px 8px;
+                border-radius: 32px;
+                min-width: 56px;
+                background: transparent;
+                cursor: pointer;
+            }
+
+            .bottom-nav-item i {
+                font-size: 20px;
+                color: #94a3b8;
+                transition: all 0.2s;
+            }
+
+            .bottom-nav-item span {
+                font-size: 10px;
+                font-weight: 500;
+                color: #94a3b8;
+                transition: all 0.2s;
+            }
+
+            .bottom-nav-item:hover {
+                background: rgba(59, 130, 246, 0.06);
+            }
+
+            .bottom-nav-item:hover i,
+            .bottom-nav-item:hover span {
+                color: #3b82f6;
+            }
+
+            .bottom-nav-item.active {
+                background: rgba(59, 130, 246, 0.1);
+            }
+
+            .bottom-nav-item.active i,
+            .bottom-nav-item.active span {
+                color: #3b82f6;
+                font-weight: 600;
+            }
+
+            .bottom-nav-item:active {
+                transform: scale(0.95);
+            }
+
+            .logo-item {
+                pointer-events: none;
+            }
+
+            .logo-wrapper {
+                width: 40px;
+                height: 40px;
+                background: transparent;
+                border-radius: 28px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                transition: all 0.2s;
+            }
+
+            .nav-logo {
+                width: 32px;
+                height: 32px;
+                object-fit: contain;
+            }
+
+            .logo-item span {
+                color: #1e293b;
+                font-weight: 700;
+                font-size: 11px;
+                margin-top: 2px;
+            }
+
+            .logo-item:hover .logo-wrapper {
+                transform: scale(1.05);
+            }
+
+            body {
+                padding-bottom: 68px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .bottom-nav {
+                padding: 6px 8px;
+            }
+            .bottom-nav-item {
+                padding: 4px 6px;
+                min-width: 48px;
+            }
+            .bottom-nav-item i {
+                font-size: 18px;
+            }
+            .bottom-nav-item span {
+                font-size: 9px;
+            }
+            .logo-wrapper {
+                width: 36px;
+                height: 36px;
+            }
+            .nav-logo {
+                width: 28px;
+                height: 28px;
+            }
+        }
+
+        @media (min-width: 769px) {
+            .bottom-nav {
+                display: none;
+            }
+            body {
+                padding-bottom: 0;
+            }
+        }
+
+        @media (prefers-color-scheme: dark) and (max-width: 768px) {
+            .bottom-nav {
+                background: #ffffff;
+                border-top-color: rgba(0, 0, 0, 0.06);
+            }
+            .bottom-nav-item i,
+            .bottom-nav-item span {
+                color: #94a3b8;
+            }
+            .bottom-nav-item:hover {
+                background: rgba(59, 130, 246, 0.06);
+            }
+            .bottom-nav-item:hover i,
+            .bottom-nav-item:hover span {
+                color: #3b82f6;
+            }
+            .bottom-nav-item.active {
+                background: rgba(59, 130, 246, 0.1);
+            }
+            .bottom-nav-item.active i,
+            .bottom-nav-item.active span {
+                color: #3b82f6;
+            }
+            .logo-item span {
+                color: #1e293b;
+            }
+        }
     </style>
 
     {% block head %}{% endblock %}
@@ -497,310 +866,527 @@
 <body class="bg-gray-50 min-h-screen flex flex-col"
     data-user-logged-in="{% if current_user.is_authenticated %}true{% else %}false{% endif %}">
 
+     <style>
+#appLoader {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 50%, #ffffff 100%);
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: opacity 0.4s ease-out;
+}
+        
+        #appLoader.hide {
+            opacity: 0;
+            pointer-events: none;
+        }
+        
+        .loader-content {
+            text-align: center;
+            animation: fadeInUp 0.6s ease-out;
+        }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .loader-logo {
+            width: 100px;
+            height: 100px;
+            margin: 0 auto 20px;
+            border-radius: 25px;
+            animation: loaderPulse 1.5s ease-in-out infinite;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+        
+        @keyframes loaderPulse {
+            0%, 100% { transform: scale(1); opacity: 0.8; }
+            50% { transform: scale(1.1); opacity: 1; }
+        }
+        
+        .loader-spinner {
+            width: 45px;
+            height: 45px;
+            margin: 20px auto;
+            border: 3px solid rgba(59, 130, 246, 0.2);
+            border-top: 3px solid #3b82f6;
+            border-right: 3px solid #60a5fa;
+            border-radius: 50%;
+            animation: loaderSpin 0.8s linear infinite;
+        }
+        
+        @keyframes loaderSpin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .loader-text {
+            color: #2f32ff;
+            font-size: 0.9rem;
+            margin-top: 15px;
+            font-weight: 500;
+        }
+        
+        .loader-subtext {
+            color: #45474b;
+            font-size: 0.7rem;
+            margin-top: 8px;
+        }
+        
+        /* محتوای اصلی - در ابتدا مخفی */
+        #mainContent {
+            opacity: 0;
+            transition: opacity 0.3s ease-out;
+        }
+        
+        #mainContent.visible {
+            opacity: 1;
+        }
+    </style>
+
+    <div id="appLoader">
+        <div class="loader-content">
+            <img src="{{ url_for('static', filename='logo/12.png') }}" alt="سِراج" class="loader-logo">
+            <div class="loader-spinner"></div>
+            <p class="loader-text" id="loaderText">در حال آماده‌سازی</p>
+            <p class="loader-subtext">سِراج • پلتفرم فعالیت‌های قرآنی</p>
+        </div>
+    </div>
+
+    <div id="mainContent">
+
     {# تنظیم متغیرهای Jinja2 #}
-    {% set index_url = url_for('index') %}
-    {% set register_choice_url = url_for('register_choice') if endpoint_exists('register_choice') else
-    url_for('register') %}
-    {% set install_pwa_url = url_for('install_pwa') if endpoint_exists('install_pwa') else '#' %}
+    {% set index_url = '/' %}
+    {% set register_choice_url = '/auth/register/choice' %}
+    {% set install_pwa_url = '/install-pwa' %}
+    {% set login_url = '/login' %}
+    {% set logout_url = '/auth/logout' %}
+    {% set events_url = '/events' %}
+    {% set circles_url = '/circles' %}
+    {% set competitions_url = '/competitions' %}
+    {% set seraj_yari_url = '/seraj-yari' %}
+    {% set dashboard_url = '/dashboard' %}
+    {% set profile_url = '/profile' %}
+    {% set notifications_url = '/notifications' %}
+    {% set admin_url = '/admin' %}
+    {% set search_url = '/search' %}
 
     <div id="app-config" data-index-url="{{ index_url }}" data-install-url="{{ install_pwa_url }}"
         data-register-url="{{ register_choice_url }}" style="display: none;"></div>
 
-    <!-- PWA Install Prompt -->
-    {% if not request.endpoint == 'install_pwa' %}
-    <div id="pwaInstallPrompt"
-        class="fixed bottom-4 left-4 right-4 md:left-auto md:right-4 md:w-96 bg-white rounded-xl shadow-2xl border border-blue-100 z-50 hidden">
-        <div class="p-4">
-            <div class="flex items-start">
-                <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center ml-4 flex-shrink-0">
-                    <img src="{{ url_for('static', filename='logo/icon-96x96.png') }}" alt="سِراج" class="w-8 h-8"
-                        data-fallback="{{ url_for('static', filename='logo/12.png') }}"
-                        onerror="this.src=this.dataset.fallback">
-                </div>
-                <div class="flex-grow">
-                    <h3 class="font-bold text-lg">نصب برنامه سِراج</h3>
-                    <p class="text-sm text-gray-600">نصب روی دستگاه برای دسترسی سریع‌تر و آفلاین</p>
-                </div>
-                <button onclick="dismissPwaPrompt()" class="text-gray-400 hover:text-gray-600 p-2">
-                    <i class="fas fa-times"></i>
-                </button>
+<!-- PWA Install Prompt -->
+{% if not request.endpoint == 'install_pwa' %}
+<div id="pwaInstallPrompt"
+    class="fixed bottom-4 left-4 right-4 sm:left-auto sm:right-4 sm:w-80 md:w-72 bg-white rounded-xl shadow-2xl border border-blue-100 z-50 hidden">
+    <div class="p-3 sm:p-3.5">
+        <div class="flex items-start gap-2 sm:gap-3">
+            <div class="w-10 h-10 sm:w-11 sm:h-11 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                <img src="{{ url_for('static', filename='logo/icon-96x96.png') }}" alt="سِراج" class="w-7 h-7 sm:w-8 sm:h-8"
+                    data-fallback="{{ url_for('static', filename='logo/12.png') }}"
+                    onerror="this.src=this.dataset.fallback">
             </div>
-            <div class="mt-4 flex gap-2">
-                <button id="installPwaBtn"
-                    class="flex-1 bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors">
-                    <i class="fas fa-download ml-2"></i> نصب
-                </button>
-                <button onclick="dismissPwaPrompt()"
-                    class="flex-1 bg-gray-100 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors">
-                    بعداً
-                </button>
+            <div class="flex-1 min-w-0">
+                <h3 class="font-bold text-sm sm:text-base break-words">نصب برنامه سِراج</h3>
+                <p class="text-xs text-gray-600 break-words leading-relaxed">نصب روی دستگاه برای دسترسی سریع‌تر و آفلاین</p>
             </div>
-            {% if install_pwa_url != '#' %}
-            <a href="{{ install_pwa_url }}" class="block mt-2 text-xs text-center text-blue-600 hover:underline">راهنمای
-                نصب</a>
-            {% endif %}
+            <button onclick="dismissPwaPrompt()" class="text-gray-400 hover:text-gray-600 p-1.5 sm:p-2 flex-shrink-0 -mt-1">
+                <i class="fas fa-times text-sm"></i>
+            </button>
         </div>
+        <div class="mt-3 sm:mt-3.5 flex flex-col sm:flex-row gap-2">
+            <button id="installPwaBtn"
+                class="w-full sm:flex-1 bg-blue-600 text-white px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg text-xs sm:text-sm font-medium hover:bg-blue-700 transition-colors">
+                <i class="fas fa-download ml-1 sm:ml-2 text-xs sm:text-sm"></i> نصب
+            </button>
+            <button onclick="dismissPwaPrompt()"
+                class="w-full sm:flex-1 bg-gray-100 text-gray-700 px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg text-xs sm:text-sm font-medium hover:bg-gray-200 transition-colors">
+                بعداً
+            </button>
+        </div>
+        {% if install_pwa_url != '#' %}
+        <a href="{{ install_pwa_url }}" class="block mt-2 text-xs text-center text-blue-600 hover:underline truncate">راهنمای نصب</a>
+        {% endif %}
     </div>
-    {% endif %}
+</div>
 
-    <!-- Offline Notification -->
-    <div id="offlineNotification"
-        class="fixed top-4 left-4 right-4 md:left-auto md:right-4 md:w-96 bg-yellow-500 text-white rounded-lg shadow-lg z-50 hidden">
-        <div class="p-4 flex items-center">
-            <i class="fas fa-exclamation-triangle ml-3"></i>
-            <span class="flex-grow">شما آفلاین هستید. برخی امکانات محدود شده‌اند.</span>
-            <button onclick="this.parentElement.parentElement.remove()"
-                class="mr-3 text-white hover:text-yellow-100 p-2">
+<style>
+    /* تنظیم فاصله از bottom navigation در موبایل */
+    @media (max-width: 640px) {
+        #pwaInstallPrompt {
+            bottom: 80px !important;
+            left: 12px !important;
+            right: 12px !important;
+            width: auto !important;
+        }
+    }
+    
+    /* برای دستگاه‌های با ناچ یا حاشیه امنیتی */
+    @media (max-width: 640px) and (display-mode: standalone) {
+        #pwaInstallPrompt {
+            bottom: calc(80px + env(safe-area-inset-bottom)) !important;
+        }
+    }
+    
+    /* در تبلت و دسکتاپ به حالت عادی برگردد */
+    @media (min-width: 641px) and (max-width: 1024px) {
+        #pwaInstallPrompt {
+            bottom: 1rem !important;
+            width: 320px !important;
+        }
+    }
+    
+    @media (min-width: 1025px) {
+        #pwaInstallPrompt {
+            bottom: 1rem !important;
+            width: 280px !important;
+        }
+    }
+</style>
+
+<script>
+    // تنظیم داینامیک فاصله از bottom navigation در موبایل
+    function adjustPwaPromptPosition() {
+        var pwaPrompt = document.getElementById('pwaInstallPrompt');
+        if (!pwaPrompt || window.innerWidth > 640) return;
+        
+        var bottomNav = document.querySelector('.bottom-nav');
+        if (bottomNav) {
+            var bottomNavHeight = bottomNav.offsetHeight;
+            pwaPrompt.style.bottom = (bottomNavHeight + 12) + 'px';
+        }
+    }
+    
+    // اجرا در بارگذاری صفحه و تغییر اندازه
+    window.addEventListener('DOMContentLoaded', adjustPwaPromptPosition);
+    window.addEventListener('resize', adjustPwaPromptPosition);
+    setTimeout(adjustPwaPromptPosition, 100);
+</script>
+{% endif %}
+
+<!-- Offline Notification-->
+<div id="offlineNotification" class="hidden">
+    <div class="bg-yellow-500 text-white shadow-lg">
+        <div class="p-3 sm:p-4 flex items-center gap-2 sm:gap-3 max-w-7xl mx-auto px-4">
+            <i class="fas fa-exclamation-triangle text-sm sm:text-base flex-shrink-0"></i>
+            <span class="flex-1 text-xs sm:text-sm break-words">شما آفلاین هستید. برخی امکانات محدود شده‌اند.</span>
+            <button onclick="this.closest('#offlineNotification').remove()"
+                class="text-white hover:text-yellow-100 p-1 sm:p-2 flex-shrink-0">
                 <i class="fas fa-times"></i>
             </button>
         </div>
     </div>
+</div>
 
-    <!-- Update Notification -->
-    <div id="updateNotification"
-        class="fixed bottom-4 left-4 right-4 md:left-auto md:right-4 md:w-96 bg-blue-600 text-white rounded-lg shadow-lg z-50 hidden">
-        <div class="p-4">
-            <div class="flex items-center">
-                <i class="fas fa-sync-alt ml-3 animate-spin"></i>
-                <span class="flex-grow">نسخه جدیدی منتشر شده است.</span>
+<!-- Update Notification-->
+<div id="updateNotification"
+    class="fixed bottom-4 left-4 right-4 sm:left-auto sm:right-4 sm:w-96 bg-blue-600 text-white rounded-lg shadow-lg z-50 hidden">
+    <div class="p-3 sm:p-4">
+        <div class="flex items-center gap-2 sm:gap-3">
+            <i class="fas fa-sync-alt animate-spin text-sm sm:text-base flex-shrink-0"></i>
+            <span class="flex-1 text-xs sm:text-sm break-words">نسخه جدیدی منتشر شده است.</span>
+        </div>
+        <div class="mt-3 flex flex-col sm:flex-row gap-2">
+            <button onclick="updateApp()"
+                class="w-full sm:flex-1 bg-white text-blue-600 px-3 py-2 rounded-lg hover:bg-blue-50 transition text-sm font-medium">
+                بروزرسانی
+            </button>
+            <button onclick="document.getElementById('updateNotification').remove()"
+                class="w-full sm:flex-1 bg-blue-700 text-white px-3 py-2 rounded-lg hover:bg-blue-800 transition text-sm font-medium">
+                بعداً
+            </button>
+        </div>
+    </div>
+</div>
+
+  <!-- ========== Header ========== -->
+<header class="sticky top-0 z-50 bg-white border-b border-gray-200 shadow-sm" x-data="{ 
+    mobileMenuOpen: false, 
+    userDropdownOpen: false, 
+    searchOpen: false,
+    isMobile: window.innerWidth < 768
+}" x-init="window.addEventListener('resize', () => isMobile = window.innerWidth < 768)">
+
+<nav class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex items-center justify-between h-16">
+
+        <!-- لوگو سمت راست (فقط در دسکتاپ نمایش داده می‌شود) -->
+        <div class="flex items-center gap-2 flex-shrink-0 hidden md:flex">
+            {% if request.endpoint != 'index' %}
+            <a href="{{ index_url }}"
+                class="flex items-center justify-center w-10 h-10 ml-1 rounded-xl bg-gray-100 hover:bg-blue-50 text-gray-600 hover:text-blue-600 transition-all duration-200 group"
+                title="بازگشت به صفحه اصلی">
+                <i class="fas fa-arrow-right text-lg group-hover:-translate-x-0.5 transition-transform"></i>
+            </a>
+            {% endif %}
+            <a href="{{ index_url }}" class="flex items-center gap-3 group">
+                <div class="relative w-10 h-10 rounded-full overflow-hidden shadow-sm border border-gray-200 group-hover:scale-105 transition-transform">
+                    <img src="{{ url_for('static', filename='logo/12.png') }}" alt="سِراج"
+                        class="w-full h-full object-cover" loading="lazy">
+                </div>
+                <div class="leading-tight">
+                    <h1 class="text-xl font-bold text-gray-900 transition-colors">سِراج</h1>
+                    <p class="hidden md:block text-[10px] text-gray-500 font-medium">سامانه فعالیت‌های قرآنی</p>
+                </div>
+            </a>
+        </div>
+
+        <!-- منوی اصلی دسکتاپ -->
+        <div class="desktop-nav-center hidden md:block">
+            <div class="flex items-center bg-gray-100 rounded-full px-1.5 py-1.5 gap-0.5 border border-gray-200">
+                <a href="{{ events_url }}"
+                    class="nav-pill {{ 'bg-white text-blue-700 shadow-sm' if request.endpoint == 'events_list' else 'text-gray-600' }}">رویدادها</a>
+                <a href="{{ circles_url }}"
+                    class="nav-pill {{ 'bg-white text-blue-700 shadow-sm' if request.endpoint == 'circles_list' else 'text-gray-600' }}">حلقه‌ها</a>
+                <a href="{{ competitions_url }}"
+                    class="nav-pill {{ 'bg-white text-blue-700 shadow-sm' if request.endpoint == 'competitions_list' else 'text-gray-600' }}">مسابقات</a>
             </div>
-            <div class="mt-3 flex gap-2">
-                <button onclick="updateApp()"
-                    class="flex-1 bg-white text-blue-600 px-3 py-2 rounded-lg hover:bg-blue-50 transition text-sm">
-                    بروزرسانی
+        </div>
+
+        <!-- بخش راست دسکتاپ (جستجو، کاربر) -->
+        <div class="hidden md:flex items-center gap-2">
+            <div class="relative">
+                <button @click="searchOpen = !searchOpen"
+                    class="p-2.5 text-gray-500 hover:text-blue-600 rounded-full transition-all hover:bg-blue-50"
+                    :class="{ 'bg-blue-50 text-blue-600': searchOpen }">
+                    <i class="fas fa-search text-base"></i>
                 </button>
-                <button onclick="document.getElementById('updateNotification').remove()"
-                    class="flex-1 bg-blue-700 text-white px-3 py-2 rounded-lg hover:bg-blue-800 transition text-sm">
-                    بعداً
+                <div x-show="searchOpen" x-transition @click.away="searchOpen = false"
+                    class="absolute left-0 mt-2 w-64 bg-white rounded-lg shadow-xl border border-gray-200 z-50"
+                    style="display: none;">
+                    <form action="{{ search_url }}" method="GET" class="p-2">
+                        <div class="relative">
+                            <input type="text" name="q" placeholder="جستجو..."
+                                class="w-full py-2 pr-4 pl-10 text-sm bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                            <button type="submit"
+                                class="absolute left-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-blue-600">
+                                <i class="fas fa-search text-sm"></i>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            {% if current_user.is_authenticated %}
+            <a href="{{ seraj_yari_url }}"
+                class="p-2.5 text-gray-500 hover:text-blue-600 rounded-full hover:bg-blue-50" title="سِراج‌یار">
+                <i class="fas fa-robot text-base"></i>
+            </a>
+            <div class="relative">
+                <button @click="userDropdownOpen = !userDropdownOpen"
+                    class="flex items-center gap-2 pl-3 pr-1.5 py-1.5 rounded-full border border-gray-300 hover:border-blue-300 hover:bg-blue-50 bg-white shadow-sm">
+                    <div class="w-7 h-7 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center text-white shadow-sm">
+                        <i class="fas fa-user text-xs"></i>
+                    </div>
+                    <span class="text-sm font-semibold text-gray-700 max-w-[90px] truncate">
+                        {{ current_user.full_name or current_user.username }}
+                    </span>
+                    <i class="fas fa-chevron-down text-[10px] text-gray-500 transition-transform"
+                        :class="{'rotate-180': userDropdownOpen}"></i>
                 </button>
+                <div x-show="userDropdownOpen" x-transition @click.away="userDropdownOpen = false"
+                    class="absolute left-0 mt-2 w-60 bg-white rounded-2xl shadow-xl border border-gray-100 py-2 overflow-hidden z-50"
+                    style="display: none;">
+                    <div class="px-4 py-3 bg-gradient-to-br from-blue-50 to-indigo-50 border-b border-gray-200">
+                        <p class="text-[10px] text-blue-500 font-medium uppercase">خوش آمدید</p>
+                        <p class="text-sm font-bold text-gray-800 truncate">{{ current_user.full_name }}</p>
+                    </div>
+                    <div class="p-2">
+                        {% if current_user.role and current_user.role.value == 'admin' %}
+                        <a href="{{ admin_url }}"
+                            class="flex items-center gap-3 px-3 py-2 text-sm text-gray-600 rounded-xl hover:bg-blue-50 hover:text-blue-700">
+                            <i class="fas fa-tachometer-alt w-5"></i> مدیریت سیستم
+                        </a>
+                        {% else %}
+                        <a href="{{ dashboard_url }}"
+                            class="flex items-center gap-3 px-3 py-2 text-sm text-gray-600 rounded-xl hover:bg-blue-50 hover:text-blue-700">
+                            <i class="fas fa-th-large w-5"></i> داشبورد
+                        </a>
+                        {% endif %}
+                        <a href="{{ profile_url }}"
+                            class="flex items-center gap-3 px-3 py-2 text-sm text-gray-600 rounded-xl hover:bg-blue-50 hover:text-blue-700">
+                            <i class="fas fa-user-circle w-5"></i> ویرایش پروفایل
+                        </a>
+                        <a href="{{ notifications_url }}"
+                            class="flex items-center justify-between px-3 py-2 text-sm text-gray-600 rounded-xl hover:bg-blue-50 hover:text-blue-700">
+                            <div class="flex items-center gap-3"><i class="fas fa-bell w-5"></i> اعلان‌ها</div>
+                            {% set unread_count = current_user.notifications|selectattr('is_read','equalto',False)|list|length %}
+                            {% if unread_count > 0 %}
+                            <span class="bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">{{ unread_count }}</span>
+                            {% endif %}
+                        </a>
+                    </div>
+                    <div class="border-t border-gray-200 mx-3 my-1"></div>
+                    <div class="px-2 pb-1">
+                        <a href="{{ logout_url }}"
+                            class="flex items-center gap-3 px-3 py-2 text-sm text-red-500 rounded-xl hover:bg-red-50">
+                            <i class="fas fa-sign-out-alt w-5"></i> خروج از حساب
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% else %}
+            <div class="flex items-center gap-2">
+               <a href="{{ login_url }}"
+                    class="text-sm font-medium text-gray-600 hover:text-blue-700 px-4 py-2 rounded-full hover:bg-blue-50">ورود</a>
+                <a href="{{ register_choice_url }}" class="register-btn">ثبت‌نام</a>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- ============================================ -->
+        <!-- بخش موبایل - چیدمان: [☰] در چپ | لوگو وسط | [🔔] [🔍] [→] در راست -->
+        <!-- ============================================ -->
+        <div class="mobile-nav md:hidden flex items-center justify-between w-full relative">
+            
+            <!-- سمت چپ: دکمه منو -->
+            <div class="flex items-center">
+                <button @click="mobileMenuOpen = !mobileMenuOpen"
+                    class="p-2 rounded-xl text-gray-600 hover:bg-gray-100 transition-all focus:outline-none mobile-menu-button">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"
+                        class="transition-all duration-200"
+                        :class="mobileMenuOpen ? 'hidden' : 'block'">
+                        <path fill-rule="evenodd" clip-rule="evenodd" d="M3 9C3 8.58579 3.33579 8.25 3.75 8.25H20.25C20.6642 8.25 21 8.58579 21 9C21 9.41421 20.6642 9.75 20.25 9.75H3.75C3.33579 9.75 3 9.41421 3 9ZM3 15.75C3 15.3358 3.33579 15 3.75 15H20.25C20.6642 15 21 15.3358 21 15.75C21 16.1642 20.6642 16.5 20.25 16.5H3.75C3.33579 16.5 3 16.1642 3 15.75Z" fill="currentColor"/>
+                    </svg>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"
+                        class="transition-all duration-200"
+                        :class="mobileMenuOpen ? 'block' : 'hidden'">
+                        <path fill-rule="evenodd" clip-rule="evenodd" d="M5.29289 5.29289C5.68342 4.90237 6.31658 4.90237 6.70711 5.29289L12 10.5858L17.2929 5.29289C17.6834 4.90237 18.3166 4.90237 18.7071 5.29289C19.0976 5.68342 19.0976 6.31658 18.7071 6.70711L13.4142 12L18.7071 17.2929C19.0976 17.6834 19.0976 18.3166 18.7071 18.7071C18.3166 19.0976 17.6834 19.0976 17.2929 18.7071L12 13.4142L6.70711 18.7071C6.31658 19.0976 5.68342 19.0976 5.29289 18.7071C4.90237 18.3166 4.90237 17.6834 5.29289 17.2929L10.5858 12L5.29289 6.70711C4.90237 6.31658 4.90237 5.68342 5.29289 5.29289Z" fill="currentColor"/>
+                    </svg>
+                </button>
+            </div>
+            
+            <!-- لوگو (وسط) -->
+            <div class="absolute left-1/2 transform -translate-x-1/2">
+                <a href="{{ index_url }}" class="flex items-center gap-2">
+                    <div class="relative w-8 h-8 rounded-full overflow-hidden shadow-sm border border-gray-200">
+                        <img src="{{ url_for('static', filename='logo/12.png') }}" alt="سِراج"
+                            class="w-full h-full object-cover" loading="lazy">
+                    </div>
+                    <span class="text-lg font-bold text-gray-900">سِراج</span>
+                </a>
+            </div>
+            
+            <!-- سمت راست: اعلان → جستجو → بازگشت -->
+            <div class="flex items-center gap-1">
+                <!-- دکمه اعلان (فقط در صورت احراز هویت) -->
+                {% if current_user.is_authenticated %}
+                <a href="{{ notifications_url }}"
+                    class="relative p-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-full">
+                    <i class="fas fa-bell text-lg"></i>
+                    {% set unread_count = current_user.notifications|selectattr('is_read','equalto',False)|list|length %}
+                    {% if unread_count > 0 %}
+                    <span class="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border-2 border-white animate-pulse"></span>
+                    {% endif %}
+                </a>
+                {% endif %}
+                
+                <!-- دکمه جستجو -->
+                <button @click="searchOpen = !searchOpen"
+                    class="p-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-full transition-all">
+                    <i class="fas fa-search text-lg"></i>
+                </button>
+                
+                <!-- دکمه بازگشت (آخرین دکمه در سمت راست) -->
+                {% if request.endpoint != 'index' %}
+                <button onclick="goBack()"
+                    class="p-2 rounded-xl text-gray-600 hover:bg-gray-100 transition-all focus:outline-none"
+                    title="بازگشت">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path fill-rule="evenodd" clip-rule="evenodd" d="M15.7071 4.29289C16.0976 4.68342 16.0976 5.31658 15.7071 5.70711L9.41421 12L15.7071 18.2929C16.0976 18.6834 16.0976 19.3166 15.7071 19.7071C15.3166 20.0976 14.6834 20.0976 14.2929 19.7071L7.29289 12.7071C6.90237 12.3166 6.90237 11.6834 7.29289 11.2929L14.2929 4.29289C14.6834 3.90237 15.3166 3.90237 15.7071 4.29289Z" fill="currentColor"/>
+                    </svg>
+                </button>
+                {% endif %}
             </div>
         </div>
     </div>
 
-    <!-- ========== Header ========== -->
-    <header class="sticky top-0 z-50 bg-white border-b border-gray-200 shadow-sm" x-data="{ 
-        mobileMenuOpen: false, 
-        userDropdownOpen: false, 
-        searchOpen: false,
-        isMobile: window.innerWidth < 768
-    }" x-init="window.addEventListener('resize', () => isMobile = window.innerWidth < 768)">
+    <!-- بخش جستجوی موبایل (در صورت باز شدن) -->
+    <div x-show="searchOpen" x-transition class="md:hidden py-3 border-t border-gray-200" style="display: none;">
+        <form action="{{ search_url }}" method="GET" class="relative">
+            <input type="text" name="q" placeholder="جستجو در رویدادها، حلقه‌ها..."
+                class="w-full py-3 pr-12 pl-4 text-sm bg-white border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500">
+            <i class="fas fa-search absolute right-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+            <button type="submit"
+                class="absolute left-2 top-1/2 -translate-y-1/2 bg-blue-600 text-white px-4 py-1.5 rounded-lg text-sm font-medium hover:bg-blue-700">برو</button>
+        </form>
+    </div>
 
-        <nav class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex items-center justify-between h-16">
-
-                <!-- لوگو و دکمه بازگشت -->
-                <div class="flex items-center gap-2 flex-shrink-0">
-                    {% if request.endpoint != 'index' %}
-                    <a href="{{ url_for('index') }}"
-                        class="flex items-center justify-center w-10 h-10 ml-1 rounded-xl bg-gray-100 hover:bg-blue-50 text-gray-600 hover:text-blue-600 transition-all duration-200 group"
-                        title="بازگشت به صفحه اصلی">
-                        <i class="fas fa-arrow-right text-lg group-hover:-translate-x-0.5 transition-transform"></i>
-                    </a>
-                    {% endif %}
-                    <a href="{{ url_for('index') }}" class="flex items-center gap-3 group">
-                        <div
-                            class="relative w-10 h-10 rounded-full overflow-hidden shadow-sm border border-gray-200 group-hover:scale-105 transition-transform">
-                            <img src="{{ url_for('static', filename='logo/12.png') }}" alt="سِراج"
-                                class="w-full h-full object-cover" loading="lazy">
-                        </div>
-                        <div class="leading-tight">
-                            <h1 class="text-xl font-bold text-gray-900 transition-colors">سِراج</h1>
-                            <p class="hidden md:block text-[10px] text-gray-500 font-medium">سامانه فعالیت‌های قرآنی</p>
-                        </div>
-                    </a>
-                </div>
-
-                <!-- منوی وسط (دسکتاپ) -->
-                <div class="desktop-nav-center hidden md:block">
-                    <div
-                        class="flex items-center bg-gray-100 rounded-full px-1.5 py-1.5 gap-0.5 border border-gray-200">
-                        <a href="{{ url_for('events_list') }}"
-                            class="nav-pill {{ 'bg-white text-blue-700 shadow-sm' if request.endpoint == 'events_list' else 'text-gray-600' }}">رویدادها</a>
-                        <a href="{{ url_for('circles_list') }}"
-                            class="nav-pill {{ 'bg-white text-blue-700 shadow-sm' if request.endpoint == 'circles_list' else 'text-gray-600' }}">حلقه‌ها</a>
-                        <a href="{{ url_for('competitions_list') }}"
-                            class="nav-pill {{ 'bg-white text-blue-700 shadow-sm' if request.endpoint == 'competitions_list' else 'text-gray-600' }}">مسابقات</a>
-                    </div>
-                </div>
-
-                <!-- بخش سمت چپ هدر (دسکتاپ) -->
-                <div class="hidden md:flex items-center gap-2">
-                    <div class="relative">
-                        <button @click="searchOpen = !searchOpen"
-                            class="p-2.5 text-gray-500 hover:text-blue-600 rounded-full transition-all hover:bg-blue-50"
-                            :class="{ 'bg-blue-50 text-blue-600': searchOpen }">
-                            <i class="fas fa-search text-base"></i>
-                        </button>
-                        <div x-show="searchOpen" x-transition @click.away="searchOpen = false"
-                            class="absolute left-0 mt-2 w-64 bg-white rounded-lg shadow-xl border border-gray-200 z-50"
-                            style="display: none;">
-                            <form action="{{ url_for('search') }}" method="GET" class="p-2">
-                                <div class="relative">
-                                    <input type="text" name="q" placeholder="جستجو..."
-                                        class="w-full py-2 pr-4 pl-10 text-sm bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
-                                    <button type="submit"
-                                        class="absolute left-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-blue-600">
-                                        <i class="fas fa-search text-sm"></i>
-                                    </button>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-
-                    {% if current_user.is_authenticated %}
-                    <a href="{{ url_for('ai_quran') }}"
-                        class="p-2.5 text-gray-500 hover:text-blue-600 rounded-full hover:bg-blue-50" title="سِراج‌یار">
-                        <i class="fas fa-robot text-base"></i>
-                    </a>
-                    <div class="relative">
-                        <button @click="userDropdownOpen = !userDropdownOpen"
-                            class="flex items-center gap-2 pl-3 pr-1.5 py-1.5 rounded-full border border-gray-300 hover:border-blue-300 hover:bg-blue-50 bg-white shadow-sm">
-                            <div
-                                class="w-7 h-7 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center text-white shadow-sm">
-                                <i class="fas fa-user text-xs"></i>
-                            </div>
-                            <span class="text-sm font-semibold text-gray-700 max-w-[90px] truncate">
-                                {{ current_user.full_name or current_user.username }}
-                            </span>
-                            <i class="fas fa-chevron-down text-[10px] text-gray-500 transition-transform"
-                                :class="{'rotate-180': userDropdownOpen}"></i>
-                        </button>
-                        <div x-show="userDropdownOpen" x-transition @click.away="userDropdownOpen = false"
-                            class="absolute left-0 mt-2 w-60 bg-white rounded-2xl shadow-xl border border-gray-100 py-2 overflow-hidden z-50"
-                            style="display: none;">
-                            <div class="px-4 py-3 bg-gradient-to-br from-blue-50 to-indigo-50 border-b border-gray-200">
-                                <p class="text-[10px] text-blue-500 font-medium uppercase">خوش آمدید</p>
-                                <p class="text-sm font-bold text-gray-800 truncate">{{ current_user.full_name }}</p>
-                            </div>
-                            <div class="p-2">
-                                {% if current_user.role and current_user.role.value == 'admin' %}
-                                <a href="{{ url_for('admin_dashboard') }}"
-                                    class="flex items-center gap-3 px-3 py-2 text-sm text-gray-600 rounded-xl hover:bg-blue-50 hover:text-blue-700">
-                                    <i class="fas fa-tachometer-alt w-5"></i> مدیریت سیستم
-                                </a>
-                                {% else %}
-                                <a href="{{ url_for('dashboard') }}"
-                                    class="flex items-center gap-3 px-3 py-2 text-sm text-gray-600 rounded-xl hover:bg-blue-50 hover:text-blue-700">
-                                    <i class="fas fa-th-large w-5"></i> داشبورد
-                                </a>
-                                {% endif %}
-                                <a href="{{ url_for('profile') }}"
-                                    class="flex items-center gap-3 px-3 py-2 text-sm text-gray-600 rounded-xl hover:bg-blue-50 hover:text-blue-700">
-                                    <i class="fas fa-user-circle w-5"></i> ویرایش پروفایل
-                                </a>
-                                <a href="{{ url_for('notifications') }}"
-                                    class="flex items-center justify-between px-3 py-2 text-sm text-gray-600 rounded-xl hover:bg-blue-50 hover:text-blue-700">
-                                    <div class="flex items-center gap-3"><i class="fas fa-bell w-5"></i> اعلان‌ها</div>
-                                    {% set unread_count =
-                                    current_user.notifications|selectattr('is_read','equalto',False)|list|length %}
-                                    {% if unread_count > 0 %}
-                                    <span
-                                        class="bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">{{
-                                        unread_count }}</span>
-                                    {% endif %}
-                                </a>
-                            </div>
-                            <div class="border-t border-gray-200 mx-3 my-1"></div>
-                            <div class="px-2 pb-1">
-                                <a href="{{ url_for('logout') }}"
-                                    class="flex items-center gap-3 px-3 py-2 text-sm text-red-500 rounded-xl hover:bg-red-50">
-                                    <i class="fas fa-sign-out-alt w-5"></i> خروج از حساب
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                    {% else %}
-                    <div class="flex items-center gap-2">
-                        <a href="{{ url_for('login') }}"
-                            class="text-sm font-medium text-gray-600 hover:text-blue-700 px-4 py-2 rounded-full hover:bg-blue-50">ورود</a>
-                        <a href="{{ register_choice_url }}" class="register-btn">ثبت‌نام</a>
-                    </div>
-                    {% endif %}
-                </div>
-
-                <!-- بخش موبایل -->
-                <div class="mobile-nav md:hidden">
-                    <button @click="searchOpen = !searchOpen"
-                        class="p-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-full transition-all">
-                        <i class="fas fa-search text-lg"></i>
-                    </button>
-                    {% if current_user.is_authenticated %}
-                    <a href="{{ url_for('notifications') }}"
-                        class="relative p-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-full">
-                        <i class="fas fa-bell text-lg"></i>
-                        {% set unread_count =
-                        current_user.notifications|selectattr('is_read','equalto',False)|list|length %}
-                        {% if unread_count > 0 %}
-                        <span
-                            class="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border-2 border-white animate-pulse"></span>
-                        {% endif %}
-                    </a>
-                    {% endif %}
-                    <button @click="mobileMenuOpen = !mobileMenuOpen"
-                        class="p-2 rounded-xl text-gray-600 hover:bg-gray-100 transition-all focus:outline-none mobile-menu-button">
-                        <i class="fas text-lg transition-all" :class="mobileMenuOpen ? 'fa-times' : 'fa-bars'"></i>
-                    </button>
-                </div>
+    <!-- منوی موبایل (در صورت باز شدن) -->
+    <div x-show="mobileMenuOpen" x-transition class="md:hidden mobile-menu-dropdown" style="display: none;">
+        <div class="py-2">
+            <a href="{{ index_url }}"
+                class="mobile-menu-item flex items-center gap-3 {{ 'bg-blue-50 text-blue-700' if request.endpoint == 'index' else 'text-gray-600' }}">
+                <i class="fas fa-home w-5"></i> خانه
+            </a>
+            <a href="{{ events_url }}"
+                class="mobile-menu-item flex items-center gap-3 {{ 'bg-blue-50 text-blue-700' if request.endpoint == 'events_list' else 'text-gray-600' }}">
+                <i class="fas fa-calendar-alt w-5"></i> رویدادها
+            </a>
+            <a href="{{ circles_url }}"
+                class="mobile-menu-item flex items-center gap-3 {{ 'bg-blue-50 text-blue-700' if request.endpoint == 'circles_list' else 'text-gray-600' }}">
+                <i class="fas fa-users w-5"></i> حلقه‌های تلاوت
+            </a>
+            <a href="{{ competitions_url }}"
+                class="mobile-menu-item flex items-center gap-3 {{ 'bg-blue-50 text-blue-700' if request.endpoint == 'competitions_list' else 'text-gray-600' }}">
+                <i class="fas fa-trophy w-5"></i> مسابقات
+            </a>
+            
+            {% if current_user.is_authenticated %}
+            <div class="border-t border-gray-200 my-2"></div>
+            <a href="{{ dashboard_url }}" class="mobile-menu-item flex items-center gap-3 text-gray-600">
+                <i class="fas fa-th-large w-5"></i> داشبورد
+            </a>
+            <a href="{{ seraj_yari_url }}" class="mobile-menu-item flex items-center gap-3 text-gray-600">
+                <i class="fas fa-robot w-5"></i> سِراج‌یار
+            </a>
+            <a href="{{ profile_url }}" class="mobile-menu-item flex items-center gap-3 text-gray-600">
+                <i class="fas fa-user-circle w-5"></i> ویرایش پروفایل
+            </a>
+            <a href="{{ notifications_url }}" class="mobile-menu-item flex items-center gap-3 text-gray-600">
+                <i class="fas fa-bell w-5"></i> اعلان‌ها
+                {% set unread_count = current_user.notifications|selectattr('is_read','equalto',False)|list|length %}
+                {% if unread_count > 0 %}
+                <span class="bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full mr-auto">{{ unread_count }}</span>
+                {% endif %}
+            </a>
+            <div class="border-t border-gray-200 my-2"></div>
+            <a href="{{ logout_url }}" class="mobile-menu-item flex items-center gap-3 text-red-600 font-medium">
+                <i class="fas fa-sign-out-alt w-5"></i> خروج از حساب کاربری
+            </a>
+            {% else %}
+            <div class="grid grid-cols-2 gap-3 p-4 mt-2">
+                <a href="{{ login_url }}"
+                    class="text-center py-3 rounded-xl border border-gray-300 text-gray-700 font-medium hover:bg-gray-100">ورود</a>
+                <a href="{{ register_choice_url }}"
+                    class="text-center py-3 rounded-xl bg-gradient-to-l from-blue-600 to-blue-500 text-white font-bold hover:from-blue-700 hover:to-blue-600">ثبت‌نام</a>
             </div>
+            {% endif %}
+        </div>
+    </div>
+</nav>
+</header>
 
-            <!-- باکس جستجوی موبایل -->
-            <div x-show="searchOpen" x-transition class="md:hidden py-3 border-t border-gray-200"
-                style="display: none;">
-                <form action="{{ url_for('search') }}" method="GET" class="relative">
-                    <input type="text" name="q" placeholder="جستجو در رویدادها، حلقه‌ها..."
-                        class="w-full py-3 pr-12 pl-4 text-sm bg-white border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500">
-                    <i class="fas fa-search absolute right-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
-                    <button type="submit"
-                        class="absolute left-2 top-1/2 -translate-y-1/2 bg-blue-600 text-white px-4 py-1.5 rounded-lg text-sm font-medium hover:bg-blue-700">برو</button>
-                </form>
-            </div>
-
-            <!-- منوی موبایل (کشویی) -->
-            <div x-show="mobileMenuOpen" x-transition class="md:hidden mobile-menu-dropdown" style="display: none;">
-                <div class="py-2">
-                    <a href="{{ url_for('index') }}"
-                        class="mobile-menu-item flex items-center gap-3 {{ 'bg-blue-50 text-blue-700' if request.endpoint == 'index' else 'text-gray-600' }}">
-                        <i class="fas fa-home w-5"></i> خانه
-                    </a>
-                    <a href="{{ url_for('events_list') }}"
-                        class="mobile-menu-item flex items-center gap-3 {{ 'bg-blue-50 text-blue-700' if request.endpoint == 'events_list' else 'text-gray-600' }}">
-                        <i class="fas fa-calendar-alt w-5"></i> رویدادها
-                    </a>
-                    <a href="{{ url_for('circles_list') }}"
-                        class="mobile-menu-item flex items-center gap-3 {{ 'bg-blue-50 text-blue-700' if request.endpoint == 'circles_list' else 'text-gray-600' }}">
-                        <i class="fas fa-users w-5"></i> حلقه‌های تلاوت
-                    </a>
-                    <a href="{{ url_for('competitions_list') }}"
-                        class="mobile-menu-item flex items-center gap-3 {{ 'bg-blue-50 text-blue-700' if request.endpoint == 'competitions_list' else 'text-gray-600' }}">
-                        <i class="fas fa-trophy w-5"></i> مسابقات
-                    </a>
-                    {% if current_user.is_authenticated %}
-                    <div class="border-t border-gray-200 my-2"></div>
-                    <a href="{{ url_for('dashboard') }}" class="mobile-menu-item flex items-center gap-3 text-gray-600">
-                        <i class="fas fa-th-large w-5"></i> داشبورد
-                    </a>
-                    <a href="{{ url_for('ai_quran') }}" class="mobile-menu-item flex items-center gap-3 text-gray-600">
-                        <i class="fas fa-robot w-5"></i> سِراج‌یار
-                    </a>
-                    <a href="{{ url_for('profile') }}" class="mobile-menu-item flex items-center gap-3 text-gray-600">
-                        <i class="fas fa-user-circle w-5"></i> پروفایل من
-                    </a>
-                    <div class="border-t border-gray-200 my-2"></div>
-                    <a href="{{ url_for('logout') }}" class="mobile-menu-item flex items-center gap-3 text-red-500">
-                        <i class="fas fa-sign-out-alt w-5"></i> خروج
-                    </a>
-                    {% else %}
-                    <div class="grid grid-cols-2 gap-3 p-4">
-                        <a href="{{ url_for('login') }}"
-                            class="text-center py-3 rounded-xl border border-gray-300 text-gray-700 font-medium hover:bg-gray-100">ورود</a>
-                        <a href="{{ register_choice_url }}"
-                            class="text-center py-3 rounded-xl bg-gradient-to-l from-blue-600 to-blue-500 text-white font-bold hover:from-blue-700 hover:to-blue-600">ثبت‌نام</a>
-                    </div>
-                    {% endif %}
-                </div>
-            </div>
-        </nav>
-    </header>
+<!-- تابع goBack برای بازگشت -->
+<script>
+function goBack() {
+    if (document.referrer && document.referrer !== '') {
+        history.back();
+    } else {
+        window.location.href = "{{ url_for('index') }}";
+    }
+}
+</script>
 
     <!-- Flash Messages -->
     {% with messages = get_flashed_messages(with_categories=true) %}
@@ -831,68 +1417,473 @@
     </main>
 
     <!-- ========== Bottom Navigation (موبایل) ========== -->
-    <div class="bottom-nav">
+    <nav class="bottom-nav">
         {% if current_user.is_authenticated %}
-        <!-- لینک‌های کاربر وارد شده -->
-        <a href="{{ url_for('index') }}" class="bottom-nav-item {% if request.endpoint == 'index' %}active{% endif %}">
+        <a href="{{ index_url }}" class="bottom-nav-item {% if request.endpoint == 'index' %}active{% endif %}">
             <i class="fas fa-home"></i>
             <span>خانه</span>
         </a>
-        <a href="{{ url_for('competitions_list') }}"
-            class="bottom-nav-item {% if request.endpoint == 'competitions_list' %}active{% endif %}">
+        <a href="{{ competitions_url }}" class="bottom-nav-item {% if request.endpoint == 'competitions_list' %}active{% endif %}">
             <i class="fas fa-trophy"></i>
             <span>مسابقات</span>
         </a>
-        <a href="{{ url_for('ai_quran') }}"
-            class="bottom-nav-item {% if request.endpoint == 'ai_quran' %}active{% endif %}">
-            <i class="fas fa-robot"></i>
-            <span>سراج یار</span>
-        </a>
-        <a href="{{ url_for('events_list') }}"
-            class="bottom-nav-item {% if request.endpoint == 'events_list' %}active{% endif %}">
+<a href="{{ seraj_yari_url }}" class="bottom-nav-item {% if request.endpoint == 'seraj_yari' %}active{% endif %}" style="transform: scale(1.15); display: inline-flex; font-size: 1.1rem;">
+    <i class="fas fa-robot" style="font-size: 1.5rem;"></i>
+    <span>سِراج‌یار</span>
+</a>
+        <a href="{{ events_url }}" class="bottom-nav-item {% if request.endpoint == 'events_list' %}active{% endif %}">
             <i class="fas fa-calendar-alt"></i>
             <span>رویدادها</span>
         </a>
-        <a href="{{ url_for('dashboard') }}"
-            class="bottom-nav-item {% if request.endpoint == 'dashboard' %}active{% endif %}">
-            <i class="fas fa-tachometer-alt"></i>
+        <a href="{{ dashboard_url }}" class="bottom-nav-item {% if request.endpoint == 'dashboard' %}active{% endif %}">
+            <i class="fas fa-chart-line"></i>
             <span>داشبورد</span>
         </a>
         {% else %}
-        <a href="{{ url_for('index') }}" class="bottom-nav-item {% if request.endpoint == 'index' %}active{% endif %}">
+        <a href="{{ index_url }}" class="bottom-nav-item {% if request.endpoint == 'index' %}active{% endif %}">
             <i class="fas fa-home"></i>
             <span>خانه</span>
         </a>
-        <a href="{{ url_for('competitions_list') }}"
-            class="bottom-nav-item {% if request.endpoint == 'competitions_list' %}active{% endif %}">
+        <a href="{{ competitions_url }}" class="bottom-nav-item {% if request.endpoint == 'competitions_list' %}active{% endif %}">
             <i class="fas fa-trophy"></i>
             <span>مسابقات</span>
         </a>
-        <a href="{{ url_for('index') }}" class="bottom-nav-item {% if request.endpoint == 'index' %}active{% endif %}">
-            <img src="{{ url_for('static', filename='logo/12.png') }}" alt="لوگو" style="width: 24px; height: 24px;">
+        <div class="bottom-nav-item logo-item">
+            <div class="logo-wrapper">
+                <img src="{{ url_for('static', filename='logo/12.png') }}" alt="سِراج" class="nav-logo">
+            </div>
             <span>سِراج</span>
-        </a>
-        <a href="{{ url_for('events_list') }}"
-            class="bottom-nav-item {% if request.endpoint == 'events_list' %}active{% endif %}">
+        </div>
+        <a href="{{ events_url }}" class="bottom-nav-item {% if request.endpoint == 'events_list' %}active{% endif %}">
             <i class="fas fa-calendar-alt"></i>
             <span>رویدادها</span>
         </a>
-        <a href="{{ register_choice_url }}"
-            class="bottom-nav-item {% if request.endpoint == 'register_choice' %}active{% endif %}">
+        <a href="{{ register_choice_url }}" class="bottom-nav-item {% if request.endpoint == 'register_choice' %}active{% endif %}">
             <i class="fas fa-user-plus"></i>
             <span>ثبت‌نام</span>
         </a>
         {% endif %}
+    </nav>
+    <!-- ============================================ -->
+    <!-- پنل پشتیبانی شناور - فقط برای کاربران عادی -->
+    <!-- ============================================ -->
+    
+    {% if current_user.is_authenticated %}
+        {% if current_user.role.value != 'admin' and request.endpoint != 'seraj_yari' %}
+            {% set show_support = true %}
+        {% else %}
+            {% set show_support = false %}
+        {% endif %}
+    {% else %}
+        {% set show_support = false %}
+    {% endif %}
+
+    {% if show_support %}
+    <style>
+        .support-fab-simple {
+            position: fixed;
+            bottom: 25px;
+            left: 20px;
+            width: 56px;
+            height: 56px;
+            background: #2563eb;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 9999;
+            border: none;
+            color: white;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+        }
+        .support-fab-simple:hover {
+            transform: scale(1.1);
+            background: #1d4ed8;
+        }
+        .support-fab-simple i {
+            font-size: 24px;
+        }
+        .support-badge-simple {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: #ef4444;
+            color: white;
+            font-size: 10px;
+            font-weight: bold;
+            min-width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 4px;
+            border: 2px solid white;
+        }
+        .support-panel-simple {
+            position: fixed;
+            bottom: 95px;
+            left: 20px;
+            width: 350px;
+            max-width: calc(100vw - 40px);
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+            z-index: 9998;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+        .support-panel-simple.hidden {
+            display: none;
+        }
+        .support-panel-header-simple {
+            background: #2563eb;
+            padding: 15px 20px;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .support-panel-header-simple h3 {
+            margin: 0;
+            font-size: 16px;
+        }
+        .support-panel-header-simple button {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .support-tabs-simple {
+            display: flex;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        .support-tab-simple {
+            flex: 1;
+            text-align: center;
+            padding: 12px;
+            cursor: pointer;
+            background: #f9fafb;
+            transition: all 0.2s;
+        }
+        .support-tab-simple.active {
+            background: white;
+            color: #2563eb;
+            border-bottom: 2px solid #2563eb;
+        }
+        .support-content-simple {
+            max-height: 450px;
+            overflow-y: auto;
+            padding: 15px;
+        }
+        .ticket-list-simple {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .ticket-item-simple {
+            background: #f3f4f6;
+            border-radius: 12px;
+            padding: 12px;
+            cursor: pointer;
+            border: 1px solid #e5e7eb;
+        }
+        .ticket-item-simple:hover {
+            background: #e0e7ff;
+        }
+        .form-group-simple {
+            margin-bottom: 15px;
+        }
+        .form-group-simple label {
+            display: block;
+            font-size: 13px;
+            margin-bottom: 5px;
+            color: #374151;
+        }
+        .form-group-simple input,
+        .form-group-simple select,
+        .form-group-simple textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 13px;
+        }
+        .btn-submit-simple {
+            width: 100%;
+            background: #2563eb;
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .btn-submit-simple:hover {
+            background: #1d4ed8;
+        }
+        @media (max-width: 640px) {
+            .support-fab-simple { bottom: 70px; width: 48px; height: 48px; }
+            .support-fab-simple i { font-size: 20px; }
+            .support-panel-simple { bottom: 130px; left: 15px; right: 15px; width: auto; }
+        }
+    </style>
+
+    <!-- دکمه شناور پشتیبانی ساده -->
+    <button class="support-fab-simple" id="supportFabSimple">
+        <i class="fas fa-headset"></i>
+        <span class="support-badge-simple" id="supportBadgeSimple" style="display: none;">0</span>
+    </button>
+
+    <!-- پنل پشتیبانی ساده -->
+    <div class="support-panel-simple hidden" id="supportPanelSimple">
+        <div class="support-panel-header-simple">
+            <h3 style="color: white; display: flex; align-items: center; gap: 8px;">
+    <i class="fas fa-headset" style="color: white;"></i>
+    پشتیبانی سِراج
+</h3>
+            <button id="closeSupportSimple">✕</button>
+        </div>
+        <div class="support-tabs-simple">
+            <div class="support-tab-simple active" data-tab="tickets"> تیکت‌ها</div>
+            <div class="support-tab-simple" data-tab="new">➕ تیکت جدید</div>
+        </div>
+        <div class="support-content-simple">
+            <div id="ticketsListSimple">
+                <div style="text-align:center;padding:20px;">
+                    <div style="width:20px;height:20px;border:2px solid #e5e7eb;border-top-color:#2563eb;border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto;"></div>
+                    <p style="font-size:12px;margin-top:10px;">در حال بارگذاری...</p>
+                </div>
+            </div>
+            <div id="newTicketSimple" style="display:none;">
+                <form id="ticketFormSimple">
+                    <div class="form-group-simple">
+                        <label>عنوان تیکت *</label>
+                        <input type="text" id="ticketSubjectSimple" required>
+                    </div>
+                    <div class="form-group-simple">
+                        <label>دسته‌بندی</label>
+                        <select id="ticketCategorySimple">
+                            <option value="general">عمومی</option>
+                            <option value="technical">مشکل فنی</option>
+                            <option value="account">مشکل حساب کاربری</option>
+                            <option value="event">مشکل رویدادها</option>
+                        </select>
+                    </div>
+                    <div class="form-group-simple">
+                        <label>اولویت</label>
+                        <select id="ticketPrioritySimple">
+                            <option value="low">کم</option>
+                            <option value="medium" selected>متوسط</option>
+                            <option value="high">بالا</option>
+                        </select>
+                    </div>
+                    <div class="form-group-simple">
+                        <label>توضیحات *</label>
+                        <textarea id="ticketMessageSimple" rows="4" required></textarea>
+                    </div>
+                    <button type="submit" class="btn-submit-simple">ارسال تیکت</button>
+                </form>
+            </div>
+        </div>
     </div>
 
+    
 
+    <script>
+    (function() {
+        // المنت‌ها
+        var fab = document.getElementById('supportFabSimple');
+        var panel = document.getElementById('supportPanelSimple');
+        var closeBtn = document.getElementById('closeSupportSimple');
+        var tabs = document.querySelectorAll('.support-tab-simple');
+        var ticketsDiv = document.getElementById('ticketsListSimple');
+        var newDiv = document.getElementById('newTicketSimple');
+        var ticketForm = document.getElementById('ticketFormSimple');
+        var isLoggedIn = document.body.getAttribute('data-user-logged-in') === 'true';
+        var badge = document.getElementById('supportBadgeSimple');
+        
+        if (!fab || !panel) {
+            console.error('پنل پشتیبانی یافت نشد');
+            return;
+        }
+        
+        // باز کردن پنل
+        fab.onclick = function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            panel.classList.toggle('hidden');
+            if (!panel.classList.contains('hidden')) {
+                loadTickets();
+                if (badge) badge.style.display = 'none';
+            }
+        };
+        
+        // بستن پنل
+        if (closeBtn) {
+            closeBtn.onclick = function() {
+                panel.classList.add('hidden');
+            };
+        }
+        
+        // تب‌ها
+        for (var i = 0; i < tabs.length; i++) {
+            tabs[i].onclick = function() {
+                var tabName = this.getAttribute('data-tab');
+                for (var j = 0; j < tabs.length; j++) {
+                    tabs[j].classList.remove('active');
+                }
+                this.classList.add('active');
+                
+                if (tabName === 'tickets') {
+                    ticketsDiv.style.display = 'block';
+                    newDiv.style.display = 'none';
+                    loadTickets();
+                } else {
+                    ticketsDiv.style.display = 'none';
+                    newDiv.style.display = 'block';
+                }
+            };
+        }
+        
+        // بستن با کلیک خارج
+        document.onclick = function(e) {
+            if (!panel.classList.contains('hidden') && 
+                !panel.contains(e.target) && 
+                !fab.contains(e.target)) {
+                panel.classList.add('hidden');
+            }
+        };
+        
+        // بارگذاری تیکت‌ها
+        async function loadTickets() {
+            if (!isLoggedIn) {
+                ticketsDiv.innerHTML = '<div style="text-align:center;padding:20px;">برای مشاهده تیکت‌ها <a href="/login" style="color:#2563eb;">وارد شوید</a></div>';
+                return;
+            }
+            
+            ticketsDiv.innerHTML = '<div style="text-align:center;padding:20px;">⏳ در حال بارگذاری...</div>';
+            
+            try {
+                var res = await fetch('/api/support/my-tickets');
+                var data = await res.json();
+                
+                if (data.success && data.tickets && data.tickets.length > 0) {
+                    var html = '<div class="ticket-list-simple">';
+                    for (var i = 0; i < data.tickets.length; i++) {
+                        var t = data.tickets[i];
+                        var statusText = t.status === 'open' ? 'باز' : (t.status === 'in_progress' ? 'در حال بررسی' : 'بسته');
+                        html += '<div class="ticket-item-simple" onclick="window.location.href=\'/support/ticket/' + t.id + '\'">';
+                        html += '<div style="font-weight:bold;font-size:14px;">#' + t.id + ' - ' + escapeHtmlSimple(t.subject.substring(0, 40)) + '</div>';
+                        html += '<div style="font-size:11px;color:#6b7280;margin-top:5px;">' + (t.created_at || '') + ' - ' + statusText + '</div>';
+                        html += '</div>';
+                    }
+                    html += '</div>';
+                    ticketsDiv.innerHTML = html;
+                } else {
+                    ticketsDiv.innerHTML = '<div style="text-align:center;padding:20px;">📭 تیکتی وجود ندارد<br><button onclick="document.querySelector(\'.support-tab-simple[data-tab=\\\'new\\\']\').click()" style="margin-top:10px;background:#f3f4f6;border:none;padding:8px 16px;border-radius:8px;cursor:pointer;">➕ تیکت جدید</button></div>';
+                }
+            } catch(e) {
+                ticketsDiv.innerHTML = '<div style="text-align:center;padding:20px;color:red;">❌ خطا در بارگذاری</div>';
+            }
+        }
+        
+        function escapeHtmlSimple(text) {
+            if (!text) return '';
+            var div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+        
+        // ارسال تیکت جدید
+        if (ticketForm) {
+            ticketForm.onsubmit = async function(e) {
+                e.preventDefault();
+                
+                if (!isLoggedIn) {
+                    alert('لطفاً وارد شوید');
+                    window.location.href = '/login';
+                    return;
+                }
+                
+                var subject = document.getElementById('ticketSubjectSimple').value.trim();
+                var message = document.getElementById('ticketMessageSimple').value.trim();
+                var category = document.getElementById('ticketCategorySimple').value;
+                var priority = document.getElementById('ticketPrioritySimple').value;
+                
+                if (!subject || !message) {
+                    alert('لطفاً عنوان و متن تیکت را وارد کنید');
+                    return;
+                }
+                
+                var btn = ticketForm.querySelector('button[type="submit"]');
+                var originalText = btn.innerHTML;
+                btn.innerHTML = '⏳ در حال ارسال...';
+                btn.disabled = true;
+                
+                try {
+                    var res = await fetch('/api/support/create-ticket', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ subject: subject, message: message, category: category, priority: priority })
+                    });
+                    var data = await res.json();
+                    
+                    if (data.success) {
+                        alert('✅ تیکت با موفقیت ثبت شد');
+                        document.getElementById('ticketSubjectSimple').value = '';
+                        document.getElementById('ticketMessageSimple').value = '';
+                        document.querySelector('.support-tab-simple[data-tab="tickets"]').click();
+                    } else {
+                        alert('❌ خطا: ' + (data.error || 'مشکلی پیش آمد'));
+                    }
+                } catch(e) {
+                    alert('❌ خطا در ارسال تیکت');
+                } finally {
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                }
+            };
+        }
+        
+        // بارگذاری تعداد پیام‌های خوانده نشده
+        async function loadUnreadCount() {
+            if (!isLoggedIn) return;
+            try {
+                var res = await fetch('/api/support/unread-count');
+                var data = await res.json();
+                if (badge && data.count && data.count > 0) {
+                    badge.style.display = 'flex';
+                    badge.textContent = data.count > 9 ? '9+' : data.count;
+                } else if (badge) {
+                    badge.style.display = 'none';
+                }
+            } catch(e) {}
+        }
+        
+        if (isLoggedIn) {
+            loadUnreadCount();
+            setInterval(loadUnreadCount, 30000);
+        }
+    })();
+    </script>
+    {% endif %}
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-messaging-compat.js"></script>
 
     <script>
-        // تنظیمات Firebase
-        const firebaseConfig = {
+        // ============================================
+        // تنظیمات اولیه و متغیرهای سراسری
+        // ============================================
+        
+        var firebaseConfig = {
             apiKey: "AIzaSyCu9ruK0nzFXl7cj2U81pu2Ku-SiCk9iOw",
             authDomain: "seraj-app.firebaseapp.com",
             projectId: "seraj-app",
@@ -901,11 +1892,12 @@
             appId: "1:651768016947:web:68632e505ad4c1c7bd3346",
             measurementId: "G-KN3B5SW162"
         };
+        
         firebase.initializeApp(firebaseConfig);
-        const messaging = firebase.messaging();
+        var messaging = firebase.messaging();
 
         messaging.getToken({ vapidKey: "BISxnpPZtEVallaB4HF2VQHeuT3dz_YvL8KNnsghIyr50fuV5-dJffIvppl-8oPZOqipUPczPctFiNvuY8HTHKQ" })
-            .then((currentToken) => {
+            .then(function(currentToken) {
                 if (currentToken) {
                     console.log("FCM Token:", currentToken);
                     fetch("/save-token", {
@@ -916,19 +1908,23 @@
                 } else {
                     console.log('Permission denied or token not available.');
                 }
-            }).catch((err) => {
+            }).catch(function(err) {
                 console.error('Error getting token:', err);
             });
 
-        let deferredPrompt;
-        let isOnline = navigator.onLine;
-        const configElement = document.getElementById('app-config');
-        const SERAJ_CONFIG = {
+        var deferredPrompt;
+        var isOnline = navigator.onLine;
+        var configElement = document.getElementById('app-config');
+        var SERAJ_CONFIG = {
             indexUrl: configElement?.dataset.indexUrl || '/',
             installPwaUrl: configElement?.dataset.installUrl || '#',
             registerUrl: configElement?.dataset.registerUrl || '/auth/register'
         };
 
+        // ============================================
+        // توابع کمکی عمومی
+        // ============================================
+        
         function goBack() {
             if (document.referrer && document.referrer !== '') {
                 history.back();
@@ -939,7 +1935,7 @@
 
         function updateOnlineStatus() {
             isOnline = navigator.onLine;
-            const offlineNotification = document.getElementById('offlineNotification');
+            var offlineNotification = document.getElementById('offlineNotification');
             if (isOnline) {
                 document.body.classList.remove('offline');
                 if (offlineNotification) offlineNotification.classList.add('hidden');
@@ -950,13 +1946,13 @@
         }
 
         function showUpdateNotification() {
-            const updateNotif = document.getElementById('updateNotification');
+            var updateNotif = document.getElementById('updateNotification');
             if (updateNotif) updateNotif.classList.remove('hidden');
         }
 
-        window.updateApp = function () {
+        window.updateApp = function() {
             if ('serviceWorker' in navigator) {
-                navigator.serviceWorker.ready.then(registration => {
+                navigator.serviceWorker.ready.then(function(registration) {
                     if (registration.waiting) {
                         registration.waiting.postMessage('skipWaiting');
                     }
@@ -965,8 +1961,8 @@
             window.location.reload();
         };
 
-        window.dismissPwaPrompt = function () {
-            const prompt = document.getElementById('pwaInstallPrompt');
+        window.dismissPwaPrompt = function() {
+            var prompt = document.getElementById('pwaInstallPrompt');
             if (prompt) {
                 prompt.remove();
                 localStorage.setItem('pwa-install-dismissed', 'true');
@@ -974,109 +1970,358 @@
         };
 
         function initBackToTop() {
-            const backToTopBtn = document.getElementById('backToTop');
+            var backToTopBtn = document.getElementById('backToTop');
             if (!backToTopBtn) return;
-            window.addEventListener('scroll', () => {
+            window.addEventListener('scroll', function() {
                 if (window.scrollY > 300) {
                     backToTopBtn.classList.add('show');
                 } else {
                     backToTopBtn.classList.remove('show');
                 }
             });
-            backToTopBtn.addEventListener('click', () => {
+            backToTopBtn.addEventListener('click', function() {
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             });
         }
 
-        function saveQuranProgress(surah, ayah) {
-            const progress = { surah: surah, ayah: ayah, lastRead: new Date().toISOString() };
-            localStorage.setItem('quranProgress', JSON.stringify(progress));
-        }
-
-        function getLastQuranProgress() {
-            const saved = localStorage.getItem('quranProgress');
-            if (saved) {
-                try { return JSON.parse(saved); } catch (e) { return null; }
+        // ============================================
+        // اسکریپت پنل پشتیبانی
+        // ============================================
+        
+        (function() {
+            var supportFab = document.getElementById('supportFabBtn');
+            var supportPanel = document.getElementById('supportPanel');
+            
+            if (!supportFab || !supportPanel) {
+                return;
             }
-            return null;
-        }
+            
+            var closePanelBtn = document.getElementById('closeSupportPanel');
+            var tabs = document.querySelectorAll('.support-tab');
+            var ticketsTab = document.getElementById('ticketsTab');
+            var newTicketTab = document.getElementById('newTicketTab');
+            var quickTicketForm = document.getElementById('quickTicketForm');
+            var isLoggedIn = document.body.dataset.userLoggedIn === 'true';
+            var supportBadge = document.getElementById('supportUnreadBadge');
+            var lastVisitTimestamp = localStorage.getItem('support_last_visit') || 0;
 
-        function updateQuranProgressDisplay() {
-            const isLoggedIn = document.body.dataset.userLoggedIn === 'true';
-            if (!isLoggedIn) return;
-            const progress = getLastQuranProgress();
-            if (progress && progress.surah) {
-                console.log('آخرین مطالعه:', progress);
+            if (supportBadge) {
+                supportBadge.style.display = 'none';
             }
-        }
 
-        document.addEventListener('DOMContentLoaded', function () {
-            setTimeout(() => {
-                const alerts = document.querySelectorAll('.alert');
-                alerts.forEach(alert => {
+            function toggleSupportPanel() {
+                supportPanel.classList.toggle('hidden');
+                if (!supportPanel.classList.contains('hidden')) {
+                    localStorage.setItem('support_last_visit', Date.now().toString());
+                    loadUserTickets();
+                    if (supportBadge) {
+                        supportBadge.style.display = 'none';
+                        supportBadge.textContent = '0';
+                    }
+                }
+            }
+
+            supportFab.addEventListener('click', function(e) {
+                e.stopPropagation();
+                toggleSupportPanel();
+            });
+            
+            if (closePanelBtn) {
+                closePanelBtn.addEventListener('click', function() {
+                    supportPanel.classList.add('hidden');
+                });
+            }
+
+            if (tabs && tabs.length) {
+                for (var i = 0; i < tabs.length; i++) {
+                    var tab = tabs[i];
+                    tab.addEventListener('click', function() {
+                        for (var j = 0; j < tabs.length; j++) {
+                            tabs[j].classList.remove('active');
+                        }
+                        this.classList.add('active');
+                        var tabName = this.dataset.tab;
+                        if (tabName === 'tickets') {
+                            if (ticketsTab) ticketsTab.style.display = 'block';
+                            if (newTicketTab) newTicketTab.style.display = 'none';
+                            loadUserTickets();
+                        } else {
+                            if (ticketsTab) ticketsTab.style.display = 'none';
+                            if (newTicketTab) newTicketTab.style.display = 'block';
+                        }
+                    });
+                }
+            }
+
+            async function loadUserTickets() {
+                if (!ticketsTab) return;
+                
+                if (!isLoggedIn) {
+                    ticketsTab.innerHTML = `
+                        <div class="empty-state">
+                            <i class="fas fa-lock"></i>
+                            <p class="text-sm">برای مشاهده تیکت‌ها وارد شوید</p>
+                            <button onclick="window.location.href='/login'" class="text-blue-600 text-sm mt-2 inline-block">ورود به حساب</button>
+                        </div>
+                    `;
+                    return;
+                }
+
+                ticketsTab.innerHTML = `
+                    <div class="text-center py-8">
+                        <div class="loading-spinner-small mx-auto"></div>
+                        <p class="text-sm text-gray-500 mt-2">در حال بارگذاری...</p>
+                    </div>
+                `;
+
+                try {
+                    var response = await fetch('/api/support/my-tickets');
+                    var data = await response.json();
+                    
+                    if (data.success && data.tickets && data.tickets.length > 0) {
+                        var html = '';
+                        var lastVisit = parseInt(lastVisitTimestamp);
+                        
+                        for (var i = 0; i < data.tickets.length; i++) {
+                            var ticket = data.tickets[i];
+                            var statusClass = ticket.status === 'open' ? 'status-open' : 
+                                               (ticket.status === 'in_progress' ? 'status-in_progress' : 'status-closed');
+                            var statusText = ticket.status === 'open' ? 'باز' :
+                                              (ticket.status === 'in_progress' ? 'در حال بررسی' : 'بسته شده');
+                            var priorityClass = ticket.priority === 'high' ? 'priority-high' :
+                                                 (ticket.priority === 'medium' ? 'priority-medium' : 'priority-low');
+                            
+                            var subjectText = ticket.subject.substring(0, 40);
+                            if (ticket.subject.length > 40) subjectText = subjectText + '...';
+                            
+                            var hasNewStaffReply = false;
+                            if (ticket.last_staff_reply_at) {
+                                var lastReplyTime = new Date(ticket.last_staff_reply_at).getTime();
+                                hasNewStaffReply = lastReplyTime > lastVisit;
+                            }
+                            
+                            var newReplyBadge = '';
+                            if (hasNewStaffReply && ticket.status !== 'closed') {
+                                newReplyBadge = '<span class="bg-red-500 text-white text-xs px-2 py-0.5 rounded-full mr-2 animate-pulse">پاسخ جدید</span>';
+                            }
+                            
+                            html += `
+                                <div class="ticket-item ${priorityClass}" onclick="window.location.href='/support/ticket/${ticket.id}'">
+                                    <div class="flex justify-between items-start mb-2 flex-wrap gap-1">
+                                        <span class="font-medium text-gray-800 text-sm flex items-center">#${ticket.id} - ${escapeHtml(subjectText)} ${newReplyBadge}</span>
+                                        <span class="ticket-status ${statusClass}">${statusText}</span>
+                                    </div>
+                                    <div class="flex justify-between items-center text-xs text-gray-500 mt-2">
+                                        <span><i class="fas fa-calendar-alt ml-1"></i> ${ticket.created_at || ''}</span>
+                                        <span><i class="fas fa-comment ml-1"></i> ${ticket.replies_count || 0} پاسخ</span>
+                                    </div>
+                                </div>
+                            `;
+                        }
+                        ticketsTab.innerHTML = html;
+                    } else {
+                        ticketsTab.innerHTML = `
+                            <div class="empty-state">
+                                <i class="fas fa-inbox"></i>
+                                <p class="text-sm">تیکتی ثبت نکرده‌اید</p>
+                                <button onclick="document.querySelector('[data-tab=\"new\"]').click()" class="text-blue-600 text-sm mt-2">ثبت تیکت جدید</button>
+                            </div>
+                        `;
+                    }
+                } catch (error) {
+                    console.error('Error loading tickets:', error);
+                    ticketsTab.innerHTML = `
+                        <div class="empty-state">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <p class="text-sm">خطا در بارگذاری تیکت‌ها</p>
+                            <button onclick="location.reload()" class="text-blue-600 text-sm mt-2">تلاش مجدد</button>
+                        </div>
+                    `;
+                }
+            }
+
+            function escapeHtml(text) {
+                if (!text) return '';
+                var div = document.createElement('div');
+                div.textContent = text;
+                return div.innerHTML;
+            }
+
+            if (quickTicketForm) {
+                quickTicketForm.addEventListener('submit', async function(e) {
+                    e.preventDefault();
+                    
+                    if (!isLoggedIn) {
+                        alert('لطفاً ابتدا وارد حساب کاربری خود شوید.');
+                        window.location.href = '/login';
+                        return;
+                    }
+
+                    var subject = document.getElementById('ticketSubject').value.trim();
+                    var message = document.getElementById('ticketMessage').value.trim();
+                    var category = document.getElementById('ticketCategory').value;
+                    var priority = document.getElementById('ticketPriority').value;
+
+                    if (!subject || !message) {
+                        alert('لطفاً عنوان و متن تیکت را وارد کنید.');
+                        return;
+                    }
+
+                    var submitBtn = quickTicketForm.querySelector('button[type="submit"]');
+                    var originalText = submitBtn.innerHTML;
+                    submitBtn.innerHTML = '<span class="loading-spinner-small"></span> در حال ارسال...';
+                    submitBtn.disabled = true;
+
+                    try {
+                        var response = await fetch('/api/support/create-ticket', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ subject: subject, message: message, category: category, priority: priority })
+                        });
+                        var data = await response.json();
+
+                        if (data.success) {
+                            alert('✅ تیکت شما با موفقیت ثبت شد.');
+                            document.getElementById('ticketSubject').value = '';
+                            document.getElementById('ticketMessage').value = '';
+                            var ticketsTabBtn = document.querySelector('[data-tab="tickets"]');
+                            if (ticketsTabBtn) ticketsTabBtn.click();
+                            loadUserTickets();
+                            loadUnreadTicketsCount();
+                        } else {
+                            alert('❌ خطا: ' + (data.error || 'مشکلی پیش آمد'));
+                        }
+                    } catch (error) {
+                        console.error('Error creating ticket:', error);
+                        alert('❌ خطا در ارسال تیکت. لطفاً دوباره تلاش کنید.');
+                    } finally {
+                        submitBtn.innerHTML = originalText;
+                        submitBtn.disabled = false;
+                    }
+                });
+            }
+
+            async function loadUnreadTicketsCount() {
+                if (!isLoggedIn) return;
+                
+                try {
+                    var response = await fetch('/api/support/unread-count');
+                    var data = await response.json();
+                    var badge = document.getElementById('supportUnreadBadge');
+                    
+                    if (badge && data.count && data.count > 0) {
+                        badge.style.display = 'flex';
+                        badge.textContent = data.count > 9 ? '9+' : data.count;
+                    } else if (badge) {
+                        badge.style.display = 'none';
+                    }
+                } catch (error) {
+                    console.error('Error loading unread count:', error);
+                    var badge = document.getElementById('supportUnreadBadge');
+                    if (badge) badge.style.display = 'none';
+                }
+            }
+
+            document.addEventListener('click', function(e) {
+                if (!supportPanel.classList.contains('hidden') && 
+                    !supportPanel.contains(e.target) && 
+                    !supportFab.contains(e.target)) {
+                    supportPanel.classList.add('hidden');
+                }
+            });
+
+            if (isLoggedIn) {
+                loadUnreadTicketsCount();
+                setInterval(loadUnreadTicketsCount, 30000);
+            }
+        })();
+
+        // ============================================
+        // رویدادهای DOMContentLoaded
+        // ============================================
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(function() {
+                var alerts = document.querySelectorAll('.alert');
+                for (var i = 0; i < alerts.length; i++) {
+                    var alert = alerts[i];
                     alert.style.transition = 'opacity 0.5s';
                     alert.style.opacity = '0';
-                    setTimeout(() => alert.remove(), 500);
-                });
+                    (function(a) {
+                        setTimeout(function() { 
+                            if (a && a.remove) a.remove(); 
+                        }, 500);
+                    })(alert);
+                }
             }, 5000);
 
             if (!window.matchMedia('(display-mode: standalone)').matches &&
                 !localStorage.getItem('pwa-install-dismissed')) {
-                setTimeout(() => {
-                    document.getElementById('pwaInstallPrompt')?.classList.remove('hidden');
+                setTimeout(function() {
+                    var prompt = document.getElementById('pwaInstallPrompt');
+                    if (prompt) prompt.classList.remove('hidden');
                 }, 10000);
             }
 
-            document.getElementById('installPwaBtn')?.addEventListener('click', async () => {
-                if (deferredPrompt) {
-                    deferredPrompt.prompt();
-                    const { outcome } = await deferredPrompt.userChoice;
-                    if (outcome === 'accepted') {
-                        document.getElementById('pwaInstallPrompt')?.remove();
+            var installBtn = document.getElementById('installPwaBtn');
+            if (installBtn) {
+                installBtn.addEventListener('click', async function() {
+                    if (deferredPrompt) {
+                        deferredPrompt.prompt();
+                        var outcome = await deferredPrompt.userChoice;
+                        if (outcome.outcome === 'accepted') {
+                            var promptDiv = document.getElementById('pwaInstallPrompt');
+                            if (promptDiv) promptDiv.remove();
+                        }
+                        deferredPrompt = null;
+                    } else {
+                        if (SERAJ_CONFIG.installPwaUrl && SERAJ_CONFIG.installPwaUrl !== '#') {
+                            window.location.href = SERAJ_CONFIG.installPwaUrl;
+                        }
                     }
-                    deferredPrompt = null;
-                } else {
-                    if (SERAJ_CONFIG.installPwaUrl && SERAJ_CONFIG.installPwaUrl !== '#') {
-                        window.location.href = SERAJ_CONFIG.installPwaUrl;
-                    }
-                }
-            });
+                });
+            }
 
             initBackToTop();
-            updateQuranProgressDisplay();
 
-            document.addEventListener('touchstart', (e) => {
+            document.addEventListener('touchstart', function(e) {
                 if (e.touches.length > 1) e.preventDefault();
             }, { passive: false });
         });
 
+        // ============================================
+        // رویدادهای آنلاین/آفلاین و PWA
+        // ============================================
+        
         window.addEventListener('online', updateOnlineStatus);
         window.addEventListener('offline', updateOnlineStatus);
         updateOnlineStatus();
 
-        window.addEventListener('beforeinstallprompt', (e) => {
+        window.addEventListener('beforeinstallprompt', function(e) {
             e.preventDefault();
             deferredPrompt = e;
             if (!localStorage.getItem('pwa-install-dismissed') &&
                 !window.matchMedia('(display-mode: standalone)').matches) {
-                document.getElementById('pwaInstallPrompt')?.classList.remove('hidden');
+                var promptDiv = document.getElementById('pwaInstallPrompt');
+                if (promptDiv) promptDiv.classList.remove('hidden');
             }
         });
 
-        window.addEventListener('appinstalled', () => {
+        window.addEventListener('appinstalled', function() {
             console.log('✅ برنامه با موفقیت نصب شد');
-            document.getElementById('pwaInstallPrompt')?.remove();
+            var promptDiv = document.getElementById('pwaInstallPrompt');
+            if (promptDiv) promptDiv.remove();
             localStorage.removeItem('pwa-install-dismissed');
         });
 
         if ('serviceWorker' in navigator) {
-            window.addEventListener('load', function () {
+            window.addEventListener('load', function() {
                 navigator.serviceWorker.register('/static/js/firebase-messaging-sw.js')
-                    .then(function (registration) {
+                    .then(function(registration) {
                         console.log('✅ Service Worker ثبت شد با scope:', registration.scope);
-                        registration.addEventListener('updatefound', function () {
-                            const newWorker = registration.installing;
-                            newWorker.addEventListener('statechange', function () {
+                        registration.addEventListener('updatefound', function() {
+                            var newWorker = registration.installing;
+                            newWorker.addEventListener('statechange', function() {
                                 if (newWorker.state === 'installed') {
                                     if (navigator.serviceWorker.controller) {
                                         showUpdateNotification();
@@ -1085,32 +2330,77 @@
                             });
                         });
                     })
-                    .catch(function (error) {
+                    .catch(function(error) {
                         console.log('❌ خطا در ثبت Service Worker:', error);
                     });
-                navigator.serviceWorker.addEventListener('controllerchange', () => {
+                navigator.serviceWorker.addEventListener('controllerchange', function() {
                     window.location.reload();
                 });
             });
         }
 
-        document.addEventListener('alpine:init', () => {
-            console.log('Alpine.js loaded');
-        });
-
-        document.addEventListener('touchend', (e) => {
-            const now = Date.now();
-            const DOUBLE_TAP_DELAY = 300;
+        document.addEventListener('touchend', function(e) {
+            var now = Date.now();
+            var DOUBLE_TAP_DELAY = 300;
             if (now - (window.lastTouchEnd || 0) < DOUBLE_TAP_DELAY) {
                 e.preventDefault();
             }
             window.lastTouchEnd = now;
         });
+        (function() {
+            var loader = document.getElementById('appLoader');
+            var mainContent = document.getElementById('mainContent');
+            
+            if (!loader) return;
+            
+            var hasShownLoader = sessionStorage.getItem('splash_shown');
+            var messages = ['در حال آماده‌سازی', 'بارگذاری منابع', 'اتصال به سرور', 'همگام‌سازی اطلاعات', 'آماده‌سازی پنل کاربری', 'تقریباً آماده', 'خوش آمدید'];
+            var messageIndex = 0;
+            var messageInterval = null;
+            var loaderTextEl = document.getElementById('loaderText');
+            
+            function changeLoaderText() {
+                if (messageIndex < messages.length - 1 && loaderTextEl) {
+                    messageIndex++;
+                    loaderTextEl.textContent = messages[messageIndex];
+                }
+            }
+            
+            function hideLoader() {
+                if (messageInterval) clearInterval(messageInterval);
+                if (loader) {
+                    loader.classList.add('hide');
+                    setTimeout(function() {
+                        loader.style.display = 'none';
+                        if (mainContent) mainContent.classList.add('visible');
+                    }, 400);
+                } else if (mainContent) {
+                    mainContent.classList.add('visible');
+                }
+            }
+            
+            if (hasShownLoader === 'true') {
+                // لودر قبلاً نمایش داده شده، بلافاصله مخفی کن
+                loader.style.display = 'none';
+                if (mainContent) mainContent.classList.add('visible');
+            } else {
+                // اولین بار است
+                sessionStorage.setItem('splash_shown', 'true');
+                messageInterval = setInterval(changeLoaderText, 600);
+                setTimeout(hideLoader, 2200);
+                
+                // جلوگیری از اسکرول
+                document.body.style.overflow = 'hidden';
+                setTimeout(function() {
+                    document.body.style.overflow = '';
+                }, 2500);
+            }
+        })();
     </script>
 
     <script defer src="{{ url_for('static', filename='js/alpinejs/dist/cdn.min.js') }}"></script>
 
     {% block scripts %}{% endblock %}
+    </div> 
 </body>
-
 </html>

@@ -1,0 +1,281 @@
+{% extends "base.html" %}
+
+{% block title %}مدیریت محتوای نهج‌البلاغه{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 py-6">
+    
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-xl font-light text-gray-700">مدیریت محتوای نهج‌البلاغه</h1>
+        <div class="flex gap-2">
+            <a href="{{ url_for('admin_nahj_categories') }}" class="px-3 py-1.5 bg-gray-100 text-gray-600 rounded hover:bg-gray-200 text-sm">
+                دسته‌بندی
+            </a>
+            <button onclick="openAddModal()" class="px-3 py-1.5 bg-gray-800 text-white rounded hover:bg-gray-700 text-sm">
+                + جدید
+            </button>
+        </div>
+    </div>
+    
+    <!-- فیلتر -->
+    <div class="bg-gray-50 rounded p-3 mb-4">
+        <form method="GET" class="flex gap-3 items-center">
+            <label class="text-sm text-gray-500">فیلتر:</label>
+            <select name="category_id" class="px-3 py-1.5 border rounded text-sm" onchange="this.form.submit()">
+                <option value="">همه</option>
+                {% for cat in categories %}
+                <option value="{{ cat.id }}" {% if selected_category == cat.id %}selected{% endif %}>{{ cat.name }}</option>
+                {% endfor %}
+            </select>
+        </form>
+    </div>
+    
+    <!-- جدول -->
+    <div class="bg-white border rounded-lg overflow-hidden">
+        <table class="w-full text-sm">
+            <thead class="bg-gray-50">
+                <tr class="border-b">
+                    <th class="text-right px-3 py-2 text-xs text-gray-500">عنوان</th>
+                    <th class="text-right px-3 py-2 text-xs text-gray-500 hidden sm:table-cell">دسته</th>
+                    <th class="text-right px-3 py-2 text-xs text-gray-500">وضعیت</th>
+                    <th class="text-right px-3 py-2 text-xs text-gray-500">عملیات</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for content in contents %}
+                <tr class="border-b hover:bg-gray-50">
+                    <td class="px-3 py-2">{{ content.title|truncate(40) }}</td>
+                    <td class="px-3 py-2 text-gray-500 text-xs hidden sm:table-cell">{{ content.category.name if content.category else '-' }}</td>
+                    <td class="px-3 py-2">
+                        <span class="inline-block w-2 h-2 rounded-full {% if content.is_active %}bg-green-500{% else %}bg-red-400{% endif %}"></span>
+                    </td>
+                    <td class="px-3 py-2">
+                        <div class="flex gap-2">
+                            <button class="edit-btn text-blue-500 hover:text-blue-700" data-id="{{ content.id }}">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="delete-btn text-red-500 hover:text-red-700" data-id="{{ content.id }}">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                            <a href="{{ url_for('nahj_content_detail', id=content.id) }}" target="_blank" class="text-green-500 hover:text-green-700">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="4" class="text-center py-8 text-gray-400">مطلبی یافت نشد</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- مودال -->
+<div id="contentModal" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50" style="display: none;">
+    <div class="bg-white rounded-lg max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+        <div class="p-5">
+            <div class="flex justify-between items-center pb-3 border-b mb-4">
+                <h2 id="modalTitle" class="text-lg font-medium">مطلب جدید</h2>
+                <button onclick="closeModal()" class="text-gray-400 hover:text-gray-600 text-xl">&times;</button>
+            </div>
+            
+            <form id="contentForm">
+                <input type="hidden" id="contentId">
+                
+                <div class="mb-3">
+                    <label class="block text-sm text-gray-600 mb-1">دسته‌بندی</label>
+                    <select id="categoryId" class="w-full p-2 border rounded text-sm">
+                        <option value="">انتخاب کنید</option>
+                        {% for cat in categories %}
+                        <option value="{{ cat.id }}">{{ cat.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="block text-sm text-gray-600 mb-1">عنوان</label>
+                    <input type="text" id="title" class="w-full p-2 border rounded text-sm">
+                </div>
+                
+                <div class="mb-3">
+                    <label class="block text-sm text-gray-600 mb-1">شماره</label>
+                    <input type="text" id="number" class="w-full p-2 border rounded text-sm">
+                </div>
+                
+                <div class="mb-3">
+                    <label class="block text-sm text-gray-600 mb-1">متن عربی</label>
+                    <textarea id="arabicText" rows="4" class="w-full p-2 border rounded text-sm font-arabic"></textarea>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="block text-sm text-gray-600 mb-1">متن فارسی</label>
+                    <textarea id="persianText" rows="6" class="w-full p-2 border rounded text-sm"></textarea>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="block text-sm text-gray-600 mb-1">شرح و توضیحات</label>
+                    <textarea id="explanation" rows="4" class="w-full p-2 border rounded text-sm"></textarea>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="block text-sm text-gray-600 mb-1">برچسب‌ها</label>
+                    <input type="text" id="tags" class="w-full p-2 border rounded text-sm">
+                </div>
+                
+                <div class="flex items-center gap-4 mb-4">
+                    <label class="flex items-center gap-1"><input type="checkbox" id="isFeatured"> ویژه</label>
+                    <label class="flex items-center gap-1"><input type="checkbox" id="isActive" checked> فعال</label>
+                </div>
+                
+                <div class="flex gap-3 pt-3 border-t">
+                    <button type="submit" class="flex-1 py-2 bg-gray-800 text-white rounded hover:bg-gray-700">ذخیره</button>
+                    <button type="button" onclick="closeModal()" class="flex-1 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300">انصراف</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function openAddModal() {
+    document.getElementById('modalTitle').innerText = 'مطلب جدید';
+    document.getElementById('contentForm').reset();
+    document.getElementById('contentId').value = '';
+    document.getElementById('isFeatured').checked = false;
+    document.getElementById('isActive').checked = true;
+    document.getElementById('contentModal').style.display = 'flex';
+}
+
+function closeModal() {
+    document.getElementById('contentModal').style.display = 'none';
+}
+
+function editContent(id) {
+    fetch('/admin/nahj/content/' + id + '/get')
+        .then(function(response) {
+            return response.json();
+        })
+        .then(function(data) {
+            if (data.success) {
+                var c = data.content;
+                document.getElementById('modalTitle').innerText = 'ویرایش مطلب';
+                document.getElementById('contentId').value = c.id;
+                document.getElementById('categoryId').value = c.category_id;
+                document.getElementById('title').value = c.title;
+                document.getElementById('number').value = c.number || '';
+                document.getElementById('arabicText').value = c.arabic_text || '';
+                document.getElementById('persianText').value = c.persian_text;
+                document.getElementById('explanation').value = c.explanation || '';
+                document.getElementById('tags').value = c.tags || '';
+                document.getElementById('isFeatured').checked = c.is_featured;
+                document.getElementById('isActive').checked = c.is_active;
+                document.getElementById('contentModal').style.display = 'flex';
+            } else {
+                alert('خطا در دریافت اطلاعات');
+            }
+        })
+        .catch(function(error) {
+            alert('خطا: ' + error);
+        });
+}
+
+function deleteContent(id) {
+    if (confirm('آیا برای حذف مطمئن هستید؟')) {
+        fetch('/admin/nahj/content/' + id + '/delete', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(function(response) {
+            return response.json();
+        })
+        .then(function(data) {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('خطا در حذف');
+            }
+        });
+    }
+}
+
+// اتصال Event Listener به دکمه‌ها بعد از بارگذاری صفحه
+document.addEventListener('DOMContentLoaded', function() {
+    // دکمه‌های ویرایش
+    var editBtns = document.querySelectorAll('.edit-btn');
+    for (var i = 0; i < editBtns.length; i++) {
+        editBtns[i].addEventListener('click', function() {
+            var id = this.getAttribute('data-id');
+            editContent(id);
+        });
+    }
+    
+    // دکمه‌های حذف
+    var deleteBtns = document.querySelectorAll('.delete-btn');
+    for (var i = 0; i < deleteBtns.length; i++) {
+        deleteBtns[i].addEventListener('click', function() {
+            var id = this.getAttribute('data-id');
+            deleteContent(id);
+        });
+    }
+});
+
+// فرم ذخیره
+document.getElementById('contentForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    var id = document.getElementById('contentId').value;
+    var url = id ? '/admin/nahj/content/' + id + '/edit' : '/admin/nahj/content/add';
+    
+    var data = {
+        category_id: parseInt(document.getElementById('categoryId').value),
+        title: document.getElementById('title').value,
+        number: document.getElementById('number').value,
+        arabic_text: document.getElementById('arabicText').value,
+        persian_text: document.getElementById('persianText').value,
+        explanation: document.getElementById('explanation').value,
+        tags: document.getElementById('tags').value,
+        is_featured: document.getElementById('isFeatured').checked,
+        is_active: document.getElementById('isActive').checked
+    };
+    
+    fetch(url, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+    })
+    .then(function(response) {
+        return response.json();
+    })
+    .then(function(result) {
+        if (result.success) {
+            location.reload();
+        } else {
+            alert('خطا در ذخیره: ' + (result.message || 'خطای ناشناخته'));
+        }
+    })
+    .catch(function(error) {
+        alert('خطا: ' + error);
+    });
+});
+</script>
+{% endblock %}
+
+{% block styles %}
+<style>
+.font-arabic {
+    font-family: 'Amiri', 'Scheherazade', 'Traditional Arabic', serif;
+    font-size: 0.95rem;
+    line-height: 1.7;
+    text-align: right;
+}
+</style>
+{% endblock %}

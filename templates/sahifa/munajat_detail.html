@@ -1,0 +1,87 @@
+{% extends "sahifa_base.html" %}
+
+{% block title %}{{ munajat.title }} - صحیفه سجادیه - سِراج{% endblock %}
+
+{% block content %}
+<div class="sahifa-container container mx-auto px-4 py-4">
+    
+    <!-- ناوبری بین مناجات‌ها -->
+    <div class="munajat-nav">
+        {% if prev %}
+        <a href="{{ url_for('sahifa_munajat_detail', munajat_id=prev.id) }}" class="munajat-nav-btn text-decoration-none">
+            <i class="fas fa-chevron-right ms-1"></i> قبلی
+        </a>
+        {% else %}
+        <div></div>
+        {% endif %}
+        
+        <a href="{{ url_for('sahifa_munajat') }}" class="munajat-nav-btn text-decoration-none">
+            <i class="fas fa-list ms-1"></i> همه مناجات‌ها
+        </a>
+        
+        {% if next %}
+        <a href="{{ url_for('sahifa_munajat_detail', munajat_id=next.id) }}" class="munajat-nav-btn text-decoration-none">
+            بعدی <i class="fas fa-chevron-left me-1"></i>
+        </a>
+        {% else %}
+        <div></div>
+        {% endif %}
+    </div>
+
+    <!-- هدر مناجات -->
+    <div class="text-center mb-5">
+        <span class="prayer-number d-inline-flex mb-3">
+            <i class="fas fa-pray"></i> مناجات {{ munajat.number }}
+        </span>
+        <h1 style="font-size: 2rem; color: var(--sahifa-primary);">{{ munajat.title }}</h1>
+        {% if munajat.title_arabic %}
+        <div style="font-family: 'Amiri', serif; font-size: 1.2rem; color: var(--sahifa-gold-dark);">
+            {{ munajat.title_arabic }}
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- متن عربی -->
+    {% if munajat.arabic_text %}
+    <div class="arabic-section">
+        <div class="arabic-text">
+            {{ munajat.arabic_text|safe }}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- ترجمه فارسی -->
+    <div class="persian-section">
+        <div class="d-flex align-items-center gap-2 mb-3">
+            <i class="fas fa-language" style="color: var(--sahifa-gold);"></i>
+            <h3 style="font-size: 1rem; margin: 0; color: var(--sahifa-primary);">ترجمه فارسی</h3>
+            <span style="flex: 1; height: 1px; background: var(--sahifa-border);"></span>
+        </div>
+        <div class="persian-text">
+            {{ munajat.persian_text|safe }}
+        </div>
+    </div>
+
+    <!-- شرح و تفسیر -->
+    {% if munajat.explanation %}
+    <div class="persian-section mt-4" style="background: #fefcf8;">
+        <div class="d-flex align-items-center gap-2 mb-3">
+            <i class="fas fa-book-open" style="color: var(--sahifa-gold);"></i>
+            <h3 style="font-size: 1rem; margin: 0; color: var(--sahifa-primary);">شرح و تفسیر</h3>
+            <span style="flex: 1; height: 1px; background: var(--sahifa-border);"></span>
+        </div>
+        <div class="persian-text">
+            {{ munajat.explanation|safe }}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- دکمه بازگشت به بالا -->
+    <div class="text-center mt-5">
+        <button onclick="window.scrollTo({top: 0, behavior: 'smooth'})" 
+                class="btn-sahifa btn">
+            <i class="fas fa-arrow-up"></i> بازگشت به بالا
+        </button>
+    </div>
+</div>
+{% endblock %}

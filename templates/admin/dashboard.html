@@ -7,7 +7,7 @@
 <div class="mb-6 md:mb-8">
     <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
         <div>
-            <h1 class="text-2xl md:text-3xl font-bold mb-1 md:mb-2">داشبورد مدیریت</h1>
+            <h1 class="text-2xl  text-blue-800 md:text-3xl font-bold mb-1 md:mb-2">داشبورد مدیریت</h1>
             <p class="text-sm md:text-base text-gray-600">خوش آمدید {{ current_user.full_name }}، به پنل مدیریت سِراج
             </p>
         </div>
@@ -150,26 +150,17 @@
                 <table class="min-w-full divide-y divide-gray-200">
                     <thead class="bg-gray-50">
                         <tr>
-                            <th
-                                class="px-3 md:px-4 py-2 md:py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                عنوان</th>
-                            <th
-                                class="px-3 md:px-4 py-2 md:py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                نوع</th>
-                            <th
-                                class="px-3 md:px-4 py-2 md:py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider hidden sm:table-cell">
-                                تاریخ</th>
-                            <th
-                                class="px-3 md:px-4 py-2 md:py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                عملیات</th>
+                            <th class="px-3 md:px-4 py-2 md:py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">عنوان</th>
+                            <th class="px-3 md:px-4 py-2 md:py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">نوع</th>
+                            <th class="px-3 md:px-4 py-2 md:py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider hidden sm:table-cell">تاریخ</th>
+                            <th class="px-3 md:px-4 py-2 md:py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">عملیات</th>
                         </tr>
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-200">
                         {% for event in recent_events %}
                         <tr>
                             <td class="px-3 md:px-4 py-2 md:py-3 whitespace-nowrap">
-                                <div class="font-medium text-gray-900 text-sm md:text-base">{{ event.title|truncate(25)
-                                    }}</div>
+                                <div class="font-medium text-gray-900 text-sm md:text-base">{{ event.title|truncate(25) }}</div>
                             </td>
                             <td class="px-3 md:px-4 py-2 md:py-3 whitespace-nowrap">
                                 <span class="badge text-xs px-2 py-1 rounded-full 
@@ -178,30 +169,21 @@
                                             {% elif event.event_type.value == 'halaqah' %}badge-halaqah
                                             {% elif event.event_type.value == 'lecture' %}badge-lecture
                                             {% else %}badge-other{% endif %}">
-                                    {% if event.event_type.value == 'workshop' %}
-                                    کارگاه
-                                    {% elif event.event_type.value == 'competition' %}
-                                    مسابقه
-                                    {% elif event.event_type.value == 'halaqah' %}
-                                    حلقه تلاوت
-                                    {% elif event.event_type.value == 'lecture' %}
-                                    سخنرانی
-                                    {% else %}
-                                    دیگر
-                                    {% endif %}
+                                    {% if event.event_type.value == 'workshop' %}کارگاه
+                                    {% elif event.event_type.value == 'competition' %}مسابقه
+                                    {% elif event.event_type.value == 'halaqah' %}حلقه تلاوت
+                                    {% elif event.event_type.value == 'lecture' %}سخنرانی
+                                    {% else %}دیگر{% endif %}
                                 </span>
                             </td>
-                            <td
-                                class="px-3 md:px-4 py-2 md:py-3 whitespace-nowrap text-xs md:text-sm text-gray-500 hidden sm:table-cell">
+                            <td class="px-3 md:px-4 py-2 md:py-3 whitespace-nowrap text-xs md:text-sm text-gray-500 hidden sm:table-cell">
                                 {{ event.start_date|persian_date }}
                             </td>
                             <td class="px-3 md:px-4 py-2 md:py-3 whitespace-nowrap text-sm">
-                                <a href="{{ url_for('edit_event', event_id=event.id) }}"
-                                    class="text-blue-600 hover:text-blue-900 ml-2 md:ml-3 inline-block">
+                                <a href="{{ url_for('edit_event', event_id=event.id) }}" class="text-blue-600 hover:text-blue-900 ml-2 md:ml-3 inline-block">
                                     <i class="fas fa-edit"></i>
                                 </a>
-                                <button data-event-id="{{ event.id }}" onclick="deleteEvent(this)"
-                                    class="text-red-600 hover:text-red-900 inline-block">
+                                <button data-event-id="{{ event.id }}" onclick="deleteEvent(this)" class="text-red-600 hover:text-red-900 inline-block">
                                     <i class="fas fa-trash"></i>
                                 </button>
                             </td>
@@ -216,8 +198,7 @@
             <i class="fas fa-calendar-plus text-3xl md:text-4xl text-gray-300 mb-3"></i>
             <p class="text-gray-600 text-sm md:text-base">هنوز رویدادی ایجاد نکرده‌اید</p>
             <a href="{{ url_for('create_event') }}" class="btn btn-primary mt-4 inline-block">
-                <i class="fas fa-plus ml-2"></i>
-                ایجاد اولین رویداد
+                <i class="fas fa-plus ml-2"></i> ایجاد اولین رویداد
             </a>
         </div>
         {% endif %}
@@ -239,18 +220,10 @@
                 <table class="min-w-full divide-y divide-gray-200">
                     <thead class="bg-gray-50">
                         <tr>
-                            <th
-                                class="px-3 md:px-4 py-2 md:py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                نام کاربر</th>
-                            <th
-                                class="px-3 md:px-4 py-2 md:py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider hidden sm:table-cell">
-                                دانشگاه</th>
-                            <th
-                                class="px-3 md:px-4 py-2 md:py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">
-                                تاریخ عضویت</th>
-                            <th
-                                class="px-3 md:px-4 py-2 md:py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                وضعیت</th>
+                            <th class="px-3 md:px-4 py-2 md:py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">نام کاربر</th>
+                            <th class="px-3 md:px-4 py-2 md:py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider hidden sm:table-cell">دانشگاه</th>
+                            <th class="px-3 md:px-4 py-2 md:py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">تاریخ عضویت</th>
+                            <th class="px-3 md:px-4 py-2 md:py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">وضعیت</th>
                         </tr>
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-200">
@@ -258,23 +231,19 @@
                         <tr>
                             <td class="px-3 md:px-4 py-2 md:py-3 whitespace-nowrap">
                                 <div class="flex items-center">
-                                    <div
-                                        class="w-6 h-6 md:w-8 md:h-8 bg-gray-200 rounded-full flex items-center justify-center ml-2 md:ml-3">
+                                    <div class="w-6 h-6 md:w-8 md:h-8 bg-gray-200 rounded-full flex items-center justify-center ml-2 md:ml-3">
                                         <i class="fas fa-user text-gray-600 text-xs md:text-sm"></i>
                                     </div>
                                     <div>
-                                        <div class="font-medium text-gray-900 text-sm md:text-base">{{
-                                            user.full_name|truncate(15) }}</div>
+                                        <div class="font-medium text-gray-900 text-sm md:text-base">{{ user.full_name|truncate(15) }}</div>
                                         <div class="text-xs text-gray-500">{{ user.username|truncate(12) }}</div>
                                     </div>
                                 </div>
                             </td>
-                            <td
-                                class="px-3 md:px-4 py-2 md:py-3 whitespace-nowrap text-xs md:text-sm text-gray-500 hidden sm:table-cell">
+                            <td class="px-3 md:px-4 py-2 md:py-3 whitespace-nowrap text-xs md:text-sm text-gray-500 hidden sm:table-cell">
                                 {{ user.university|truncate(20) if user.university else '---' }}
                             </td>
-                            <td
-                                class="px-3 md:px-4 py-2 md:py-3 whitespace-nowrap text-xs md:text-sm text-gray-500 hidden md:table-cell">
+                            <td class="px-3 md:px-4 py-2 md:py-3 whitespace-nowrap text-xs md:text-sm text-gray-500 hidden md:table-cell">
                                 {{ user.created_at|time_ago }}
                             </td>
                             <td class="px-3 md:px-4 py-2 md:py-3 whitespace-nowrap">
@@ -315,42 +284,30 @@
             <table class="min-w-full divide-y divide-gray-200">
                 <thead class="bg-gray-50">
                     <tr>
-                        <th
-                            class="px-3 md:px-4 py-2 md:py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            کاربر</th>
-                        <th
-                            class="px-3 md:px-4 py-2 md:py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider hidden sm:table-cell">
-                            رویداد</th>
-                        <th
-                            class="px-3 md:px-4 py-2 md:py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">
-                            تاریخ ثبت‌نام</th>
-                        <th
-                            class="px-3 md:px-4 py-2 md:py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            وضعیت</th>
+                        <th class="px-3 md:px-4 py-2 md:py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">کاربر</th>
+                        <th class="px-3 md:px-4 py-2 md:py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider hidden sm:table-cell">رویداد</th>
+                        <th class="px-3 md:px-4 py-2 md:py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">تاریخ ثبت‌نام</th>
+                        <th class="px-3 md:px-4 py-2 md:py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">وضعیت</th>
                     </tr>
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200">
                     {% for reg in recent_registrations %}
                     <tr>
                         <td class="px-3 md:px-4 py-2 md:py-3 whitespace-nowrap">
-                            <div class="font-medium text-gray-900 text-sm md:text-base">{{
-                                reg.user.full_name|truncate(20) }}</div>
+                            <div class="font-medium text-gray-900 text-sm md:text-base">{{ reg.user.full_name|truncate(20) }}</div>
                             <div class="text-xs text-gray-500">{{ reg.user.email|truncate(20) }}</div>
                         </td>
-                        <td
-                            class="px-3 md:px-4 py-2 md:py-3 whitespace-nowrap text-sm md:text-base text-gray-900 hidden sm:table-cell">
+                        <td class="px-3 md:px-4 py-2 md:py-3 whitespace-nowrap text-sm md:text-base text-gray-900 hidden sm:table-cell">
                             {{ reg.event.title|truncate(30) }}
                         </td>
-                        <td
-                            class="px-3 md:px-4 py-2 md:py-3 whitespace-nowrap text-xs md:text-sm text-gray-500 hidden md:table-cell">
+                        <td class="px-3 md:px-4 py-2 md:py-3 whitespace-nowrap text-xs md:text-sm text-gray-500 hidden md:table-cell">
                             {{ reg.registration_date|persian_datetime }}
                         </td>
                         <td class="px-3 md:px-4 py-2 md:py-3 whitespace-nowrap">
                             {% if reg.attended %}
                             <span class="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800">شرکت کرده</span>
                             {% else %}
-                            <span class="px-2 py-1 text-xs rounded-full bg-yellow-100 text-yellow-800">ثبت‌نام
-                                شده</span>
+                            <span class="px-2 py-1 text-xs rounded-full bg-yellow-100 text-yellow-800">ثبت‌نام شده</span>
                             {% endif %}
                         </td>
                     </tr>
@@ -372,10 +329,8 @@
     <h2 class="text-lg md:text-xl font-bold mb-4">دسترسی سریع مدیریت</h2>
     <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
         <!-- Create Event -->
-        <a href="{{ url_for('create_event') }}"
-            class="card bg-white rounded-xl shadow-sm p-3 md:p-4 text-center hover:shadow-md transition-all">
-            <div
-                class="w-10 h-10 md:w-12 md:h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-2 md:mb-3">
+        <a href="{{ url_for('create_event') }}" class="card bg-white rounded-xl shadow-sm p-3 md:p-4 text-center hover:shadow-md transition-all">
+            <div class="w-10 h-10 md:w-12 md:h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-2 md:mb-3">
                 <i class="fas fa-plus text-blue-600 text-base md:text-xl"></i>
             </div>
             <h3 class="font-bold text-sm md:text-base">مدیریت رویدادها</h3>
@@ -383,10 +338,8 @@
         </a>
 
         <!-- Manage Users -->
-        <a href="{{ url_for('admin_users') }}"
-            class="card bg-green-50 border-2 border-green-200 rounded-xl shadow-sm p-3 md:p-4 text-center hover:shadow-md transition-all">
-            <div
-                class="w-10 h-10 md:w-12 md:h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-2 md:mb-3">
+        <a href="{{ url_for('admin_users') }}" class="card bg-green-50 border-2 border-green-200 rounded-xl shadow-sm p-3 md:p-4 text-center hover:shadow-md transition-all">
+            <div class="w-10 h-10 md:w-12 md:h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-2 md:mb-3">
                 <i class="fas fa-users-cog text-green-600 text-base md:text-xl"></i>
             </div>
             <h3 class="font-bold text-green-800 text-sm md:text-base">مدیریت کاربران</h3>
@@ -394,98 +347,156 @@
         </a>
 
         <!-- Reports -->
-        <a href="{{ url_for('admin_reports') }}"
-            class="card bg-white rounded-xl shadow-sm p-3 md:p-4 text-center hover:shadow-md transition-all">
-            <div
-                class="w-10 h-10 md:w-12 md:h-12 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-2 md:mb-3">
+        <a href="{{ url_for('admin_reports') }}" class="card bg-white rounded-xl shadow-sm p-3 md:p-4 text-center hover:shadow-md transition-all">
+            <div class="w-10 h-10 md:w-12 md:h-12 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-2 md:mb-3">
                 <i class="fas fa-chart-bar text-purple-600 text-base md:text-xl"></i>
             </div>
             <h3 class="font-bold text-sm md:text-base">گزارش‌گیری</h3>
         </a>
 
         <!-- View Site -->
-        <a href="{{ url_for('events_list') }}"
-            class="card bg-white rounded-xl shadow-sm p-3 md:p-4 text-center hover:shadow-md transition-all">
-            <div
-                class="w-10 h-10 md:w-12 md:h-12 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-2 md:mb-3">
+        <a href="{{ url_for('events_list') }}" class="card bg-white rounded-xl shadow-sm p-3 md:p-4 text-center hover:shadow-md transition-all">
+            <div class="w-10 h-10 md:w-12 md:h-12 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-2 md:mb-3">
                 <i class="fas fa-eye text-yellow-600 text-base md:text-xl"></i>
             </div>
             <h3 class="font-bold text-sm md:text-base">مشاهده سایت</h3>
         </a>
 
         <!-- Send Announcement -->
-        <a href="{{ url_for('admin_announcement') }}"
-            class="card bg-white rounded-xl shadow-sm p-3 md:p-4 text-center hover:shadow-md transition-all">
-            <div
-                class="w-10 h-10 md:w-12 md:h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-2 md:mb-3">
+        <a href="{{ url_for('admin_announcement') }}" class="card bg-white rounded-xl shadow-sm p-3 md:p-4 text-center hover:shadow-md transition-all">
+            <div class="w-10 h-10 md:w-12 md:h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-2 md:mb-3">
                 <i class="fas fa-bullhorn text-red-600 text-base md:text-xl"></i>
             </div>
             <h3 class="font-bold text-sm md:text-base">ارسال اعلامیه</h3>
         </a>
 
         <!-- Announcement History -->
-        <a href="{{ url_for('admin_announcements_list') }}"
-            class="card bg-white rounded-xl shadow-sm p-3 md:p-4 text-center hover:shadow-md transition-all">
-            <div
-                class="w-10 h-10 md:w-12 md:h-12 bg-indigo-100 rounded-full flex items-center justify-center mx-auto mb-2 md:mb-3">
+        <a href="{{ url_for('admin_announcements_list') }}" class="card bg-white rounded-xl shadow-sm p-3 md:p-4 text-center hover:shadow-md transition-all">
+            <div class="w-10 h-10 md:w-12 md:h-12 bg-indigo-100 rounded-full flex items-center justify-center mx-auto mb-2 md:mb-3">
                 <i class="fas fa-history text-indigo-600 text-base md:text-xl"></i>
             </div>
             <h3 class="font-bold text-sm md:text-base">تاریخچه اعلامیه‌ها</h3>
         </a>
 
         <!-- AI Dashboard -->
-        <a href="{{ url_for('admin_ai_dashboard') }}"
-            class="card bg-white rounded-xl shadow-sm p-3 md:p-4 text-center hover:shadow-md transition-all">
-            <div
-                class="w-10 h-10 md:w-12 md:h-12 bg-teal-100 rounded-full flex items-center justify-center mx-auto mb-2 md:mb-3">
+        <a href="{{ url_for('seraj_yari') }}" class="card bg-white rounded-xl shadow-sm p-3 md:p-4 text-center hover:shadow-md transition-all">
+            <div class="w-10 h-10 md:w-12 md:h-12 bg-teal-100 rounded-full flex items-center justify-center mx-auto mb-2 md:mb-3">
                 <i class="fas fa-robot text-teal-600 text-base md:text-xl"></i>
             </div>
-            <h3 class="font-bold text-sm md:text-base">هوش مصنوعی</h3>
+            <h3 class="font-bold text-sm md:text-base">سِراج‌یار</h3>
         </a>
-
-        <!-- Pending Users -->
-        <a href="{{ url_for('admin_pending_users') }}"
-            class="card bg-yellow-50 border-2 border-yellow-200 rounded-xl shadow-sm p-3 md:p-4 text-center hover:shadow-md transition-all relative">
-            <div
-                class="w-10 h-10 md:w-12 md:h-12 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-2 md:mb-3">
-                <i class="fas fa-user-clock text-yellow-600 text-base md:text-xl"></i>
-            </div>
-            <h3 class="font-bold text-yellow-800 text-sm md:text-base">در انتظار تأیید</h3>
-            <span class="absolute top-1 right-1 bg-red-500 text-white px-1.5 py-0.5 rounded-full text-xs font-bold"
-                id="pendingCount">{{ pending_count }}</span>
-        </a>
+        
+<!-- Pending Users -->
+<a href="{{ url_for('admin_pending_users') }}" class="card bg-yellow-50 border-2 border-yellow-200 rounded-xl shadow-sm p-3 md:p-4 text-center hover:shadow-md transition-all relative flex items-center justify-between gap-2">
+    <div class="flex items-center gap-2">
+        <div class="w-10 h-10 md:w-12 md:h-12 bg-yellow-100 rounded-full flex items-center justify-center">
+            <i class="fas fa-user-clock text-yellow-600 text-base md:text-xl"></i>
+        </div>
+        <h3 class="font-bold text-yellow-800 text-sm md:text-base">در انتظار تأیید</h3>
+    </div>
+    <span class="bg-red-500 text-white px-2 py-0.5 rounded-full text-xs font-bold">{{ pending_count }}</span>
+</a>
 
         <!-- Manage Banners -->
-        <a href="{{ url_for('admin_banners_list') }}"
-            class="card bg-white rounded-xl shadow-sm p-3 md:p-4 text-center hover:shadow-md transition-all">
-            <div
-                class="w-10 h-10 md:w-12 md:h-12 bg-pink-100 rounded-full flex items-center justify-center mx-auto mb-2 md:mb-3">
+        <a href="{{ url_for('admin_banners_list') }}" class="card bg-white rounded-xl shadow-sm p-3 md:p-4 text-center hover:shadow-md transition-all">
+            <div class="w-10 h-10 md:w-12 md:h-12 bg-pink-100 rounded-full flex items-center justify-center mx-auto mb-2 md:mb-3">
                 <i class="fas fa-images text-pink-600 text-base md:text-xl"></i>
             </div>
             <h3 class="font-bold text-sm md:text-base">مدیریت بنرها</h3>
         </a>
 
-        <!-- Manage Competitions (جدید) -->
-        <a href="{{ url_for('admin_competitions') }}"
-            class="card bg-white rounded-xl shadow-sm p-3 md:p-4 text-center hover:shadow-md transition-all">
-            <div
-                class="w-10 h-10 md:w-12 md:h-12 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-2 md:mb-3">
+        <!-- Manage Competitions -->
+        <a href="{{ url_for('admin_competitions') }}" class="card bg-white rounded-xl shadow-sm p-3 md:p-4 text-center hover:shadow-md transition-all">
+            <div class="w-10 h-10 md:w-12 md:h-12 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-2 md:mb-3">
                 <i class="fas fa-trophy text-purple-600 text-base md:text-xl"></i>
             </div>
             <h3 class="font-bold text-sm md:text-base">مدیریت مسابقات</h3>
             <span class="text-xs text-gray-500 mt-1 hidden sm:block">ایجاد و مدیریت مسابقات قرآنی</span>
         </a>
 
+<style>
+    .card-custom {
+        background-color: white;
+        border-radius: 0.75rem;
+        box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+        padding: 0.75rem 1rem;
+        text-align: center;
+        transition: all 0.3s ease;
+        display: block;
+        text-decoration: none;
+    }
+    .card-custom:hover {
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    }
+    .icon-ahkam {
+        background-color: #d1fae5; /* emerald-100 */
+        border-radius: 9999px;
+        width: 3rem;
+        height: 3rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 0.5rem auto;
+    }
+    .icon-ahkam i {
+        color: #059669; /* emerald-600 */
+        font-size: 1.125rem;
+    }
+    .icon-nahj {
+        background-color: #fef3c7; /* amber-100 */
+    }
+    .icon-nahj i {
+        color: #d97706; /* amber-600 */
+    }
+    @media (min-width: 768px) {
+        .icon-ahkam, .icon-nahj {
+            width: 3rem;
+            height: 3rem;
+        }
+        .icon-ahkam i, .icon-nahj i {
+            font-size: 1.25rem;
+        }
+        .card-custom {
+            padding: 1rem;
+        }
+    }
+</style>
+
+<!-- مدیریت احکام شرعی -->
+<a href="{{ url_for('admin_ahkam') }}" class="card-custom">
+    <div class="icon-ahkam">
+        <i class="fas fa-balance-scale"></i>
+    </div>
+    <h3 style="font-weight: bold; font-size: 0.875rem;">مدیریت احکام شرعی</h3>
+    <span style="font-size: 0.75rem; color: #6b7280; margin-top: 0.25rem; display: none;">اضافه، ویرایش و حذف احکام</span>
+</a>
+
+<!-- مدیریت نهج‌البلاغه -->
+<a href="{{ url_for('admin_nahj_contents') }}" class="card-custom">
+    <div class="icon-ahkam icon-nahj">
+        <i class="fas fa-feather-alt"></i>
+    </div>
+    <h3 style="font-weight: bold; font-size: 0.875rem;">مدیریت نهج‌البلاغه</h3>
+    <span style="font-size: 0.75rem; color: #6b7280; margin-top: 0.25rem; display: none;">مدیریت خطبه‌ها، نامه‌ها و کلمات قصار</span>
+</a>
+
         <!-- Circle Requests -->
-        <a href="{{ url_for('admin_circle_requests') }}"
-            class="card bg-white rounded-xl shadow-sm p-3 md:p-4 text-center hover:shadow-md transition-all">
-            <div
-                class="w-10 h-10 md:w-12 md:h-12 bg-indigo-100 rounded-full flex items-center justify-center mx-auto mb-2 md:mb-3">
+        <a href="{{ url_for('admin_circle_requests') }}" class="card bg-white rounded-xl shadow-sm p-3 md:p-4 text-center hover:shadow-md transition-all">
+            <div class="w-10 h-10 md:w-12 md:h-12 bg-indigo-100 rounded-full flex items-center justify-center mx-auto mb-2 md:mb-3">
                 <i class="fas fa-quran text-indigo-600 text-base md:text-xl"></i>
             </div>
             <h3 class="font-bold text-sm md:text-base">درخواست‌های حلقه</h3>
             <span class="text-xs text-gray-500 mt-1 hidden sm:block">تأیید یا رد حلقه‌ها</span>
         </a>
+
+        <!-- Support Tickets -->
+<a href="/admin/tickets" class="card bg-blue-50 border-2 border-blue-200 rounded-xl shadow-sm p-3 md:p-4 text-center hover:shadow-md transition-all">
+    <div class="w-10 h-10 md:w-12 md:h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-2 md:mb-3">
+        <i class="fas fa-headset text-blue-600 text-base md:text-xl"></i>
+    </div>
+    <h3 class="font-bold text-blue-800 text-sm md:text-base">مدیریت تیکت‌ها</h3>
+    <span class="text-xs text-blue-600 mt-1 hidden sm:block">مشاهده همه درخواست‌ها</span>
+</a>
     </div>
 </div>
 
@@ -522,11 +533,9 @@
 </div>
 
 <script>
-    // تابع نمایش دیالوگ حذف
     function deleteEvent(btn) {
         const eventId = btn.dataset.eventId;
         
-        // نمایش دیالوگ سفارشی
         showConfirmDialog({
             title: 'حذف رویداد',
             message: 'آیا از حذف این رویداد مطمئن هستید؟',
@@ -534,7 +543,6 @@
             confirmText: 'بله، حذف شود',
             cancelText: 'انصراف',
             onConfirm: function() {
-                // درخواست حذف به سرور
                 fetch('/admin/event/delete/' + eventId, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' }
@@ -553,16 +561,13 @@
         });
     }
 
-    // دیالوگ تایید سفارشی
     function showConfirmDialog(options) {
-        // حذف دیالوگ قبلی اگر وجود داشت
         const existingDialog = document.querySelector('.custom-confirm-dialog');
         if (existingDialog) existingDialog.remove();
 
         const dialog = document.createElement('div');
         dialog.className = 'custom-confirm-dialog fixed inset-0 bg-black/50 flex items-center justify-center z-[10000]';
         
-        // رنگ‌ها بر اساس نوع
         const colors = {
             danger: { bg: 'bg-red-500', hover: 'hover:bg-red-600', icon: 'fa-exclamation-triangle text-red-500' },
             warning: { bg: 'bg-amber-500', hover: 'hover:bg-amber-600', icon: 'fa-exclamation-triangle text-amber-500' },
@@ -615,7 +620,6 @@
         });
     }
 
-    // تابع نمایش نوتیفیکیشن (توست)
     function showToast(message, type = 'success') {
         const existingToast = document.querySelector('.custom-toast');
         if (existingToast) existingToast.remove();
@@ -646,7 +650,6 @@
         }, 2500);
     }
 
-    // اضافه کردن استایل‌های انیمیشن (اگر قبلاً اضافه نشده باشد)
     if (!document.querySelector('#dialog-styles')) {
         const style = document.createElement('style');
         style.id = 'dialog-styles';
@@ -670,84 +673,20 @@
     .card {
         transition: all 0.3s ease;
     }
-
     .card:hover {
         transform: translateY(-2px);
         box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
     }
-
-    .badge-workshop {
-        background-color: #dbeafe;
-        color: #1e40af;
-    }
-
-    .badge-competition {
-        background-color: #dcfce7;
-        color: #166534;
-    }
-
-    .badge-halaqah {
-        background-color: #f3e8ff;
-        color: #6b21a8;
-    }
-
-    .badge-lecture {
-        background-color: #fef9c3;
-        color: #854d0e;
-    }
-
-    .badge-other {
-        background-color: #f1f5f9;
-        color: #334155;
-    }
-
-    .btn {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        padding: 0.5rem 1rem;
-        font-size: 0.875rem;
-        font-weight: 500;
-        border-radius: 0.5rem;
-        transition: all 0.2s;
-    }
-
-    .btn-primary {
-        background-color: #2563eb;
-        color: white;
-    }
-
-    .btn-primary:hover {
-        background-color: #1d4ed8;
-    }
-
-    @keyframes pulse {
-
-        0%,
-        100% {
-            transform: scale(1);
-        }
-
-        50% {
-            transform: scale(1.05);
-        }
-    }
-
-    #pendingCount {
-        animation: pulse 1s infinite;
-        display: inline-block;
-        min-width: 20px;
-    }
-
-    @media (max-width: 640px) {
-        .badge {
-            font-size: 0.7rem;
-            padding: 0.2rem 0.5rem;
-        }
-
-        .card-body {
-            padding: 0.75rem;
-        }
-    }
+    .badge-workshop { background-color: #dbeafe; color: #1e40af; }
+    .badge-competition { background-color: #dcfce7; color: #166534; }
+    .badge-halaqah { background-color: #f3e8ff; color: #6b21a8; }
+    .badge-lecture { background-color: #fef9c3; color: #854d0e; }
+    .badge-other { background-color: #f1f5f9; color: #334155; }
+    .btn { display: inline-flex; align-items: center; justify-content: center; padding: 0.5rem 1rem; font-size: 0.875rem; font-weight: 500; border-radius: 0.5rem; transition: all 0.2s; }
+    .btn-primary { background-color: #2563eb; color: white; }
+    .btn-primary:hover { background-color: #1d4ed8; }
+    @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+    #pendingCount { animation: pulse 1s infinite; display: inline-block; min-width: 20px; }
+    @media (max-width: 640px) { .badge { font-size: 0.7rem; padding: 0.2rem 0.5rem; } .card-body { padding: 0.75rem; } }
 </style>
 {% endblock %}

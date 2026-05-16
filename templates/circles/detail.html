@@ -3,163 +3,263 @@
 {% block title %}{{ circle.name }} - سِراج{% endblock %}
 
 {% block content %}
-<div class="max-w-7xl mx-auto">
+<div class="min-h-screen bg-gray-50">
 
-    <!-- Header -->
-    <div class="bg-gradient-to-r from-green-700 to-teal-700 rounded-2xl p-8 text-white mb-8">
-        <div class="flex flex-col md:flex-row items-start md:items-center gap-6">
+    <!-- هدر کاملاً ریسپانسیو -->
+    <div class="bg-white border-b border-gray-100 sticky top-0 z-10 shadow-sm">
+        <div class="px-4 sm:px-6 md:px-8 py-3 sm:py-4 md:py-5">
 
-            <div class="w-24 h-24 bg-white/20 rounded-full flex items-center justify-center border-4 border-white/30 overflow-hidden">
-                {% if circle.teacher_image %}
-                    <img src="{{ url_for('static', filename='uploads/' + circle.teacher_image) }}"
-                         alt="{{ circle.teacher_name }}"
-                         class="w-full h-full object-cover">
-                {% else %}
-                    <i class="fas fa-user-graduate text-4xl"></i>
-                {% endif %}
-            </div>
+            <!-- ردیف اول: آواتار + عنوان -->
+            <div class="flex items-center gap-3 sm:gap-4 md:gap-5">
 
-            <div class="flex-grow">
-                <h1 class="text-3xl font-bold mb-2">{{ circle.name }}</h1>
-                <p class="text-lg opacity-90 mb-3">
-                    با مدیریت استاد {{ circle.teacher_name }}
-                </p>
+                <!-- آواتار -->
+                <div class="relative shrink-0">
+                    <div class="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 lg:w-20 lg:h-20 bg-gradient-to-br from-green-50 to-teal-50 rounded-xl sm:rounded-2xl flex items-center justify-center overflow-hidden border border-green-100">
+                        {% if circle.teacher_image %}
+                            <img src="{{ url_for('static', filename='uploads/' + circle.teacher_image) }}"
+                                 alt="{{ circle.teacher_name }}"
+                                 class="w-full h-full object-cover">
+                        {% else %}
+                            <i class="fas fa-chalkboard-user text-xl sm:text-2xl md:text-3xl text-green-600"></i>
+                        {% endif %}
+                    </div>
+                    <div class="absolute -bottom-0.5 -right-0.5 bg-green-500 rounded-full w-2.5 h-2.5 sm:w-3 sm:h-3 md:w-3.5 md:h-3.5 border-2 border-white"></div>
+                </div>
 
-                <div class="flex flex-wrap gap-4 text-sm">
-                    <span class="bg-white/20 px-3 py-1 rounded-full">
-                        <i class="fas fa-users ml-2"></i>
-                        {{ circle.current_members }} عضو
-                    </span>
+                <!-- عنوان و استاد -->
+                <div class="flex-1 min-w-0">
+                    <div class="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+                        <h1 class="text-base sm:text-lg md:text-xl lg:text-2xl font-bold text-gray-800 truncate">{{ circle.name }}</h1>
+                        {% if circle.is_full() %}
+                            <span class="bg-red-100 text-red-600 text-[9px] sm:text-[10px] md:text-xs px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full whitespace-nowrap">تکمیل شده</span>
+                        {% endif %}
+                    </div>
+                    <div class="flex items-center gap-1 sm:gap-1.5 mt-0.5 sm:mt-1">
+                        <i class="fas fa-microphone-alt text-green-600 text-[10px] sm:text-xs"></i>
+                        <span class="text-xs sm:text-sm text-gray-600 truncate">استاد <span class="font-medium text-gray-800">{{ circle.teacher_name }}</span></span>
+                    </div>
+                </div>
+
+                <!-- دکمه عضویت (موبایل مخفی - در ردیف بعدی) -->
+                <div class="hidden sm:block">
+                    {% if current_user.is_authenticated %}
+                        {% if is_member %}
+                            <form method="POST" action="{{ url_for('leave_circle', circle_id=circle.id) }}">
+                                <button type="submit"
+                                    class="bg-white border border-red-200 text-red-600 px-3 sm:px-4 md:px-5 py-1.5 sm:py-2 rounded-lg hover:bg-red-50 transition text-xs sm:text-sm font-medium whitespace-nowrap">
+                                    <i class="fas fa-sign-out-alt ml-1"></i>
+                                    خروج
+                                </button>
+                            </form>
+                        {% else %}
+                            <form method="POST" action="{{ url_for('join_circle', circle_id=circle.id) }}">
+                                <button type="submit"
+                                    class="bg-gradient-to-r from-green-600 to-teal-600 text-white px-4 sm:px-5 md:px-6 py-1.5 sm:py-2 rounded-lg hover:from-green-700 hover:to-teal-700 transition text-xs sm:text-sm font-medium shadow-sm whitespace-nowrap"
+                                    {% if circle.is_full() %}disabled{% endif %}>
+                                    <i class="fas fa-user-plus ml-1"></i>
+                                    عضویت
+                                </button>
+                            </form>
+                        {% endif %}
+                    {% else %}
+                        <a href="{{ url_for('login') }}"
+                           class="inline-block bg-gradient-to-r from-green-600 to-teal-600 text-white px-4 sm:px-5 md:px-6 py-1.5 sm:py-2 rounded-lg hover:from-green-700 hover:to-teal-700 transition text-xs sm:text-sm font-medium shadow-sm whitespace-nowrap">
+                            ورود
+                        </a>
+                    {% endif %}
                 </div>
             </div>
 
-            <div>
-                {% if current_user.is_authenticated %}
-                    {% if is_member %}
-                        <form method="POST" action="{{ url_for('leave_circle', circle_id=circle.id) }}">
-                            <button type="submit"
-                                class="bg-red-500 px-6 py-3 rounded-lg hover:bg-red-600 transition">
-                                خروج از حلقه
-                            </button>
-                        </form>
+            <!-- ردیف دوم: آمار -->
+            <div class="flex items-center justify-between gap-2 mt-3 sm:mt-4 pt-3 sm:pt-4 border-t border-gray-100">
+                <div class="flex items-center gap-2 sm:gap-3 md:gap-4">
+                    <div class="flex items-center gap-1 sm:gap-1.5">
+                        <i class="fas fa-users text-green-600 text-[10px] sm:text-xs"></i>
+                        <span class="text-[10px] sm:text-xs text-gray-500">{{ circle.current_members }} عضو</span>
+                    </div>
+                    <div class="w-px h-3 sm:h-4 bg-gray-200"></div>
+                    <div class="flex items-center gap-1 sm:gap-1.5">
+                        <i class="fas fa-calendar-alt text-green-600 text-[10px] sm:text-xs"></i>
+                        <span class="text-[10px] sm:text-xs text-gray-500 truncate">{{ circle.days_of_week or 'زمان نامشخص' }}</span>
+                    </div>
+                </div>
+
+                <!-- دکمه عضویت (فقط موبایل) -->
+                <div class="sm:hidden">
+                    {% if current_user.is_authenticated %}
+                        {% if is_member %}
+                            <form method="POST" action="{{ url_for('leave_circle', circle_id=circle.id) }}">
+                                <button type="submit"
+                                    class="bg-white border border-red-200 text-red-600 px-3 py-1.5 rounded-lg text-xs font-medium">
+                                    خروج
+                                </button>
+                            </form>
+                        {% else %}
+                            <form method="POST" action="{{ url_for('join_circle', circle_id=circle.id) }}">
+                                <button type="submit"
+                                    class="bg-gradient-to-r from-green-600 to-teal-600 text-white px-3 py-1.5 rounded-lg text-xs font-medium shadow-sm"
+                                    {% if circle.is_full() %}disabled{% endif %}>
+                                    عضویت
+                                </button>
+                            </form>
+                        {% endif %}
                     {% else %}
-                        <form method="POST" action="{{ url_for('join_circle', circle_id=circle.id) }}">
-                            <button type="submit"
-                                class="bg-white text-green-700 px-6 py-3 rounded-lg hover:bg-gray-100 transition"
-                                {% if circle.is_full() %}disabled{% endif %}>
-                                عضویت در حلقه
-                            </button>
-                        </form>
+                        <a href="{{ url_for('login') }}"
+                           class="inline-block bg-gradient-to-r from-green-600 to-teal-600 text-white px-3 py-1.5 rounded-lg text-xs font-medium shadow-sm">
+                            ورود
+                        </a>
                     {% endif %}
-                {% else %}
-                    <a href="{{ url_for('login') }}"
-                       class="bg-white text-green-700 px-6 py-3 rounded-lg hover:bg-gray-100 transition">
-                        ورود برای عضویت
-                    </a>
-                {% endif %}
+                </div>
             </div>
 
         </div>
     </div>
 
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <!-- محتوای اصلی - کاملاً ریسپانسیو -->
+    <div class="px-4 sm:px-6 md:px-8 py-4 sm:py-6 md:py-8">
 
-        <!-- Main Content -->
-        <div class="lg:col-span-2 space-y-6">
+        <!-- گرید ریسپانسیو -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-5 md:gap-6">
 
-            <div class="card">
-                <div class="card-header">
-                    <h2 class="text-xl font-bold">درباره حلقه</h2>
-                </div>
-                <div class="card-body">
-                    <p class="text-gray-700">
-                        {{ circle.description or 'توضیحی ثبت نشده است.' }}
-                    </p>
-                </div>
-            </div>
+            <!-- ستون اصلی (2/3 در دسکتاپ) -->
+            <div class="lg:col-span-2 space-y-4 sm:space-y-5 md:space-y-6">
 
-        </div>
-
-        <!-- Sidebar -->
-        <div class="space-y-6">
-
-            <div class="card">
-                <div class="card-header">
-                    <h2 class="text-xl font-bold">اطلاعات حلقه</h2>
-                </div>
-
-                <div class="card-body space-y-6">
-
-                    <!-- Time -->
-                    <div>
-                        <div class="text-sm text-gray-500 mb-1">زمان برگزاری</div>
-                        <div class="font-medium">{{ circle.days_of_week or 'نامشخص' }}</div>
-                        <div class="text-sm text-gray-600">
-                            {{ circle.start_time or '--' }} تا {{ circle.end_time or '--' }}
+                <!-- درباره حلقه -->
+                <div class="bg-white rounded-xl sm:rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-5 md:p-6">
+                    <div class="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4 pb-2 sm:pb-3 border-b border-gray-100">
+                        <div class="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 bg-green-100 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-info-circle text-green-600 text-xs sm:text-sm"></i>
                         </div>
+                        <h2 class="text-sm sm:text-base md:text-lg font-semibold text-gray-800">درباره حلقه</h2>
                     </div>
 
-                    <!-- Capacity -->
-                    <div>
-                        <div class="text-sm text-gray-500 mb-1">ظرفیت</div>
-
-                        {% if circle.capacity %}
-                            {% set percent = ((circle.current_members / circle.capacity) * 100)|int %}
+                    <div class="text-gray-600 text-xs sm:text-sm md:text-base leading-relaxed">
+                        {% if circle.description %}
+                            {{ circle.description|replace('\n', '<br>')|safe }}
                         {% else %}
-                            {% set percent = 0 %}
+                            <div class="text-center py-6 sm:py-8 md:py-10 text-gray-400">
+                                <i class="fas fa-file-alt text-2xl sm:text-3xl mb-2 block"></i>
+                                <p class="text-xs sm:text-sm">توضیحی ثبت نشده است.</p>
+                            </div>
                         {% endif %}
+                    </div>
+                </div>
 
-                        <div class="flex items-center">
-                            <div class="flex-grow bg-gray-200 rounded-full h-2 ml-3 overflow-hidden">
-                                <div class="bg-green-600 h-2 rounded-full transition-all duration-500 progress-bar"
-                                     data-percent="{{ percent }}">
+            </div>
+
+            <!-- سایدبار (1/3 در دسکتاپ) -->
+            <div class="space-y-4 sm:space-y-5 md:space-y-6">
+
+                <!-- اطلاعات حلقه -->
+                <div class="bg-white rounded-xl sm:rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-5 md:p-6">
+                    <div class="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4 pb-2 sm:pb-3 border-b border-gray-100">
+                        <div class="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 bg-green-100 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-chart-simple text-green-600 text-xs sm:text-sm"></i>
+                        </div>
+                        <h2 class="text-sm sm:text-base md:text-lg font-semibold text-gray-800">اطلاعات حلقه</h2>
+                    </div>
+
+                    <div class="space-y-4 sm:space-y-5">
+
+                        <!-- زمان برگزاری -->
+                        <div class="flex items-start gap-2 sm:gap-3">
+                            <i class="fas fa-clock text-green-600 text-sm sm:text-base mt-0.5 w-4 sm:w-5"></i>
+                            <div class="flex-1">
+                                <div class="text-[10px] sm:text-xs text-gray-400 uppercase tracking-wide">زمان برگزاری</div>
+                                <div class="font-medium text-gray-800 text-sm sm:text-base">{{ circle.days_of_week or 'نامشخص' }}</div>
+                                <div class="text-xs sm:text-sm text-gray-500 mt-0.5">
+                                    {{ circle.start_time or '--' }} تا {{ circle.end_time or '--' }}
                                 </div>
                             </div>
-                            <span class="text-sm font-medium whitespace-nowrap">
-                                {{ circle.current_members }}/{{ circle.capacity if circle.capacity else '∞' }}
-                            </span>
-                        </div>
-                    </div>
-
-                    <!-- Files -->
-                    <div>
-                        <div class="flex justify-between items-center mb-2">
-                            <div class="text-sm text-gray-500">فایل‌ها</div>
                         </div>
 
-                        {% if circle.files %}
-                            <ul class="space-y-2">
-                                {% for file in circle.files %}
-                                    <li class="flex justify-between items-center bg-gray-50 p-2 rounded-lg">
-                                        <a href="{{ url_for('circles.download_file', file_id=file.id) }}"
-                                           class="text-blue-600 hover:underline text-sm">
-                                            {{ file.filename }}
-                                        </a>
-                                    </li>
-                                {% endfor %}
-                            </ul>
-                        {% else %}
-                            <div class="text-sm text-gray-400">
-                                فایلی وجود ندارد.
+                        <!-- ظرفیت -->
+                        <div class="flex items-start gap-2 sm:gap-3">
+                            <i class="fas fa-users-viewfinder text-green-600 text-sm sm:text-base mt-0.5 w-4 sm:w-5"></i>
+                            <div class="flex-1">
+                                <div class="text-[10px] sm:text-xs text-gray-400 uppercase tracking-wide">ظرفیت</div>
+                                {% if circle.capacity %}
+                                    {% set percent = ((circle.current_members / circle.capacity) * 100)|int %}
+                                {% else %}
+                                    {% set percent = 0 %}
+                                {% endif %}
+                                <div class="flex items-center gap-2 sm:gap-3 mb-1.5">
+                                    <div class="flex-grow bg-gray-100 rounded-full h-1.5 sm:h-2 overflow-hidden">
+                                        <div class="bg-gradient-to-r from-green-500 to-teal-500 h-1.5 sm:h-2 rounded-full transition-all progress-bar"
+                                             data-percent="{{ percent }}">
+                                        </div>
+                                    </div>
+                                    <span class="text-xs sm:text-sm font-medium text-gray-700 whitespace-nowrap">
+                                        {{ circle.current_members }}/{{ circle.capacity if circle.capacity else '∞' }}
+                                    </span>
+                                </div>
+                                <div class="text-[10px] sm:text-xs text-gray-400">
+                                    {{ (100 - percent) if circle.capacity else 'نامحدود' }}% ظرفیت خالی
+                                </div>
                             </div>
-                        {% endif %}
+                        </div>
+
+                        <!-- فایل‌ها -->
+                        <div class="flex items-start gap-2 sm:gap-3">
+                            <i class="fas fa-paperclip text-green-600 text-sm sm:text-base mt-0.5 w-4 sm:w-5"></i>
+                            <div class="flex-1">
+                                <div class="text-[10px] sm:text-xs text-gray-400 uppercase tracking-wide mb-2 sm:mb-3">فایل‌ها</div>
+                                {% if circle.files %}
+                                    <div class="space-y-1.5 sm:space-y-2">
+                                        {% for file in circle.files %}
+                                            <a href="{{ url_for('circles.download_file', file_id=file.id) }}"
+                                               class="flex items-center gap-2 p-2 sm:p-2.5 bg-gray-50 rounded-lg hover:bg-green-50 transition-all duration-150 group">
+                                                <i class="fas fa-file-pdf text-green-600 text-sm sm:text-base"></i>
+                                                <span class="flex-1 text-gray-700 truncate text-xs sm:text-sm">{{ file.filename }}</span>
+                                                <i class="fas fa-download text-gray-400 text-[10px] sm:text-xs opacity-0 group-hover:opacity-100 transition-opacity"></i>
+                                            </a>
+                                        {% endfor %}
+                                    </div>
+                                {% else %}
+                                    <div class="text-center py-4 sm:py-6 text-gray-400 bg-gray-50 rounded-lg">
+                                        <i class="fas fa-folder-open text-lg sm:text-xl mb-1 block"></i>
+                                        <p class="text-[10px] sm:text-xs">فایلی وجود ندارد</p>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
                     </div>
-
                 </div>
-            </div>
 
+                <!-- کارت اضافی در موبایل (اختیاری) -->
+                <div class="hidden lg:block">
+                    <!-- فضای خالی برای symmetry -->
+                </div>
+
+            </div>
         </div>
     </div>
 </div>
 
-<!-- Progress Bar Script (No CSS Errors) -->
 <script>
 document.addEventListener("DOMContentLoaded", function () {
+    // پروگرس بار
     document.querySelectorAll(".progress-bar").forEach(function (bar) {
         const percent = bar.getAttribute("data-percent");
-        bar.style.width = percent + "%";
+        if (percent) {
+            bar.style.width = percent + "%";
+        }
     });
 });
 </script>
+
+<style>
+    .progress-bar {
+        transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    /* بهبود اسکرول در موبایل */
+    @media (max-width: 640px) {
+        .truncate {
+            max-width: 150px;
+        }
+    }
+</style>
 
 {% endblock %}

@@ -4,11 +4,13 @@
 {% block title %}کاربران در انتظار تأیید - سِراج{% endblock %}
 
 {% block content %}
-<div class="max-w-7xl mx-auto">
-    <div class="flex justify-between items-center mb-6">
-        <h1 class="text-2xl font-bold">کاربران در انتظار تأیید</h1>
-        <div class="flex space-x-2 space-x-reverse">
-            <select id="type-filter" class="border rounded-lg px-4 py-2" onchange="filterUsers()">
+<div class="container mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
+    <!-- Header Section - Responsive -->
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+        <h1 class="text-xl sm:text-2xl font-bold text-gray-900">کاربران در انتظار تأیید</h1>
+        
+        <div class="w-full sm:w-auto">
+            <select id="type-filter" class="w-full sm:w-auto border border-gray-300 rounded-lg px-4 py-2 bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500" onchange="filterUsers()">
                 <option value="all">همه کاربران</option>
                 <option value="professor">اساتید</option>
                 <option value="staff">کارمندان</option>
@@ -17,121 +19,255 @@
     </div>
     
     {% if users.items %}
-        <div class="bg-white rounded-lg shadow overflow-hidden">
-            <table class="min-w-full divide-y divide-gray-200">
-                <thead class="bg-gray-50">
-                    <tr>
-                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">کاربر</th>
-                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">نوع کاربر</th>
-                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">اطلاعات تماس</th>
-                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">تاریخ ثبت‌نام</th>
-                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">عملیات</th>
-                    </tr>
-                </thead>
-                <tbody class="bg-white divide-y divide-gray-200">
-                    {% for user in users.items %}
-                    <tr class="hover:bg-gray-50" id="user-row-{{ user.id }}">
-                        <td class="px-6 py-4">
-                            <div class="flex items-center">
-                                <div class="flex-shrink-0 h-10 w-10 bg-gray-200 rounded-full flex items-center justify-center">
-                                    <i class="fas fa-user text-gray-500"></i>
+        <!-- Desktop Table View (Hidden on mobile) -->
+        <div class="hidden md:block bg-white rounded-lg shadow overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">کاربر</th>
+                            <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">نوع کاربر</th>
+                            <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">اطلاعات تماس</th>
+                            <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">تاریخ و ساعت ثبت‌نام</th>
+                            <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">عملیات</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        {% for user in users.items %}
+                        <tr class="hover:bg-gray-50 transition-colors duration-200" id="user-row-{{ user.id }}">
+                            <td class="px-4 py-4">
+                                <div class="flex items-center">
+                                    <div class="flex-shrink-0 h-10 w-10 bg-gradient-to-br from-gray-200 to-gray-300 rounded-full flex items-center justify-center">
+                                        <i class="fas fa-user text-gray-600"></i>
+                                    </div>
+                                    <div class="mr-3">
+                                        <div class="text-sm font-medium text-gray-900">{{ user.full_name }}</div>
+                                        <div class="text-xs text-gray-500">{{ user.username }}</div>
+                                    </div>
                                 </div>
-                                <div class="mr-4">
-                                    <div class="text-sm font-medium text-gray-900">{{ user.full_name }}</div>
-                                    <div class="text-sm text-gray-500">{{ user.username }}</div>
+                            </td>
+                            <td class="px-4 py-4">
+                                {% if user.user_type == 'professor' %}
+                                    <div class="flex flex-col gap-1">
+                                        <span class="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs w-fit">استاد</span>
+                                        {% if user.academic_rank %}
+                                        <div class="text-xs text-gray-600">{{ user.get_academic_rank_display() }}</div>
+                                        {% endif %}
+                                        {% if user.specialization %}
+                                        <div class="text-xs text-gray-500">{{ user.specialization }}</div>
+                                        {% endif %}
+                                    </div>
+                                {% elif user.user_type == 'staff' %}
+                                    <div class="flex flex-col gap-1">
+                                        <span class="px-2 py-1 bg-purple-100 text-purple-800 rounded-full text-xs w-fit">کارمند</span>
+                                        {% if user.position %}
+                                        <div class="text-xs text-gray-600">{{ user.position }}</div>
+                                        {% endif %}
+                                        {% if user.department %}
+                                        <div class="text-xs text-gray-500">{{ user.department }}</div>
+                                        {% endif %}
+                                    </div>
+                                {% endif %}
+                            </td>
+                            <td class="px-4 py-4">
+                                <div class="text-sm text-gray-900">{{ user.email }}</div>
+                                <div class="text-sm text-gray-500">{{ user.phone }}</div>
+                            </td>
+                            <td class="px-4 py-4">
+                                <div class="text-sm text-gray-900 font-medium">
+                                    {{ user.created_at|persian_datetime("%Y/%m/%d") }}
                                 </div>
+                                <div class="text-xs text-gray-500 flex items-center gap-1 mt-1">
+                                    <i class="fas fa-clock text-gray-400"></i>
+                                    <span class="font-mono">{{ user.created_at|persian_datetime("%H:%M:%S") }}</span>
+                                </div>
+                            </td>
+                            <td class="px-4 py-4 text-sm">
+                                <div class="flex space-x-2 space-x-reverse">
+                                    <a href="{{ url_for('admin_user_detail', user_id=user.id) }}" 
+                                       class="text-blue-600 hover:text-blue-900 transition-colors duration-200 p-2 rounded-full hover:bg-blue-50" 
+                                       title="مشاهده جزئیات">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <button class="verify-btn text-green-600 hover:text-green-900 transition-colors duration-200 p-2 rounded-full hover:bg-green-50" 
+                                            title="تأیید کاربر"
+                                            data-user-id="{{ user.id }}">
+                                        <i class="fas fa-check"></i>
+                                    </button>
+                                    <button class="reject-btn text-red-600 hover:text-red-900 transition-colors duration-200 p-2 rounded-full hover:bg-red-50" 
+                                            title="رد درخواست"
+                                            data-user-id="{{ user.id }}"
+                                            data-user-name="{{ user.full_name }}">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Mobile Card View (Visible on mobile & tablet) -->
+        <div class="md:hidden space-y-4">
+            {% for user in users.items %}
+            <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300">
+                <div class="p-4 border-b border-gray-100">
+                    <div class="flex items-center justify-between mb-3">
+                        <div class="flex items-center">
+                            <div class="h-12 w-12 bg-gradient-to-br from-gray-200 to-gray-300 rounded-full flex items-center justify-center">
+                                <i class="fas fa-user text-gray-600 text-lg"></i>
                             </div>
-                        </td>
-                        <td class="px-6 py-4">
-                            {% if user.user_type == 'professor' %}
-                                <span class="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs">استاد</span>
-                                {% if user.academic_rank %}
-                                <div class="text-xs text-gray-500 mt-1">{{ user.get_academic_rank_display() }}</div>
-                                {% endif %}
-                                {% if user.specialization %}
-                                <div class="text-xs text-gray-500">{{ user.specialization }}</div>
-                                {% endif %}
-                            {% elif user.user_type == 'staff' %}
-                                <span class="px-2 py-1 bg-purple-100 text-purple-800 rounded-full text-xs">کارمند</span>
-                                {% if user.position %}
-                                <div class="text-xs text-gray-500 mt-1">{{ user.position }}</div>
-                                {% endif %}
-                                {% if user.department %}
-                                <div class="text-xs text-gray-500">{{ user.department }}</div>
-                                {% endif %}
+                            <div class="mr-3">
+                                <h3 class="font-bold text-gray-900">{{ user.full_name }}</h3>
+                                <p class="text-xs text-gray-500">{{ user.username }}</p>
+                            </div>
+                        </div>
+                        <div class="flex gap-2">
+                            <a href="{{ url_for('admin_user_detail', user_id=user.id) }}" 
+                               class="text-blue-600 p-2">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                            <button class="verify-btn text-green-600 p-2" data-user-id="{{ user.id }}">
+                                <i class="fas fa-check"></i>
+                            </button>
+                            <button class="reject-btn text-red-600 p-2" 
+                                    data-user-id="{{ user.id }}"
+                                    data-user-name="{{ user.full_name }}">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- User Type Badge -->
+                    <div class="mb-3">
+                        {% if user.user_type == 'professor' %}
+                            <span class="inline-block px-3 py-1 bg-green-100 text-green-800 rounded-full text-xs font-semibold">استاد</span>
+                            {% if user.academic_rank %}
+                            <p class="text-sm text-gray-700 mt-2"><span class="font-medium">مرتبه علمی:</span> {{ user.get_academic_rank_display() }}</p>
                             {% endif %}
-                        </td>
-                        <td class="px-6 py-4">
-                            <div class="text-sm text-gray-900">{{ user.email }}</div>
-                            <div class="text-sm text-gray-500">{{ user.phone }}</div>
-                        </td>
-                        <td class="px-6 py-4 text-sm text-gray-500">
-                            {{ user.created_at|persian_datetime }}
-                        </td>
-                        <td class="px-6 py-4 text-sm font-medium">
-                            <div class="flex space-x-2 space-x-reverse">
-                                <a href="{{ url_for('admin_user_detail', user_id=user.id) }}" 
-                                   class="text-blue-600 hover:text-blue-900 ml-3" title="مشاهده جزئیات">
-                                    <i class="fas fa-eye"></i>
-                                </a>
-                                <button class="verify-btn text-green-600 hover:text-green-900 ml-3" title="تأیید کاربر"
-                                        data-user-id="{{ user.id }}">
-                                    <i class="fas fa-check"></i>
-                                </button>
-                                <button class="reject-btn text-red-600 hover:text-red-900" title="رد درخواست"
-                                        data-user-id="{{ user.id }}"
-                                        data-user-name="{{ user.full_name }}">
-                                    <i class="fas fa-times"></i>
-                                </button>
-                            </div>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+                            {% if user.specialization %}
+                            <p class="text-sm text-gray-700 mt-1"><span class="font-medium">تخصص:</span> {{ user.specialization }}</p>
+                            {% endif %}
+                        {% elif user.user_type == 'staff' %}
+                            <span class="inline-block px-3 py-1 bg-purple-100 text-purple-800 rounded-full text-xs font-semibold">کارمند</span>
+                            {% if user.position %}
+                            <p class="text-sm text-gray-700 mt-2"><span class="font-medium">سمت:</span> {{ user.position }}</p>
+                            {% endif %}
+                            {% if user.department %}
+                            <p class="text-sm text-gray-700 mt-1"><span class="font-medium">بخش:</span> {{ user.department }}</p>
+                            {% endif %}
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Contact Info -->
+                    <div class="space-y-2 pt-2 border-t border-gray-100">
+                        <div class="flex items-center text-sm">
+                            <i class="fas fa-envelope text-gray-400 w-5"></i>
+                            <span class="mr-2 text-gray-700">{{ user.email }}</span>
+                        </div>
+                        <div class="flex items-center text-sm">
+                            <i class="fas fa-phone text-gray-400 w-5"></i>
+                            <span class="mr-2 text-gray-700">{{ user.phone }}</span>
+                        </div>
+                        <div class="flex items-center text-sm">
+                            <i class="fas fa-calendar text-gray-400 w-5"></i>
+                            <span class="mr-2 text-gray-700">{{ user.created_at|persian_datetime("%Y/%m/%d") }}</span>
+                        </div>
+                        <div class="flex items-center text-sm">
+                            <i class="fas fa-clock text-gray-400 w-5"></i>
+                            <span class="mr-2 text-gray-600 font-mono">{{ user.created_at|persian_datetime("%H:%M:%S") }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
         </div>
         
-        <!-- Pagination -->
+        <!-- Pagination - Responsive -->
         {% if users.pages > 1 %}
         <div class="flex justify-center mt-6">
-            <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px">
-                {% for page in range(1, users.pages + 1) %}
-                    <a href="{{ url_for('admin_pending_users', page=page, type=user_type) }}" 
-                       class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 {% if page == users.page %}bg-blue-50 text-blue-600{% endif %}">
-                        {{ page }}
-                    </a>
+            <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+                {% if users.has_prev %}
+                <a href="{{ url_for('admin_pending_users', page=users.prev_num, type=user_type) }}" 
+                   class="relative inline-flex items-center px-2 sm:px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 rounded-r-md">
+                    <span class="sr-only">قبلی</span>
+                    <i class="fas fa-chevron-right"></i>
+                    <span class="hidden sm:inline mr-1">قبلی</span>
+                </a>
+                {% endif %}
+                
+                {% for page_num in users.iter_pages(left_edge=2, left_current=2, right_current=3, right_edge=2) %}
+                    {% if page_num %}
+                        {% if page_num == users.page %}
+                            <a href="{{ url_for('admin_pending_users', page=page_num, type=user_type) }}" 
+                               class="relative inline-flex items-center px-3 sm:px-4 py-2 border border-gray-300 bg-blue-50 text-blue-600 text-sm font-medium">
+                                {{ page_num }}
+                            </a>
+                        {% else %}
+                            <a href="{{ url_for('admin_pending_users', page=page_num, type=user_type) }}" 
+                               class="hidden sm:inline-flex relative items-center px-3 sm:px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">
+                                {{ page_num }}
+                            </a>
+                        {% endif %}
+                    {% else %}
+                        <span class="relative inline-flex items-center px-3 sm:px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700">
+                            ...
+                        </span>
+                    {% endif %}
                 {% endfor %}
+                
+                {% if users.has_next %}
+                <a href="{{ url_for('admin_pending_users', page=users.next_num, type=user_type) }}" 
+                   class="relative inline-flex items-center px-2 sm:px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 rounded-l-md">
+                    <span class="hidden sm:inline ml-1">بعدی</span>
+                    <i class="fas fa-chevron-left"></i>
+                    <span class="sr-only">بعدی</span>
+                </a>
+                {% endif %}
             </nav>
         </div>
         {% endif %}
     {% else %}
-        <div class="bg-white rounded-lg shadow p-8 text-center">
-            <i class="fas fa-check-circle text-green-500 text-5xl mb-4"></i>
-            <h3 class="text-lg font-medium text-gray-900 mb-2">کاربری در انتظار تأیید نیست</h3>
-            <p class="text-gray-500">همه درخواست‌ها بررسی شده‌اند.</p>
+        <!-- Empty State - Responsive -->
+        <div class="bg-white rounded-lg shadow-lg p-6 sm:p-8 md:p-12 text-center">
+            <div class="inline-flex items-center justify-center w-16 h-16 sm:w-20 sm:h-20 bg-green-100 rounded-full mb-4">
+                <i class="fas fa-check-circle text-green-500 text-3xl sm:text-4xl"></i>
+            </div>
+            <h3 class="text-lg sm:text-xl font-medium text-gray-900 mb-2">کاربری در انتظار تأیید نیست</h3>
+            <p class="text-sm sm:text-base text-gray-500">همه درخواست‌ها بررسی شده‌اند.</p>
         </div>
     {% endif %}
 </div>
 
-<!-- Modal برای رد درخواست -->
-<div id="rejectModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden items-center justify-center z-50">
-    <div class="bg-white rounded-lg p-6 max-w-md w-full">
-        <h3 class="text-lg font-bold mb-4">رد درخواست کاربر</h3>
-        <p class="mb-4">آیا از رد درخواست <span id="rejectUserName" class="font-bold"></span> اطمینان دارید؟</p>
+<!-- Modal for Reject Request - Responsive -->
+<div id="rejectModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden items-center justify-center z-50 p-4">
+    <div class="bg-white rounded-lg p-4 sm:p-6 max-w-md w-full mx-4 shadow-xl transform transition-all">
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="text-lg sm:text-xl font-bold text-gray-900">رد درخواست کاربر</h3>
+            <button onclick="closeRejectModal()" class="text-gray-400 hover:text-gray-600 transition-colors">
+                <i class="fas fa-times text-xl"></i>
+            </button>
+        </div>
+        
+        <p class="mb-4 text-gray-700">آیا از رد درخواست <span id="rejectUserName" class="font-bold text-red-600"></span> اطمینان دارید؟</p>
         
         <form id="rejectForm" method="POST">
             <div class="mb-4">
                 <label class="block text-sm font-medium text-gray-700 mb-2">دلیل رد (اختیاری)</label>
-                <textarea name="reason" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-lg"></textarea>
+                <textarea name="reason" rows="3" 
+                          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 resize-none"
+                          placeholder="لطفاً دلیل رد درخواست را وارد کنید..."></textarea>
             </div>
             
-            <div class="flex justify-end space-x-2 space-x-reverse">
+            <div class="flex flex-col sm:flex-row justify-end gap-2 sm:space-x-2 sm:space-x-reverse">
                 <button type="button" onclick="closeRejectModal()" 
-                        class="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400">
+                        class="w-full sm:w-auto px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors duration-200 order-2 sm:order-1">
                     انصراف
                 </button>
                 <button type="submit" 
-                        class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">
+                        class="w-full sm:w-auto px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors duration-200 order-1 sm:order-2">
                     تأیید و رد
                 </button>
             </div>
@@ -140,16 +276,25 @@
 </div>
 
 <script>
-// متغیرهای سراسری
+// Global variables
 let currentUserId = null;
 
 function filterUsers() {
     const type = document.getElementById('type-filter').value;
-    window.location.href = "{{ url_for('admin_pending_users') }}?type=" + type;
+    const url = new URL(window.location.href);
+    url.searchParams.set('type', type);
+    url.searchParams.set('page', '1');
+    window.location.href = url.toString();
 }
 
 function verifyUser(userId) {
     if (confirm('آیا از تأیید این کاربر اطمینان دارید؟')) {
+        // Show loading state
+        const btn = event.currentTarget;
+        const originalHtml = btn.innerHTML;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+        btn.disabled = true;
+        
         fetch(`/admin/user/verify/${userId}`, {
             method: 'POST',
             headers: {
@@ -159,14 +304,22 @@ function verifyUser(userId) {
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                window.location.reload();
+                // Show success message
+                showToast('کاربر با موفقیت تأیید شد', 'success');
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1500);
             } else {
-                alert(data.message || 'خطا در تأیید کاربر');
+                showToast(data.message || 'خطا در تأیید کاربر', 'error');
+                btn.innerHTML = originalHtml;
+                btn.disabled = false;
             }
         })
         .catch(error => {
             console.error('Error:', error);
-            alert('خطا در ارتباط با سرور');
+            showToast('خطا در ارتباط با سرور', 'error');
+            btn.innerHTML = originalHtml;
+            btn.disabled = false;
         });
     }
 }
@@ -177,25 +330,55 @@ function showRejectModal(userId, userName) {
     document.getElementById('rejectForm').action = `/admin/user/reject/${userId}`;
     document.getElementById('rejectModal').classList.remove('hidden');
     document.getElementById('rejectModal').classList.add('flex');
+    document.body.style.overflow = 'hidden'; // Prevent background scroll
 }
 
 function closeRejectModal() {
     document.getElementById('rejectModal').classList.add('hidden');
     document.getElementById('rejectModal').classList.remove('flex');
     document.getElementById('rejectForm').reset();
+    document.body.style.overflow = ''; // Restore scroll
 }
 
-// راه‌اندازی event listeners بعد از لود صفحه
+function showToast(message, type = 'success') {
+    // Create toast element
+    const toast = document.createElement('div');
+    toast.className = `fixed bottom-4 left-4 right-4 sm:left-auto sm:right-4 sm:bottom-4 ${type === 'success' ? 'bg-green-500' : 'bg-red-500'} text-white px-4 py-2 rounded-lg shadow-lg z-50 transition-all duration-300 transform translate-y-full`;
+    toast.innerHTML = `
+        <div class="flex items-center gap-2">
+            <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i>
+            <span>${message}</span>
+        </div>
+    `;
+    document.body.appendChild(toast);
+    
+    // Animate in
+    setTimeout(() => {
+        toast.classList.remove('translate-y-full');
+        toast.classList.add('translate-y-0');
+    }, 10);
+    
+    // Remove after 3 seconds
+    setTimeout(() => {
+        toast.classList.remove('translate-y-0');
+        toast.classList.add('translate-y-full');
+        setTimeout(() => {
+            document.body.removeChild(toast);
+        }, 300);
+    }, 3000);
+}
+
+// Setup event listeners after page load
 document.addEventListener('DOMContentLoaded', function() {
-    // event listeners برای دکمه‌های تأیید
+    // Event listeners for verify buttons
     document.querySelectorAll('.verify-btn').forEach(button => {
-        button.addEventListener('click', function() {
+        button.addEventListener('click', function(e) {
             const userId = this.dataset.userId;
             verifyUser(userId);
         });
     });
     
-    // event listeners برای دکمه‌های رد
+    // Event listeners for reject buttons
     document.querySelectorAll('.reject-btn').forEach(button => {
         button.addEventListener('click', function() {
             const userId = this.dataset.userId;
@@ -204,7 +387,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
     
-    // بستن مودال با کلیک روی پس‌زمینه
+    // Close modal when clicking on background
     const modal = document.getElementById('rejectModal');
     if (modal) {
         modal.addEventListener('click', function(e) {
@@ -214,20 +397,54 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    // بستن مودال با کلید ESC
+    // Close modal with ESC key
     document.addEventListener('keydown', function(e) {
         if (e.key === 'Escape') {
             closeRejectModal();
         }
     });
+    
+    // Responsive touch improvements
+    if ('ontouchstart' in window) {
+        // Add active states for touch devices
+        document.querySelectorAll('.verify-btn, .reject-btn, a').forEach(el => {
+            el.addEventListener('touchstart', function() {
+                this.classList.add('opacity-70');
+            });
+            el.addEventListener('touchend', function() {
+                this.classList.remove('opacity-70');
+            });
+        });
+    }
 });
 </script>
 
 <style>
-.hidden {
-    display: none !important;
+/* Custom responsive styles */
+@media (max-width: 768px) {
+    .container {
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+    
+    /* Improved touch targets on mobile */
+    .verify-btn, .reject-btn, a[href] {
+        min-height: 44px;
+        min-width: 44px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
 }
 
+/* Smooth transitions */
+.transition-all {
+    transition-property: all;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    transition-duration: 300ms;
+}
+
+/* Modal animation */
 #rejectModal {
     transition: opacity 0.3s ease;
 }
@@ -241,14 +458,41 @@ document.addEventListener('DOMContentLoaded', function() {
     pointer-events: none;
 }
 
-/* استایل برای دکمه‌ها */
-.verify-btn, .reject-btn {
+/* Hover effects */
+.verify-btn, .reject-btn, a {
     cursor: pointer;
     transition: all 0.2s ease;
 }
 
-.verify-btn:hover, .reject-btn:hover {
-    transform: scale(1.1);
+.verify-btn:active, .reject-btn:active, a:active {
+    transform: scale(0.95);
+}
+
+/* Scrollbar styling for better mobile experience */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
+}
+
+/* Font for time display */
+.font-mono {
+    font-family: monospace;
+    direction: ltr;
+    display: inline-block;
 }
 </style>
 {% endblock %}

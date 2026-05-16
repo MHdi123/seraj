@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+
+{% block title %}{{ qa.question }} | سِراج‌یار{% endblock %}
+
+{% block head %}
+<style>
+    .answer-content {
+        line-height: 1.7;
+    }
+    .answer-content p {
+        margin-bottom: 0.75rem;
+    }
+    .answer-content strong {
+        color: #059669;
+    }
+    .verse-box {
+        background: #fef3c7;
+        border-right: 3px solid #d97706;
+        border-radius: 0.5rem;
+        padding: 12px;
+        margin: 12px 0;
+    }
+    .line-clamp-1 {
+        display: -webkit-box;
+        -webkit-line-clamp: 1;
+        line-clamp: 1;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto px-4 py-6">
+    
+    <div class="mb-4">
+        <a href="{% if qa.category %}{{ url_for('seraj_yari_category', slug=qa.category.slug) }}{% else %}{{ url_for('seraj_yari') }}{% endif %}" 
+           class="inline-flex items-center gap-1 text-gray-500 hover:text-emerald-600 transition text-sm">
+            <i class="fas fa-arrow-right"></i>
+            <span>بازگشت</span>
+        </a>
+    </div>
+
+    <div class="bg-white rounded-xl border border-gray-100 overflow-hidden">
+        
+        <div class="p-4 border-b border-gray-100">
+            <div class="flex items-center gap-2 mb-2 flex-wrap">
+                {% if qa.category %}
+                <a href="{{ url_for('seraj_yari_category', slug=qa.category.slug) }}" 
+                   class="text-xs bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full">
+                    <i class="fas {{ qa.category.icon }} ml-1"></i> {{ qa.category.name }}
+                </a>
+                {% endif %}
+                <span class="text-xs text-gray-400"><i class="fas fa-eye ml-1"></i> {{ qa.view_count }}</span>
+                <span class="text-xs text-gray-400"><i class="fas fa-calendar ml-1"></i> {{ qa.created_at.strftime('%Y/%m/%d') }}</span>
+            </div>
+            <h1 class="text-lg font-bold text-gray-800">{{ qa.question }}</h1>
+        </div>
+
+        <div class="p-4">
+            <div class="flex items-start gap-2">
+                <div class="w-7 h-7 bg-emerald-500 rounded-full flex items-center justify-center shrink-0">
+                    <i class="fas fa-robot text-white text-xs"></i>
+                </div>
+                <div class="flex-1">
+                    <h3 class="font-bold text-gray-700 text-sm mb-1">پاسخ:</h3>
+                    <div class="answer-content text-gray-700 text-sm leading-relaxed">
+                        {{ qa.answer|safe }}
+                    </div>
+                </div>
+            </div>
+
+            {% if qa.source %}
+            <div class="mt-3 pt-2 border-t border-gray-100">
+                <div class="flex items-center gap-2 text-xs text-gray-500">
+                    <i class="fas fa-book"></i>
+                    <span>منبع: {{ qa.source }}</span>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="p-3 bg-gray-50 border-t border-gray-100 flex justify-center gap-2">
+            <form action="{{ url_for('seraj_yari_feedback') }}" method="POST" class="inline">
+                <input type="hidden" name="qa_id" value="{{ qa.id }}">
+                <input type="hidden" name="was_helpful" value="true">
+                <button type="submit" class="px-3 py-1.5 bg-green-100 text-green-700 rounded-lg text-xs">
+                    <i class="fas fa-thumbs-up ml-1"></i> مفید
+                </button>
+            </form>
+            <form action="{{ url_for('seraj_yari_feedback') }}" method="POST" class="inline">
+                <input type="hidden" name="qa_id" value="{{ qa.id }}">
+                <input type="hidden" name="was_helpful" value="false">
+                <button type="submit" class="px-3 py-1.5 bg-red-100 text-red-700 rounded-lg text-xs">
+                    <i class="fas fa-thumbs-down ml-1"></i> ناقص
+                </button>
+            </form>
+        </div>
+    </div>
+
+    {% if similar %}
+    <div class="mt-6">
+        <h3 class="font-bold text-gray-700 text-sm mb-3">📌 سوالات مشابه</h3>
+        <div class="space-y-2">
+            {% for s in similar[:5] %}
+            <a href="{{ url_for('seraj_yari_question_detail', qa_id=s.id) }}" 
+               class="block p-2 bg-white rounded-lg border border-gray-100 hover:border-emerald-200 transition group">
+                <p class="font-medium text-gray-800 group-hover:text-emerald-600 transition text-sm">
+                    {{ s.question }}
+                </p>
+                <p class="text-gray-500 text-xs mt-1 line-clamp-1">
+                    {{ s.answer|striptags|truncate(60) }}
+                </p>
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="mt-6 bg-emerald-50 rounded-lg p-4 text-center">
+        <i class="fas fa-comment-dots text-emerald-600 text-xl mb-2 block"></i>
+        <h3 class="font-bold text-gray-800 text-sm mb-1">سوال دیگری دارید؟</h3>
+        <a href="{{ url_for('seraj_yari') }}" class="inline-flex items-center gap-1 bg-emerald-600 text-white px-4 py-1.5 rounded-lg text-sm hover:bg-emerald-700 transition">
+            <i class="fas fa-paper-plane"></i> شروع گفتگو
+        </a>
+    </div>
+</div>
+{% endblock %}

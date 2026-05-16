@@ -1,0 +1,159 @@
+{% extends "base.html" %}
+
+{% block title %}{{ article.title }} - معارف اسلامی | سِراج{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-3 sm:px-4 py-4 sm:py-6 md:py-8">
+    
+    <!-- ========== مسیر (Breadcrumb) ========== -->
+    <div class="flex items-center gap-2 text-sm text-gray-500 mb-4 flex-wrap">
+        <a href="{{ url_for('maaref_index') }}" class="hover:text-emerald-600 transition">معارف اسلامی</a>
+        <i class="fas fa-chevron-left text-xs"></i>
+        <a href="{{ url_for('maaref_category', slug=article.category.slug) }}" class="hover:text-emerald-600 transition">{{ article.category.name }}</a>
+        <i class="fas fa-chevron-left text-xs"></i>
+        <span class="text-emerald-600">{{ article.title|truncate(30) }}</span>
+    </div>
+
+    <!-- ========== هدر مقاله ========== -->
+    <div class="mb-6 text-right">
+        <div class="flex flex-wrap gap-2 mb-3">
+            <span class="px-2 py-0.5 rounded-full text-xs" style="background-color: #ecfdf5; color: #059669;">
+                {{ {'beginner': 'مقدماتی', 'intermediate': 'متوسط', 'advanced': 'پیشرفته'}[article.level] or article.level }}
+            </span>
+            {% if article.tags %}
+                {% for tag in article.tags.split(',')[:3] %}
+                <span class="px-2 py-0.5 rounded-full bg-gray-100 text-gray-500 text-xs">
+                    {{ tag.strip() }}
+                </span>
+                {% endfor %}
+            {% endif %}
+        </div>
+        
+        <h1 class="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-gray-800 leading-tight">{{ article.title }}</h1>
+        
+        <div class="flex flex-wrap items-center gap-3 mt-3 text-xs text-gray-400">
+            <span><i class="fas fa-eye ml-1"></i> {{ article.view_count }} بازدید</span>
+            <span>•</span>
+            <span><i class="fas fa-calendar-alt ml-1"></i> {{ article.created_at|persian_date if article.created_at else '۱۴۰۴' }}</span>
+            {% if article.updated_at and article.updated_at != article.created_at %}
+            <span>•</span>
+            <span><i class="fas fa-edit ml-1"></i> آخرین ویرایش: {{ article.updated_at|persian_date }}</span>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- ========== محتوای اصلی ========== -->
+    <div class="prose prose-sm sm:prose-base md:prose-lg max-w-none text-right" style="color: #374151; line-height: 1.8;">
+        {{ article.content|safe }}
+    </div>
+
+    <!-- ========== برچسب‌ها ========== -->
+    {% if article.tags %}
+    <div class="mt-6 pt-4 border-t border-gray-100">
+        <div class="flex flex-wrap items-center gap-2">
+            <span class="text-sm text-gray-500">برچسب‌ها:</span>
+            {% for tag in article.tags.split(',') %}
+            <a href="{{ url_for('maaref_index') }}?tag={{ tag.strip() }}" 
+               class="px-2 py-1 rounded-full bg-gray-100 text-gray-600 text-xs hover:bg-emerald-100 hover:text-emerald-600 transition">
+                {{ tag.strip() }}
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- ========== مطالب مرتبط ========== -->
+    {% if related %}
+    <div class="mt-8 pt-4 border-t border-gray-100">
+        <h3 class="text-base sm:text-lg font-semibold text-gray-800 mb-3">مطالب مرتبط</h3>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {% for rel in related %}
+            <a href="{{ url_for('maaref_detail', article_id=rel.id) }}" class="block group">
+                <div class="p-3 rounded-lg bg-gray-50 hover:bg-emerald-50 transition">
+                    <h4 class="text-sm font-medium text-gray-700 group-hover:text-emerald-600 line-clamp-2">{{ rel.title }}</h4>
+                    <p class="text-xs text-gray-500 mt-1 line-clamp-1">{{ rel.excerpt|truncate(60) }}</p>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- ========== دکمه بازگشت ========== -->
+    <div class="mt-6 text-center">
+        <a href="{{ url_for('maaref_category', slug=article.category.slug) }}" 
+           class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-emerald-50 text-emerald-600 text-sm hover:bg-emerald-100 transition">
+            <i class="fas fa-arrow-right"></i>
+            بازگشت به {{ article.category.name }}
+        </a>
+    </div>
+</div>
+
+<style>
+.prose p {
+    margin-bottom: 1.25em;
+    line-height: 1.8;
+}
+.prose h1, .prose h2, .prose h3, .prose h4 {
+    margin-top: 1.5em;
+    margin-bottom: 0.75em;
+    font-weight: 600;
+}
+.prose h2 {
+    font-size: 1.5em;
+    color: #059669;
+}
+.prose h3 {
+    font-size: 1.25em;
+}
+.prose ul, .prose ol {
+    margin-right: 1.5em;
+    margin-bottom: 1em;
+}
+.prose li {
+    margin-bottom: 0.25em;
+}
+.prose blockquote {
+    border-right: 4px solid #059669;
+    padding-right: 1em;
+    margin: 1em 0;
+    font-style: italic;
+    color: #4b5563;
+}
+.prose img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 0.5rem;
+    margin: 1em 0;
+}
+.prose a {
+    color: #059669;
+    text-decoration: underline;
+}
+.prose a:hover {
+    color: #047857;
+}
+.line-clamp-1 {
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+.line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+@media (max-width: 640px) {
+    .prose {
+        font-size: 0.875rem;
+    }
+    .prose h2 {
+        font-size: 1.25rem;
+    }
+}
+</style>
+{% endblock %}

@@ -1,0 +1,184 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title }} - سیراج{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-4 md:py-8 max-w-3xl">
+    <div class="bg-white rounded-xl shadow-sm p-4 md:p-6">
+        <h1 class="text-xl md:text-2xl font-bold text-gray-800 mb-4 md:mb-6">{{ title }}</h1>
+        
+        <form method="POST">
+            {{ form.hidden_tag() }}
+            
+            <div class="mb-4">
+                {{ form.title.label(class="block text-gray-700 mb-2 text-sm md:text-base") }}
+                {{ form.title(class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm md:text-base", placeholder="مثال: حکم نماز مسافر") }}
+            </div>
+            
+            <!-- فیلدهای دو ستونه که در موبایل یک ستونه می‌شوند -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+                <div>
+                    {{ form.category.label(class="block text-gray-700 mb-2 text-sm md:text-base") }}
+                    {{ form.category(class="w-full px-3 py-2 border rounded-lg text-sm md:text-base") }}
+                </div>
+                <div>
+                    {{ form.ruling_type.label(class="block text-gray-700 mb-2 text-sm md:text-base") }}
+                    {{ form.ruling_type(class="w-full px-3 py-2 border rounded-lg text-sm md:text-base") }}
+                </div>
+            </div>
+            
+            <div class="mb-4">
+                {{ form.short_description.label(class="block text-gray-700 mb-2 text-sm md:text-base") }}
+                {{ form.short_description(class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm md:text-base", rows=3, placeholder="توضیح مختصر درباره حکم...") }}
+            </div>
+            
+            <div class="mb-4">
+                {{ form.full_content.label(class="block text-gray-700 mb-2 text-sm md:text-base") }}
+                {{ form.full_content(class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm md:text-base", rows=10, placeholder="متن کامل حکم شرعی...") }}
+            </div>
+            
+            <!-- فیلدهای دو ستونه که در موبایل یک ستونه می‌شوند -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+                <div>
+                    {{ form.source.label(class="block text-gray-700 mb-2 text-sm md:text-base") }}
+                    {{ form.source(class="w-full px-3 py-2 border rounded-lg text-sm md:text-base", placeholder="مثال: رساله عملیه") }}
+                </div>
+                <div>
+                    {{ form.marja.label(class="block text-gray-700 mb-2 text-sm md:text-base") }}
+                    {{ form.marja(class="w-full px-3 py-2 border rounded-lg text-sm md:text-base", placeholder="مثال: آیت‌الله سیستانی") }}
+                </div>
+            </div>
+            
+            <div class="mb-6">
+                <label class="flex items-center cursor-pointer">
+                    {{ form.is_active(class="ml-2 w-4 h-4 md:w-5 md:h-5") }}
+                    <span class="text-gray-700 text-sm md:text-base">{{ form.is_active.label.text }}</span>
+                </label>
+            </div>
+            
+            <!-- دکمه‌ها در موبایل به صورت عمودی و در دسکتاپ افقی -->
+            <div class="flex flex-col sm:flex-row gap-3">
+                {{ form.submit(class="bg-blue-600 text-white px-4 md:px-6 py-2 rounded-lg hover:bg-blue-700 cursor-pointer text-sm md:text-base transition-colors") }}
+                <a href="{{ url_for('admin_ahkam') }}" class="bg-gray-300 text-gray-700 px-4 md:px-6 py-2 rounded-lg hover:bg-gray-400 text-center text-sm md:text-base transition-colors">انصراف</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+    /* بهبود استایل فیلدها در حالت فوکوس */
+    input:focus, select:focus, textarea:focus {
+        outline: none;
+    }
+    
+    /* بهبود استایل در موبایل */
+    @media (max-width: 640px) {
+        input, select, textarea {
+            font-size: 16px !important; /* جلوگیری از زوم خودکار در iOS */
+        }
+    }
+    
+    /* استایل برای placeholder */
+    ::placeholder {
+        color: #9ca3af;
+        font-size: 0.875rem;
+    }
+    
+    /* بهبود اسکرول برای textarea در موبایل */
+    textarea {
+        -webkit-appearance: none;
+        appearance: none;
+    }
+</style>
+
+<script>
+    // اضافه کردن کلاس‌های خطا برای نمایش خطاهای اعتبارسنجی
+    document.addEventListener('DOMContentLoaded', function() {
+        // پیدا کردن تمام فیلدهایی که خطا دارند
+        const errorFields = document.querySelectorAll('.is-invalid');
+        errorFields.forEach(field => {
+            field.classList.add('border-red-500', 'bg-red-50');
+            field.classList.remove('border-gray-300');
+            
+            // اضافه کردن پیام خطا
+            const errorMessage = document.createElement('p');
+            errorMessage.className = 'text-red-500 text-xs md:text-sm mt-1';
+            errorMessage.textContent = field.getAttribute('data-error') || 'این فیلد نامعتبر است';
+            field.parentNode.appendChild(errorMessage);
+        });
+    });
+    
+    // اعتبارسنجی سمت کلاینت (اختیاری)
+    function validateForm() {
+        const title = document.querySelector('input[name="title"]');
+        const category = document.querySelector('select[name="category"]');
+        const ruling_type = document.querySelector('select[name="ruling_type"]');
+        
+        if (title && !title.value.trim()) {
+            showToast('لطفاً عنوان حکم را وارد کنید', 'error');
+            title.focus();
+            return false;
+        }
+        
+        if (category && !category.value) {
+            showToast('لطفاً دسته‌بندی را انتخاب کنید', 'error');
+            category.focus();
+            return false;
+        }
+        
+        if (ruling_type && !ruling_type.value) {
+            showToast('لطفاً نوع حکم را انتخاب کنید', 'error');
+            ruling_type.focus();
+            return false;
+        }
+        
+        return true;
+    }
+    
+    // تابع نمایش نوتیفیکیشن (در صورت نیاز)
+    function showToast(message, type = 'success') {
+        const existingToast = document.querySelector('.custom-toast');
+        if (existingToast) existingToast.remove();
+
+        const colors = {
+            success: 'bg-emerald-500',
+            error: 'bg-red-500',
+            info: 'bg-blue-500',
+            warning: 'bg-amber-500'
+        };
+
+        const icons = {
+            success: 'fa-check-circle',
+            error: 'fa-exclamation-circle',
+            info: 'fa-info-circle',
+            warning: 'fa-exclamation-triangle'
+        };
+
+        const toast = document.createElement('div');
+        toast.className = `custom-toast fixed bottom-20 md:bottom-24 left-1/2 transform -translate-x-1/2 ${colors[type]} text-white px-4 py-2.5 md:px-5 md:py-3 rounded-xl shadow-lg z-[10000] flex items-center gap-2 text-sm md:text-base`;
+        toast.style.animation = 'toastAnim 2.5s ease forwards';
+        toast.innerHTML = `<i class="fas ${icons[type]}"></i> <span>${message}</span>`;
+
+        document.body.appendChild(toast);
+
+        setTimeout(() => {
+            if (toast) toast.remove();
+        }, 2500);
+    }
+    
+    // اضافه کردن استایل انیمیشن برای toast
+    if (!document.querySelector('#toast-styles')) {
+        const style = document.createElement('style');
+        style.id = 'toast-styles';
+        style.textContent = `
+            @keyframes toastAnim {
+                0% { opacity: 0; transform: translate(-50%, 20px); }
+                20% { opacity: 1; transform: translate(-50%, 0); }
+                80% { opacity: 1; transform: translate(-50%, 0); }
+                100% { opacity: 0; transform: translate(-50%, -20px); }
+            }
+        `;
+        document.head.appendChild(style);
+    }
+</script>
+{% endblock %}

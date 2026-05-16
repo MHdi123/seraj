@@ -1,0 +1,187 @@
+{% extends "admin/base_admin.html" %}
+
+{% block title %}ویرایش مطلب - معارف اسلامی{% endblock %}
+
+{% block content %}
+<div class="p-4 sm:p-6 max-w-4xl mx-auto">
+    
+    <div class="flex items-center gap-3 mb-6">
+        <a href="{{ url_for('admin_maaref_index') }}" class="text-gray-400 hover:text-gray-600 transition">
+            <i class="fas fa-arrow-right text-lg"></i>
+        </a>
+        <h1 class="text-xl sm:text-2xl font-bold text-gray-800">
+            <i class="fas fa-edit text-emerald-600 ml-2"></i> ویرایش مطلب
+        </h1>
+        <span class="text-sm text-gray-400 bg-gray-100 px-3 py-1 rounded-full">{{ article.title|truncate(30) }}</span>
+    </div>
+
+    <form method="POST" class="bg-white rounded-xl shadow-sm p-4 sm:p-6 space-y-5">
+        {{ form.csrf_token if form else '' }}
+        
+        <!-- عنوان -->
+        <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">
+                عنوان مطلب <span class="text-red-500">*</span>
+            </label>
+            <input type="text" 
+                   name="title" 
+                   id="title"
+                   value="{{ article.title }}"
+                   required
+                   class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-emerald-200 focus:border-emerald-500 outline-none transition">
+        </div>
+
+        <!-- اسلاگ -->
+        <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">
+                اسلاگ (آدرس) <span class="text-red-500">*</span>
+            </label>
+            <div class="flex items-center gap-2">
+                <span class="text-xs text-gray-400 bg-gray-100 px-2 py-2 rounded">/maaref/</span>
+                <input type="text" 
+                       name="slug" 
+                       id="slug"
+                       value="{{ article.slug }}"
+                       required
+                       dir="ltr"
+                       class="flex-1 border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-emerald-200 focus:border-emerald-500 outline-none transition">
+            </div>
+            <p class="text-xs text-gray-400 mt-1">آدرس مطلب - تغییر آن باعث تغییر لینک قبلی می‌شود</p>
+        </div>
+
+        <!-- دسته‌بندی -->
+        <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">
+                دسته‌بندی <span class="text-red-500">*</span>
+            </label>
+            <select name="category_id" required class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-emerald-200 focus:border-emerald-500 outline-none transition">
+                <option value="">انتخاب کنید</option>
+                {% for cat in categories %}
+                <option value="{{ cat.id }}" {% if article.category_id == cat.id %}selected{% endif %}>{{ cat.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <!-- خلاصه -->
+        <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">
+                خلاصه مطلب
+            </label>
+            <textarea name="summary" rows="3" 
+                      class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-emerald-200 focus:border-emerald-500 outline-none transition"
+                      placeholder="متن خلاصه مطلب...">{{ article.summary or '' }}</textarea>
+        </div>
+
+        <!-- متن کامل -->
+        <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">
+                متن کامل مطلب <span class="text-red-500">*</span>
+            </label>
+            <textarea name="content" id="content" rows="15" required
+                      class="w-full border border-gray-300 rounded-lg px-4 py-2 font-mono text-sm focus:ring-2 focus:ring-emerald-200 focus:border-emerald-500 outline-none transition">{{ article.content }}</textarea>
+            <div class="flex justify-between items-center mt-1">
+                <p class="text-xs text-gray-400">می‌توانید از تگ‌های HTML استفاده کنید</p>
+                <span class="text-xs text-gray-400" id="wordCount"></span>
+            </div>
+        </div>
+
+        <!-- سطح -->
+        <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">
+                سطح مطلب
+            </label>
+            <div class="flex flex-wrap gap-3">
+                <label class="flex items-center gap-2">
+                    <input type="radio" name="level" value="beginner" {% if article.level == 'beginner' %}checked{% endif %} class="text-emerald-600">
+                    <span class="text-sm">📗 مقدماتی</span>
+                </label>
+                <label class="flex items-center gap-2">
+                    <input type="radio" name="level" value="intermediate" {% if article.level == 'intermediate' %}checked{% endif %} class="text-emerald-600">
+                    <span class="text-sm">📘 متوسط</span>
+                </label>
+                <label class="flex items-center gap-2">
+                    <input type="radio" name="level" value="advanced" {% if article.level == 'advanced' %}checked{% endif %} class="text-emerald-600">
+                    <span class="text-sm">📕 پیشرفته</span>
+                </label>
+            </div>
+        </div>
+
+        <!-- برچسب‌ها -->
+        <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">
+                برچسب‌ها
+            </label>
+            <input type="text" 
+                   name="tags" 
+                   value="{{ article.tags or '' }}"
+                   class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-emerald-200 focus:border-emerald-500 outline-none transition"
+                   placeholder="عقاید, توحید, نبوت, معاد">
+            <p class="text-xs text-gray-400 mt-1">با کاما (,) جدا کنید</p>
+        </div>
+
+        <!-- گزینه‌ها -->
+        <div class="flex flex-wrap gap-6 pt-2">
+            <label class="flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" name="is_featured" value="true" {% if article.is_featured %}checked{% endif %} class="w-4 h-4 text-emerald-600 rounded">
+                <span class="text-sm">✨ نمایش در بخش مطالب ویژه</span>
+            </label>
+            <label class="flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" name="is_active" value="true" {% if article.is_active %}checked{% endif %} class="w-4 h-4 text-emerald-600 rounded">
+                <span class="text-sm">✅ فعال (قابل مشاهده در سایت)</span>
+            </label>
+        </div>
+
+        <!-- اطلاعات آماری -->
+        <div class="bg-gray-50 rounded-lg p-4 text-sm text-gray-600">
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                <div>
+                    <span class="text-gray-400">شناسه:</span>
+                    <span class="mr-2">{{ article.id }}</span>
+                </div>
+                <div>
+                    <span class="text-gray-400">بازدید:</span>
+                    <span class="mr-2">{{ article.view_count }}</span>
+                </div>
+                <div>
+                    <span class="text-gray-400">تاریخ ایجاد:</span>
+                    <span class="mr-2">{{ article.created_at|persian_date }}</span>
+                </div>
+                <div>
+                    <span class="text-gray-400">آخرین ویرایش:</span>
+                    <span class="mr-2">{{ article.updated_at|persian_date if article.updated_at else '-' }}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- دکمه‌ها -->
+        <div class="flex gap-3 pt-4 border-t">
+            <button type="submit" class="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2 rounded-lg transition">
+                <i class="fas fa-save ml-2"></i> ذخیره تغییرات
+            </button>
+            <a href="{{ url_for('admin_maaref_index') }}" class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-6 py-2 rounded-lg transition">
+                انصراف
+            </a>
+            <a href="{{ url_for('maaref_detail', article_id=article.id) }}" target="_blank" 
+               class="mr-auto text-emerald-600 hover:text-emerald-700 text-sm flex items-center gap-1">
+                <i class="fas fa-external-link-alt"></i> مشاهده در سایت
+            </a>
+        </div>
+    </form>
+</div>
+
+<script>
+// شمارش کلمات
+const contentTextarea = document.getElementById('content');
+const wordCountSpan = document.getElementById('wordCount');
+
+function updateWordCount() {
+    const text = contentTextarea.value;
+    const words = text.replace(/<[^>]*>/g, ' ').trim().split(/\s+/);
+    const wordCount = text.trim() === '' ? 0 : words.length;
+    wordCountSpan.innerText = `تعداد کلمات: ${wordCount.toLocaleString('fa-IR')}`;
+}
+
+contentTextarea.addEventListener('input', updateWordCount);
+updateWordCount();
+</script>
+{% endblock %}

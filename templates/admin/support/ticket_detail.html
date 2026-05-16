@@ -1,0 +1,130 @@
+{% extends "base.html" %}
+{% block title %}مدیریت تیکت #{{ ticket.id }} - سِراج{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-6 md:py-8 max-w-4xl">
+    <div class="flex items-center gap-3 mb-6">
+        <a href="/admin/tickets" class="text-gray-400 hover:text-gray-600 transition">
+            <i class="fas fa-arrow-right text-lg"></i>
+        </a>
+        <h1 class="text-xl md:text-2xl font-semibold text-gray-800">مدیریت تیکت #{{ ticket.id }}</h1>
+    </div>
+
+    <!-- اطلاعات تیکت -->
+    <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 md:p-6 mb-5">
+        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3 mb-4">
+            <div class="flex-1">
+                <h2 class="text-lg md:text-xl font-semibold text-gray-800">{{ ticket.subject }}</h2>
+                <div class="flex flex-wrap gap-2 mt-2">
+                    <span class="text-sm text-gray-500">
+                        <i class="fas fa-user ml-1"></i> {{ ticket.user.full_name }}
+                    </span>
+                    <span class="text-sm text-gray-300">•</span>
+                    <span class="text-sm text-gray-500">
+                        <i class="fas fa-calendar ml-1"></i> {{ ticket.created_at|persian_date }}
+                    </span>
+                </div>
+            </div>
+            <div class="flex flex-wrap gap-2">
+                {% if ticket.status == 'open' %}
+                <span class="px-3 py-1 rounded-xl text-xs font-medium bg-amber-50 text-amber-700">باز</span>
+                {% elif ticket.status == 'in_progress' %}
+                <span class="px-3 py-1 rounded-xl text-xs font-medium bg-blue-50 text-blue-700">در حال بررسی</span>
+                {% else %}
+                <span class="px-3 py-1 rounded-xl text-xs font-medium bg-gray-100 text-gray-600">بسته شده</span>
+                {% endif %}
+                
+                {% if ticket.priority == 'high' %}
+                <span class="px-3 py-1 rounded-xl text-xs font-medium bg-rose-50 text-rose-700">اولویت بالا</span>
+                {% elif ticket.priority == 'medium' %}
+                <span class="px-3 py-1 rounded-xl text-xs font-medium bg-orange-50 text-orange-700">اولویت متوسط</span>
+                {% else %}
+                <span class="px-3 py-1 rounded-xl text-xs font-medium bg-gray-100 text-gray-600">اولویت کم</span>
+                {% endif %}
+            </div>
+        </div>
+        
+        <div class="bg-gray-50 rounded-xl p-4 mb-5">
+            <p class="text-gray-700 leading-relaxed whitespace-pre-line">{{ ticket.message }}</p>
+        </div>
+        
+        <div class="flex flex-wrap gap-3">
+            {% if ticket.status != 'closed' %}
+            <form action="/support/ticket/{{ ticket.id }}/close" method="POST" class="inline">
+                <button type="submit" onclick="return confirm('آیا از بستن این تیکت مطمئن هستید؟')" 
+                        class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-5 py-2 rounded-xl transition text-sm">
+                    <i class="fas fa-check ml-2"></i> بستن تیکت
+                </button>
+            </form>
+            {% else %}
+            <form action="/support/ticket/{{ ticket.id }}/reopen" method="POST" class="inline">
+                <button type="submit" onclick="return confirm('آیا از بازگشایی این تیکت مطمئن هستید؟')" 
+                        class="bg-emerald-100 hover:bg-emerald-200 text-emerald-700 px-5 py-2 rounded-xl transition text-sm">
+                    <i class="fas fa-folder-open ml-2"></i> بازگشایی تیکت
+                </button>
+            </form>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- فرم پاسخ ادمین -->
+    <div class="bg-gradient-to-br from-indigo-50 to-white rounded-2xl border border-indigo-200 shadow-sm p-5 md:p-6 mb-5">
+        <h3 class="font-semibold text-gray-800 mb-4 flex items-center gap-2">
+            <i class="fas fa-headset text-indigo-600"></i>
+            پاسخ از طرف پشتیبانی
+        </h3>
+        <form action="/support/ticket/{{ ticket.id }}/reply" method="POST">
+            <textarea name="message" rows="5" required 
+                      class="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent transition resize-none mb-4"
+                      placeholder="متن پاسخ خود را وارد کنید..."></textarea>
+            
+            <!-- دکمه ارسال در پایین فرم و به صورت بزرگ -->
+            <div class="flex justify-end mt-4">
+                <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-blue-600 px-8 py-3 rounded-xl transition shadow-md text-base font-semibold">
+                    <i class="fas fa-paper-plane ml-2"></i> ارسال پاسخ
+                </button>
+            </div>
+        </form>
+        <div class="mt-4 text-xs text-gray-500 bg-indigo-100 p-3 rounded-lg">
+            <i class="fas fa-info-circle ml-1 text-indigo-500"></i>
+            پس از ارسال پاسخ، کاربر از طریق اعلان مطلع خواهد شد.
+        </div>
+    </div>
+
+    <!-- پاسخ‌ها -->
+    {% if replies %}
+    <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 md:p-6">
+        <h3 class="font-semibold text-gray-800 mb-4 flex items-center gap-2">
+            <i class="fas fa-comments text-gray-500"></i>
+            تاریخچه مکالمه 
+            <span class="text-gray-400 text-sm font-normal">({{ replies|length }} پاسخ)</span>
+        </h3>
+        <div class="space-y-4">
+            {% for reply in replies %}
+            <div class="border-r-4 {% if reply.is_staff %}border-indigo-400 bg-indigo-50/30{% else %}border-emerald-400 bg-emerald-50/30{% endif %} pr-4 py-3 rounded-lg">
+                <div class="flex flex-wrap justify-between items-start gap-2 mb-2">
+                    <div class="flex items-center gap-2">
+                        {% if reply.is_staff %}
+                        <div class="w-6 h-6 bg-indigo-100 rounded-full flex items-center justify-center">
+                            <i class="fas fa-headset text-indigo-600 text-xs"></i>
+                        </div>
+                        <span class="font-semibold text-indigo-700 text-sm">پشتیبانی سِراج</span>
+                        {% else %}
+                        <div class="w-6 h-6 bg-emerald-100 rounded-full flex items-center justify-center">
+                            <i class="fas fa-user text-emerald-600 text-xs"></i>
+                        </div>
+                        <span class="font-semibold text-gray-700 text-sm">{{ reply.sender.full_name }}</span>
+                        {% endif %}
+                    </div>
+                    <span class="text-xs text-gray-400">
+                        <i class="fas fa-clock ml-1"></i> {{ reply.created_at|persian_date }}
+                    </span>
+                </div>
+                <p class="text-gray-600 text-sm leading-relaxed whitespace-pre-line mr-8">{{ reply.message }}</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

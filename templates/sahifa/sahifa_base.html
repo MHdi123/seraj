@@ -1,0 +1,499 @@
+{% extends "base.html" %}
+
+{% block extra_css %}
+<style>
+/* ========================================
+   فونت‌های اختصاصی صحیفه سجادیه
+   ======================================== */
+@import url('https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&display=swap');
+
+/* ========================================
+   تم اختصاصی صحیفه سجادیه
+   ======================================== */
+:root {
+    --sahifa-primary: #1a3a2f;
+    --sahifa-primary-dark: #0e261f;
+    --sahifa-primary-light: #2d5a48;
+    --sahifa-gold: #c9a03d;
+    --sahifa-gold-light: #e8c97a;
+    --sahifa-gold-dark: #a0782c;
+    --sahifa-cream: #faf6ed;
+    --sahifa-cream-dark: #efe6d5;
+    --sahifa-text: #2c2418;
+    --sahifa-text-light: #6b5c4a;
+    --sahifa-border: #d4c5a9;
+    --sahifa-green: #2d6a4f;
+    --sahifa-green-light: #52b788;
+}
+
+/* ========================================
+   بدنه اصلی
+   ======================================== */
+body.sahifa-page {
+    background: linear-gradient(135deg, var(--sahifa-cream) 0%, #e8dfd1 100%);
+    position: relative;
+}
+
+body.sahifa-page::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' opacity='0.03'%3E%3Cpath fill='none' stroke='%231a3a2f' stroke-width='0.5' d='M20,20 L80,20 L80,80 L20,80 Z M30,30 L70,30 L70,70 L30,70 Z M40,40 L60,40 L60,60 L40,60 Z'/%3E%3Ccircle cx='50' cy='50' r='15' fill='none' stroke='%23c9a03d' stroke-width='0.5'/%3E%3C/svg%3E");
+    background-repeat: repeat;
+    pointer-events: none;
+    z-index: 0;
+}
+
+.sahifa-container {
+    position: relative;
+    z-index: 1;
+}
+
+/* ========================================
+   هدر صحیفه
+   ======================================== */
+.sahifa-header {
+    background: linear-gradient(135deg, var(--sahifa-primary) 0%, var(--sahifa-primary-dark) 100%);
+    border-radius: 30px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+}
+
+.sahifa-header::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -20%;
+    width: 80%;
+    height: 200%;
+    background: radial-gradient(ellipse at center, rgba(201,160,61,0.08) 0%, transparent 70%);
+    transform: rotate(25deg);
+    pointer-events: none;
+}
+
+.sahifa-header::after {
+    content: '﷽';
+    font-family: 'Amiri', serif;
+    position: absolute;
+    bottom: -30px;
+    left: 20px;
+    font-size: 120px;
+    color: rgba(255,255,255,0.03);
+    pointer-events: none;
+}
+
+.sahifa-header h1 {
+    color: var(--sahifa-gold-light);
+    font-size: 2.2rem;
+    font-weight: 400;
+    letter-spacing: 2px;
+    margin: 0;
+    position: relative;
+    display: inline-block;
+}
+
+.sahifa-header h1::after {
+    content: '';
+    position: absolute;
+    bottom: -10px;
+    right: 0;
+    width: 60px;
+    height: 2px;
+    background: linear-gradient(90deg, var(--sahifa-gold), transparent);
+}
+
+.sahifa-header .subtitle {
+    color: rgba(255,255,255,0.7);
+    margin-top: 0.75rem;
+    font-size: 0.9rem;
+    font-weight: 300;
+}
+
+/* ========================================
+   کارت دعا
+   ======================================== */
+.prayer-card {
+    background: white;
+    border-radius: 20px;
+    margin-bottom: 1.5rem;
+    position: relative;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+    border: 1px solid rgba(201,160,61,0.2);
+    overflow: hidden;
+}
+
+.prayer-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 100%;
+    height: 4px;
+    background: linear-gradient(90deg, var(--sahifa-gold), var(--sahifa-primary-light), var(--sahifa-gold));
+}
+
+.prayer-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+    border-color: rgba(201,160,61,0.4);
+}
+
+.prayer-card .card-inner {
+    padding: 1.5rem;
+    position: relative;
+}
+
+/* شماره دعا */
+.prayer-number {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, var(--sahifa-gold), var(--sahifa-gold-dark));
+    color: white;
+    font-size: 0.75rem;
+    font-weight: bold;
+    padding: 0.25rem 0.75rem;
+    border-radius: 50px;
+    margin-bottom: 0.75rem;
+    box-shadow: 0 2px 8px rgba(201,160,61,0.3);
+}
+
+.prayer-number i {
+    margin-left: 0.4rem;
+    font-size: 0.7rem;
+}
+
+/* عنوان دعا */
+.prayer-title {
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: var(--sahifa-primary);
+    margin-bottom: 0.25rem;
+    line-height: 1.4;
+}
+
+.prayer-title-arabic {
+    font-family: 'Amiri', serif;
+    font-size: 0.9rem;
+    color: var(--sahifa-gold-dark);
+    margin-bottom: 0.75rem;
+    letter-spacing: 0.5px;
+}
+
+/* متن预览 */
+.prayer-excerpt {
+    color: var(--sahifa-text-light);
+    font-size: 0.85rem;
+    line-height: 1.6;
+    margin-top: 0.75rem;
+    padding-top: 0.75rem;
+    border-top: 1px dashed var(--sahifa-border);
+}
+
+/* اطلاعات پایین کارت */
+.prayer-meta {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-top: 1rem;
+    font-size: 0.7rem;
+    color: var(--sahifa-text-light);
+}
+
+.prayer-meta i {
+    color: var(--sahifa-gold);
+    margin-left: 0.25rem;
+}
+
+/* ========================================
+   کارت ویژه (برگزیده)
+   ======================================== */
+.prayer-card.featured {
+    border: 1px solid var(--sahifa-gold);
+    background: linear-gradient(135deg, #ffffff 0%, #fffdf8 100%);
+}
+
+.prayer-card.featured::before {
+    height: 5px;
+    background: linear-gradient(90deg, var(--sahifa-gold), #ffd700, var(--sahifa-gold));
+}
+
+.featured-badge {
+    position: absolute;
+    top: 1rem;
+    left: 1rem;
+    background: linear-gradient(135deg, #ffd700, #b8860b);
+    color: white;
+    padding: 0.25rem 0.75rem;
+    border-radius: 50px;
+    font-size: 0.7rem;
+    font-weight: bold;
+    z-index: 2;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+}
+
+.featured-badge i {
+    margin-left: 0.3rem;
+}
+
+/* ========================================
+   دسته‌بندی‌ها
+   ======================================== */
+.sahifa-categories {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-bottom: 2rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid var(--sahifa-border);
+}
+
+.category-badge {
+    background: white;
+    border: 1px solid var(--sahifa-border);
+    border-radius: 50px;
+    padding: 0.5rem 1.2rem;
+    font-size: 0.85rem;
+    color: var(--sahifa-text);
+    transition: all 0.2s;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.category-badge i {
+    color: var(--sahifa-gold);
+    font-size: 0.9rem;
+}
+
+.category-badge:hover {
+    background: var(--sahifa-primary);
+    border-color: var(--sahifa-primary);
+    color: white;
+    transform: translateY(-2px);
+}
+
+.category-badge:hover i {
+    color: var(--sahifa-gold-light);
+}
+
+.category-badge.active {
+    background: var(--sahifa-primary);
+    border-color: var(--sahifa-primary);
+    color: white;
+}
+
+/* ========================================
+   صفحه جزئیات دعا
+   ======================================== */
+.prayer-detail-header {
+    background: white;
+    border-radius: 25px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    border-right: 5px solid var(--sahifa-gold);
+    box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+}
+
+.arabic-section {
+    background: linear-gradient(135deg, #f8f4ea 0%, #fefcf8 100%);
+    border-radius: 20px;
+    padding: 2rem;
+    margin-bottom: 1.5rem;
+    border: 1px solid var(--sahifa-border);
+    position: relative;
+}
+
+.arabic-section::before {
+    content: '﷽';
+    font-family: 'Amiri', serif;
+    position: absolute;
+    top: -15px;
+    right: 20px;
+    font-size: 28px;
+    color: var(--sahifa-gold);
+    background: var(--sahifa-cream);
+    padding: 0 10px;
+}
+
+.arabic-text {
+    font-family: 'Amiri', serif;
+    font-size: 1.4rem;
+    line-height: 2.2rem;
+    text-align: right;
+    color: var(--sahifa-primary);
+    font-weight: 500;
+    letter-spacing: 0.5px;
+}
+
+.persian-section {
+    background: white;
+    border-radius: 20px;
+    padding: 1.8rem;
+    border: 1px solid var(--sahifa-border);
+}
+
+.persian-text {
+    font-size: 1rem;
+    line-height: 1.9rem;
+    color: var(--sahifa-text);
+    text-align: justify;
+}
+
+/* ========================================
+   دکمه‌ها
+   ======================================== */
+.btn-sahifa {
+    background: linear-gradient(135deg, var(--sahifa-primary), var(--sahifa-primary-dark));
+    color: white !important;
+    border: none;
+    padding: 0.6rem 1.5rem;
+    border-radius: 50px;
+    font-size: 0.85rem;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    text-decoration: none;
+}
+
+.btn-sahifa:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(26,58,47,0.3);
+    color: white !important;
+}
+
+.btn-gold {
+    background: linear-gradient(135deg, var(--sahifa-gold), var(--sahifa-gold-dark));
+    color: white !important;
+}
+
+.btn-gold:hover {
+    background: linear-gradient(135deg, var(--sahifa-gold-dark), var(--sahifa-gold));
+    color: white !important;
+}
+
+/* ========================================
+   جعبه جستجو
+   ======================================== */
+.search-box {
+    position: relative;
+    margin-top: 1.5rem;
+}
+
+.search-box input {
+    width: 100%;
+    padding: 0.9rem 1.2rem;
+    padding-right: 3rem;
+    border: 2px solid var(--sahifa-border);
+    border-radius: 60px;
+    background: white;
+    font-size: 0.9rem;
+    transition: all 0.2s;
+}
+
+.search-box input:focus {
+    outline: none;
+    border-color: var(--sahifa-gold);
+    box-shadow: 0 0 0 3px rgba(201,160,61,0.1);
+}
+
+.search-box i {
+    position: absolute;
+    right: 1.2rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--sahifa-gold);
+    font-size: 1.1rem;
+}
+
+/* ========================================
+   ناوبری بین مناجات‌ها
+   ======================================== */
+.munajat-nav {
+    background: white;
+    border-radius: 60px;
+    padding: 0.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    border: 1px solid var(--sahifa-border);
+}
+
+.munajat-nav-btn {
+    padding: 0.5rem 1.2rem;
+    border-radius: 50px;
+    background: transparent;
+    color: var(--sahifa-text);
+    transition: all 0.2s;
+    text-decoration: none;
+}
+
+.munajat-nav-btn:hover {
+    background: var(--sahifa-primary);
+    color: white;
+}
+
+/* ========================================
+   انیمیشن‌ها
+   ======================================== */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.prayer-card {
+    animation: fadeInUp 0.4s ease forwards;
+}
+
+/* ========================================
+   ریسپانسیو
+   ======================================== */
+@media (max-width: 768px) {
+    .sahifa-header h1 {
+        font-size: 1.6rem;
+    }
+    
+    .prayer-card .card-inner {
+        padding: 1rem;
+    }
+    
+    .prayer-title {
+        font-size: 1.1rem;
+    }
+    
+    .arabic-text {
+        font-size: 1.1rem;
+        line-height: 1.8rem;
+    }
+    
+    .sahifa-categories {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        padding-bottom: 0.75rem;
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    .category-badge {
+        white-space: nowrap;
+    }
+}
+</style>
+{% endblock %}
+
+{% block body_class %}sahifa-page{% endblock %}

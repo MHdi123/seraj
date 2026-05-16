@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}مدیریت مسابقات{% endblock %}
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 py-8">
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-2xl font-bold">مدیریت مسابقات</h1>
+        <a href="{{ url_for('admin_create_competition') }}" class="bg-blue-600 text-white px-4 py-2 rounded-lg">+ مسابقه جدید</a>
+    </div>
+    <div class="bg-white rounded-xl shadow overflow-x-auto">
+        <table class="min-w-full divide-y">
+            <thead class="bg-gray-50"><tr><th class="px-6 py-3 text-right">عنوان</th><th class="px-6 py-3 text-right">دسته</th><th class="px-6 py-3 text-right">تاریخ شروع</th><th class="px-6 py-3 text-right">شرکت‌کنندگان</th><th class="px-6 py-3 text-right">وضعیت</th><th class="px-6 py-3 text-right">عملیات</th></tr></thead>
+            <tbody>
+                {% for comp in competitions %}
+                <tr class="border-t"><td class="px-6 py-4">{{ comp.title }}</td><td class="px-6 py-4">{{ comp.category.value }}</td><td class="px-6 py-4">{{ comp.start_date|persian_date }}</td><td class="px-6 py-4">{{ comp.current_participants }}/{{ comp.max_participants or '∞' }}</td><td class="px-6 py-4">{% if comp.is_active %}فعال{% else %}غیرفعال{% endif %}</td><td class="px-6 py-4 space-x-2"><a href="{{ url_for('admin_edit_competition', comp_id=comp.id) }}" class="text-blue-600">ویرایش</a> <button onclick="deleteComp({{ comp.id }})" class="text-red-600">حذف</button> <a href="{{ url_for('admin_competition_rounds', comp_id=comp.id) }}" class="text-green-600">مراحل</a></td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+<script>
+function deleteComp(id){ if(confirm('حذف شود؟')) fetch(`/admin/competition/${id}/delete`,{method:'POST'}).then(r=>r.json()).then(d=>{if(d.success) location.reload(); else alert('خطا');}); }
+</script>
+{% endblock %}

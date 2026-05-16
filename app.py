@@ -1,5 +1,5 @@
 # app.py
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, url_for
 from extensions import db, login_manager
 from config import Config
 from models import User
@@ -34,7 +34,8 @@ def create_app():
 
     @login_manager.user_loader
     def load_user(user_id):
-        return User.query.get(int(user_id))
+        # روش جدید: استفاده از db.session.get() (توصیه شده)
+        return db.session.get(User, int(user_id))
 
     # =================== توابع کمکی برای تبدیل تاریخ ===================
     def to_persian_numbers(text):
@@ -129,9 +130,85 @@ def create_app():
         return str(dt)
 
     @app.template_filter('persian_datetime')
-    def persian_datetime_filter(dt):
+    def persian_datetime_filter(dt, format="%Y/%m/%d %H:%M:%S"):
         """
-        تبدیل تاریخ و زمان میلادی به شمسی
+        تبدیل تاریخ و زمان میلادی به شمسی با قابلیت تعیین فرمت
+        ورودی: datetime, string
+        پارامترها:
+            dt: تاریخ و زمان
+            format: فرمت خروجی (پیش‌فرض: %Y/%m/%d %H:%M:%S)
+        خروجی: string
+        """
+        if not dt:
+            return ''
+        
+        # اگر شیء datetime است
+        if isinstance(dt, datetime):
+            try:
+                jalali_date = convert_to_jalali(dt)
+                if jalali_date:
+                    # تبدیل به jdatetime.datetime برای دسترسی به زمان
+                    jalali_datetime = jdatetime.datetime(
+                        jalali_date.year, 
+                        jalali_date.month, 
+                        jalali_date.day,
+                        dt.hour,
+                        dt.minute,
+                        dt.second
+                    )
+                    return jalali_datetime.strftime(format)
+                else:
+                    return dt.strftime(format)
+            except:
+                return dt.strftime(format)
+        
+        # اگر string است
+        if isinstance(dt, str):
+            parsed_date = parse_date_string(dt)
+            if parsed_date:
+                jalali_date = convert_to_jalali(parsed_date)
+                if jalali_date:
+                    jalali_datetime = jdatetime.datetime(
+                        jalali_date.year,
+                        jalali_date.month,
+                        jalali_date.day,
+                        parsed_date.hour,
+                        parsed_date.minute,
+                        parsed_date.second
+                    )
+                    return jalali_datetime.strftime(format)
+                return parsed_date.strftime(format)
+            return dt
+        
+        return str(dt)
+
+    @app.template_filter('persian_time')
+    def persian_time_filter(dt):
+        """
+        استخراج ساعت از datetime و تبدیل به فارسی
+        ورودی: datetime, string
+        خروجی: string (format: HH:MM:SS)
+        """
+        if not dt:
+            return ''
+        
+        # اگر شیء datetime است
+        if isinstance(dt, datetime):
+            return dt.strftime('%H:%M:%S')
+        
+        # اگر string است
+        if isinstance(dt, str):
+            parsed_date = parse_date_string(dt)
+            if parsed_date:
+                return parsed_date.strftime('%H:%M:%S')
+            return dt
+        
+        return str(dt)
+
+    @app.template_filter('persian_datetime_full')
+    def persian_datetime_full_filter(dt):
+        """
+        تبدیل تاریخ و زمان میلادی به شمسی (فرمت کامل)
         ورودی: datetime, string
         خروجی: string (format: YYYY/MM/DD - HH:MM)
         """
@@ -222,7 +299,17 @@ def create_app():
         ورودی: datetime, string
         خروجی: string (format: YYYY/MM/DD - HH:MM با اعداد فارسی)
         """
-        result = persian_datetime_filter(dt)
+        result = persian_datetime_full_filter(dt)
+        return to_persian_numbers(result)
+
+    @app.template_filter('persian_time_persian')
+    def persian_time_persian_filter(dt):
+        """
+        استخراج ساعت از datetime و تبدیل به فارسی
+        ورودی: datetime, string
+        خروجی: string با اعداد فارسی
+        """
+        result = persian_time_filter(dt)
         return to_persian_numbers(result)
 
     @app.template_filter('time_ago')
@@ -408,11 +495,6 @@ def create_app():
     # =================== روت‌ها ===================
     init_routes(app)
 
-    # =================== FCM Token Endpoint (MOVED TO routes.py) ===================
-    # این تابع به فایل routes.py منتقل شده است تا از تکرار جلوگیری شود
-    # مسیر /save-token در routes.py با کیفیت بهتر پیاده‌سازی شده است
-    # و از دکوریتورهای login_required و verified_required استفاده می‌کند
-
     # =================== Health Check ===================
     @app.route("/health")
     def health_check():
@@ -421,12 +503,11 @@ def create_app():
             "status": "healthy",
             "timestamp": datetime.now().isoformat(),
             "persian_time": to_persian_numbers(
-                persian_datetime_filter(datetime.now())
+                persian_datetime_full_filter(datetime.now())
             )
         })
 
     return app
-
 
 # =================== اجرای اپلیکیشن ===================
 app = create_app()

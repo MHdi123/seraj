@@ -103,6 +103,7 @@ class SessionStatus(enum.Enum):
 
 class User(UserMixin, db.Model):
     __tablename__ = "users"
+    __table_args__ = {'extend_existing': True}
 
     # ========== فیلدهای اصلی ==========
     id = db.Column(db.Integer, primary_key=True)
@@ -354,9 +355,9 @@ class QuranVerse(db.Model):
     surah_name = db.Column(db.String(100))
     surah_number = db.Column(db.Integer)
     verse_number = db.Column(db.Integer)
-    verse_arabic = db.Column(db.Text)
-    verse_persian = db.Column(db.Text)
-    translation = db.Column(db.Text)
+    verse_arabic = db.Column(db.Text)    
+    verse_persian = db.Column(db.Text)    
+    translation = db.Column(db.Text)       
     keywords = db.Column(db.String(500))
     topic = db.Column(db.String(100))
     is_active = db.Column(db.Boolean, default=True)
@@ -1202,3 +1203,334 @@ class QuranSuggestion(db.Model):
     
     def __repr__(self):
         return f'<QuranSuggestion {self.mood} - {self.surah_name}:{self.verse_number}>'
+
+           # ============================================
+    # مسیرهای احکام شرعی
+    # ============================================
+
+
+class Ahkam(db.Model):
+    __tablename__ = 'ahkam'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(200), nullable=False)
+    category = db.Column(db.String(50), nullable=False)
+    ruling_type = db.Column(db.String(20), default='واجب')
+    short_description = db.Column(db.String(300), nullable=False)
+    full_content = db.Column(db.Text, nullable=False)
+    source = db.Column(db.String(200))
+    marja = db.Column(db.String(100), default='آیت‌الله العظمی خامنه‌ای')
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    is_active = db.Column(db.Boolean, default=True)
+    views = db.Column(db.Integer, default=0)    
+
+    # ============================================
+# مدل‌های نهج‌البلاغه
+# ============================================
+
+class NahjCategory(db.Model):
+    __tablename__ = 'nahj_categories'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)
+    slug = db.Column(db.String(100), unique=True, nullable=False)
+    icon = db.Column(db.String(50), default='fa-feather-alt')
+    description = db.Column(db.String(200))
+    order = db.Column(db.Integer, default=0)
+    is_active = db.Column(db.Boolean, default=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    contents = db.relationship('NahjContent', backref='category', lazy=True, cascade='all, delete-orphan')
+
+class NahjContent(db.Model):
+    __tablename__ = 'nahj_contents'
+    id = db.Column(db.Integer, primary_key=True)
+    category_id = db.Column(db.Integer, db.ForeignKey('nahj_categories.id'), nullable=False)
+    title = db.Column(db.String(300), nullable=False)
+    number = db.Column(db.String(50))
+    arabic_text = db.Column(db.Text)
+    persian_text = db.Column(db.Text, nullable=False)
+    explanation = db.Column(db.Text)
+    tags = db.Column(db.String(500))
+    is_featured = db.Column(db.Boolean, default=False)
+    view_count = db.Column(db.Integer, default=0)
+    is_active = db.Column(db.Boolean, default=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+# ================================
+# مدل‌های پشتیبانی (Support)
+# ================================
+
+class SupportTicket(db.Model):
+    __tablename__ = "support_tickets"
+    
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
+    assigned_to = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=True)
+    subject = db.Column(db.String(200), nullable=False)
+    message = db.Column(db.Text, nullable=False)
+    status = db.Column(db.String(20), default="open")  # open, in_progress, closed
+    priority = db.Column(db.String(20), default="medium")  # low, medium, high
+    category = db.Column(db.String(50), default="general")
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    # روابط
+    user = db.relationship("User", foreign_keys=[user_id], backref="support_tickets")
+    assignee = db.relationship("User", foreign_keys=[assigned_to], backref="assigned_tickets")
+    replies = db.relationship("SupportReply", backref="ticket", lazy="dynamic", cascade="all, delete-orphan")
+
+
+class SupportReply(db.Model):
+    __tablename__ = "support_replies"
+    
+    id = db.Column(db.Integer, primary_key=True)
+    ticket_id = db.Column(db.Integer, db.ForeignKey("support_tickets.id"), nullable=False)
+    sender_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
+    message = db.Column(db.Text, nullable=False)
+    is_staff = db.Column(db.Boolean, default=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    sender = db.relationship("User", foreign_keys=[sender_id], backref="support_replies")
+
+## ============================================
+# مدل‌های سِراج‌یار (Seraj Yari)
+# ============================================
+
+class SerajCategory(db.Model):
+    """دسته‌بندی سوالات سِراج‌یار"""
+    __tablename__ = 'seraj_categories'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)
+    slug = db.Column(db.String(100), unique=True, nullable=False)
+    icon = db.Column(db.String(50), default='fa-question-circle')
+    description = db.Column(db.Text)
+    order = db.Column(db.Integer, default=0)
+    is_active = db.Column(db.Boolean, default=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    # رابطه با سوالات
+    questions = db.relationship('SerajQA', backref='category', lazy=True)
+    suggestions = db.relationship('SerajSuggestion', backref='category', lazy=True)
+
+
+class SerajQA(db.Model):
+    """سوال و پاسخ سِراج‌یار"""
+    __tablename__ = 'seraj_qa'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    category_id = db.Column(db.Integer, db.ForeignKey('seraj_categories.id'))
+    question = db.Column(db.String(500), nullable=False)
+    answer = db.Column(db.Text, nullable=False)
+    answer_full = db.Column(db.Text)  # پاسخ کامل
+    keywords = db.Column(db.String(500))  # کلمات کلیدی (با کاما جدا شده)
+    priority = db.Column(db.Integer, default=0)  # اولویت
+    view_count = db.Column(db.Integer, default=0)
+    is_active = db.Column(db.Boolean, default=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    # رابطه با چت‌ها
+    chats = db.relationship('SerajChat', backref='qa', lazy=True)
+
+
+class SerajSuggestion(db.Model):
+    """سوالات پیشنهادی سِراج‌یار"""
+    __tablename__ = 'seraj_suggestions'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    category_id = db.Column(db.Integer, db.ForeignKey('seraj_categories.id'))
+    question = db.Column(db.String(500), nullable=False)
+    order = db.Column(db.Integer, default=0)
+    is_active = db.Column(db.Boolean, default=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+
+class SerajChat(db.Model):
+    """تاریخچه چت کاربران با سِراج‌یار"""
+    __tablename__ = 'seraj_chats'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    question = db.Column(db.Text, nullable=False)
+    answer = db.Column(db.Text, nullable=False)
+    category_id = db.Column(db.Integer, db.ForeignKey('seraj_categories.id'))
+    related_qa_id = db.Column(db.Integer, db.ForeignKey('seraj_qa.id'))
+    was_helpful = db.Column(db.Boolean, default=None)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    # رابطه با کاربر
+    user = db.relationship('User', backref='seraj_chats')
+
+    # ============================================
+# مدل‌های گفتگوی سِراج‌یار
+# ============================================
+
+class SerajConversation(db.Model):
+    """گفتگوهای کاربران با سِراج‌یار"""
+    __tablename__ = 'seraj_conversations'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    title = db.Column(db.String(200), nullable=False)  # عنوان گفتگو (بر اساس اولین سوال)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    is_active = db.Column(db.Boolean, default=True)
+    
+    # روابط
+    user = db.relationship('User', backref='seraj_conversations')
+    messages = db.relationship('SerajMessage', backref='conversation', lazy='dynamic', cascade='all, delete-orphan')
+    
+    def __repr__(self):
+        return f'<SerajConversation {self.id} - {self.title}>'
+
+
+class SerajMessage(db.Model):
+    """پیام‌های هر گفتگو"""
+    __tablename__ = 'seraj_messages'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    conversation_id = db.Column(db.Integer, db.ForeignKey('seraj_conversations.id'), nullable=False)
+    message_type = db.Column(db.String(20), nullable=False)  # 'user' یا 'ai'
+    content = db.Column(db.Text, nullable=False)
+    related_verses = db.Column(db.Text, nullable=True)  # JSON ذخیره آیات مرتبط
+    suggestions = db.Column(db.Text, nullable=True)     # JSON ذخیره سوالات پیشنهادی
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    def __repr__(self):
+        return f'<SerajMessage {self.id} - {self.message_type}>'
+    
+    # ============================================
+# مدل‌های صحیفه سجادیه
+# ============================================
+
+class SahifaCategory(db.Model):
+    """دسته‌بندی دعاهای صحیفه سجادیه"""
+    __tablename__ = 'sahifa_categories'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)
+    slug = db.Column(db.String(100), unique=True, nullable=False)
+    icon = db.Column(db.String(50), default='fa-hands-praying')
+    description = db.Column(db.String(300))
+    order = db.Column(db.Integer, default=0)
+    is_active = db.Column(db.Boolean, default=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    # رابطه با دعاها
+    prayers = db.relationship('SahifaPrayer', back_populates='category', lazy=True)
+
+
+class SahifaPrayer(db.Model):
+    """دعاهای صحیفه سجادیه"""
+    __tablename__ = 'sahifa_prayers'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    category_id = db.Column(db.Integer, db.ForeignKey('sahifa_categories.id'))
+    number = db.Column(db.Integer, nullable=False)  # شماره دعا (1 تا 54)
+    title = db.Column(db.String(200), nullable=False)
+    title_arabic = db.Column(db.String(200))
+    arabic_text = db.Column(db.Text)  # متن عربی دعا
+    persian_text = db.Column(db.Text, nullable=False)  # ترجمه فارسی
+    explanation = db.Column(db.Text)  # شرح و تفسیر
+    keywords = db.Column(db.String(500))  # کلمات کلیدی
+    is_featured = db.Column(db.Boolean, default=False)
+    view_count = db.Column(db.Integer, default=0)
+    is_active = db.Column(db.Boolean, default=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    # روابط
+    category = db.relationship('SahifaCategory', back_populates='prayers')
+    
+    def __repr__(self):
+        return f'<SahifaPrayer {self.number}: {self.title}>'
+
+
+class SahifaMunajat(db.Model):
+    """مناجات خمسه عشر (۱۵ مناجات)"""
+    __tablename__ = 'sahifa_munajat'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    number = db.Column(db.Integer, nullable=False)  # شماره مناجات (1 تا 15)
+    title = db.Column(db.String(200), nullable=False)
+    title_arabic = db.Column(db.String(200))
+    arabic_text = db.Column(db.Text)
+    persian_text = db.Column(db.Text, nullable=False)
+    explanation = db.Column(db.Text)
+    view_count = db.Column(db.Integer, default=0)
+    is_active = db.Column(db.Boolean, default=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    def __repr__(self):
+        return f'<SahifaMunajat {self.number}: {self.title}>'
+    
+
+class Surah(db.Model):
+    __tablename__ = "surahs"
+    
+    id = db.Column(db.Integer, primary_key=True)
+    number = db.Column(db.Integer, unique=True, nullable=False)
+    persian_name = db.Column(db.String(100), nullable=False)
+    arabic_name = db.Column(db.String(100), nullable=False)
+    verses_count = db.Column(db.Integer, default=0)
+    is_makki = db.Column(db.Boolean, default=True)
+    juz_start = db.Column(db.Integer)
+    juz_end = db.Column(db.Integer)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    def __repr__(self):
+        return f'<Surah {self.number}: {self.persian_name}>'
+
+        # ============================================
+# مدل‌های معارف اسلامی
+# ============================================
+
+class MaarefCategory(db.Model):
+    """دسته‌بندی مطالب معارف اسلامی"""
+    __tablename__ = 'maaref_categories'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)
+    slug = db.Column(db.String(100), unique=True, nullable=False)
+    icon = db.Column(db.String(50), default='fa-book')
+    description = db.Column(db.String(300))
+    order = db.Column(db.Integer, default=0)
+    is_active = db.Column(db.Boolean, default=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    # رابطه با مقالات
+    articles = db.relationship('MaarefArticle', back_populates='category', lazy=True)
+
+
+class MaarefArticle(db.Model):
+    """مقالات معارف اسلامی"""
+    __tablename__ = 'maaref_articles'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    category_id = db.Column(db.Integer, db.ForeignKey('maaref_categories.id'))
+    title = db.Column(db.String(300), nullable=False)
+    slug = db.Column(db.String(300), unique=True, nullable=False)
+    summary = db.Column(db.String(500))  # خلاصه مطلب
+    content = db.Column(db.Text, nullable=False)  # متن کامل
+    level = db.Column(db.String(50), default='beginner')  # beginner, intermediate, advanced
+    tags = db.Column(db.String(500))  # برچسب‌ها
+    is_featured = db.Column(db.Boolean, default=False)
+    view_count = db.Column(db.Integer, default=0)
+    is_active = db.Column(db.Boolean, default=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    # روابط
+    category = db.relationship('MaarefCategory', back_populates='articles')
+    
+    @property
+    def excerpt(self):
+        """دریافت بخشی از متن برای نمایش"""
+        if self.summary:
+            return self.summary
+        return self.content[:150] + '...' if len(self.content) > 150 else self.content
+    
+    def __repr__(self):
+        return f'<MaarefArticle {self.title}>'
+        

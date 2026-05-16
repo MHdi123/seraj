@@ -3,96 +3,132 @@
 {% block title %}مدیریت بنرها - سِراج{% endblock %}
 
 {% block content %}
-<div class="container mx-auto px-4 py-8">
-    <div class="flex justify-between items-center mb-6">
+<div class="container mx-auto px-4 py-4 md:py-8">
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
         <div>
-            <h1 class="text-2xl font-bold">مدیریت بنرها</h1>
-            <p class="text-gray-600 mt-1">افزودن، ویرایش و حذف بنرهای صفحه اصلی</p>
+            <h1 class="text-xl md:text-2xl font-bold">مدیریت بنرها</h1>
+            <p class="text-gray-600 text-sm md:text-base mt-1">افزودن، ویرایش و حذف بنرهای صفحه اصلی</p>
         </div>
         <button id="addBannerBtn"
-            class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2">
+            class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 text-sm md:text-base w-full sm:w-auto justify-center">
             <i class="fas fa-plus"></i>
             بنر جدید
         </button>
     </div>
 
-    <!-- لیست بنرها -->
+    <!-- لیست بنرها - ریسپانسیو با کارت در موبایل و جدول در دسکتاپ -->
     <div class="bg-white rounded-xl shadow-sm overflow-hidden">
-        <table class="min-w-full divide-y divide-gray-200">
-            <thead class="bg-gray-50">
-                <tr>
-                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">تصویر
-                    </th>
-                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">عنوان
-                    </th>
-                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">لینک
-                    </th>
-                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">ترتیب
-                    </th>
-                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">وضعیت
-                    </th>
-                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">عملیات
-                    </th>
-                </tr>
-            </thead>
-            <tbody class="bg-white divide-y divide-gray-200" id="banners-list">
-                {% for banner in banners %}
-                <tr id="banner-row-{{ banner.id }}" data-id="{{ banner.id }}" data-order="{{ banner.order }}">
-                    <td class="px-6 py-4 whitespace-nowrap">
-                        <img src="{{ banner.image_url }}" class="w-20 h-12 object-cover rounded"
-                            alt="{{ banner.alt_text }}">
-                    </td>
-                    <td class="px-6 py-4">{{ banner.title }}</td>
-                    <td class="px-6 py-4">
-                        <span class="text-sm text-gray-500">{{ banner.link_url or 'ندارد' }}</span>
-                    </td>
-                    <td class="px-6 py-4">
-                        <input type="number" class="w-16 border rounded px-2 py-1 order-input"
-                            value="{{ banner.order }}" data-id="{{ banner.id }}">
-                    </td>
-                    <td class="px-6 py-4">
-                        <button class="toggle-btn status-toggle" data-id="{{ banner.id }}">
-                            {% if banner.is_active %}
-                            <span class="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800">فعال</span>
-                            {% else %}
-                            <span class="px-2 py-1 text-xs rounded-full bg-gray-100 text-gray-800">غیرفعال</span>
-                            {% endif %}
-                        </button>
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                        <button class="edit-btn text-blue-600 hover:text-blue-900 ml-3" data-id="{{ banner.id }}">
+        <!-- نمایش دسکتاپ (جدول) -->
+        <div class="hidden md:block overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">تصویر</th>
+                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">عنوان</th>
+                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">لینک</th>
+                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">ترتیب</th>
+                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">وضعیت</th>
+                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">عملیات</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200" id="banners-list">
+                    {% for banner in banners %}
+                    <tr id="banner-row-{{ banner.id }}" data-id="{{ banner.id }}" data-order="{{ banner.order }}">
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <img src="{{ banner.image_url }}" class="w-20 h-12 object-cover rounded" alt="{{ banner.alt_text }}">
+                        </td>
+                        <td class="px-6 py-4">{{ banner.title }}</td>
+                        <td class="px-6 py-4">
+                            <span class="text-sm text-gray-500">{{ banner.link_url or 'ندارد' }}</span>
+                        </td>
+                        <td class="px-6 py-4">
+                            <input type="number" class="w-16 border rounded px-2 py-1 order-input text-center" value="{{ banner.order }}" data-id="{{ banner.id }}">
+                        </td>
+                        <td class="px-6 py-4">
+                            <button class="toggle-btn status-toggle" data-id="{{ banner.id }}">
+                                {% if banner.is_active %}
+                                <span class="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800">فعال</span>
+                                {% else %}
+                                <span class="px-2 py-1 text-xs rounded-full bg-gray-100 text-gray-800">غیرفعال</span>
+                                {% endif %}
+                            </button>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                            <button class="edit-btn text-blue-600 hover:text-blue-900 ml-3" data-id="{{ banner.id }}">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="delete-btn text-red-600 hover:text-red-900" data-id="{{ banner.id }}">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="6" class="px-6 py-8 text-center text-gray-500">
+                            <i class="fas fa-images text-4xl mb-2 block"></i>
+                            هیچ بنری وجود ندارد. اولین بنر را اضافه کنید.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- نمایش موبایل و تبلت (کارت‌ها) -->
+        <div class="block md:hidden" id="banners-cards">
+            {% for banner in banners %}
+            <div class="card-item border-b border-gray-100 p-4" data-id="{{ banner.id }}" data-order="{{ banner.order }}">
+                <div class="flex gap-4">
+                    <img src="{{ banner.image_url }}" class="w-24 h-16 object-cover rounded" alt="{{ banner.alt_text }}">
+                    <div class="flex-1 min-w-0">
+                        <h3 class="font-semibold text-gray-800 truncate">{{ banner.title }}</h3>
+                        <p class="text-xs text-gray-500 mt-1 truncate">{{ banner.link_url or 'بدون لینک' }}</p>
+                        <div class="flex flex-wrap items-center gap-3 mt-2">
+                            <div class="flex items-center gap-2">
+                                <label class="text-xs text-gray-500">ترتیب:</label>
+                                <input type="number" class="w-16 border rounded px-2 py-0.5 text-sm text-center order-input" value="{{ banner.order }}" data-id="{{ banner.id }}">
+                            </div>
+                            <button class="toggle-btn status-toggle" data-id="{{ banner.id }}">
+                                {% if banner.is_active %}
+                                <span class="px-2 py-0.5 text-xs rounded-full bg-green-100 text-green-800">فعال</span>
+                                {% else %}
+                                <span class="px-2 py-0.5 text-xs rounded-full bg-gray-100 text-gray-800">غیرفعال</span>
+                                {% endif %}
+                            </button>
+                        </div>
+                    </div>
+                    <div class="flex flex-col gap-2">
+                        <button class="edit-btn text-blue-600 hover:text-blue-800" data-id="{{ banner.id }}">
                             <i class="fas fa-edit"></i>
                         </button>
-                        <button class="delete-btn text-red-600 hover:text-red-900" data-id="{{ banner.id }}">
+                        <button class="delete-btn text-red-600 hover:text-red-800" data-id="{{ banner.id }}">
                             <i class="fas fa-trash"></i>
                         </button>
-                    </td>
-                </tr>
-                {% else %}
-                <tr>
-                    <td colspan="6" class="px-6 py-8 text-center text-gray-500">
-                        <i class="fas fa-images text-4xl mb-2 block"></i>
-                        هیچ بنری وجود ندارد. اولین بنر را اضافه کنید.
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+                    </div>
+                </div>
+            </div>
+            {% else %}
+            <div class="p-8 text-center text-gray-500">
+                <i class="fas fa-images text-4xl mb-2 block"></i>
+                هیچ بنری وجود ندارد. اولین بنر را اضافه کنید.
+            </div>
+            {% endfor %}
+        </div>
     </div>
 
     <div class="mt-4 flex justify-end">
-        <button id="saveOrderBtn" class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg">
+        <button id="saveOrderBtn" class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg text-sm md:text-base w-full sm:w-auto">
             <i class="fas fa-save ml-2"></i>
             ذخیره ترتیب
         </button>
     </div>
 </div>
 
-<!-- مودال افزودن/ویرایش بنر -->
-<div id="bannerModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
-    <div class="bg-white rounded-xl w-full max-w-lg mx-4 p-6">
+<!-- مودال افزودن/ویرایش بنر - ریسپانسیو -->
+<div id="bannerModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50 p-4">
+    <div class="bg-white rounded-xl w-full max-w-lg mx-auto p-4 md:p-6 max-h-[90vh] overflow-y-auto">
         <div class="flex justify-between items-center mb-4">
-            <h2 class="text-xl font-bold" id="modalTitle">افزودن بنر جدید</h2>
+            <h2 class="text-lg md:text-xl font-bold" id="modalTitle">افزودن بنر جدید</h2>
             <button id="closeModalBtn" class="text-gray-400 hover:text-gray-600">
                 <i class="fas fa-times text-xl"></i>
             </button>
@@ -102,45 +138,45 @@
             <input type="hidden" name="banner_id" id="bannerId">
 
             <div class="mb-4">
-                <label class="block text-gray-700 mb-2">عنوان بنر *</label>
+                <label class="block text-gray-700 mb-2 text-sm md:text-base">عنوان بنر *</label>
                 <input type="text" name="title" id="title"
-                    class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    class="w-full border rounded-lg px-3 py-2 text-sm md:text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
                     required>
             </div>
 
             <div class="mb-4">
-                <label class="block text-gray-700 mb-2">تصویر بنر</label>
+                <label class="block text-gray-700 mb-2 text-sm md:text-base">تصویر بنر</label>
                 <div id="currentImagePreview" class="hidden mb-2">
                     <img id="currentImage" src="" class="w-full h-32 object-cover rounded">
                     <p class="text-xs text-gray-500 mt-1">تصویر فعلی</p>
                 </div>
-                <input type="file" name="image" id="image" accept="image/*" class="w-full border rounded-lg px-3 py-2">
+                <input type="file" name="image" id="image" accept="image/*" class="w-full border rounded-lg px-3 py-2 text-sm md:text-base">
                 <p class="text-xs text-gray-500 mt-1">یا آدرس تصویر را وارد کنید:</p>
-                <input type="text" name="image_url" id="imageUrl" class="w-full border rounded-lg px-3 py-2 mt-1"
+                <input type="text" name="image_url" id="imageUrl" class="w-full border rounded-lg px-3 py-2 mt-1 text-sm md:text-base"
                     placeholder="https://...">
             </div>
 
             <div class="mb-4">
-                <label class="block text-gray-700 mb-2">لینک هدف (اختیاری)</label>
-                <input type="text" name="link_url" id="linkUrl" class="w-full border rounded-lg px-3 py-2"
+                <label class="block text-gray-700 mb-2 text-sm md:text-base">لینک هدف (اختیاری)</label>
+                <input type="text" name="link_url" id="linkUrl" class="w-full border rounded-lg px-3 py-2 text-sm md:text-base"
                     placeholder="/events">
             </div>
 
             <div class="mb-4">
-                <label class="block text-gray-700 mb-2">متن جایگزین (alt)</label>
-                <input type="text" name="alt_text" id="altText" class="w-full border rounded-lg px-3 py-2">
+                <label class="block text-gray-700 mb-2 text-sm md:text-base">متن جایگزین (alt)</label>
+                <input type="text" name="alt_text" id="altText" class="w-full border rounded-lg px-3 py-2 text-sm md:text-base">
             </div>
 
             <div class="mb-4">
-                <label class="block text-gray-700 mb-2">ترتیب نمایش</label>
-                <input type="number" name="order" id="order" class="w-full border rounded-lg px-3 py-2" value="0">
+                <label class="block text-gray-700 mb-2 text-sm md:text-base">ترتیب نمایش</label>
+                <input type="number" name="order" id="order" class="w-full border rounded-lg px-3 py-2 text-sm md:text-base" value="0">
             </div>
 
-            <div class="flex gap-3 justify-end">
+            <div class="flex flex-col sm:flex-row gap-3 justify-end mt-6">
                 <button type="button" id="cancelModalBtn"
-                    class="px-4 py-2 border rounded-lg hover:bg-gray-50">انصراف</button>
+                    class="px-4 py-2 border rounded-lg hover:bg-gray-50 text-sm md:text-base order-2 sm:order-1">انصراف</button>
                 <button type="submit"
-                    class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">ذخیره</button>
+                    class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm md:text-base order-1 sm:order-2">ذخیره</button>
             </div>
         </form>
     </div>
@@ -165,12 +201,13 @@
             justify-content: center;
             z-index: 9999;
             animation: fadeIn 0.2s ease;
+            padding: 1rem;
         }
         .custom-confirm-box {
             background: white;
             border-radius: 1.5rem;
             max-width: 380px;
-            width: 90%;
+            width: 100%;
             margin: 1rem;
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
             animation: slideUp 0.2s ease;
@@ -178,39 +215,39 @@
         }
         .custom-confirm-header {
             background: linear-gradient(135deg, #ef4444, #dc2626);
-            padding: 1.25rem;
+            padding: 1rem md:p-1.25rem;
             text-align: center;
         }
         .custom-confirm-header i {
-            font-size: 3rem;
+            font-size: 2rem md:text-3rem;
             color: white;
         }
         .custom-confirm-body {
-            padding: 1.5rem;
+            padding: 1rem md:p-1.5rem;
             text-align: center;
         }
         .custom-confirm-body h3 {
-            font-size: 1.25rem;
+            font-size: 1rem md:text-1.25rem;
             font-weight: bold;
             color: #1f2937;
             margin-bottom: 0.5rem;
         }
         .custom-confirm-body p {
             color: #6b7280;
-            font-size: 0.875rem;
+            font-size: 0.75rem md:text-0.875rem;
             line-height: 1.5;
         }
         .custom-confirm-footer {
-            padding: 1rem 1.5rem 1.5rem;
+            padding: 0.75rem 1rem 1.25rem;
             display: flex;
             gap: 0.75rem;
             justify-content: center;
         }
         .custom-confirm-btn {
-            padding: 0.625rem 1.5rem;
+            padding: 0.5rem 1rem md:p-0.625rem 1.5rem;
             border-radius: 0.75rem;
             font-weight: 500;
-            font-size: 0.875rem;
+            font-size: 0.75rem md:text-0.875rem;
             cursor: pointer;
             transition: all 0.2s;
             border: none;
@@ -247,7 +284,7 @@
             transform: translateX(-50%);
             background: white;
             border-radius: 1rem;
-            padding: 0.875rem 1.5rem;
+            padding: 0.75rem 1rem md:p-0.875rem 1.5rem;
             display: flex;
             align-items: center;
             gap: 0.75rem;
@@ -255,6 +292,8 @@
             z-index: 10000;
             animation: toastSlideUp 0.3s ease;
             direction: rtl;
+            margin: 0 1rem;
+            font-size: 0.875rem md:text-1rem;
         }
         .custom-toast-success {
             border-right: 4px solid #10b981;
@@ -391,11 +430,13 @@
         function showModal() {
             modal.classList.remove('hidden');
             modal.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
         }
 
         function hideModal() {
             modal.classList.add('hidden');
             modal.style.display = 'none';
+            document.body.style.overflow = '';
         }
 
         function resetForm() {
@@ -427,7 +468,7 @@
             });
         }
 
-        // ویرایش بنر (بدون پیام هشدار)
+        // ویرایش بنر (هم برای جدول و هم برای کارت‌ها)
         var editBtns = document.querySelectorAll('.edit-btn');
         for (var i = 0; i < editBtns.length; i++) {
             editBtns[i].addEventListener('click', async function () {
@@ -478,7 +519,14 @@
         for (var i = 0; i < deleteBtns.length; i++) {
             deleteBtns[i].addEventListener('click', async function () {
                 var id = this.dataset.id;
-                var title = this.dataset.title || 'این بنر';
+                var row = document.querySelector(`#banner-row-${id}`);
+                var title = row ? (row.querySelector('td:nth-child(2)')?.innerText || 'این بنر') : 'این بنر';
+                
+                var card = document.querySelector(`.card-item[data-id="${id}"]`);
+                if (card) {
+                    var cardTitle = card.querySelector('h3');
+                    if (cardTitle) title = cardTitle.innerText;
+                }
 
                 var confirmed = await showConfirmDialog({
                     title: 'حذف بنر',
@@ -506,12 +554,12 @@
             });
         }
 
-        // تغییر وضعیت فعال/غیرفعال (با هشدار ساده)
+        // تغییر وضعیت فعال/غیرفعال
         var toggleBtns = document.querySelectorAll('.toggle-btn');
         for (var i = 0; i < toggleBtns.length; i++) {
             toggleBtns[i].addEventListener('click', async function () {
                 var id = this.dataset.id;
-                var isActive = this.dataset.active === 'true';
+                var isActive = this.querySelector('span')?.innerText.includes('فعال');
                 var statusText = isActive ? 'غیرفعال' : 'فعال';
 
                 var confirmed = await showConfirmDialog({
@@ -541,18 +589,32 @@
             });
         }
 
-        // ذخیره ترتیب (بدون هشدار اضافی)
+        // ذخیره ترتیب
         if (saveOrderBtn) {
             saveOrderBtn.addEventListener('click', async function () {
                 var orders = [];
-                var rows = document.querySelectorAll('#banners-list tr[data-id]');
-
-                for (var i = 0; i < rows.length; i++) {
-                    var row = rows[i];
+                
+                // دریافت از جدول دسکتاپ
+                var tableRows = document.querySelectorAll('#banners-list tr[data-id]');
+                for (var i = 0; i < tableRows.length; i++) {
+                    var row = tableRows[i];
                     var input = row.querySelector('.order-input');
                     if (input) {
                         orders.push({
                             id: parseInt(row.dataset.id),
+                            order: parseInt(input.value)
+                        });
+                    }
+                }
+                
+                // دریافت از کارت‌های موبایل
+                var cards = document.querySelectorAll('.card-item');
+                for (var i = 0; i < cards.length; i++) {
+                    var card = cards[i];
+                    var input = card.querySelector('.order-input');
+                    if (input && !orders.find(o => o.id === parseInt(card.dataset.id))) {
+                        orders.push({
+                            id: parseInt(card.dataset.id),
                             order: parseInt(input.value)
                         });
                     }
@@ -577,7 +639,7 @@
             });
         }
 
-        // ارسال فرم (ویرایش/افزودن - بدون هشدار غیرقابل بازگشت)
+        // ارسال فرم (ویرایش/افزودن)
         if (bannerForm) {
             bannerForm.addEventListener('submit', async function (e) {
                 e.preventDefault();
@@ -643,6 +705,19 @@
         background: none;
         border: none;
         cursor: pointer;
+    }
+    
+    /* بهبود نمایش در موبایل */
+    @media (max-width: 640px) {
+        .custom-toast {
+            max-width: calc(100% - 2rem);
+            white-space: normal;
+            word-break: break-word;
+        }
+        
+        .custom-confirm-box {
+            margin: 0.5rem;
+        }
     }
 </style>
 {% endblock %}

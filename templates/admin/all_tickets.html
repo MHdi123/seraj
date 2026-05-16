@@ -1,0 +1,158 @@
+{% extends "base.html" %}
+
+{% block title %}مدیریت تیکت‌ها - سِراج{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 sm:px-6 py-4 sm:py-8">
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+        <h1 class="text-xl sm:text-2xl font-bold">مدیریت تیکت‌های پشتیبانی</h1>
+    </div>
+
+    <!-- آمار - کاملاً ریسپانسیو -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 mb-6">
+        <div class="bg-white rounded-lg shadow p-3 sm:p-4 text-center">
+            <div class="text-xl sm:text-2xl font-bold text-blue-600">{{ stats.total }}</div>
+            <div class="text-xs sm:text-sm text-gray-600">کل تیکت‌ها</div>
+        </div>
+        <div class="bg-yellow-50 rounded-lg shadow p-3 sm:p-4 text-center">
+            <div class="text-xl sm:text-2xl font-bold text-green-600">{{ stats.open }}</div>
+            <div class="text-xs sm:text-sm text-gray-600">باز</div>
+        </div>
+        <div class="bg-blue-50 rounded-lg shadow p-3 sm:p-4 text-center">
+            <div class="text-xl sm:text-2xl font-bold text-yellow-600">{{ stats.in_progress }}</div>
+            <div class="text-xs sm:text-sm text-gray-600">در حال بررسی</div>
+        </div>
+        <div class="bg-green-50 rounded-lg shadow p-3 sm:p-4 text-center">
+            <div class="text-xl sm:text-2xl font-bold text-red-600">{{ stats.closed }}</div>
+            <div class="text-xs sm:text-sm text-gray-600">بسته شده</div>
+        </div>
+    </div>
+
+    <!-- فیلتر وضعیت - اسکرول افقی در موبایل -->
+    <div class="bg-white rounded-lg shadow mb-6 p-3 sm:p-4">
+            <a href="?status=all" class="px-3 sm:px-4 py-2 rounded-lg whitespace-nowrap {% if current_status == 'all' %}bg-blue-600 text-white{% else %}bg-gray-200 text-gray-700{% endif %}">همه</a>
+            <a href="?status=open" class="px-3 sm:px-4 py-2 rounded-lg whitespace-nowrap {% if current_status == 'open' %}bg-green-600 text-white{% else %}bg-gray-200 text-gray-700{% endif %}">باز</a>
+            <a href="?status=in_progress" class="px-3 sm:px-4 py-2 rounded-lg whitespace-nowrap {% if current_status == 'in_progress' %}bg-yellow-600 text-white{% else %}bg-gray-200 text-gray-700{% endif %}">در حال بررسی</a>
+            <a href="?status=closed" class="px-3 sm:px-4 py-2 rounded-lg whitespace-nowrap {% if current_status == 'closed' %}bg-red-600 text-white{% else %}bg-gray-200 text-gray-700{% endif %}">بسته شده</a>
+    </div>
+
+    <!-- لیست تیکت‌ها - تبدیل جدول به کارت در موبایل -->
+    <div class="bg-white rounded-lg shadow overflow-hidden">
+        <!-- نسخه دسکتاپ: جدول -->
+        <div class="hidden md:block overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-4 py-3 text-right text-xs font-medium text-gray-500">#</th>
+                        <th class="px-4 py-3 text-right text-xs font-medium text-gray-500">کاربر</th>
+                        <th class="px-4 py-3 text-right text-xs font-medium text-gray-500">موضوع</th>
+                        <th class="px-4 py-3 text-right text-xs font-medium text-gray-500">وضعیت</th>
+                        <th class="px-4 py-3 text-right text-xs font-medium text-gray-500">اولویت</th>
+                        <th class="px-4 py-3 text-right text-xs font-medium text-gray-500">تاریخ</th>
+                        <th class="px-4 py-3 text-right text-xs font-medium text-gray-500">عملیات</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-200">
+                    {% for ticket in tickets.items %}
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">#{{ ticket.id }}</td>
+                        <td class="px-4 py-4 whitespace-nowrap">
+                            <div class="text-sm font-medium text-gray-900">{{ ticket.user.full_name }}</div>
+                            <div class="text-xs text-gray-500">{{ ticket.user.email }}</div>
+                        </td>
+                        <td class="px-4 py-4">
+                            <div class="text-sm text-gray-900">{{ ticket.subject[:50] }}{% if ticket.subject|length > 50 %}...{% endif %}</div>
+                            <div class="text-xs text-gray-500">{{ ticket.message[:60] }}...</div>
+                        </td>
+                        <td class="px-4 py-4 whitespace-nowrap">
+                            {% if ticket.status == 'open' %}
+                            <span class="px-2 py-1 text-xs rounded-full bg-yellow-100 text-yellow-800">باز</span>
+                            {% elif ticket.status == 'in_progress' %}
+                            <span class="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800">در حال بررسی</span>
+                            {% else %}
+                            <span class="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800">بسته</span>
+                            {% endif %}
+                        </td>
+                        <td class="px-4 py-4 whitespace-nowrap">
+                            {% if ticket.priority == 'high' %}
+                            <span class="px-2 py-1 text-xs rounded-full bg-red-100 text-red-800">بالا</span>
+                            {% elif ticket.priority == 'medium' %}
+                            <span class="px-2 py-1 text-xs rounded-full bg-orange-100 text-orange-800">متوسط</span>
+                            {% else %}
+                            <span class="px-2 py-1 text-xs rounded-full bg-gray-100 text-gray-800">کم</span>
+                            {% endif %}
+                        </td>
+                        <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
+                            {{ ticket.created_at|persian_date }}
+                        </td>
+                        <td class="px-4 py-4 whitespace-nowrap text-sm">
+                            <a href="{{ url_for('admin_support_ticket_detail', ticket_id=ticket.id) }}" class="text-indigo-600 hover:text-indigo-800 text-sm font-medium transition">مشاهده و پاسخ</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- نسخه موبایل و تبلت: کارت‌ها -->
+        <div class="md:hidden divide-y divide-gray-200">
+            {% for ticket in tickets.items %}
+            <div class="p-4 hover:bg-gray-50 transition">
+                <div class="flex justify-between items-start mb-3">
+                    <span class="text-sm font-bold text-gray-700">#{{ ticket.id }}</span>
+                    <div class="flex gap-2">
+                        {% if ticket.status == 'open' %}
+                        <span class="px-2 py-1 text-xs rounded-full bg-yellow-100 text-yellow-800">باز</span>
+                        {% elif ticket.status == 'in_progress' %}
+                        <span class="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800">در حال بررسی</span>
+                        {% else %}
+                        <span class="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800">بسته</span>
+                        {% endif %}
+                        
+                        {% if ticket.priority == 'high' %}
+                        <span class="px-2 py-1 text-xs rounded-full bg-red-100 text-red-800">بالا</span>
+                        {% elif ticket.priority == 'medium' %}
+                        <span class="px-2 py-1 text-xs rounded-full bg-orange-100 text-orange-800">متوسط</span>
+                        {% else %}
+                        <span class="px-2 py-1 text-xs rounded-full bg-gray-100 text-gray-800">کم</span>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="mb-2">
+                    <div class="text-sm font-medium text-gray-900">{{ ticket.user.full_name }}</div>
+                    <div class="text-xs text-gray-500">{{ ticket.user.email }}</div>
+                </div>
+                
+                <div class="mb-2">
+                    <div class="text-sm text-gray-900 font-semibold">{{ ticket.subject[:60] }}{% if ticket.subject|length > 60 %}...{% endif %}</div>
+                    <div class="text-xs text-gray-500 mt-1">{{ ticket.message[:80] }}...</div>
+                </div>
+                
+                <div class="flex justify-between items-center mt-3 pt-2 border-t border-gray-100">
+                    <span class="text-xs text-gray-500">{{ ticket.created_at|persian_date }}</span>
+                    <a href="{{ url_for('admin_support_ticket_detail', ticket_id=ticket.id) }}" class="text-indigo-600 hover:text-indigo-800 text-sm font-medium transition">
+                        مشاهده و پاسخ
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- صفحه‌بندی ریسپانسیو -->
+    {% if tickets.pages > 1 %}
+    <div class="flex justify-center mt-6">
+        <div class="flex gap-1 flex-wrap justify-center">
+            {% if tickets.has_prev %}
+            <a href="?page={{ tickets.prev_num }}&status={{ current_status }}" class="px-3 py-1 border rounded-lg text-sm hover:bg-gray-50">قبلی</a>
+            {% endif %}
+            <span class="px-3 py-1 text-sm">صفحه {{ tickets.page }} از {{ tickets.pages }}</span>
+            {% if tickets.has_next %}
+            <a href="?page={{ tickets.next_num }}&status={{ current_status }}" class="px-3 py-1 border rounded-lg text-sm hover:bg-gray-50">بعدی</a>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

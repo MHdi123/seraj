@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+
+{% block title %}نهج‌البلاغه - سیراج{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 py-6 sm:py-8">
+    
+    <!-- هدر با رنگ -->
+    <div class="mb-8 sm:mb-10 text-right">
+        <h1 class="text-2xl sm:text-3xl font-normal" style="color: #4f46e5;">نهج‌البلاغه</h1>
+        <p class="text-gray-500 text-sm mt-1">خطبه‌ها، نامه‌ها و کلمات قصار</p>
+        
+        {% if current_user.is_authenticated and current_user.is_admin %}
+        <div class="mt-3">
+            <a href="{{ url_for('admin_nahj_contents') }}" class="text-xs text-gray-400 hover:text-gray-600 transition">مدیریت مطالب</a>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- دسته‌بندی‌ها - مشابه احکام -->
+    <div class="mb-8">
+        <div class="flex flex-wrap gap-2 pb-3">
+            {% for cat in categories %}
+            <a href="{{ url_for('nahj_category', slug=cat.slug) }}" 
+               class="px-3 py-1.5 text-sm rounded-full transition duration-200" 
+               style="background-color: #eef2ff; color: #4f46e5;">
+                {{ cat.name }}
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- مطالب ویژه - کارت‌های مشابه احکام -->
+    {% if featured_contents %}
+    <div>
+        <div class="text-right mb-4">
+            <span class="text-xs px-2 py-0.5 rounded-full" style="background-color: #eef2ff; color: #4f46e5;">✦ مطالب برگزیده ✦</span>
+        </div>
+        <div class="space-y-3">
+            {% for content in featured_contents %}
+            <a href="{{ url_for('nahj_content_detail', id=content.id) }}" class="block group">
+                <div class="p-4 rounded-xl bg-white hover:shadow-md transition-all duration-200" style="border-right: 4px solid #f59e0b;">
+                    <div class="flex flex-wrap items-center gap-2 mb-2 text-xs">
+                        <span class="px-2 py-0.5 rounded-full" style="background-color: #f3f4f6; color: #4b5563;">{{ content.category.name }}</span>
+                        {% if content.number %}
+                        <span class="px-2 py-0.5 rounded-full" style="background-color: #eef2ff; color: #4f46e5;">{{ content.number }}</span>
+                        {% endif %}
+                    </div>
+                    <h2 class="text-base sm:text-lg font-medium transition" style="color: #1f2937;">{{ content.title }}</h2>
+                    <p class="text-sm text-gray-500 line-clamp-2 mt-1">{{ content.persian_text|truncate(80) }}</p>
+                    <div class="flex items-center gap-2 mt-2 text-xs text-gray-400">
+                        <span>{{ content.view_count }} بازدید</span>
+                        {% if content.created_at %}
+                        <span>•</span>
+                        <span>{{ content.created_at|persian_date }}</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+    {% else %}
+    <div class="text-center py-12">
+        <div class="inline-flex items-center justify-center w-16 h-16 rounded-full mb-4" style="background-color: #eef2ff;">
+            <svg class="w-8 h-8" style="color: #818cf8;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+            </svg>
+        </div>
+        <p class="text-gray-400 text-sm">هیچ مطلب ویژه‌ای یافت نشد</p>
+    </div>
+    {% endif %}
+</div>
+
+<style>
+.line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+@media (max-width: 640px) {
+    .line-clamp-2 {
+        -webkit-line-clamp: 3;
+        line-clamp: 3;
+    }
+}
+</style>
+{% endblock %}

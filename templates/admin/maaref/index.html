@@ -1,0 +1,164 @@
+{% extends "admin/base_admin.html" %}
+
+{% block title %}مدیریت مطالب معارف اسلامی{% endblock %}
+
+{% block content %}
+<div class="p-4 sm:p-6">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+        <div>
+            <h1 class="text-xl sm:text-2xl font-bold text-gray-800">
+                <i class="fas fa-book text-emerald-600 ml-2"></i> مدیریت معارف اسلامی
+            </h1>
+            <p class="text-gray-500 text-sm mt-1">مدیریت مطالب، دسته‌بندی‌ها و محتوای معارف اسلامی</p>
+        </div>
+        <a href="{{ url_for('admin_maaref_new') }}" 
+           class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg text-sm transition flex items-center gap-2 justify-center">
+            <i class="fas fa-plus"></i> مطلب جدید
+        </a>
+    </div>
+
+    <!-- فیلتر دسته‌بندی -->
+    <div class="mb-4 flex flex-wrap gap-2 items-center">
+        <span class="text-sm text-gray-500 ml-2">فیلتر:</span>
+        <a href="{{ url_for('admin_maaref_index') }}" 
+           class="px-3 py-1 rounded-full text-sm {% if not selected_category %}bg-emerald-600 text-white{% else %}bg-gray-100 text-gray-700 hover:bg-gray-200{% endif %} transition">
+            همه
+        </a>
+        {% for cat in categories %}
+        <a href="{{ url_for('admin_maaref_index', category_id=cat.id) }}" 
+           class="px-3 py-1 rounded-full text-sm {% if selected_category == cat.id %}bg-emerald-600 text-white{% else %}bg-gray-100 text-gray-700 hover:bg-gray-200{% endif %} transition">
+            {{ cat.name }}
+        </a>
+        {% endfor %}
+    </div>
+
+    <!-- لیست مطالب -->
+    <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+                <thead class="bg-gray-50 border-b">
+                    <tr class="text-right">
+                        <th class="px-4 py-3 w-12">#</th>
+                        <th class="px-4 py-3">عنوان</th>
+                        <th class="px-4 py-3">دسته‌بندی</th>
+                        <th class="px-4 py-3">سطح</th>
+                        <th class="px-4 py-3">بازدید</th>
+                        <th class="px-4 py-3">وضعیت</th>
+                        <th class="px-4 py-3">تاریخ</th>
+                        <th class="px-4 py-3">عملیات</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for article in articles %}
+                    <tr class="border-t hover:bg-gray-50 transition" data-article-id="{{ article.id }}" data-article-title="{{ article.title }}">
+                        <td class="px-4 py-3 text-gray-500">{{ article.id }}</td>
+                        <td class="px-4 py-3">
+                            <div class="font-medium text-gray-800">{{ article.title }}</div>
+                            {% if article.is_featured %}
+                            <span class="inline-flex items-center gap-1 text-xs text-amber-600 mt-1">
+                                <i class="fas fa-star text-xs"></i> ویژه
+                            </span>
+                            {% endif %}
+                            <div class="text-xs text-gray-400 mt-1">{{ article.slug }}</div>
+                        </td>
+                        <td class="px-4 py-3">
+                            <span class="px-2 py-1 rounded-full text-xs bg-gray-100 text-gray-700">
+                                {{ article.category.name if article.category else 'دسته‌بندی نشده' }}
+                            </span>
+                        </td>
+                        <td class="px-4 py-3">
+                            <span class="px-2 py-1 rounded-full text-xs 
+                                {% if article.level == 'beginner' %}bg-green-100 text-green-700
+                                {% elif article.level == 'intermediate' %}bg-blue-100 text-blue-700
+                                {% else %}bg-purple-100 text-purple-700{% endif %}">
+                                {% if article.level == 'beginner' %}مقدماتی
+                                {% elif article.level == 'intermediate' %}متوسط
+                                {% else %}پیشرفته{% endif %}
+                            </span>
+                        </td>
+                        <td class="px-4 py-3 text-gray-600">{{ article.view_count }}</td>
+                        <td class="px-4 py-3">
+                            {% if article.is_active %}
+                            <span class="inline-flex items-center gap-1 text-xs text-green-600">
+                                <i class="fas fa-circle" style="font-size: 8px;"></i> فعال
+                            </span>
+                            {% else %}
+                            <span class="inline-flex items-center gap-1 text-xs text-red-600">
+                                <i class="fas fa-circle" style="font-size: 8px;"></i> غیرفعال
+                            </span>
+                            {% endif %}
+                        </td>
+                        <td class="px-4 py-3 text-gray-500 text-xs">{{ article.created_at|persian_date }}</td>
+                        <td class="px-4 py-3">
+                            <div class="flex gap-2">
+                                <a href="{{ url_for('admin_maaref_edit', id=article.id) }}" 
+                                   class="text-blue-600 hover:text-blue-800 transition p-1" title="ویرایش">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <button type="button" 
+                                        class="delete-btn text-red-600 hover:text-red-800 transition p-1" 
+                                        title="حذف">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                                <a href="{{ url_for('maaref_detail', article_id=article.id) }}" target="_blank"
+                                   class="text-gray-500 hover:text-emerald-600 transition p-1" title="مشاهده در سایت">
+                                    <i class="fas fa-external-link-alt"></i>
+                                </a>
+                            </div>
+                        </td>
+                    茁
+                    {% else %}
+                    <tr class="border-t">
+                        <td colspan="8" class="text-center py-12 text-gray-400">
+                            <i class="fas fa-inbox text-4xl mb-2 block"></i>
+                            هیچ مطلبی یافت نشد
+                            <div class="mt-3">
+                                <a href="{{ url_for('admin_maaref_new') }}" class="text-emerald-600 hover:underline text-sm">
+                                    اولین مطلب را اضافه کنید
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var deleteButtons = document.querySelectorAll('.delete-btn');
+    
+    deleteButtons.forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            var row = this.closest('tr');
+            var articleId = row.getAttribute('data-article-id');
+            var articleTitle = row.getAttribute('data-article-title');
+            
+            if (confirm('آیا از حذف مطلب "' + articleTitle + '" اطمینان دارید؟')) {
+                fetch('/admin/maaref/delete/' + articleId, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                })
+                .then(function(response) {
+                    return response.json();
+                })
+                .then(function(data) {
+                    if (data.success) {
+                        location.reload();
+                    } else {
+                        alert('خطا در حذف: ' + data.message);
+                    }
+                })
+                .catch(function(error) {
+                    alert('خطا در ارتباط با سرور');
+                });
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,195 @@
+{% extends "base.html" %}
+
+{% block title %}{{ content.title }} - نهج‌البلاغه{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto px-4 py-6 sm:py-8">
+    
+    <!-- بازگشت -->
+    <div class="mb-6">
+        <a href="{{ url_for('nahj_category', slug=content.category.slug) }}" class="text-gray-400 hover:text-gray-600 transition text-sm">
+            ← بازگشت به {{ content.category.name }}
+        </a>
+    </div>
+    
+    <!-- هدر مطلب -->
+    <div class="mb-8 text-right">
+        <div class="flex flex-wrap items-center gap-2 mb-3 text-xs">
+            <span class="px-2 py-0.5 rounded-full" style="background-color: #eef2ff; color: #4f46e5;">{{ content.category.name }}</span>
+            {% if content.number %}
+            <span class="px-2 py-0.5 rounded-full" style="background-color: #f3f4f6; color: #4b5563;">{{ content.number }}</span>
+            {% endif %}
+            {% if content.is_featured %}
+            <span class="px-2 py-0.5 rounded-full" style="background-color: #fef3c7; color: #d97706;">ویژه</span>
+            {% endif %}
+        </div>
+        
+        <h1 class="text-xl sm:text-2xl md:text-3xl font-normal" style="color: #1f2937;">{{ content.title }}</h1>
+        
+        <div class="flex flex-wrap items-center gap-3 mt-3 text-xs" style="color: #9ca3af;">
+            <span class="flex items-center gap-1">
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                </svg>
+                {{ content.view_count }} بازدید
+            </span>
+            {% if content.created_at %}
+            <span class="flex items-center gap-1">
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                </svg>
+                {{ content.created_at|persian_date }}
+            </span>
+            {% endif %}
+        </div>
+        
+        {% if current_user.is_authenticated and current_user.is_admin %}
+        <div class="flex gap-3 mt-4 text-xs">
+            <a href="{{ url_for('admin_nahj_contents') }}" class="text-gray-400 hover:text-gray-600">ویرایش</a>
+            <span class="text-gray-300">|</span>
+            <button data-id="{{ content.id }}" class="delete-btn text-gray-400 hover:text-gray-600">حذف</button>
+        </div>
+        {% endif %}
+    </div>
+    
+    <!-- متن عربی -->
+    {% if content.arabic_text %}
+    <div class="mb-8 p-4 sm:p-5 rounded-xl" style="background-color: #fafafa;">
+        <div class="arabic-text leading-loose text-right text-gray-700 text-base sm:text-lg">
+            {{ content.arabic_text|safe }}
+        </div>
+    </div>
+    {% endif %}
+    
+    <!-- متن فارسی -->
+    <div class="mb-8">
+        <div class="persian-text leading-loose text-justify text-gray-700 text-sm sm:text-base">
+            {{ content.persian_text|safe }}
+        </div>
+    </div>
+    
+    <!-- شرح -->
+    {% if content.explanation %}
+    <div class="mb-8 p-4 sm:p-5 rounded-xl" style="background-color: #fefce8;">
+        <div class="text-xs sm:text-sm text-gray-600 leading-loose text-justify">
+            {{ content.explanation|safe }}
+        </div>
+    </div>
+    {% endif %}
+    
+    <!-- برچسب‌ها -->
+    {% if content.tags %}
+    <div class="flex flex-wrap justify-center gap-2 mb-8">
+        {% for tag in content.tags.split(',') %}
+        <span class="px-2 py-0.5 rounded-full text-xs" style="background-color: #f3f4f6; color: #6b7280;">{{ tag.strip() }}</span>
+        {% endfor %}
+    </div>
+    {% endif %}
+    
+    <!-- مطالب مرتبط -->
+    {% if related %}
+    <div class="mt-8 pt-6 border-t border-gray-100">
+        <h3 class="text-sm font-medium text-center mb-4" style="color: #4f46e5;">مطالب مرتبط</h3>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {% for item in related %}
+            <a href="{{ url_for('nahj_content_detail', id=item.id) }}" class="group block p-3 rounded-xl hover:shadow-sm transition" style="background-color: #fafafa;">
+                <div class="flex items-start gap-2">
+                    <svg class="w-4 h-4 text-gray-300 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                    </svg>
+                    <div>
+                        {% if item.number %}
+                        <span class="text-gray-400 text-xs">{{ item.number }}</span>
+                        {% endif %}
+                        <h4 class="text-gray-700 text-sm group-hover:text-gray-900 transition line-clamp-1">{{ item.title }}</h4>
+                    </div>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+    
+    <!-- کپی لینک -->
+    <div class="mt-8 pt-6 text-center border-t border-gray-100">
+        <button onclick="copyLink()" class="inline-flex items-center gap-1 text-xs text-gray-400 hover:text-gray-600 transition">
+            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.102m3.172-5.656a4 4 0 015.656 0l4 4a4 4 0 01-5.656 5.656l-1.102-1.102"/>
+            </svg>
+            کپی لینک
+        </button>
+    </div>
+</div>
+
+<div id="toast" class="fixed bottom-5 left-1/2 -translate-x-1/2 bg-gray-800 text-white text-xs px-3 py-1.5 rounded-full opacity-0 transition pointer-events-none z-50">
+    ✓ لینک کپی شد
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function copyLink() {
+    navigator.clipboard.writeText(window.location.href);
+    var toast = document.getElementById('toast');
+    toast.classList.remove('opacity-0');
+    toast.classList.add('opacity-90');
+    setTimeout(function() {
+        toast.classList.remove('opacity-90');
+        toast.classList.add('opacity-0');
+    }, 1500);
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    var deleteBtn = document.querySelector('.delete-btn');
+    if (deleteBtn) {
+        deleteBtn.addEventListener('click', function() {
+            var id = this.getAttribute('data-id');
+            if (confirm('آیا برای حذف این مطلب اطمینان دارید؟')) {
+                fetch('/admin/nahj/content/' + id + '/delete', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                })
+                .then(function(response) { return response.json(); })
+                .then(function(data) {
+                    if (data.success) {
+                        alert('مطلب حذف شد');
+                        window.location.href = '/nahj';
+                    } else {
+                        alert('خطا در حذف');
+                    }
+                });
+            }
+        });
+    }
+});
+</script>
+{% endblock %}
+
+{% block styles %}
+<style>
+.arabic-text {
+    font-family: 'Amiri', 'Scheherazade', 'Traditional Arabic', serif;
+    line-height: 1.8;
+}
+.persian-text {
+    font-family: 'Vazir', 'IRANSans', tahoma, sans-serif;
+    line-height: 1.9;
+}
+.line-clamp-1 {
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+@media (max-width: 640px) {
+    .arabic-text { font-size: 0.9rem; }
+    .persian-text { font-size: 0.85rem; }
+}
+@media (min-width: 768px) {
+    .arabic-text { font-size: 1.05rem; }
+    .persian-text { font-size: 0.95rem; }
+}
+</style>
+{% endblock %}

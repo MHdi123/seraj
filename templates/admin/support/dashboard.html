@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+{% block title %}پنل پشتیبانی{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-6 md:py-8">
+    <div class="mb-8">
+        <h1 class="text-xl md:text-2xl font-semibold text-gray-800">مدیریت تیکت‌های پشتیبانی</h1>
+        <p class="text-gray-500 text-sm mt-1">مشاهده و مدیریت درخواست‌های کاربران</p>
+    </div>
+
+    <!-- آمار - ریسپانسیو با گرید -->
+    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 md:gap-4 mb-8">
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-3 md:p-4 text-center hover:shadow-md transition">
+            <div class="text-2xl md:text-3xl font-bold text-indigo-600">{{ stats.total }}</div>
+            <div class="text-gray-500 text-xs md:text-sm mt-1">کل تیکت‌ها</div>
+        </div>
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-3 md:p-4 text-center hover:shadow-md transition">
+            <div class="text-2xl md:text-3xl font-bold text-amber-600">{{ stats.open }}</div>
+            <div class="text-gray-500 text-xs md:text-sm mt-1">باز</div>
+        </div>
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-3 md:p-4 text-center hover:shadow-md transition">
+            <div class="text-2xl md:text-3xl font-bold text-blue-600">{{ stats.in_progress }}</div>
+            <div class="text-gray-500 text-xs md:text-sm mt-1">در حال بررسی</div>
+        </div>
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-3 md:p-4 text-center hover:shadow-md transition">
+            <div class="text-2xl md:text-3xl font-bold text-emerald-600">{{ stats.closed }}</div>
+            <div class="text-gray-500 text-xs md:text-sm mt-1">بسته شده</div>
+        </div>
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-3 md:p-4 text-center hover:shadow-md transition">
+            <div class="text-2xl md:text-3xl font-bold text-rose-600">{{ stats.high_priority }}</div>
+            <div class="text-gray-500 text-xs md:text-sm mt-1">اولویت بالا</div>
+        </div>
+    </div>
+
+    <!-- فیلتر - اسکرول افقی در موبایل -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 mb-6 p-3 overflow-x-auto">
+        <div class="flex gap-2 min-w-max">
+            <a href="?status=all" class="px-4 py-2 rounded-lg text-sm font-medium transition {% if current_status == 'all' %}bg-indigo-600 text-white shadow-sm{% else %}bg-gray-100 text-gray-700 hover:bg-gray-200{% endif %}">همه</a>
+            <a href="?status=open" class="px-4 py-2 rounded-lg text-sm font-medium transition {% if current_status == 'open' %}bg-amber-500 text-white shadow-sm{% else %}bg-gray-100 text-gray-700 hover:bg-gray-200{% endif %}">باز</a>
+            <a href="?status=in_progress" class="px-4 py-2 rounded-lg text-sm font-medium transition {% if current_status == 'in_progress' %}bg-blue-500 text-white shadow-sm{% else %}bg-gray-100 text-gray-700 hover:bg-gray-200{% endif %}">در حال بررسی</a>
+            <a href="?status=closed" class="px-4 py-2 rounded-lg text-sm font-medium transition {% if current_status == 'closed' %}bg-gray-600 text-white shadow-sm{% else %}bg-gray-100 text-gray-700 hover:bg-gray-200{% endif %}">بسته شده</a>
+        </div>
+    </div>
+
+    <!-- لیست تیکت‌ها - ریسپانسیو با overflow-x-auto -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-100">
+                <thead>
+                    <tr class="bg-gray-50">
+                        <th class="px-4 md:px-6 py-3 text-right text-xs font-medium text-gray-500">ID</th>
+                        <th class="px-4 md:px-6 py-3 text-right text-xs font-medium text-gray-500">موضوع</th>
+                        <th class="px-4 md:px-6 py-3 text-right text-xs font-medium text-gray-500 hidden sm:table-cell">کاربر</th>
+                        <th class="px-4 md:px-6 py-3 text-right text-xs font-medium text-gray-500">وضعیت</th>
+                        <th class="px-4 md:px-6 py-3 text-right text-xs font-medium text-gray-500 hidden md:table-cell">اولویت</th>
+                        <th class="px-4 md:px-6 py-3 text-right text-xs font-medium text-gray-500 hidden lg:table-cell">تاریخ</th>
+                        <th class="px-4 md:px-6 py-3 text-right text-xs font-medium text-gray-500">عملیات</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-100">
+                    {% for ticket in tickets %}
+                    <tr class="hover:bg-gray-50 transition">
+                        <td class="px-4 md:px-6 py-3 text-sm text-gray-600 font-mono">#{{ ticket.id }}</td>
+                        <td class="px-4 md:px-6 py-3 text-sm text-gray-800 max-w-[150px] md:max-w-none truncate">{{ ticket.subject[:40] }}{% if ticket.subject|length > 40 %}...{% endif %}</td>
+                        <td class="px-4 md:px-6 py-3 text-sm text-gray-600 hidden sm:table-cell">{{ ticket.user.full_name }}</td>
+                        <td class="px-4 md:px-6 py-3">
+                            {% if ticket.status == 'open' %}
+                            <span class="inline-flex px-2 py-1 text-xs font-medium rounded-lg bg-amber-50 text-amber-700">باز</span>
+                            {% elif ticket.status == 'in_progress' %}
+                            <span class="inline-flex px-2 py-1 text-xs font-medium rounded-lg bg-blue-50 text-blue-700">در حال بررسی</span>
+                            {% else %}
+                            <span class="inline-flex px-2 py-1 text-xs font-medium rounded-lg bg-gray-100 text-gray-600">بسته شده</span>
+                            {% endif %}
+                        </td>
+                        <td class="px-4 md:px-6 py-3 hidden md:table-cell">
+                            {% if ticket.priority == 'high' %}
+                            <span class="inline-flex px-2 py-1 text-xs font-medium rounded-lg bg-rose-50 text-rose-700">بالا</span>
+                            {% elif ticket.priority == 'medium' %}
+                            <span class="inline-flex px-2 py-1 text-xs font-medium rounded-lg bg-orange-50 text-orange-700">متوسط</span>
+                            {% else %}
+                            <span class="inline-flex px-2 py-1 text-xs font-medium rounded-lg bg-gray-100 text-gray-600">پایین</span>
+                            {% endif %}
+                        </td>
+                        <td class="px-4 md:px-6 py-3 text-sm text-gray-500 hidden lg:table-cell">{{ ticket.created_at|persian_date }}</td>
+                        <td class="px-4 md:px-6 py-3">
+                            <a href="/staff/support/ticket/{{ ticket.id }}" class="text-indigo-600 hover:text-indigo-800 text-sm font-medium transition">مشاهده</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

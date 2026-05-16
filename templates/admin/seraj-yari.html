@@ -1,0 +1,130 @@
+{% extends "base.html" %}
+
+{% block title %}مدیریت سِراج‌یار | سِراج{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto px-4 py-6">
+    <h1 class="text-2xl font-bold text-gray-800 mb-6">📚 مدیریت سِراج‌یار</h1>
+
+    <!-- تب‌ها با لینک -->
+    <div class="border-b border-gray-200 mb-6">
+        <ul class="flex flex-wrap gap-4">
+            <li><a href="?tab=qa" class="py-2 px-4 {% if request.args.get('tab') == 'qa' or not request.args.get('tab') %}border-b-2 border-emerald-600 text-emerald-600 font-medium{% else %}text-gray-500 hover:text-gray-700{% endif %}">📝 پرسش و پاسخ</a></li>
+            <li><a href="?tab=categories" class="py-2 px-4 {% if request.args.get('tab') == 'categories' %}border-b-2 border-emerald-600 text-emerald-600 font-medium{% else %}text-gray-500 hover:text-gray-700{% endif %}">📂 دسته‌بندی‌ها</a></li>
+            <li><a href="?tab=suggestions" class="py-2 px-4 {% if request.args.get('tab') == 'suggestions' %}border-b-2 border-emerald-600 text-emerald-600 font-medium{% else %}text-gray-500 hover:text-gray-700{% endif %}">💡 سوالات پیشنهادی</a></li>
+        </ul>
+    </div>
+
+    <!-- تب پرسش و پاسخ -->
+    {% if request.args.get('tab') == 'qa' or not request.args.get('tab') %}
+    <div>
+        <div class="flex justify-between items-center mb-4">
+            <h2 class="text-lg font-bold text-gray-700">لیست پرسش و پاسخ‌ها</h2>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-x-auto">
+            <table class="w-full min-w-[600px]">
+                <thead class="bg-gray-50 border-b border-gray-100">
+                    <tr>
+                        <th class="px-4 py-3 text-right text-sm font-medium text-gray-600">سوال</th>
+                        <th class="px-4 py-3 text-right text-sm font-medium text-gray-600">دسته‌بندی</th>
+                        <th class="px-4 py-3 text-right text-sm font-medium text-gray-600">بازدید</th>
+                        <th class="px-4 py-3 text-right text-sm font-medium text-gray-600">وضعیت</th>
+                        <th class="px-4 py-3 text-right text-sm font-medium text-gray-600">عملیات</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for qa in qa_list %}
+                    <tr class="border-b border-gray-100 hover:bg-gray-50">
+                        <td class="px-4 py-3 text-sm">{{ qa.question[:50] }}{% if qa.question|length > 50 %}...{% endif %}</td>
+                        <td class="px-4 py-3 text-sm">{{ qa.category.name if qa.category else 'بدون دسته' }}</td>
+                        <td class="px-4 py-3 text-sm">{{ qa.view_count }}</td>
+                        <td class="px-4 py-3 text-sm">
+                            {% if qa.is_active %}
+                            <span class="bg-green-100 text-green-700 px-2 py-1 rounded-full text-xs">فعال</span>
+                            {% else %}
+                            <span class="bg-red-100 text-red-700 px-2 py-1 rounded-full text-xs">غیرفعال</span>
+                            {% endif %}
+                        </td>
+                        <td class="px-4 py-3 text-sm">
+                            <button onclick="alert('ویرایش در حال توسعه')" class="text-blue-600 hover:text-blue-800 ml-3"><i class="fas fa-edit"></i></button>
+                            <button onclick="if(confirm('آیا از حذف اطمینان دارید؟')) alert('حذف در حال توسعه')" class="text-red-600 hover:text-red-800"><i class="fas fa-trash"></i></button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- تب دسته‌بندی‌ها -->
+    {% if request.args.get('tab') == 'categories' %}
+    <div>
+        <div class="flex justify-between items-center mb-4">
+            <h2 class="text-lg font-bold text-gray-700">لیست دسته‌بندی‌ها</h2>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-x-auto">
+            <table class="w-full min-w-[500px]">
+                <thead class="bg-gray-50 border-b border-gray-100">
+                    <tr>
+                        <th class="px-4 py-3 text-right text-sm font-medium text-gray-600">نام</th>
+                        <th class="px-4 py-3 text-right text-sm font-medium text-gray-600">شناسه</th>
+                        <th class="px-4 py-3 text-right text-sm font-medium text-gray-600">آیکون</th>
+                        <th class="px-4 py-3 text-right text-sm font-medium text-gray-600">عملیات</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for cat in categories %}
+                    <tr class="border-b border-gray-100 hover:bg-gray-50">
+                        <td class="px-4 py-3 text-sm">{{ cat.name }}</td>
+                        <td class="px-4 py-3 text-sm">{{ cat.slug }}</td>
+                        <td class="px-4 py-3 text-sm"><i class="fas {{ cat.icon }}"></i> {{ cat.icon }}</td>
+                        <td class="px-4 py-3 text-sm">
+                            <button onclick="alert('ویرایش در حال توسعه')" class="text-blue-600 hover:text-blue-800 ml-3"><i class="fas fa-edit"></i></button>
+                            <button onclick="if(confirm('آیا از حذف اطمینان دارید؟')) alert('حذف در حال توسعه')" class="text-red-600 hover:text-red-800"><i class="fas fa-trash"></i></button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- تب سوالات پیشنهادی -->
+    {% if request.args.get('tab') == 'suggestions' %}
+    <div>
+        <div class="flex justify-between items-center mb-4">
+            <h2 class="text-lg font-bold text-gray-700">لیست سوالات پیشنهادی</h2>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-x-auto">
+            <table class="w-full min-w-[500px]">
+                <thead class="bg-gray-50 border-b border-gray-100">
+                    <tr>
+                        <th class="px-4 py-3 text-right text-sm font-medium text-gray-600">سوال</th>
+                        <th class="px-4 py-3 text-right text-sm font-medium text-gray-600">دسته‌بندی</th>
+                        <th class="px-4 py-3 text-right text-sm font-medium text-gray-600">ترتیب</th>
+                        <th class="px-4 py-3 text-right text-sm font-medium text-gray-600">عملیات</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for s in suggestions %}
+                    <tr class="border-b border-gray-100 hover:bg-gray-50">
+                        <td class="px-4 py-3 text-sm">{{ s.question }}</td>
+                        <td class="px-4 py-3 text-sm">{{ s.category.name if s.category else 'بدون دسته' }}</td>
+                        <td class="px-4 py-3 text-sm">{{ s.order }}</td>
+                        <td class="px-4 py-3 text-sm">
+                            <button onclick="if(confirm('آیا از حذف اطمینان دارید؟')) alert('حذف در حال توسعه')" class="text-red-600 hover:text-red-800"><i class="fas fa-trash"></i></button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,60 @@
+{% extends "admin/base.html" %}
+
+{% block title %}تست ارسال پیامک{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="card shadow">
+        <div class="card-header bg-primary text-white">
+            <h4 class="mb-0">📱 تست ارسال پیامک - سرویس sms.ir</h4>
+        </div>
+        <div class="card-body">
+            <!-- نمایش اعتبار -->
+            <div class="alert alert-info">
+                <strong>ℹ️ اطلاعات حساب:</strong><br>
+                شماره خط: <code>{{ line_number }}</code><br>
+                {% if credit is not none %}
+                اعتبار باقیمانده: <strong>{{ credit|persian_number }} تومان</strong>
+                {% else %}
+                <span class="text-danger">دریافت اعتبار ناموفق - کلید API را بررسی کنید</span>
+                {% endif %}
+            </div>
+            
+            <!-- فرم ارسال تست -->
+            <form method="POST">
+                <div class="mb-3">
+                    <label class="form-label">شماره تلفن مقصد</label>
+                    <input type="tel" name="phone" class="form-control" 
+                           placeholder="مثال: 09123456789" required>
+                    <small class="text-muted">شماره خود را برای تست وارد کنید</small>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label">متن پیامک</label>
+                    <textarea name="message" class="form-control" rows="4" 
+                              placeholder="متن پیامک را وارد کنید..." required></textarea>
+                </div>
+                
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-paper-plane"></i> ارسال تست
+                </button>
+                <a href="{{ url_for('admin_sms_logs') }}" class="btn btn-secondary">
+                    <i class="fas fa-history"></i> مشاهده لاگ ارسال‌ها
+                </a>
+            </form>
+            
+            <hr>
+            
+            <div class="alert alert-warning mt-3">
+                <strong>⚠️ نکات مهم:</strong>
+                <ul class="mb-0">
+                    <li>قبل از ارسال انبوه، حتماً این تست را انجام دهید</li>
+                    <li>متن پیامک نباید بیش از ۱۰۰۰ کاراکتر باشد</li>
+                    <li>در صورت خطا، کلید API و شماره خط را بررسی کنید</li>
+                    <li>برای افزایش اعتبار به پنل <a href="https://app.sms.ir" target="_blank">sms.ir</a> مراجعه کنید</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
