@@ -1464,10 +1464,6 @@ function goBack() {
         </a>
         {% endif %}
     </nav>
-    <!-- ============================================ -->
-    <!-- پنل پشتیبانی شناور - فقط برای کاربران عادی -->
-    <!-- ============================================ -->
-    
     {% if current_user.is_authenticated %}
         {% if current_user.role.value != 'admin' and request.endpoint != 'seraj_yari' %}
             {% set show_support = true %}
@@ -1780,7 +1776,7 @@ function goBack() {
                         var t = data.tickets[i];
                         var statusText = t.status === 'open' ? 'باز' : (t.status === 'in_progress' ? 'در حال بررسی' : 'بسته');
                         html += '<div class="ticket-item-simple" onclick="window.location.href=\'/support/ticket/' + t.id + '\'">';
-                        html += '<div style="font-weight:bold;font-size:14px;">#' + t.id + ' - ' + escapeHtmlSimple(t.subject.substring(0, 40)) + '</div>';
+                        html += '<div style="font-weight:bold;font-size:14px;">' + escapeHtmlSimple(t.subject.substring(0, 40)) + '</div>';
                         html += '<div style="font-size:11px;color:#6b7280;margin-top:5px;">' + (t.created_at || '') + ' - ' + statusText + '</div>';
                         html += '</div>';
                     }

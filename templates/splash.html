@@ -93,7 +93,7 @@
             position: relative;
             width: 140px;
             height: 140px;
-            margin: 0 auto 30px;
+            margin: 0 auto 20px;
         }
 
         @keyframes logoGlow {
@@ -181,12 +181,54 @@
             font-size: 0.75rem;
             color: #64748b;
             letter-spacing: 2px;
-            margin-bottom: 30px;
+            margin-bottom: 20px;
+        }
+
+        /* Version Badge - NEW stylish badge under title */
+        .version-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            background: rgba(37, 99, 235, 0.08);
+            backdrop-filter: blur(8px);
+            padding: 6px 14px;
+            border-radius: 40px;
+            margin: 0 auto 15px;
+            width: fit-content;
+            border: 1px solid rgba(37, 99, 235, 0.15);
+            transition: all 0.3s ease;
+        }
+
+        .version-badge:hover {
+            background: rgba(37, 99, 235, 0.12);
+            border-color: rgba(37, 99, 235, 0.25);
+            transform: translateY(-1px);
+        }
+
+        .version-icon {
+            font-size: 0.8rem;
+            display: inline-block;
+        }
+
+        .version-number {
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: #2563eb;
+            letter-spacing: 0.5px;
+            direction: ltr;
+            display: inline-block;
+        }
+
+        .version-label {
+            font-size: 0.65rem;
+            color: #64748b;
+            font-weight: 400;
         }
 
         /* Spinner - blue tones */
         .spinner {
-            margin: 30px auto 20px;
+            margin: 25px auto 20px;
             width: 60px;
             height: 60px;
             position: relative;
@@ -275,7 +317,7 @@
         .progress-bar-container {
             width: 250px;
             max-width: 80%;
-            margin: 25px auto 0;
+            margin: 20px auto 0;
             height: 4px;
             background: #e2e8f0;
             border-radius: 10px;
@@ -328,8 +370,8 @@
             line-height: 1.8;
         }
 
-        /* Version */
-        .version {
+        /* Bottom version - minimal */
+        .bottom-version {
             position: fixed;
             bottom: 10px;
             right: 15px;
@@ -374,6 +416,14 @@
             .quote-text {
                 font-size: 0.6rem;
             }
+
+            .version-badge {
+                padding: 4px 12px;
+            }
+
+            .version-number {
+                font-size: 0.65rem;
+            }
         }
 
         /* PWA mode */
@@ -406,6 +456,13 @@
         <h1 class="app-title">سِراج</h1>
         <p class="app-subtitle">پلتفرم مدیریت فعالیت‌های قرآنی</p>
 
+        <!-- NEW: Version Badge under subtitle -->
+        <div class="version-badge" id="versionBadge">
+            <span class="version-icon">📱</span>
+            <span class="version-label">نسخه</span>
+            <span class="version-number" id="badgeVersionNumber">2.0.0</span>
+        </div>
+
         <div class="spinner">
             <div class="spinner-dot"></div>
             <div class="spinner-dot"></div>
@@ -431,7 +488,7 @@
         </div>
     </div>
 
-    <div class="version" id="version">نسخه 2.0.0</div>
+    <div class="bottom-version" id="bottomVersion">نسخه 2.0.0</div>
 
     <script>
         (function () {
@@ -457,6 +514,8 @@
             var progressPercentEl = document.getElementById('progressPercent');
             var quoteEl = document.getElementById('quoteText');
             var loaderContainer = document.getElementById('loaderContainer');
+            var badgeVersionSpan = document.getElementById('badgeVersionNumber');
+            var bottomVersionSpan = document.getElementById('bottomVersion');
 
             var currentProgress = 0;
             var quoteIndex = 0;
@@ -464,6 +523,23 @@
             var quoteInterval = null;
             var startTime = Date.now();
             var minLoadTime = 1500;
+
+            // Get version from localStorage or use default
+            var appVersion = '2.0.0';
+            try {
+                var savedVersion = localStorage.getItem('app_version');
+                if (savedVersion && savedVersion.trim() !== '') {
+                    appVersion = savedVersion;
+                }
+            } catch(e) {
+                // ignore
+            }
+
+            // Update all version displays
+            function updateVersionDisplays() {
+                if (badgeVersionSpan) badgeVersionSpan.textContent = appVersion;
+                if (bottomVersionSpan) bottomVersionSpan.textContent = 'نسخه ' + appVersion;
+            }
 
             function createParticles() {
                 var container = document.getElementById('particles');
@@ -554,6 +630,9 @@
             }
 
             function init() {
+                // Update version badge and bottom version
+                updateVersionDisplays();
+                
                 createParticles();
                 progressInterval = setInterval(updateProgress, 80);
                 quoteInterval = setInterval(rotateQuote, 3000);
@@ -561,13 +640,18 @@
                 var firstQuote = quotesList[0];
                 quoteEl.innerHTML = '"' + firstQuote.text + '"<br><span style="font-size: 0.55rem; opacity: 0.7;">' + firstQuote.meaning + '</span>';
 
-                var versionEl = document.getElementById('version');
-                if (versionEl) {
-                    var savedVersion = localStorage.getItem('app_version');
-                    if (savedVersion) {
-                        versionEl.textContent = 'نسخه ' + savedVersion;
-                    }
+                // Also try to read from any window config if available
+                if (window.SERAJ_CONFIG && window.SERAJ_CONFIG.appVersion) {
+                    appVersion = window.SERAJ_CONFIG.appVersion;
+                    updateVersionDisplays();
+                } else if (window.serajVersion) {
+                    appVersion = window.serajVersion;
+                    updateVersionDisplays();
                 }
+                
+                // Optional: check for update from server via meta or config
+                // This is just to show the badge with the correct version
+
                 checkReady();
             }
 
@@ -590,7 +674,8 @@
         window.SERAJ_CONFIG = window.SERAJ_CONFIG || {
             indexUrl: '/',
             installPwaUrl: '/install-pwa',
-            registerUrl: '/auth/register/choice'
+            registerUrl: '/auth/register/choice',
+            appVersion: '2.0.0'
         };
     </script>
 </body>
