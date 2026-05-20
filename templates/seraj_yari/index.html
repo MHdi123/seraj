@@ -4,7 +4,6 @@
 
 {% block head %}
 <style>
-    /* مخفی کردن هدر، فوتر و المان‌های اضافی */
     body>header,
     .bottom-nav,
     .support-fab,
@@ -12,7 +11,6 @@
         display: none !important;
     }
 
-    /* حذف کامل هدر اصلی سایت */
     .sticky.top-0,
     header[class*="sticky"],
     nav[class*="bg-white"],
@@ -21,13 +19,11 @@
         display: none !important;
     }
 
-    /* حذف بخش ناوبری دسکتاپ */
     .desktop-nav-center,
     .md\:block {
         display: none !important;
     }
 
-    /* تنظیمات صفحه چت تمام صفحه */
     .chatgpt-container {
         height: 100vh !important;
         background: #f7f7f8;
@@ -47,7 +43,6 @@
         max-width: 100% !important;
     }
 
-    /* استایل سایدبار - ریسپانسیو */
     .chatgpt-sidebar {
         width: 280px;
         background: #f7f7f8;
@@ -82,7 +77,7 @@
         display: flex;
         flex-direction: column;
         background: #f7f7f8;
-        min-width: 0; /* برای جلوگیری از سرریز */
+        min-width: 0;
     }
 
     .chat-header {
@@ -121,7 +116,6 @@
         }
     }
 
-    /* استایل پیام کاربر - ریسپانسیو */
     .message-user-wrapper {
         display: flex;
         justify-content: flex-end;
@@ -168,7 +162,6 @@
         }
     }
 
-    /* استایل پیام AI - ریسپانسیو */
     .message-ai-wrapper {
         display: flex;
         align-items: flex-start;
@@ -203,7 +196,7 @@
     .message-ai-content {
         max-width: 90%;
         flex: 1;
-        min-width: 0; /* جلوگیری از سرریز */
+        min-width: 0;
     }
 
     @media (min-width: 640px) {
@@ -551,7 +544,6 @@
         }
     }
 
-    /* اسکرول بار سفارشی */
     .messages-area::-webkit-scrollbar {
         width: 4px;
     }
@@ -671,7 +663,6 @@
         100% { transform: rotate(360deg); }
     }
 
-    /* responsive grid for suggestions */
     .suggestions-grid {
         display: flex;
         flex-wrap: wrap;
@@ -685,7 +676,6 @@
         }
     }
 
-    /* بهبود فاصله در موبایل */
     @media (max-width: 480px) {
         .gap-2 {
             gap: 0.375rem;
@@ -704,7 +694,6 @@
 
 {% block content %}
 <div class="chatgpt-container" data-initial-question="{{ initial_question|escape if initial_question else '' }}">
-    <!-- سایدبار -->
     <div class="chatgpt-sidebar" id="sidebar">
         <div class="p-3 flex-1 flex flex-col">
             <div class="flex items-center justify-between flex-wrap gap-2">
@@ -763,7 +752,6 @@
 
     <div class="fixed inset-0 bg-black bg-opacity-50 z-40 hidden" id="sidebarOverlay" onclick="toggleSidebar()"></div>
 
-    <!-- بخش اصلی چت -->
     <div class="chatgpt-main">
         <div class="chat-header flex items-center justify-between">
             <button class="md:hidden text-gray-600 p-2 rounded-full hover:bg-gray-200 transition-colors"
@@ -779,7 +767,7 @@
                 <span class="text-xs text-gray-400 hidden xs:inline">| دستیار قرآنی هوشمند</span>
             </div>
 
-            <div class="w-8"></div> <!-- برای平衡 در موبایل -->
+            <div class="w-8"></div>
         </div>
 
         <div class="messages-area" id="messagesArea">
@@ -830,16 +818,12 @@
 </div>
 
 <script>
-    // بستن سایدبار با دکمه ضربدر
     var closeSidebarBtn = document.getElementById('closeSidebarBtn');
     if (closeSidebarBtn) {
         closeSidebarBtn.addEventListener('click', function () {
             toggleSidebar();
         });
     }
-    // ============================================
-    // سِراج‌یار - نسخه کامل با زمان هوشمند ایران
-    // ============================================
 
     var mediaRecorder = null;
     var audioChunks = [];
@@ -862,32 +846,19 @@
     var messagesContainer = document.getElementById('messagesContainer');
     var messagesArea = document.getElementById('messagesArea');
 
-    // ============================================
-    // کش موقت برای گفتگوها (بهبود سرعت)
-    // ============================================
-
     var conversationsCache = {
         data: null,
         lastFetch: 0,
-        cacheTime: 30000 // 30 ثانیه کش
+        cacheTime: 30000
     };
 
-    // ============================================
-    // توابع زمان هوشمند (بدون نیاز به تبدیل منطقه زمانی)
-    // ============================================
-
-    // نسخه قوی‌تر با پشتیبانی از رشته‌های ISO
     function getSmartTimeDisplay(utcDateString) {
         if (!utcDateString) return 'نامشخص';
 
-        // پاک کردن کاراکترهای اضافی و تبدیل به عدد
         var cleanDateStr = utcDateString.replace('Z', '').replace('+00:00', '');
-
-        // ایجاد تاریخ با توجه به منطقه زمانی محلی
-        var utcDate = new Date(cleanDateStr + 'Z'); // اضافه کردن Z برای UTC
+        var utcDate = new Date(cleanDateStr + 'Z');
 
         if (isNaN(utcDate.getTime())) {
-            // اگر باز هم مشکل داشت، با روش دیگری امتحان کن
             utcDate = new Date(utcDateString);
             if (isNaN(utcDate.getTime())) return 'نامشخص';
         }
@@ -898,25 +869,20 @@
         var diffHours = Math.floor(diffMins / 60);
         var diffDays = Math.floor(diffHours / 24);
 
-        // کمتر از 1 دقیقه
         if (diffSec < 60) {
             return 'لحظاتی پیش';
         }
-        // کمتر از 1 ساعت
         else if (diffMins < 60) {
             return diffMins + ' دقیقه پیش';
         }
-        // کمتر از 24 ساعت
         else if (diffHours < 24) {
             if (diffHours === 1) return '1 ساعت پیش';
             return diffHours + ' ساعت پیش';
         }
-        // کمتر از 7 روز
         else if (diffDays < 7) {
             if (diffDays === 1) return 'دیروز';
             return diffDays + ' روز پیش';
         }
-        // بیشتر از 7 روز
         else {
             var year = utcDate.getFullYear();
             var month = String(utcDate.getMonth() + 1).padStart(2, '0');
@@ -925,7 +891,6 @@
         }
     }
 
-    // تابع برای نمایش زمان پیام‌ها در چت
     function getMessageTimeDisplay(utcDateString) {
         if (!utcDateString) return '';
 
@@ -934,20 +899,16 @@
 
         var now = new Date();
         var diffDays = Math.floor((now.getTime() - utcDate.getTime()) / 86400000);
-
         var hours = String(utcDate.getHours()).padStart(2, '0');
         var minutes = String(utcDate.getMinutes()).padStart(2, '0');
         var time = hours + ':' + minutes;
 
-        // اگر امروز هست، فقط ساعت رو نشون بده
         if (diffDays === 0) {
             return time;
         }
-        // اگر دیروز بود
         else if (diffDays === 1) {
             return 'دیروز ' + time;
         }
-        // اگر بیشتر از یک روز بود، تاریخ + ساعت
         else {
             var year = utcDate.getFullYear();
             var month = String(utcDate.getMonth() + 1).padStart(2, '0');
@@ -956,16 +917,11 @@
         }
     }
 
-    // ============================================
-    // توابع ارتباط با سرور (با کش)
-    // ============================================
-
     async function loadConversationsFromServer(forceRefresh = false) {
         if (!currentUserId) return [];
 
         var now = Date.now();
 
-        // اگر کش معتبر است و forceRefresh نبود، از کش استفاده کن
         if (!forceRefresh && conversationsCache.data &&
             (now - conversationsCache.lastFetch) < conversationsCache.cacheTime) {
             return conversationsCache.data;
@@ -986,7 +942,6 @@
         return [];
     }
 
-    // تابع برای بروزرسانی اجباری کش
     async function refreshConversations() {
         conversationsCache.data = null;
         return await loadConversationsFromServer(true);
@@ -1017,7 +972,6 @@
             });
             var data = await response.json();
             if (data.success) {
-                // پاک کردن کش بعد از حذف
                 conversationsCache.data = null;
                 return true;
             }
@@ -1046,10 +1000,6 @@
             return false;
         }
     }
-
-    // ============================================
-    // توابع کمکی
-    // ============================================
 
     function escapeHtml(text) {
         if (!text) return '';
@@ -1082,10 +1032,6 @@
         var typing = document.getElementById('typingIndicator');
         if (typing) typing.style.display = 'none';
     }
-
-    // ============================================
-    // توابع نمایش پیام با زمان
-    // ============================================
 
     function addUserMessage(message, timestamp) {
         var displayTime = timestamp ? getMessageTimeDisplay(timestamp) : '';
@@ -1188,10 +1134,6 @@
         scrollToBottom();
     }
 
-    // ============================================
-    // بارگذاری گفتگوها از دیتابیس (با سرعت بیشتر)
-    // ============================================
-
     async function loadRecentQuestions() {
         if (!currentUserId) {
             var recentList = document.getElementById('recentQuestionsList');
@@ -1204,7 +1146,6 @@
             return;
         }
 
-        // نمایش حالت بارگذاری سریع
         var recentList = document.getElementById('recentQuestionsList');
         recentList.innerHTML = `
         <div class="text-center py-4 text-gray-400 text-sm">
@@ -1213,7 +1154,6 @@
         </div>
     `;
 
-        // استفاده از setTimeout برای اینکه UI قفل نشه
         setTimeout(async function () {
             var conversations = await loadConversationsFromServer();
 
@@ -1332,10 +1272,6 @@
         }
     }
 
-    // ============================================
-    // شروع گفتگوی جدید
-    // ============================================
-
     function startNewChat() {
         if (isLoading || isSyncing) return;
 
@@ -1371,10 +1307,6 @@
             el.classList.remove('active-chat');
         });
     }
-
-    // ============================================
-    // ارسال سوال
-    // ============================================
 
     async function sendQuestion(questionText) {
         var question = questionText;
@@ -1416,7 +1348,6 @@
 
                 addAIMessage(data.answer, data.related_verses || [], data.suggestions || []);
 
-                // بروزرسانی کش بعد از ارسال پیام جدید
                 conversationsCache.data = null;
                 await loadRecentQuestions();
 
@@ -1446,10 +1377,6 @@
         sendQuestion(text);
     }
 
-    // ============================================
-    // پاک کردن تاریخچه
-    // ============================================
-
     async function clearAllHistory() {
         if (!confirm('آیا از پاک کردن تمام تاریخچه گفتگوهای خود اطمینان دارید؟ این عمل قابل بازگشت نیست.')) return;
 
@@ -1461,10 +1388,6 @@
             alert('خطا در پاک کردن تاریخچه');
         }
     }
-
-    // ============================================
-    // ضبط صدا
-    // ============================================
 
     async function startRecording() {
         try {
@@ -1517,10 +1440,6 @@
         sidebar.classList.toggle('active');
         overlay.classList.toggle('hidden');
     }
-
-    // ============================================
-    // Event Listeners
-    // ============================================
 
     document.getElementById('sidebarOverlay').addEventListener('click', toggleSidebar);
 
@@ -1576,10 +1495,6 @@
             }
         });
     }
-
-    // ============================================
-    // راه‌اندازی اولیه
-    // ============================================
 
     window.onload = async function () {
         await loadRecentQuestions();
