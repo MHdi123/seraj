@@ -1243,10 +1243,6 @@
             </div>
             {% endif %}
         </div>
-
-        <!-- ============================================ -->
-        <!-- بخش موبایل - چیدمان: [☰] در چپ | لوگو وسط | [🔔] [🔍] [→] در راست -->
-        <!-- ============================================ -->
         <div class="mobile-nav md:hidden flex items-center justify-between w-full relative">
             
             <!-- سمت چپ: دکمه منو -->
@@ -1276,20 +1272,7 @@
                     <span class="text-lg font-bold text-gray-900">سِراج</span>
                 </a>
             </div>
-            
-            <!-- سمت راست: اعلان → جستجو → بازگشت -->
             <div class="flex items-center gap-1">
-                <!-- دکمه اعلان (فقط در صورت احراز هویت) -->
-                {% if current_user.is_authenticated %}
-                <a href="{{ notifications_url }}"
-                    class="relative p-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-full">
-                    <i class="fas fa-bell text-lg"></i>
-                    {% set unread_count = current_user.notifications|selectattr('is_read','equalto',False)|list|length %}
-                    {% if unread_count > 0 %}
-                    <span class="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border-2 border-white animate-pulse"></span>
-                    {% endif %}
-                </a>
-                {% endif %}
                 
                 <!-- دکمه جستجو -->
                 <button @click="searchOpen = !searchOpen"
