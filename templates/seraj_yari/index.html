@@ -47,25 +47,29 @@
         max-width: 100% !important;
     }
 
-    /* استایل سایدبار */
+    /* استایل سایدبار - ریسپانسیو */
     .chatgpt-sidebar {
-        width: 260px;
+        width: 280px;
         background: #f7f7f8;
         border-left: 1px solid #e5e5e5;
         transition: all 0.3s ease;
         display: flex;
         flex-direction: column;
+        position: relative;
+        z-index: 10;
     }
 
     @media (max-width: 768px) {
         .chatgpt-sidebar {
             position: fixed;
-            right: -280px;
+            right: -300px;
             top: 0;
             bottom: 0;
             z-index: 1000;
             background: white;
-            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+            width: 85%;
+            max-width: 300px;
         }
 
         .chatgpt-sidebar.active {
@@ -78,12 +82,19 @@
         display: flex;
         flex-direction: column;
         background: #f7f7f8;
+        min-width: 0; /* برای جلوگیری از سرریز */
     }
 
     .chat-header {
         background: #f7f7f8;
         border-bottom: 1px solid #e5e5e5;
-        padding: 12px 20px;
+        padding: 12px 16px;
+    }
+
+    @media (min-width: 768px) {
+        .chat-header {
+            padding: 12px 24px;
+        }
     }
 
     .messages-area {
@@ -95,10 +106,22 @@
     .messages-container {
         max-width: 48rem;
         margin: 0 auto;
-        padding: 2rem 1rem;
+        padding: 1rem;
     }
 
-    /* استایل پیام کاربر */
+    @media (min-width: 640px) {
+        .messages-container {
+            padding: 1.5rem;
+        }
+    }
+
+    @media (min-width: 768px) {
+        .messages-container {
+            padding: 2rem;
+        }
+    }
+
+    /* استایل پیام کاربر - ریسپانسیو */
     .message-user-wrapper {
         display: flex;
         justify-content: flex-end;
@@ -106,7 +129,19 @@
     }
 
     .message-user-content {
-        max-width: 85%;
+        max-width: 90%;
+    }
+
+    @media (min-width: 640px) {
+        .message-user-content {
+            max-width: 85%;
+        }
+    }
+
+    @media (min-width: 768px) {
+        .message-user-content {
+            max-width: 75%;
+        }
     }
 
     .message-user-bubble {
@@ -114,16 +149,37 @@
         color: white;
         border-radius: 1rem;
         border-top-left-radius: 0.25rem;
-        padding: 0.75rem 1rem;
+        padding: 0.625rem 0.875rem;
+        font-size: 0.875rem;
+        line-height: 1.5;
     }
 
+    @media (min-width: 640px) {
+        .message-user-bubble {
+            padding: 0.75rem 1rem;
+            font-size: 0.9375rem;
+        }
+    }
 
-    /* استایل پیام AI */
+    @media (min-width: 768px) {
+        .message-user-bubble {
+            padding: 0.875rem 1.125rem;
+            font-size: 1rem;
+        }
+    }
+
+    /* استایل پیام AI - ریسپانسیو */
     .message-ai-wrapper {
         display: flex;
         align-items: flex-start;
-        gap: 0.75rem;
+        gap: 0.5rem;
         margin-bottom: 1rem;
+    }
+
+    @media (min-width: 640px) {
+        .message-ai-wrapper {
+            gap: 0.75rem;
+        }
     }
 
     .message-ai-avatar {
@@ -137,9 +193,29 @@
         flex-shrink: 0;
     }
 
+    @media (min-width: 640px) {
+        .message-ai-avatar {
+            width: 2.25rem;
+            height: 2.25rem;
+        }
+    }
+
     .message-ai-content {
-        max-width: 85%;
+        max-width: 90%;
         flex: 1;
+        min-width: 0; /* جلوگیری از سرریز */
+    }
+
+    @media (min-width: 640px) {
+        .message-ai-content {
+            max-width: 85%;
+        }
+    }
+
+    @media (min-width: 768px) {
+        .message-ai-content {
+            max-width: 75%;
+        }
     }
 
     .message-ai-bubble {
@@ -147,36 +223,75 @@
         color: #2d2d2d;
         border-radius: 1rem;
         border-top-right-radius: 0.25rem;
-        padding: 0.75rem 1rem;
+        padding: 0.625rem 0.875rem;
         border: 1px solid #e5e5e5;
+        font-size: 0.875rem;
+        line-height: 1.5;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+    }
+
+    @media (min-width: 640px) {
+        .message-ai-bubble {
+            padding: 0.75rem 1rem;
+            font-size: 0.9375rem;
+        }
+    }
+
+    @media (min-width: 768px) {
+        .message-ai-bubble {
+            padding: 0.875rem 1.125rem;
+            font-size: 1rem;
+        }
     }
 
     .message-ai-time {
-        font-size: 0.65rem;
+        font-size: 0.625rem;
         color: #9ca3af;
         margin-top: 0.25rem;
         padding-right: 0.5rem;
     }
 
+    @media (min-width: 640px) {
+        .message-ai-time {
+            font-size: 0.7rem;
+        }
+    }
+
     .chat-footer {
         background: #f7f7f8;
         border-top: 1px solid #e5e5e5;
-        padding: 1rem;
+        padding: 0.75rem;
+    }
+
+    @media (min-width: 640px) {
+        .chat-footer {
+            padding: 1rem;
+        }
     }
 
     .chat-input-container {
         max-width: 48rem;
         margin: 0 auto;
+        width: 100%;
     }
 
     .chat-input {
         background: white;
         border: 1px solid #e5e5e5;
-        border-radius: 1.75rem;
-        padding: 0.75rem 1.25rem;
-        font-size: 1rem;
+        border-radius: 1.5rem;
+        padding: 0.625rem 1rem;
+        font-size: 0.875rem;
         transition: all 0.2s;
         resize: none;
+        line-height: 1.4;
+    }
+
+    @media (min-width: 640px) {
+        .chat-input {
+            padding: 0.75rem 1.25rem;
+            font-size: 1rem;
+        }
     }
 
     .chat-input:focus {
@@ -195,6 +310,14 @@
         align-items: center;
         justify-content: center;
         transition: all 0.2s;
+        flex-shrink: 0;
+    }
+
+    @media (min-width: 640px) {
+        .send-btn {
+            width: 44px;
+            height: 44px;
+        }
     }
 
     .send-btn:hover {
@@ -206,12 +329,19 @@
         display: flex;
         align-items: center;
         gap: 0.75rem;
-        padding: 0.75rem 1rem;
+        padding: 0.625rem 0.875rem;
         margin: 0.25rem 0.5rem;
         border-radius: 0.5rem;
         color: #2d2d2d;
         transition: all 0.2s;
         cursor: pointer;
+        font-size: 0.875rem;
+    }
+
+    @media (min-width: 640px) {
+        .sidebar-item {
+            padding: 0.75rem 1rem;
+        }
     }
 
     .sidebar-item:hover {
@@ -230,7 +360,7 @@
     .new-chat-btn {
         background: #10a37f;
         color: white;
-        padding: 0.75rem 1rem;
+        padding: 0.625rem 1rem;
         margin: 0.75rem;
         border-radius: 0.5rem;
         display: flex;
@@ -241,6 +371,15 @@
         cursor: pointer;
         border: none;
         width: calc(100% - 1.5rem);
+        font-size: 0.875rem;
+        font-weight: 500;
+    }
+
+    @media (min-width: 640px) {
+        .new-chat-btn {
+            padding: 0.75rem 1rem;
+            font-size: 0.9375rem;
+        }
     }
 
     .new-chat-btn:hover {
@@ -252,7 +391,7 @@
         display: none;
         background: #f3f4f6;
         color: #4b5563;
-        padding: 0.6rem;
+        padding: 0.5rem;
         margin: 0.5rem 0.75rem;
         border-radius: 0.5rem;
         align-items: center;
@@ -260,8 +399,8 @@
         gap: 0.5rem;
         transition: all 0.2s;
         text-decoration: none;
-        width: 40px;
-        height: 40px;
+        width: 36px;
+        height: 36px;
     }
 
     .back-to-seraj-mobile i {
@@ -288,6 +427,14 @@
         align-items: center;
         justify-content: center;
         transition: all 0.2s;
+        flex-shrink: 0;
+    }
+
+    @media (min-width: 640px) {
+        .mic-btn {
+            width: 44px;
+            height: 44px;
+        }
     }
 
     .mic-btn:hover {
@@ -304,17 +451,42 @@
         background: #fef3c7;
         border-right: 3px solid #d97706;
         border-radius: 0.5rem;
-        padding: 0.75rem;
+        padding: 0.625rem;
         margin-top: 0.75rem;
+        font-size: 0.8125rem;
+    }
+
+    @media (min-width: 640px) {
+        .verse-card {
+            padding: 0.75rem;
+            font-size: 0.875rem;
+        }
     }
 
     .suggestion-item {
         background: #eaeaea;
-        padding: 0.25rem 0.75rem;
+        padding: 0.375rem 0.75rem;
         border-radius: 1rem;
         font-size: 0.75rem;
         cursor: pointer;
         transition: all 0.2s;
+        white-space: nowrap;
+    }
+
+    @media (max-width: 480px) {
+        .suggestion-item {
+            font-size: 0.7rem;
+            padding: 0.25rem 0.625rem;
+            white-space: normal;
+            word-break: keep-all;
+        }
+    }
+
+    @media (min-width: 640px) {
+        .suggestion-item {
+            padding: 0.375rem 0.875rem;
+            font-size: 0.8125rem;
+        }
     }
 
     .suggestion-item:hover {
@@ -331,7 +503,6 @@
             opacity: 0;
             transform: translateY(10px);
         }
-
         to {
             opacity: 1;
             transform: translateY(0);
@@ -361,14 +532,10 @@
     }
 
     @keyframes typing {
-
-        0%,
-        60%,
-        100% {
+        0%, 60%, 100% {
             transform: translateY(0);
             opacity: 0.4;
         }
-
         30% {
             transform: translateY(-8px);
             opacity: 1;
@@ -376,19 +543,23 @@
     }
 
     @keyframes pulse {
-
-        0%,
-        100% {
+        0%, 100% {
             opacity: 1;
         }
-
         50% {
             opacity: 0.7;
         }
     }
 
+    /* اسکرول بار سفارشی */
     .messages-area::-webkit-scrollbar {
-        width: 6px;
+        width: 4px;
+    }
+
+    @media (min-width: 768px) {
+        .messages-area::-webkit-scrollbar {
+            width: 6px;
+        }
     }
 
     .messages-area::-webkit-scrollbar-track {
@@ -404,10 +575,16 @@
         background: none;
         border: none;
         color: #ef4444;
-        font-size: 0.75rem;
+        font-size: 0.7rem;
         padding: 0.25rem 0.5rem;
         cursor: pointer;
         border-radius: 0.375rem;
+    }
+
+    @media (min-width: 640px) {
+        .clear-history-btn {
+            font-size: 0.75rem;
+        }
     }
 
     .clear-history-btn:hover {
@@ -424,16 +601,22 @@
         display: flex;
         align-items: center;
         gap: 0.75rem;
-        padding: 0.75rem;
+        padding: 0.625rem;
         margin: 0.5rem;
         background: white;
         border-radius: 0.5rem;
         border: 1px solid #e5e5e5;
     }
 
+    @media (min-width: 640px) {
+        .current-user-badge {
+            padding: 0.75rem;
+        }
+    }
+
     .user-avatar {
-        width: 40px;
-        height: 40px;
+        width: 36px;
+        height: 36px;
         background: linear-gradient(135deg, #10a37f, #0e8f6e);
         border-radius: 50%;
         display: flex;
@@ -441,17 +624,36 @@
         justify-content: center;
         color: white;
         font-weight: bold;
-        font-size: 1.1rem;
+        font-size: 1rem;
+        flex-shrink: 0;
+    }
+
+    @media (min-width: 640px) {
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            font-size: 1.1rem;
+        }
     }
 
     .user-info {
         flex: 1;
+        min-width: 0;
     }
 
     .user-name {
         font-weight: 600;
-        font-size: 0.9rem;
+        font-size: 0.8125rem;
         color: #2d2d2d;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    @media (min-width: 640px) {
+        .user-name {
+            font-size: 0.875rem;
+        }
     }
 
     .loading-spinner {
@@ -465,12 +667,36 @@
     }
 
     @keyframes spin {
-        0% {
-            transform: rotate(0deg);
-        }
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
 
-        100% {
-            transform: rotate(360deg);
+    /* responsive grid for suggestions */
+    .suggestions-grid {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+
+    @media (max-width: 480px) {
+        .suggestions-grid {
+            gap: 0.375rem;
+        }
+    }
+
+    /* بهبود فاصله در موبایل */
+    @media (max-width: 480px) {
+        .gap-2 {
+            gap: 0.375rem;
+        }
+        
+        .mt-3 {
+            margin-top: 0.625rem;
+        }
+        
+        .mb-2 {
+            margin-bottom: 0.375rem;
         }
     }
 </style>
@@ -482,10 +708,10 @@
     <div class="chatgpt-sidebar" id="sidebar">
         <div class="p-3 flex-1 flex flex-col">
             <div class="flex items-center justify-between flex-wrap gap-2">
-                <div class="flex items-center space-x-2 rtl:space-x-reverse">
-                    <a class="back-to-seraj-mobile text-gray-500 hover:text-black transition-colors p-2 rounded-full hover:bg-gray-200 cursor-pointer block md:hidden"
+                <div class="flex items-center gap-2">
+                    <a class="back-to-seraj-mobile text-gray-500 hover:text-black transition-colors p-2 rounded-full hover:bg-gray-200 cursor-pointer"
                         id="closeSidebarBtn" title="بستن سایدبار">
-                        <i class="fas fa-times text-xl"></i>
+                        <i class="fas fa-times text-lg"></i>
                     </a>
                     <a href="{{ url_for('index') }}"
                         class="text-gray-500 hover:text-[#10a37f] transition-colors p-2 rounded-full hover:bg-gray-200"
@@ -493,23 +719,26 @@
                         <i class="fas fa-home text-xl"></i>
                     </a>
                 </div>
-                <div class="current-user-badge w-full md:w-auto">
-                    <div class="user-avatar" id="userAvatar">
-                        {{ current_user.first_name[0] if current_user.first_name else current_user.username[0] }}
-                    </div>
-                    <div class="user-info">
-                        <div class="user-name" id="userName">{{ current_user.full_name or current_user.username }}</div>
-                    </div>
+            </div>
+            
+            <div class="current-user-badge w-full">
+                <div class="user-avatar" id="userAvatar">
+                    {{ current_user.first_name[0] if current_user.first_name else current_user.username[0] }}
+                </div>
+                <div class="user-info">
+                    <div class="user-name" id="userName">{{ current_user.full_name or current_user.username }}</div>
                 </div>
             </div>
+            
             <div class="sidebar-divider"></div>
+            
             <button class="new-chat-btn" id="newChatBtn">
                 <i class="fas fa-plus"></i>
                 <span>گفتگوی جدید</span>
             </button>
 
             <div class="mt-4 flex-1 flex flex-col min-h-0">
-                <div class="flex justify-between items-center px-3 py-2 flex-shrink-0">
+                <div class="flex justify-between items-center px-2 py-2 flex-shrink-0">
                     <div class="text-xs text-gray-500">گفتگوهای اخیر شما</div>
                     <button id="clearRecentBtn" class="clear-history-btn" title="پاک کردن تاریخچه">
                         <i class="fas fa-trash-alt text-xs"></i>
@@ -543,14 +772,14 @@
             </button>
 
             <div class="flex items-center gap-2 mx-auto md:mx-0">
-                <div class="w-8 h-8 bg-[#10a37f] rounded-full flex items-center justify-center">
-                    <i class="fas fa-robot text-white text-sm"></i>
+                <div class="w-7 h-7 sm:w-8 sm:h-8 bg-[#10a37f] rounded-full flex items-center justify-center">
+                    <i class="fas fa-robot text-white text-xs sm:text-sm"></i>
                 </div>
-                <h1 class="font-semibold text-gray-800">سِراج‌یار</h1>
-                <span class="text-xs text-gray-400">| دستیار قرآنی هوشمند</span>
+                <h1 class="font-semibold text-gray-800 text-sm sm:text-base">سِراج‌یار</h1>
+                <span class="text-xs text-gray-400 hidden xs:inline">| دستیار قرآنی هوشمند</span>
             </div>
 
-
+            <div class="w-8"></div> <!-- برای平衡 در موبایل -->
         </div>
 
         <div class="messages-area" id="messagesArea">
@@ -558,9 +787,9 @@
         </div>
 
         <div id="typingIndicator" class="messages-container" style="display: none;">
-            <div class="flex items-start gap-3">
-                <div class="w-8 h-8 bg-[#10a37f] rounded-full flex items-center justify-center shrink-0">
-                    <i class="fas fa-robot text-white text-sm"></i>
+            <div class="flex items-start gap-2 sm:gap-3">
+                <div class="w-7 h-7 sm:w-8 sm:h-8 bg-[#10a37f] rounded-full flex items-center justify-center shrink-0">
+                    <i class="fas fa-robot text-white text-xs sm:text-sm"></i>
                 </div>
                 <div class="message-ai-bubble">
                     <div class="typing-indicator">
@@ -585,7 +814,7 @@
                             <i class="fas fa-paper-plane"></i>
                         </button>
                     </div>
-                    <div class="flex flex-wrap justify-center gap-2 mt-3">
+                    <div class="suggestions-grid mt-3">
                         <span class="suggestion-item" data-question="توحید در قرآن چیست؟">🕋 توحید در قرآن</span>
                         <span class="suggestion-item" data-question="آیه الکرسی چیست؟">📖 آیه الکرسی</span>
                         <span class="suggestion-item" data-question="اهمیت نماز در قرآن چیست؟">🕌 فلسفه نماز</span>
@@ -1121,9 +1350,9 @@
                 </div>
                 <div class="message-ai-content">
                     <div class="message-ai-bubble">
-                        <p class="text-lg font-bold mb-2">🍃 السلام علیکم</p>
-                        <p>من <strong>سِراج‌یار</strong> هستم، دستیار هوشمند قرآنی شما.</p>
-                        <p class="mt-2">می‌توانید هر سوالی درباره قرآن، مفاهیم دینی، تفسیر، احکام، اخلاق و... دارید بپرسید.</p>
+                        <p class="text-base sm:text-lg font-bold mb-2">🍃 السلام علیکم</p>
+                        <p class="text-sm sm:text-base">من <strong>سِراج‌یار</strong> هستم، دستیار هوشمند قرآنی شما.</p>
+                        <p class="text-sm sm:text-base mt-2">می‌توانید هر سوالی درباره قرآن، مفاهیم دینی، تفسیر، احکام، اخلاق و... دارید بپرسید.</p>
                         <div class="flex flex-wrap gap-2 mt-3 pt-2 border-t border-gray-200">
                             <span class="suggestion-item" data-question="توحید در قرآن چیست؟">📖 توحید در قرآن چیست؟</span>
                             <span class="suggestion-item" data-question="اهمیت نماز در قرآن چیست؟">🕌 اهمیت نماز در قرآن چیست؟</span>

@@ -3,63 +3,68 @@
 {% block title %}اعلان‌ها - سِراج{% endblock %}
 
 {% block content %}
-<div class="max-w-4xl mx-auto">
-    <!-- Header -->
-    <div class="mb-8 flex justify-between items-center">
+<div class="max-w-4xl mx-auto px-3 sm:px-4 md:px-6 py-4 sm:py-6">
+    <div class="mb-5 sm:mb-6 md:mb-8 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 sm:gap-4">
         <div>
-            <h1 class="text-3xl font-bold mb-2">اعلان‌ها</h1>
-            <p class="text-gray-600">پیام‌ها و اطلاعیه‌های شما</p>
+            <h1 class="text-xl sm:text-2xl md:text-3xl font-bold mb-1 sm:mb-2 tracking-tight">اعلان‌ها</h1>
+            <p class="text-gray-600 text-xs sm:text-sm md:text-base leading-relaxed">پیام‌ها و اطلاعیه‌های شما</p>
         </div>
         
         {% if notifications.items %}
-        <form method="POST" action="{{ url_for('mark_all_notifications_read') }}" class="inline">
-            <button type="submit" class="btn btn-secondary text-sm">
-                <i class="fas fa-check-double ml-2"></i>
+        <form method="POST" action="{{ url_for('mark_all_notifications_read') }}" class="w-full sm:w-auto">
+            <button type="submit" class="btn btn-secondary bg-green-600 text-white text-xs sm:text-sm px-3 sm:px-4 py-2 w-full sm:w-auto whitespace-nowrap transition-all duration-200 hover:scale-[1.02]">
+                <i class="fas fa-check ml-1 sm:ml-2"></i>
                 علامت‌گذاری همه به عنوان خوانده شده
             </button>
         </form>
         {% endif %}
     </div>
-    
-    <!-- Notifications List -->
-    <div class="space-y-4">
+    <br>
+    <div class="space-y-3 sm:space-y-4">
         {% if notifications.items %}
             {% for notification in notifications.items %}
-                <div class="card hover:shadow-md transition-shadow {% if not notification.is_read %}border-r-4 border-r-blue-500 bg-blue-50/50{% endif %}">
-                    <div class="card-body">
-                        <div class="flex justify-between items-start">
-                            <div class="flex-grow">
-                                <div class="flex items-center mb-2">
+                <div class="card hover:shadow-md transition-all duration-200 {% if not notification.is_read %}border-r-4 border-r-blue-500 bg-gradient-to-r from-blue-50/50 to-white{% else %}bg-white{% endif %} rounded-xl overflow-hidden">
+                    <div class="card-body p-3 sm:p-4 md:p-5">
+                        <div class="flex flex-row justify-between items-start gap-2 sm:gap-3">
+                            <div class="flex-grow min-w-0 flex-1">
+                                <div class="flex items-start gap-2 mb-2">
                                     {% if not notification.is_read %}
-                                        <span class="w-2 h-2 bg-blue-600 rounded-full ml-2"></span>
+                                        <span class="w-2 h-2 sm:w-2.5 sm:h-2.5 bg-blue-600 rounded-full mt-1.5 flex-shrink-0 animate-pulse"></span>
                                     {% endif %}
-                                    <h3 class="font-bold text-lg {% if not notification.is_read %}text-blue-900{% endif %}">
+                                    <h3 class="font-bold text-sm sm:text-base md:text-lg {% if not notification.is_read %}text-blue-900{% else %}text-gray-800{% endif %} break-words hyphens-auto leading-relaxed">
                                         {{ notification.title }}
                                     </h3>
                                 </div>
                                 
-                                <p class="text-gray-700 mb-3">{{ notification.message }}</p>
+                                <p class="text-gray-700 mb-3 sm:mb-4 text-sm sm:text-base break-words whitespace-normal leading-relaxed">
+                                    {{ notification.message }}
+                                </p>
                                 
-                                <div class="flex items-center text-sm text-gray-500">
-                                    <i class="fas fa-clock ml-2"></i>
-                                    <span>{{ notification.created_at|time_ago }}</span>
-                                    <span class="mx-2">•</span>
-                                    <i class="fas fa-calendar ml-2"></i>
-                                    <span>{{ notification.created_at|persian_datetime }}</span>
-                                </div>
+<div class="flex flex-wrap items-center gap-x-6 gap-y-2 text-xs text-gray-500">
+    <div class="inline-flex items-center gap-2">
+        <i class=" w-4 text-center text-xs"></i>
+        <span class="leading-relaxed">{{ notification.created_at|time_ago }}</span>
+    </div>
+    
+    <div class="inline-flex items-center gap-2">
+        <i class=" w-4 text-center text-xs"></i>
+        <span class="leading-relaxed">{{ notification.created_at|persian_datetime }}</span>
+    </div>
+</div>
                             </div>
                             
-                            <div class="flex items-start mr-4">
+                            <div class="flex-shrink-0 mr-1 sm:mr-3">
                                 {% if not notification.is_read %}
                                     <a href="{{ url_for('mark_notification_read', notification_id=notification.id) }}" 
-                                       class="text-blue-600 hover:text-blue-800 text-sm px-3 py-1 rounded-lg hover:bg-blue-50 transition-colors">
-                                        <i class="fas fa-check ml-1"></i>
-                                        علامت خوانده شده
+                                       class="inline-flex items-center justify-center text-blue-600 hover:text-blue-800 bg-blue-50 hover:bg-blue-100 text-xs sm:text-sm px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-lg transition-all duration-200 whitespace-nowrap font-medium min-h-[36px] sm:min-h-[40px]">
+                                        <i class="fas fa-check ml-1 text-[10px] sm:text-xs"></i>
+                                        <span class="hidden xs:inline">علامت خوانده شده</span>
+                                        <span class="xs:hidden">خواندن</span>
                                     </a>
                                 {% else %}
-                                    <span class="text-gray-400 text-sm px-3 py-1">
-                                        <i class="fas fa-check-circle ml-1"></i>
-                                        خوانده شده
+                                    <span class="inline-flex items-center justify-center text-gray-500 bg-gray-50 text-xs sm:text-sm px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-lg whitespace-nowrap min-h-[36px] sm:min-h-[40px]">
+                                        <i class="fas fa-check-circle ml-1 text-[10px] sm:text-xs"></i>
+                                        <span class="hidden xs:inline">خوانده شده</span>
                                     </span>
                                 {% endif %}
                             </div>
@@ -68,27 +73,26 @@
                 </div>
             {% endfor %}
             
-            <!-- Pagination -->
             {% if notifications.pages > 1 %}
-                <div class="mt-8 flex justify-center">
-                    <div class="flex space-x-2 space-x-reverse">
+                <div class="mt-6 sm:mt-8 flex justify-center">
+                    <div class="flex flex-wrap justify-center gap-2 sm:gap-3">
                         {% if notifications.has_prev %}
                             <a href="{{ url_for('notifications', page=notifications.prev_num) }}" 
-                               class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">
-                                <i class="fas fa-chevron-right ml-2"></i>
-                                قبلی
+                               class="px-3 sm:px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-all duration-200 text-xs sm:text-sm font-medium min-h-[36px] sm:min-h-[40px] flex items-center gap-1">
+                                <i class="fas fa-chevron-right ml-1"></i>
+                                <span>قبلی</span>
                             </a>
                         {% endif %}
                         
-                        <span class="px-4 py-2 bg-blue-600 text-white rounded-lg">
+                        <span class="px-3 sm:px-4 py-2 bg-blue-600 text-white rounded-lg text-xs sm:text-sm font-medium shadow-md">
                             صفحه {{ notifications.page }} از {{ notifications.pages }}
                         </span>
                         
                         {% if notifications.has_next %}
                             <a href="{{ url_for('notifications', page=notifications.next_num) }}" 
-                               class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">
-                                بعدی
-                                <i class="fas fa-chevron-left mr-2"></i>
+                               class="px-3 sm:px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-all duration-200 text-xs sm:text-sm font-medium min-h-[36px] sm:min-h-[40px] flex items-center gap-1">
+                                <span>بعدی</span>
+                                <i class="fas fa-chevron-left mr-1"></i>
                             </a>
                         {% endif %}
                     </div>
@@ -96,21 +100,20 @@
             {% endif %}
             
         {% else %}
-            <!-- Empty State -->
-            <div class="card text-center py-16">
-                <div class="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                    <i class="fas fa-bell-slash text-gray-400 text-4xl"></i>
+            <div class="card text-center py-8 sm:py-12 md:py-16 rounded-xl bg-gradient-to-b from-gray-50 to-white">
+                <div class="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 bg-gradient-to-br from-gray-100 to-gray-200 rounded-full flex items-center justify-center mx-auto mb-4 sm:mb-5 md:mb-6 shadow-inner">
+                    <i class="fas fa-bell-slash text-gray-400 text-2xl sm:text-3xl md:text-4xl"></i>
                 </div>
-                <h3 class="text-2xl font-bold text-gray-700 mb-3">هیچ اعلانی ندارید</h3>
-                <p class="text-gray-600 mb-8 max-w-md mx-auto">
+                <h3 class="text-lg sm:text-xl md:text-2xl font-bold text-gray-700 mb-2 sm:mb-3 tracking-tight">هیچ اعلانی ندارید</h3>
+                <p class="text-gray-500 mb-6 sm:mb-8 max-w-md mx-auto text-sm sm:text-base px-4 leading-relaxed">
                     وقتی اعلان جدیدی دریافت کنید، در اینجا نمایش داده خواهد شد.
                 </p>
-                <div class="flex justify-center gap-4">
-                    <a href="{{ url_for('dashboard') }}" class="btn btn-primary">
+                <div class="flex flex-col sm:flex-row justify-center gap-3 sm:gap-4 px-4">
+                    <a href="{{ url_for('dashboard') }}" class="btn btn-primary px-4 sm:px-6 py-2.5 text-sm sm:text-base text-center font-medium rounded-lg transition-all duration-200 hover:scale-[1.02] shadow-md">
                         <i class="fas fa-tachometer-alt ml-2"></i>
                         بازگشت به داشبورد
                     </a>
-                    <a href="{{ url_for('events_list') }}" class="btn btn-secondary">
+                    <a href="{{ url_for('events_list') }}" class="btn btn-secondary px-4 sm:px-6 py-2.5 text-sm sm:text-base text-center font-medium rounded-lg transition-all duration-200 hover:scale-[1.02]">
                         <i class="fas fa-calendar-alt ml-2"></i>
                         مشاهده رویدادها
                     </a>
@@ -121,9 +124,105 @@
 </div>
 
 <script>
-// Auto-refresh notifications every 30 seconds
-setTimeout(function() {
-    location.reload();
-}, 30000);
+let refreshTimer;
+const REFRESH_INTERVAL = 30000;
+
+function startRefreshTimer() {
+    if (refreshTimer) clearTimeout(refreshTimer);
+    refreshTimer = setTimeout(function() {
+        if (!document.hidden) {
+            location.reload();
+        } else {
+            startRefreshTimer();
+        }
+    }, REFRESH_INTERVAL);
+}
+
+if (!document.hidden) {
+    startRefreshTimer();
+}
+
+document.addEventListener('visibilitychange', function() {
+    if (document.hidden) {
+        if (refreshTimer) {
+            clearTimeout(refreshTimer);
+            refreshTimer = null;
+        }
+    } else {
+        if (!refreshTimer) {
+            startRefreshTimer();
+        }
+    }
+});
+
+document.addEventListener('DOMContentLoaded', function() {
+    document.body.setAttribute('dir', 'rtl');
+    
+    if (/Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent)) {
+        document.body.classList.add('mobile-device');
+    }
+});
 </script>
+
+<style>
+@media (max-width: 640px) {
+    .btn, 
+    a[href],
+    button {
+        min-height: 44px;
+        touch-action: manipulation;
+    }
+    
+    p, h1, h2, h3, h4, h5, h6 {
+        word-break: break-word;
+        overflow-wrap: break-word;
+    }
+    
+    .animate-pulse {
+        animation: none;
+    }
+}
+
+@media (max-width: 768px) {
+    .card-body {
+        overflow-x: hidden;
+    }
+}
+
+.break-words {
+    word-break: break-word;
+    overflow-wrap: break-word;
+    hyphens: auto;
+}
+
+.transition-all {
+    transition-property: all;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    transition-duration: 200ms;
+}
+
+@media (max-width: 380px) {
+    .text-xs {
+        font-size: 0.7rem;
+    }
+    
+    .gap-2 {
+        gap: 0.4rem;
+    }
+}
+
+.xs\:inline {
+    display: none;
+}
+
+@media (min-width: 480px) {
+    .xs\:inline {
+        display: inline;
+    }
+    
+    .xs\:hidden {
+        display: none;
+    }
+}
+</style>
 {% endblock %}
