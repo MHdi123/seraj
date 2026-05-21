@@ -128,9 +128,7 @@
 <!-- بخش اصلی محتوا -->
 <section class="mb-10 sm:mb-12 lg:mb-16">
     <div
-        class="bg-gradient-to-br from-blue-700 via-blue-800 to-indigo-900 rounded-xl lg:rounded-2xl px-6 sm:px-8 lg:px-12 py-8 sm:py-10 lg:py-12 text-white relative overflow-hidden">
-
-        <!-- افکت دکوراتیو پس‌زمینه -->
+        class="bg-gradient-to-br from-blue-700 via-blue-800 to-indigo-900 rounded-xl lg:rounded-2xl px-4 sm:px-6 lg:px-12 py-6 sm:py-8 lg:py-12 text-white relative overflow-hidden">
         <div
             class="absolute top-0 left-0 w-48 h-48 bg-yellow-400/5 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2">
         </div>
@@ -139,48 +137,50 @@
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-10 items-center relative z-10">
-            <div class="lg:col-span-6 space-y-4 text-center lg:text-right">
-                <h1 class="text-xl sm:text-2xl lg:text-3xl font-bold leading-snug">
-                    <span class="text-yellow-300 inline-block mb-2 relative">
-                        پلتفرم مدیریت
-                        <span
-                            class="absolute -bottom-2 left-0 right-0 lg:left-auto lg:right-0 h-0.5 bg-yellow-400/50 rounded-full w-16 mx-auto lg:mx-0"></span>
+            <!-- سمت راست: متن‌ها -->
+            <div class="lg:col-span-6 space-y-4 text-right">
+                <h1 class="text-lg sm:text-xl lg:text-3xl font-bold leading-snug text-right">
+                    <span class="text-yellow-300 font-bold inline-block mb-2 relative">
+                        سِراج 
+                        <span class="absolute -bottom-2 left-0 right-0 lg:left-auto lg:right-0 h-0.5 bg-yellow-400/50 rounded-full w-12 sm:w-16 mx-auto lg:mx-0"></span>
                     </span>
-                    <span class="text-white drop-shadow-lg block">فعالیت‌های قرآنی دانشگاهی</span>
+                    <span class="text-white drop-shadow-lg block">پلتفرم فعالیت‌های قرآنی دانشگاهی</span>
                 </h1>
-                <p class="text-xs text-blue-100/90 leading-relaxed max-w-xl mx-auto lg:mx-0">
-                    سِراج بستری یکپارچه برای سازماندهی، مدیریت و توسعه برنامه‌های قرآنی در محیط دانشگاه است.
+                <p class="text-[11px] sm:text-xs text-blue-100/90 leading-relaxed max-w-xl mx-auto lg:mx-0 text-right">
+                    بستری یکپارچه برای سازماندهی، مدیریت و توسعه برنامه‌های قرآنی در محیط دانشگاه است.
                     با ما در راه نورانی قرآن همراه شوید.
                 </p>
-                <div class="flex flex-wrap gap-3 justify-center lg:justify-start pt-3">
+                <div class="flex flex-wrap gap-3 justify-start pt-3">
                     {% if not current_user.is_authenticated %}
 
                     {% endif %}
                 </div>
             </div>
-            {% if daily_verse %}
-            <div class="lg:col-span-6 relative max-w-sm mx-auto lg:mx-0 w-full">
-                <div
-                    class="bg-white/10 backdrop-blur-md rounded-xl p-5 lg:p-6 border border-white/20 shadow-md transition-all duration-500 hover:scale-[1.02] hover:shadow-lg group text-center">
 
-                    <!-- حدیث با سایز بزرگ -->
+            <!-- سمت چپ: باکس حدیث -->
+            {% if daily_verse %}
+            <div class="lg:col-span-6 relative w-full px-2 sm:px-0">
+                <div
+                    class="bg-white/10 backdrop-blur-md rounded-xl p-4 sm:p-5 lg:p-6 border border-white/20 shadow-md transition-all duration-500 hover:scale-[1.02] hover:shadow-lg group text-center w-full">
+
+                    <!-- حدیث با سایز ریسپانسیو -->
                     <p id="hadith-arabic"
-                        class="text-l lg:text-xl font-bold text-white leading-relaxed drop-shadow-md">
+                        class="text-base sm:text-lg lg:text-xl font-bold text-white leading-relaxed drop-shadow-md">
                         بارگذاری...
                     </p>
 
                     <!-- معنی فارسی کوچک و کم‌رنگ -->
-<p id="hadith-meaning" class="!text-[8px] lg:!text-[9px] text-white/10 mt-3 px-2 italic">
-</p>
+                    <p id="hadith-meaning" class="text-[7px] sm:text-[8px] lg:text-[9px] text-white/40 mt-3 px-2 italic">
+                    </p>
 
                     <!-- بخش پایین -->
-                    <div class="flex justify-between items-center mt-5 pt-3 border-t border-white/20">
+                    <div class="flex justify-between items-center mt-4 sm:mt-5 pt-3 border-t border-white/20">
                         <p id="hadith-date"
-                            class="text-[10px] bg-white/10 backdrop-blur px-2 py-1 rounded-full text-yellow-200/70">
-                            <i class="fas fa-calendar-alt ml-1 text-[8px]"></i>
+                            class="text-[8px] sm:text-[9px] lg:text-[10px] bg-white/10 backdrop-blur px-2 py-1 rounded-full text-yellow-200/70">
+                            <i class="fas fa-calendar-alt ml-1 text-[6px] sm:text-[7px] lg:text-[8px]"></i>
                         </p>
                         <p id="hadith-narrator"
-                            class="text-[10px] bg-white/10 backdrop-blur px-2 py-1 rounded-full text-yellow-200/70">
+                            class="text-[8px] sm:text-[9px] lg:text-[10px] bg-white/10 backdrop-blur px-2 py-1 rounded-full text-yellow-200/70">
                         </p>
                     </div>
                 </div>
@@ -199,7 +199,6 @@
                         meaning: "قرآن را بخوانید که روز قیامت به عنوان شفیع برای صاحبان خود می‌آید",
                         narrator: "پیامبر اکرم (ص)"
                     },
-
                     {
                         arabic: "الْقُرْآنُ شَافِعٌ مُشَفَّعٌ وَمَاحِلٌ مُصَدَّقٌ",
                         meaning: "قرآن شفیعی است که شفاعتش پذیرفته می‌شود و دعواکننده‌ای است که دعوایش قبول می‌گردد",
@@ -309,7 +308,7 @@
 
                     // نمایش تاریخ امروز (به صورت شمسی)
                     const today = new Date();
-                    document.getElementById('hadith-date').innerHTML = '<i class="fas fa-calendar-alt ml-1 text-[8px]"></i> ' + today.toLocaleDateString('fa-IR');
+                    document.getElementById('hadith-date').innerHTML = '<i class="fas fa-calendar-alt ml-1 text-[6px] sm:text-[7px] lg:text-[8px]"></i> ' + today.toLocaleDateString('fa-IR');
                 }
 
                 // اجرا هنگام بارگذاری صفحه
