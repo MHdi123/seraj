@@ -3,159 +3,378 @@
 {% block title %}ویرایش پروفایل - سِراج{% endblock %}
 
 {% block content %}
-<div class="max-w-2xl mx-auto">
-    <div class="card">
-        <div class="card-header">
-            <h2 class="text-2xl font-bold">ویرایش پروفایل</h2>
-        </div>
-        
-        <div class="card-body">
-            <form method="POST" action="{{ url_for('edit_profile') }}">
-                <div class="space-y-6">
-                    <!-- اطلاعات شخصی -->
-                    <div>
-                        <h3 class="text-lg font-medium text-gray-900 mb-4 border-b pb-2">اطلاعات شخصی</h3>
-                        
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                                <label for="first_name" class="block text-sm font-medium text-gray-700 mb-1">نام</label>
-                                <input type="text" id="first_name" name="first_name" 
-                                       value="{{ current_user.first_name or '' }}"
-                                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                       placeholder="نام">
-                            </div>
+<div class="container mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8">
+    <div class="max-w-2xl mx-auto w-full">
+        <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+            <div class="bg-gradient-to-r from-blue-50 to-indigo-50 p-4 sm:p-6 border-b">
+                <h2 class="text-xl sm:text-2xl font-bold text-gray-800 flex items-center gap-2">
+                    <i class="fas fa-user-edit text-blue-600"></i>
+                    ویرایش پروفایل
+                </h2>
+                <p class="text-sm sm:text-base text-gray-600 mt-1">
+                    اطلاعات خود را به‌روز کنید
+                </p>
+            </div>
+            
+            <div class="p-4 sm:p-6 lg:p-8">
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        <div class="space-y-3 mb-6 sm:mb-8">
+                            {% for category, message in messages %}
+                                <div class="p-3 sm:p-4 rounded-lg text-sm sm:text-base {% if category == 'success' %}bg-green-100 text-green-800 border-r-4 border-green-500{% elif category == 'error' %}bg-red-100 text-red-800 border-r-4 border-red-500{% else %}bg-blue-100 text-blue-800 border-r-4 border-blue-500{% endif %}">
+                                    <div class="flex items-center gap-2">
+                                        <i class="fas {% if category == 'success' %}fa-check-circle{% elif category == 'error' %}fa-exclamation-circle{% else %}fa-info-circle{% endif %}"></i>
+                                        <span>{{ message }}</span>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                {% endwith %}
+
+                <form method="POST" action="{{ url_for('edit_profile') }}" id="profileForm" novalidate>
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() if csrf_token else '' }}">
+                    
+                    <div class="space-y-6 sm:space-y-8">
+                        <div>
+                            <h3 class="text-base sm:text-lg font-semibold text-gray-900 mb-3 sm:mb-4 pb-2 border-b-2 border-blue-200 flex items-center gap-2">
+                                <i class="fas fa-user-circle text-blue-600"></i>
+                                اطلاعات شخصی
+                            </h3>
                             
-                            <div>
-                                <label for="last_name" class="block text-sm font-medium text-gray-700 mb-1">نام خانوادگی</label>
-                                <input type="text" id="last_name" name="last_name" 
-                                       value="{{ current_user.last_name or '' }}"
-                                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                       placeholder="نام خانوادگی">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
+                                <div>
+                                    <label for="first_name" class="block text-sm font-medium text-gray-700 mb-1">
+                                        نام <span class="text-gray-400 text-xs">(اختیاری)</span>
+                                    </label>
+                                    <input type="text" id="first_name" name="first_name" 
+                                           value="{{ current_user.first_name or '' }}"
+                                           class="w-full px-3 sm:px-4 py-2 sm:py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 text-sm sm:text-base"
+                                           placeholder="نام">
+                                </div>
+                                
+                                <div>
+                                    <label for="last_name" class="block text-sm font-medium text-gray-700 mb-1">
+                                        نام خانوادگی <span class="text-gray-400 text-xs">(اختیاری)</span>
+                                    </label>
+                                    <input type="text" id="last_name" name="last_name" 
+                                           value="{{ current_user.last_name or '' }}"
+                                           class="w-full px-3 sm:px-4 py-2 sm:py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 text-sm sm:text-base"
+                                           placeholder="نام خانوادگی">
+                                </div>
                             </div>
                         </div>
-                    </div>
-                    
-                    <!-- اطلاعات تماس -->
-                    <div>
-                        <h3 class="text-lg font-medium text-gray-900 mb-4 border-b pb-2">اطلاعات تماس</h3>
                         
-                        <div class="space-y-4">
-                            <div>
-                                <label for="email" class="block text-sm font-medium text-gray-700 mb-1">ایمیل</label>
-                                <input type="email" id="email" name="email" 
-                                       value="{{ current_user.email }}"
-                                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                       required>
-                            </div>
+                        <div>
+                            <h3 class="text-base sm:text-lg font-semibold text-gray-900 mb-3 sm:mb-4 pb-2 border-b-2 border-blue-200 flex items-center gap-2">
+                                <i class="fas fa-address-card text-blue-600"></i>
+                                اطلاعات تماس
+                            </h3>
                             
-                            <div>
-                                <label for="phone" class="block text-sm font-medium text-gray-700 mb-1">شماره تلفن</label>
-                                <input type="tel" id="phone" name="phone" 
-                                       value="{{ current_user.phone or '' }}"
-                                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                       placeholder="مثال: ۰۹۱۲۳۴۵۶۷۸۹">
+                            <div class="space-y-4 sm:space-y-5">
+                                <div>
+                                    <label for="email" class="block text-sm font-medium text-gray-700 mb-1">
+                                        ایمیل <span class="text-red-500">*</span>
+                                    </label>
+                                    <input type="email" id="email" name="email" 
+                                           value="{{ current_user.email }}"
+                                           class="w-full px-3 sm:px-4 py-2 sm:py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 text-sm sm:text-base"
+                                           required>
+                                    <div class="invalid-feedback text-red-600 text-xs sm:text-sm mt-1 hidden"></div>
+                                </div>
+                                
+                                <div>
+                                    <label for="phone" class="block text-sm font-medium text-gray-700 mb-1">
+                                        شماره تلفن <span class="text-gray-400 text-xs">(اختیاری)</span>
+                                    </label>
+                                    <input type="tel" id="phone" name="phone" 
+                                           value="{{ current_user.phone or '' }}"
+                                           pattern="09[0-9]{9}"
+                                           class="w-full px-3 sm:px-4 py-2 sm:py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 text-sm sm:text-base"
+                                           placeholder="مثال: ۰۹۱۲۳۴۵۶۷۸۹">
+                                    <small class="text-gray-500 text-xs mt-1 block">فرمت: 09XXXXXXXXX (۱۱ رقم)</small>
+                                    <div class="invalid-feedback text-red-600 text-xs sm:text-sm mt-1 hidden"></div>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                    
-                    <!-- اطلاعات دانشگاهی -->
-                    <div>
-                        <h3 class="text-lg font-medium text-gray-900 mb-4 border-b pb-2">اطلاعات دانشگاهی</h3>
                         
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                                <label for="student_id" class="block text-sm font-medium text-gray-700 mb-1">شماره دانشجویی</label>
-                                <input type="text" id="student_id" name="student_id" 
-                                       value="{{ current_user.student_id or '' }}"
-                                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                       placeholder="شماره دانشجویی">
-                            </div>
+                        <div>
+                            <h3 class="text-base sm:text-lg font-semibold text-gray-900 mb-3 sm:mb-4 pb-2 border-b-2 border-blue-200 flex items-center gap-2">
+                                <i class="fas fa-graduation-cap text-blue-600"></i>
+                                اطلاعات دانشگاهی
+                            </h3>
                             
-                            <div>
-                                <label for="university" class="block text-sm font-medium text-gray-700 mb-1">دانشگاه</label>
-                                <input type="text" id="university" name="university" 
-                                       value="{{ current_user.university or '' }}"
-                                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                       placeholder="نام دانشگاه">
-                            </div>
-                            
-                            <div>
-                                <label for="faculty" class="block text-sm font-medium text-gray-700 mb-1">دانشکده</label>
-                                <input type="text" id="faculty" name="faculty" 
-                                       value="{{ current_user.faculty or '' }}"
-                                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                       placeholder="نام دانشکده">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
+                                <div>
+                                    <label for="student_id" class="block text-sm font-medium text-gray-700 mb-1">
+                                        شماره دانشجویی <span class="text-gray-400 text-xs">(اختیاری)</span>
+                                    </label>
+                                    <input type="text" id="student_id" name="student_id" 
+                                           value="{{ current_user.student_id or '' }}"
+                                           class="w-full px-3 sm:px-4 py-2 sm:py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 text-sm sm:text-base"
+                                           placeholder="شماره دانشجویی">
+                                </div>
+                                
+                                <div>
+                                    <label for="university" class="block text-sm font-medium text-gray-700 mb-1">
+                                        دانشگاه <span class="text-gray-400 text-xs">(اختیاری)</span>
+                                    </label>
+                                    <input type="text" id="university" name="university" 
+                                           value="{{ current_user.university or '' }}"
+                                           class="w-full px-3 sm:px-4 py-2 sm:py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 text-sm sm:text-base"
+                                           placeholder="نام دانشگاه">
+                                </div>
+                                
+                                <div class="sm:col-span-2">
+                                    <label for="faculty" class="block text-sm font-medium text-gray-700 mb-1">
+                                        دانشکده <span class="text-gray-400 text-xs">(اختیاری)</span>
+                                    </label>
+                                    <input type="text" id="faculty" name="faculty" 
+                                           value="{{ current_user.faculty or '' }}"
+                                           class="w-full px-3 sm:px-4 py-2 sm:py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 text-sm sm:text-base"
+                                           placeholder="نام دانشکده">
+                                </div>
                             </div>
                         </div>
-                    </div>
-                    
-                    <!-- تغییر رمز عبور -->
-                    <div>
-                        <h3 class="text-lg font-medium text-gray-900 mb-4 border-b pb-2">تغییر رمز عبور</h3>
-                        <p class="text-sm text-gray-500 mb-4">در صورت تمایل به تغییر رمز عبور، فیلدهای زیر را پر کنید.</p>
                         
-                        <div class="space-y-4">
-                            <div>
-                                <label for="current_password" class="block text-sm font-medium text-gray-700 mb-1">رمز عبور فعلی</label>
-                                <input type="password" id="current_password" name="current_password" 
-                                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                       placeholder="رمز عبور فعلی خود را وارد کنید">
-                            </div>
+                        <div>
+                            <h3 class="text-base sm:text-lg font-semibold text-gray-900 mb-3 sm:mb-4 pb-2 border-b-2 border-blue-200 flex items-center gap-2">
+                                <i class="fas fa-lock text-blue-600"></i>
+                                تغییر رمز عبور
+                            </h3>
+                            <p class="text-xs sm:text-sm text-gray-500 mb-4 bg-gray-50 p-3 rounded-lg">
+                                در صورت تمایل به تغییر رمز عبور، فیلدهای زیر را پر کنید.
+                            </p>
                             
-                            <div>
-                                <label for="new_password" class="block text-sm font-medium text-gray-700 mb-1">رمز عبور جدید</label>
-                                <input type="password" id="new_password" name="new_password" 
-                                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                       placeholder="حداقل ۶ کاراکتر">
-                            </div>
-                            
-                            <div>
-                                <label for="confirm_password" class="block text-sm font-medium text-gray-700 mb-1">تکرار رمز عبور جدید</label>
-                                <input type="password" id="confirm_password" name="confirm_password" 
-                                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                       placeholder="رمز عبور جدید را مجدداً وارد کنید">
+                            <div class="space-y-4 sm:space-y-5">
+                                <div>
+                                    <label for="current_password" class="block text-sm font-medium text-gray-700 mb-1">
+                                        رمز عبور فعلی
+                                    </label>
+                                    <input type="password" id="current_password" name="current_password" 
+                                           class="w-full px-3 sm:px-4 py-2 sm:py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 text-sm sm:text-base"
+                                           placeholder="رمز عبور فعلی خود را وارد کنید"
+                                           autocomplete="current-password">
+                                </div>
+                                
+                                <div>
+                                    <label for="new_password" class="block text-sm font-medium text-gray-700 mb-1">
+                                        رمز عبور جدید
+                                    </label>
+                                    <input type="password" id="new_password" name="new_password" 
+                                           class="w-full px-3 sm:px-4 py-2 sm:py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 text-sm sm:text-base"
+                                           placeholder="حداقل ۸ کاراکتر"
+                                           autocomplete="new-password">
+                                    <div class="password-strength mt-2 hidden">
+                                        <div class="flex flex-wrap items-center gap-2">
+                                            <span class="text-xs text-gray-600">قدرت رمز عبور:</span>
+                                            <div class="flex gap-1">
+                                                <span class="strength-bar w-6 sm:w-8 h-1.5 rounded bg-gray-200 transition-colors"></span>
+                                                <span class="strength-bar w-6 sm:w-8 h-1.5 rounded bg-gray-200 transition-colors"></span>
+                                                <span class="strength-bar w-6 sm:w-8 h-1.5 rounded bg-gray-200 transition-colors"></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div>
+                                    <label for="confirm_password" class="block text-sm font-medium text-gray-700 mb-1">
+                                        تکرار رمز عبور جدید
+                                    </label>
+                                    <input type="password" id="confirm_password" name="confirm_password" 
+                                           class="w-full px-3 sm:px-4 py-2 sm:py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 text-sm sm:text-base"
+                                           placeholder="رمز عبور جدید را مجدداً وارد کنید"
+                                           autocomplete="new-password">
+                                    <div class="invalid-feedback text-red-600 text-xs sm:text-sm mt-1 hidden"></div>
+                                </div>
                             </div>
                         </div>
+                        
+                        <div class="flex flex-col sm:flex-row justify-between gap-3 pt-6 border-t border-gray-200">
+                            <a href="{{ url_for('profile') }}" class="inline-flex justify-center items-center px-4 sm:px-6 py-2 sm:py-2.5 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-center text-sm sm:text-base order-2 sm:order-1">
+                                <i class="fas fa-arrow-right ml-2"></i>
+                                انصراف
+                            </a>
+                            <button type="submit" id="submitBtn" class="inline-flex justify-center items-center px-4 sm:px-6 py-2 sm:py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base order-1 sm:order-2">
+                                <i class="fas fa-save ml-2"></i>
+                                <span class="btn-text">ذخیره تغییرات</span>
+                                <span class="btn-loading hidden"><i class="fas fa-spinner fa-spin ml-2"></i>در حال ذخیره...</span>
+                            </button>
+                        </div>
                     </div>
-                    
-                    <!-- دکمه‌ها -->
-                    <div class="flex justify-between pt-6 border-t border-gray-200">
-                        <a href="{{ url_for('profile') }}" class="px-6 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors">
-                            <i class="fas fa-arrow-right ml-2"></i>
-                            انصراف
-                        </a>
-                        <button type="submit" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-                            <i class="fas fa-save ml-2"></i>
-                            ذخیره تغییرات
-                        </button>
-                    </div>
-                </div>
-            </form>
+                </form>
+            </div>
         </div>
     </div>
 </div>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('profileForm');
+    const submitBtn = document.getElementById('submitBtn');
+    const btnText = submitBtn.querySelector('.btn-text');
+    const btnLoading = submitBtn.querySelector('.btn-loading');
+    
+    const emailInput = document.getElementById('email');
+    const phoneInput = document.getElementById('phone');
     const newPassword = document.getElementById('new_password');
     const confirmPassword = document.getElementById('confirm_password');
+    const currentPassword = document.getElementById('current_password');
     
-    function validatePassword() {
-        if (newPassword.value || confirmPassword.value) {
-            if (newPassword.value.length > 0 && newPassword.value.length < 6) {
-                confirmPassword.setCustomValidity('رمز عبور باید حداقل ۶ کاراکتر باشد.');
-            } else if (newPassword.value !== confirmPassword.value) {
-                confirmPassword.setCustomValidity('رمز عبور و تکرار آن مطابقت ندارند.');
-            } else {
-                confirmPassword.setCustomValidity('');
-            }
-        } else {
-            confirmPassword.setCustomValidity('');
-        }
+    function checkPasswordStrength(password) {
+        let strength = 0;
+        if (password.length >= 8) strength++;
+        if (password.match(/[a-z]+/)) strength++;
+        if (password.match(/[0-9]+/)) strength++;
+        if (password.match(/[A-Z]+/)) strength++;
+        if (password.match(/[!@#$%^&*(),.?":{}|<>]/)) strength++;
+        return Math.min(strength, 3);
     }
     
-    newPassword.addEventListener('input', validatePassword);
-    confirmPassword.addEventListener('input', validatePassword);
+    function updatePasswordStrength() {
+        const password = newPassword.value;
+        const strengthContainer = document.querySelector('.password-strength');
+        const bars = document.querySelectorAll('.strength-bar');
+        
+        if (password.length === 0) {
+            strengthContainer.classList.add('hidden');
+            return;
+        }
+        
+        strengthContainer.classList.remove('hidden');
+        const strength = checkPasswordStrength(password);
+        const colors = ['bg-red-500', 'bg-yellow-500', 'bg-green-500'];
+        
+        bars.forEach((bar, index) => {
+            if (index < strength) {
+                bar.classList.remove('bg-gray-200');
+                bar.classList.add(colors[Math.min(index, colors.length - 1)]);
+            } else {
+                bar.classList.remove('bg-red-500', 'bg-yellow-500', 'bg-green-500');
+                bar.classList.add('bg-gray-200');
+            }
+        });
+    }
+    
+    function validateEmail(email) {
+        const re = /^[^\s@]+@([^\s@]+\.)+[^\s@]+$/;
+        return re.test(email);
+    }
+    
+    function validatePhone(phone) {
+        if (!phone) return true;
+        const re = /^09[0-9]{9}$/;
+        return re.test(phone);
+    }
+    
+    function showFieldError(field, message) {
+        const feedback = field.parentElement.querySelector('.invalid-feedback');
+        if (feedback) {
+            feedback.textContent = message;
+            feedback.classList.remove('hidden');
+        }
+        field.classList.add('border-red-500');
+        field.classList.remove('border-gray-300');
+    }
+    
+    function hideFieldError(field) {
+        const feedback = field.parentElement.querySelector('.invalid-feedback');
+        if (feedback) {
+            feedback.classList.add('hidden');
+            feedback.textContent = '';
+        }
+        field.classList.remove('border-red-500');
+        field.classList.add('border-gray-300');
+    }
+    
+    emailInput.addEventListener('input', function() {
+        if (!validateEmail(this.value)) {
+            showFieldError(this, 'لطفاً یک ایمیل معتبر وارد کنید.');
+        } else {
+            hideFieldError(this);
+        }
+    });
+    
+    if (phoneInput) {
+        phoneInput.addEventListener('input', function() {
+            if (this.value && !validatePhone(this.value)) {
+                showFieldError(this, 'شماره تلفن باید با 09 شروع شود و ۱۱ رقم باشد.');
+            } else {
+                hideFieldError(this);
+            }
+        });
+    }
+    
+    function validatePasswordMatch() {
+        const newPass = newPassword.value;
+        const confirmPass = confirmPassword.value;
+        const currentPass = currentPassword.value;
+        
+        if ((newPass || confirmPass) && !currentPass) {
+            showFieldError(currentPassword, 'برای تغییر رمز عبور، رمز فعلی الزامی است.');
+            return false;
+        } else {
+            hideFieldError(currentPassword);
+        }
+        
+        if (newPass || confirmPass) {
+            if (newPass.length > 0 && newPass.length < 8) {
+                showFieldError(newPassword, 'رمز عبور باید حداقل ۸ کاراکتر باشد.');
+                return false;
+            } else if (newPass !== confirmPass) {
+                showFieldError(confirmPassword, 'رمز عبور و تکرار آن مطابقت ندارند.');
+                return false;
+            } else {
+                hideFieldError(newPassword);
+                hideFieldError(confirmPassword);
+            }
+        }
+        return true;
+    }
+    
+    newPassword.addEventListener('input', function() {
+        validatePasswordMatch();
+        updatePasswordStrength();
+    });
+    
+    confirmPassword.addEventListener('input', validatePasswordMatch);
+    currentPassword.addEventListener('input', function() {
+        if (this.value) {
+            hideFieldError(this);
+        }
+    });
+    
+    form.addEventListener('submit', function(e) {
+        let isValid = true;
+        
+        if (!validateEmail(emailInput.value)) {
+            showFieldError(emailInput, 'لطفاً یک ایمیل معتبر وارد کنید.');
+            isValid = false;
+        }
+        
+        if (phoneInput.value && !validatePhone(phoneInput.value)) {
+            showFieldError(phoneInput, 'شماره تلفن باید با 09 شروع شود و ۱۱ رقم باشد.');
+            isValid = false;
+        }
+        
+        if (!validatePasswordMatch()) {
+            isValid = false;
+        }
+        
+        if (!isValid) {
+            e.preventDefault();
+            const firstError = document.querySelector('.border-red-500');
+            if (firstError) {
+                firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                firstError.focus();
+            }
+        } else {
+            btnText.classList.add('hidden');
+            btnLoading.classList.remove('hidden');
+            submitBtn.disabled = true;
+            return true;
+        }
+    });
 });
 </script>
 {% endblock %}

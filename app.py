@@ -1,4 +1,3 @@
-# app.py
 from flask import Flask, render_template, request, jsonify, url_for
 from extensions import db, login_manager
 from config import Config
@@ -14,7 +13,6 @@ def create_app():
     app = Flask(__name__)
     app.config.from_object(Config)
 
-    # =================== ساخت پوشه‌های مورد نیاز ===================
     os.makedirs(app.config.get('UPLOAD_FOLDER', 'uploads'), exist_ok=True)
     os.makedirs('static/fonts', exist_ok=True)
     os.makedirs('static/uploads/banners', exist_ok=True)
@@ -22,11 +20,9 @@ def create_app():
     os.makedirs('templates/participant', exist_ok=True)
     os.makedirs('templates/admin', exist_ok=True)
 
-    # =================== دیتابیس ===================
     db.init_app(app)
     Migrate(app, db)
 
-    # =================== Flask-Login ===================
     login_manager.init_app(app)
     login_manager.login_view = 'auth.login'
     login_manager.login_message = 'لطفاً برای دسترسی به این صفحه وارد شوید.'
@@ -34,12 +30,9 @@ def create_app():
 
     @login_manager.user_loader
     def load_user(user_id):
-        # روش جدید: استفاده از db.session.get() (توصیه شده)
         return db.session.get(User, int(user_id))
 
-    # =================== توابع کمکی برای تبدیل تاریخ ===================
     def to_persian_numbers(text):
-        """تبدیل اعداد انگلیسی به فارسی"""
         if text is None:
             return ''
         persian_digits = '۰۱۲۳۴۵۶۷۸۹'
@@ -48,7 +41,6 @@ def create_app():
         return str(text).translate(translation_table)
 
     def parse_date_string(date_str):
-        """تبدیل رشته تاریخ به شیء datetime با فرمت‌های مختلف"""
         if not date_str:
             return None
         
@@ -75,7 +67,6 @@ def create_app():
         return None
 
     def convert_to_jalali(date_obj):
-        """تبدیل تاریخ میلادی به شمسی"""
         if date_obj is None:
             return None
         
@@ -89,19 +80,11 @@ def create_app():
         except:
             return None
 
-    # =================== فیلترهای Jinja2 ===================
-    
     @app.template_filter('persian_date')
     def persian_date_filter(dt):
-        """
-        تبدیل تاریخ میلادی به شمسی (فقط تاریخ)
-        ورودی: datetime, date, string
-        خروجی: string (format: YYYY/MM/DD)
-        """
         if not dt:
             return ''
         
-        # اگر شیء datetime یا date است
         if isinstance(dt, (datetime, jdatetime.date)) or hasattr(dt, 'date'):
             try:
                 if isinstance(dt, datetime):
@@ -118,7 +101,6 @@ def create_app():
             except:
                 return str(dt)
         
-        # اگر string است
         if isinstance(dt, str):
             parsed_date = parse_date_string(dt)
             if parsed_date:
@@ -131,23 +113,13 @@ def create_app():
 
     @app.template_filter('persian_datetime')
     def persian_datetime_filter(dt, format="%Y/%m/%d %H:%M:%S"):
-        """
-        تبدیل تاریخ و زمان میلادی به شمسی با قابلیت تعیین فرمت
-        ورودی: datetime, string
-        پارامترها:
-            dt: تاریخ و زمان
-            format: فرمت خروجی (پیش‌فرض: %Y/%m/%d %H:%M:%S)
-        خروجی: string
-        """
         if not dt:
             return ''
         
-        # اگر شیء datetime است
         if isinstance(dt, datetime):
             try:
                 jalali_date = convert_to_jalali(dt)
                 if jalali_date:
-                    # تبدیل به jdatetime.datetime برای دسترسی به زمان
                     jalali_datetime = jdatetime.datetime(
                         jalali_date.year, 
                         jalali_date.month, 
@@ -162,7 +134,6 @@ def create_app():
             except:
                 return dt.strftime(format)
         
-        # اگر string است
         if isinstance(dt, str):
             parsed_date = parse_date_string(dt)
             if parsed_date:
@@ -184,19 +155,12 @@ def create_app():
 
     @app.template_filter('persian_time')
     def persian_time_filter(dt):
-        """
-        استخراج ساعت از datetime و تبدیل به فارسی
-        ورودی: datetime, string
-        خروجی: string (format: HH:MM:SS)
-        """
         if not dt:
             return ''
         
-        # اگر شیء datetime است
         if isinstance(dt, datetime):
             return dt.strftime('%H:%M:%S')
         
-        # اگر string است
         if isinstance(dt, str):
             parsed_date = parse_date_string(dt)
             if parsed_date:
@@ -207,15 +171,9 @@ def create_app():
 
     @app.template_filter('persian_datetime_full')
     def persian_datetime_full_filter(dt):
-        """
-        تبدیل تاریخ و زمان میلادی به شمسی (فرمت کامل)
-        ورودی: datetime, string
-        خروجی: string (format: YYYY/MM/DD - HH:MM)
-        """
         if not dt:
             return ''
         
-        # اگر شیء datetime است
         if isinstance(dt, datetime):
             try:
                 jalali_date = convert_to_jalali(dt)
@@ -226,7 +184,6 @@ def create_app():
             except:
                 return dt.strftime('%Y/%m/%d %H:%M')
         
-        # اگر string است
         if isinstance(dt, str):
             parsed_date = parse_date_string(dt)
             if parsed_date:
@@ -239,11 +196,6 @@ def create_app():
 
     @app.template_filter('persian_date_full')
     def persian_date_full_filter(dt):
-        """
-        تبدیل تاریخ میلادی به شمسی با نام ماه
-        ورودی: datetime, date, string
-        خروجی: string (format: DAY Month YYYY)
-        """
         if not dt:
             return ''
         
@@ -252,7 +204,6 @@ def create_app():
             7: 'مهر', 8: 'آبان', 9: 'آذر', 10: 'دی', 11: 'بهمن', 12: 'اسفند'
         }
         
-        # اگر شیء datetime یا date است
         if isinstance(dt, (datetime, jdatetime.date)) or hasattr(dt, 'date'):
             try:
                 if isinstance(dt, datetime):
@@ -270,7 +221,6 @@ def create_app():
             except:
                 return str(dt)
         
-        # اگر string است
         if isinstance(dt, str):
             parsed_date = parse_date_string(dt)
             if parsed_date:
@@ -284,45 +234,24 @@ def create_app():
 
     @app.template_filter('persian_date_persian')
     def persian_date_persian_filter(dt):
-        """
-        تبدیل تاریخ میلادی به شمسی با اعداد فارسی
-        ورودی: datetime, date, string
-        خروجی: string (format: YYYY/MM/DD با اعداد فارسی)
-        """
         result = persian_date_filter(dt)
         return to_persian_numbers(result)
 
     @app.template_filter('persian_datetime_persian')
     def persian_datetime_persian_filter(dt):
-        """
-        تبدیل تاریخ و زمان میلادی به شمسی با اعداد فارسی
-        ورودی: datetime, string
-        خروجی: string (format: YYYY/MM/DD - HH:MM با اعداد فارسی)
-        """
         result = persian_datetime_full_filter(dt)
         return to_persian_numbers(result)
 
     @app.template_filter('persian_time_persian')
     def persian_time_persian_filter(dt):
-        """
-        استخراج ساعت از datetime و تبدیل به فارسی
-        ورودی: datetime, string
-        خروجی: string با اعداد فارسی
-        """
         result = persian_time_filter(dt)
         return to_persian_numbers(result)
 
     @app.template_filter('time_ago')
     def time_ago_filter(dt):
-        """
-        محاسبه زمان گذشته نسبت به الان
-        ورودی: datetime, string
-        خروجی: string (مثال: ۲ ساعت پیش)
-        """
         if not dt:
             return ''
         
-        # تبدیل به datetime اگر string است
         if isinstance(dt, str):
             parsed_date = parse_date_string(dt)
             if not parsed_date:
@@ -352,31 +281,24 @@ def create_app():
         else:
             return 'همین الان'
 
+    @app.template_filter('timesince')
+    def timesince_filter(dt, default="چندی پیش"):
+        if not dt:
+            return default
+        return time_ago_filter(dt)
+
     @app.template_filter('to_jalali')
     def to_jalali_filter(date_str):
-        """
-        فیلتر ساده برای تبدیل تاریخ (نگهداری برای سازگاری)
-        """
         return persian_date_filter(date_str)
 
     @app.template_filter('persian_number')
     def persian_number_filter(number):
-        """
-        تبدیل اعداد به فارسی
-        ورودی: عدد یا رشته
-        خروجی: string با اعداد فارسی
-        """
         if number is None:
             return ''
         return to_persian_numbers(str(number))
 
     @app.template_filter('event_type_fa')
     def event_type_fa_filter(event_type_value):
-        """
-        تبدیل نوع رویداد به فارسی
-        ورودی: string یا Enum
-        خروجی: string
-        """
         event_types = {
             'workshop': 'کارگاه',
             'competition': 'مسابقه',
@@ -385,7 +307,6 @@ def create_app():
             'other': 'سایر'
         }
         
-        # اگر Enum است
         if hasattr(event_type_value, 'value'):
             event_type_value = event_type_value.value
         
@@ -393,11 +314,6 @@ def create_app():
 
     @app.template_filter('event_status_fa')
     def event_status_fa_filter(status):
-        """
-        تبدیل وضعیت رویداد به فارسی
-        ورودی: string
-        خروجی: string
-        """
         status_map = {
             'upcoming': 'پیش‌رو',
             'ongoing': 'در حال برگزاری',
@@ -408,11 +324,6 @@ def create_app():
 
     @app.template_filter('weekday_fa')
     def weekday_fa_filter(date_obj):
-        """
-        دریافت نام روز هفته به فارسی
-        ورودی: datetime, date
-        خروجی: string
-        """
         if not date_obj:
             return ''
         
@@ -431,11 +342,8 @@ def create_app():
         
         return ''
 
-    # =================== Context Processors ===================
-    
     @app.context_processor
     def inject_now():
-        """اضافه کردن زمان فعلی به تمام قالب‌ها"""
         return {
             'now': datetime.now(),
             'today': datetime.now().date(),
@@ -444,8 +352,6 @@ def create_app():
 
     @app.context_processor
     def inject_quran_verse():
-        """اضافه کردن آیه روز به تمام قالب‌ها"""
-        # اینجا می‌توانید منطق دریافت آیه روز را پیاده‌سازی کنید
         return {
             'daily_verse': None,
             'current_date': datetime.now(),
@@ -454,13 +360,94 @@ def create_app():
                 persian_date_filter(datetime.now())
             )
         }
+    
+    @app.template_filter('persian_datetime_precise')
+    def persian_datetime_precise_filter(dt, format="%Y/%m/%d %H:%M"):
+        """نمایش تاریخ شمسی با ساعت و دقیقه - فرمت: ۱۴۰۲/۰۵/۲۱ ۱۵:۳۰"""
+        if not dt:
+            return ''
+        
+        if isinstance(dt, datetime):
+            try:
+                jalali_date = convert_to_jalali(dt)
+                if jalali_date:
+                    jalali_datetime = jdatetime.datetime(
+                        jalali_date.year, 
+                        jalali_date.month, 
+                        jalali_date.day,
+                        dt.hour,
+                        dt.minute,
+                        dt.second
+                    )
+                    result = jalali_datetime.strftime(format)
+                    return to_persian_numbers(result)
+                else:
+                    return to_persian_numbers(dt.strftime(format))
+            except:
+                return to_persian_numbers(dt.strftime(format))
+        
+        if isinstance(dt, str):
+            parsed_date = parse_date_string(dt)
+            if parsed_date:
+                jalali_date = convert_to_jalali(parsed_date)
+                if jalali_date:
+                    jalali_datetime = jdatetime.datetime(
+                        jalali_date.year,
+                        jalali_date.month,
+                        jalali_date.day,
+                        parsed_date.hour,
+                        parsed_date.minute,
+                        parsed_date.second
+                    )
+                    result = jalali_datetime.strftime(format)
+                    return to_persian_numbers(result)
+                return to_persian_numbers(parsed_date.strftime(format))
+            return dt
+        
+        return str(dt)
 
+    @app.template_filter('precise_time_ago')
+    def precise_time_ago_filter(dt):
+        """محاسبه زمان گذشته با دقت دقیقه و اعداد فارسی"""
+        if not dt:
+            return 'امروز'
+        
+        if isinstance(dt, str):
+            parsed_date = parse_date_string(dt)
+            if not parsed_date:
+                return dt
+            dt = parsed_date
+        
+        if not isinstance(dt, datetime):
+            return str(dt)
+        
+        now = datetime.now()
+        diff = now - dt
+        seconds = diff.total_seconds()
+        
+        if seconds < 60:
+            return f'{to_persian_numbers(str(int(seconds)))} ثانیه پیش'
+        
+        if seconds < 3600:
+            minutes = int(seconds // 60)
+            return f'{to_persian_numbers(str(minutes))} دقیقه پیش'
+        
+        if seconds < 86400:  # کمتر از 24 ساعت
+            hours = int(seconds // 3600)
+            minutes = int((seconds % 3600) // 60)
+            if minutes > 0:
+                return f'{to_persian_numbers(str(hours))} ساعت و {to_persian_numbers(str(minutes))} دقیقه پیش'
+            return f'{to_persian_numbers(str(hours))} ساعت پیش'
+        
+        if seconds < 604800:  # کمتر از 7 روز
+            days = int(seconds // 86400)
+            return f'{to_persian_numbers(str(days))} روز پیش'
+        
+        # بیشتر از یک هفته: نمایش تاریخ کامل
+        return persian_datetime_precise_filter(dt)
     @app.context_processor
     def utility_processor():
-        """توابع کمکی برای استفاده در قالب‌ها"""
-        
         def endpoint_exists(endpoint):
-            """بررسی وجود endpoint"""
             try:
                 all_endpoints = [rule.endpoint for rule in app.url_map.iter_rules()]
                 return endpoint in all_endpoints
@@ -468,7 +455,6 @@ def create_app():
                 return False
         
         def url_for_other_page(page):
-            """ایجاد URL برای صفحه‌بندی"""
             args = request.view_args.copy()
             args['page'] = page
             return url_for(request.endpoint, **args)
@@ -478,8 +464,6 @@ def create_app():
             url_for_other_page=url_for_other_page
         )
 
-    # =================== مدیریت خطاها ===================
-    
     @app.errorhandler(404)
     def page_not_found(e):
         return render_template('404.html'), 404
@@ -492,13 +476,10 @@ def create_app():
     def internal_server_error(e):
         return render_template('500.html'), 500
 
-    # =================== روت‌ها ===================
     init_routes(app)
 
-    # =================== Health Check ===================
     @app.route("/health")
     def health_check():
-        """بررسی سلامت برنامه"""
         return jsonify({
             "status": "healthy",
             "timestamp": datetime.now().isoformat(),
@@ -509,7 +490,6 @@ def create_app():
 
     return app
 
-# =================== اجرای اپلیکیشن ===================
 app = create_app()
 
 if __name__ == "__main__":

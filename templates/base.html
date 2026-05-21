@@ -1120,27 +1120,26 @@
 <nav class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
     <div class="flex items-center justify-between h-16">
 
-        <!-- لوگو سمت راست (فقط در دسکتاپ نمایش داده می‌شود) -->
-        <div class="flex items-center gap-2 flex-shrink-0 hidden md:flex">
-            {% if request.endpoint != 'index' %}
-            <a href="{{ index_url }}"
-                class="flex items-center justify-center w-10 h-10 ml-1 rounded-xl bg-gray-100 hover:bg-blue-50 text-gray-600 hover:text-blue-600 transition-all duration-200 group"
-                title="بازگشت به صفحه اصلی">
-                <i class="fas fa-arrow-right text-lg group-hover:-translate-x-0.5 transition-transform"></i>
-            </a>
-            {% endif %}
-            <a href="{{ index_url }}" class="flex items-center gap-3 group">
-                <div class="relative w-10 h-10 rounded-full overflow-hidden shadow-sm border border-gray-200 group-hover:scale-105 transition-transform">
-                    <img src="{{ url_for('static', filename='logo/12.png') }}" alt="سِراج"
-                        class="w-full h-full object-cover" loading="lazy">
-                </div>
-                <div class="leading-tight">
-                    <h1 class="text-xl font-bold text-gray-900 transition-colors">سِراج</h1>
-                    <p class="hidden md:block text-[10px] text-gray-500 font-medium">سامانه فعالیت‌های قرآنی</p>
-                </div>
-            </a>
+<!-- لوگو سمت راست (فقط در دسکتاپ نمایش داده می‌شود) -->
+<div class="flex items-center gap-2 flex-shrink-0 hidden md:flex">
+    {% if request.endpoint != 'index' %}
+    <button onclick="goBack()"
+        class="flex items-center justify-center w-10 h-10 ml-1 rounded-xl bg-gray-100 hover:bg-blue-50 text-gray-600 hover:text-blue-600 transition-all duration-200 group cursor-pointer"
+        title="بازگشت به صفحه قبل">
+        <i class="fas fa-arrow-right text-lg group-hover:-translate-x-0.5 transition-transform"></i>
+    </button>
+    {% endif %}
+    <a href="{{ index_url }}" class="flex items-center gap-3 group">
+        <div class="relative w-10 h-10 rounded-full overflow-hidden shadow-sm border border-gray-200 group-hover:scale-105 transition-transform">
+            <img src="{{ url_for('static', filename='logo/12.png') }}" alt="سِراج"
+                class="w-full h-full object-cover" loading="lazy">
         </div>
-
+        <div class="leading-tight">
+            <h1 class="text-xl font-bold text-gray-900 transition-colors">سِراج</h1>
+            <p class="hidden md:block text-[10px] text-gray-500 font-medium">سامانه فعالیت‌های قرآنی</p>
+        </div>
+    </a>
+</div>
         <!-- منوی اصلی دسکتاپ -->
         <div class="desktop-nav-center hidden md:block">
             <div class="flex items-center bg-gray-100 rounded-full px-1.5 py-1.5 gap-0.5 border border-gray-200">
@@ -1360,12 +1359,14 @@
 </nav>
 </header>
 
-<!-- تابع goBack برای بازگشت -->
+<!-- تابع goBack اصلاح شده برای بازگشت واقعی به صفحه قبل -->
 <script>
 function goBack() {
-    if (document.referrer && document.referrer !== '') {
+    // همیشه سعی کن به صفحه قبلی در تاریخچه مرورگر برگردی
+    if (window.history.length > 1) {
         history.back();
     } else {
+        // اگر صفحه قبلی وجود نداشت، به صفحه اصلی برو
         window.location.href = "{{ url_for('index') }}";
     }
 }
@@ -1905,9 +1906,11 @@ function goBack() {
         // ============================================
         
         function goBack() {
-            if (document.referrer && document.referrer !== '') {
+            // همیشه سعی کن به صفحه قبلی در تاریخچه مرورگر برگردی
+            if (window.history.length > 1) {
                 history.back();
             } else {
+                // اگر صفحه قبلی وجود نداشت، به صفحه اصلی برو
                 window.location.href = SERAJ_CONFIG.indexUrl;
             }
         }
@@ -2382,4 +2385,5 @@ function goBack() {
     {% block scripts %}{% endblock %}
     </div> 
 </body>
+
 </html>

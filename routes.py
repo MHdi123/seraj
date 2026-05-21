@@ -2893,16 +2893,32 @@ def init_routes(app):
                 Registration.user_id == current_user.id,
                 Registration.event.has(Event.start_date >= datetime.utcnow())
             ).count()
+            
+            # تعداد اعلان‌های خوانده نشده
+            unread_notifications_count = Notification.query.filter_by(
+                user_id=current_user.id,
+                is_read=False
+            ).count()
+            
+            # دریافت آخرین فعالیت‌ها (ثبت‌نام‌های اخیر کاربر)
+            recent_activities = Registration.query.filter_by(
+                user_id=current_user.id
+            ).order_by(Registration.registration_date.desc()).limit(5).all()
+            
         except:
             total_registrations = 0
             attended_events = 0
             upcoming_registrations = 0
+            unread_notifications_count = 0
+            recent_activities = []
         
         return render_template('participant/profile.html',
-                             total_registrations=total_registrations,
-                             attended_events=attended_events,
-                             upcoming_registrations=upcoming_registrations,
-                             current_user=current_user)
+                            total_registrations=total_registrations,
+                            attended_events=attended_events,
+                            upcoming_registrations=upcoming_registrations,
+                            unread_notifications_count=unread_notifications_count,
+                            recent_activities=recent_activities,
+                            current_user=current_user)
     
     @app.route('/profile/edit', methods=['GET', 'POST'])
     @login_required
